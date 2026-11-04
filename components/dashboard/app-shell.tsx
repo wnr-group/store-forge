@@ -36,42 +36,42 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, c
       <div className="flex min-h-dvh bg-background">
         <aside
           className={cn(
-            "sticky top-0 hidden h-dvh shrink-0 flex-col border-r bg-sidebar transition-[width] duration-200 lg:flex",
+            "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-200 lg:flex",
             collapsed ? "w-[3.75rem]" : "w-60",
           )}
         >
-          <div className={cn("flex h-14 items-center border-b px-3", collapsed && "justify-center px-0")}>
-            {collapsed ? <Logo href={ROUTES.dashboard} className="[&>span:last-child]:hidden" /> : <Logo href={ROUTES.dashboard} />}
+          <div className={cn("flex h-14 items-center border-b border-sidebar-border px-3", collapsed && "justify-center px-0")}>
+            {collapsed ? <Logo href={ROUTES.dashboard} className="text-white [&>span:last-child]:hidden" /> : <Logo href={ROUTES.dashboard} className="text-white" />}
           </div>
           <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
             {collapsed ? switcher.compact : switcher.full}
             <SidebarNav collapsed={collapsed} />
           </div>
-          <div className="border-t p-2.5">{collapsed ? footer.compact : footer.full}</div>
+          <div className="border-t border-sidebar-border p-2.5">{collapsed ? footer.compact : footer.full}</div>
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={toggle}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-expanded={!collapsed}
-            className="absolute -right-3.5 top-[3.9rem] z-10 size-7 rounded-full border bg-background shadow-xs"
+            className="absolute -right-3.5 top-[3.9rem] z-10 size-7 rounded-full border bg-card text-foreground shadow-xs hover:bg-accent"
           >
             {collapsed ? <PanelLeftOpen aria-hidden /> : <PanelLeftClose aria-hidden />}
           </Button>
         </aside>
 
         <Sheet open={drawer} onOpenChange={setDrawer}>
-          <SheetContent side="left" className="w-72 gap-0 bg-sidebar p-0 sm:max-w-72">
+          <SheetContent side="left" showCloseButton={false} className="w-72 gap-0 border-sidebar-border bg-sidebar p-0 text-sidebar-foreground sm:max-w-72">
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <SheetDescription className="sr-only">Main dashboard navigation</SheetDescription>
-            <div className="flex h-14 items-center border-b px-3">
-              <Logo href={ROUTES.dashboard} />
+            <div className="flex h-14 items-center border-b border-sidebar-border px-3">
+              <Logo href={ROUTES.dashboard} className="text-white" />
             </div>
             <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
               {switcher.full}
               <SidebarNav onNavigate={() => setDrawer(false)} />
             </div>
-            <div className="border-t p-2.5">{footer.full}</div>
+            <div className="border-t border-sidebar-border p-2.5">{footer.full}</div>
           </SheetContent>
         </Sheet>
 

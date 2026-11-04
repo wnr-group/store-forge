@@ -28,7 +28,7 @@ export async function Notifications() {
         <p className="border-b px-3 py-2 text-sm font-medium">Notifications</p>
         {count === 0 ? (
           <p className="flex items-center gap-2 px-3 py-6 text-sm text-muted-foreground">
-            <CheckCircle2 className="size-4 text-success" aria-hidden /> You are all caught up.
+            <CheckCircle2 className="size-4 text-success-text" aria-hidden /> You are all caught up.
           </p>
         ) : (
           <ul className="divide-y">

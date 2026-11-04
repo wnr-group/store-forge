@@ -192,7 +192,7 @@ export function ImageUploader({ value, onChange, scope, ownerId, max, disabled, 
           <ImagePlus className="size-5 text-muted-foreground" aria-hidden />
           <p className="text-sm text-muted-foreground">
             Drag {single ? "an image" : "images"} here or{" "}
-            <button type="button" className="font-medium text-foreground underline underline-offset-2" onClick={() => input.current?.click()}>
+            <button type="button" className="font-medium text-primary-hover underline underline-offset-2" onClick={() => input.current?.click()}>
               browse
             </button>
           </p>

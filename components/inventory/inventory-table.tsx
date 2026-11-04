@@ -98,7 +98,7 @@ export function InventoryTable({ rows, canAdjust }: { rows: InventoryRow[]; canA
             {rows.map((r) => (
               <TableRow key={`${r.productId}:${r.variantId ?? ""}`}>
                 <TableCell>
-                  <Link href={`${ROUTES.products}/${r.productId}`} className="font-medium hover:underline">{r.productName}</Link>
+                  <Link href={`${ROUTES.products}/${r.productId}`} className="font-medium hover:text-primary hover:underline">{r.productName}</Link>
                   {r.variantTitle ? <span className="block text-xs text-muted-foreground">{r.variantTitle}</span> : null}
                 </TableCell>
                 <TableCell className="hidden font-mono text-xs text-muted-foreground sm:table-cell">{r.sku ?? "—"}</TableCell>

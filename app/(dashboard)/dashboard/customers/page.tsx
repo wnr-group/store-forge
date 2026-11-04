@@ -63,7 +63,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                     {result.items.map((c) => (
                       <TableRow key={c.id}>
                         <TableCell>
-                          <Link href={`${ROUTES.customers}/${c.id}`} className="font-medium hover:underline">{c.fullName}</Link>
+                          <Link href={`${ROUTES.customers}/${c.id}`} className="font-medium hover:text-primary hover:underline">{c.fullName}</Link>
                           <span className="block text-xs text-muted-foreground">{c.email}</span>
                         </TableCell>
                         <TableCell className="hidden text-muted-foreground md:table-cell">{c.phone ?? "—"}</TableCell>

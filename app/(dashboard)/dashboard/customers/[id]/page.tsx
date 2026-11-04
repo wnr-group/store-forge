@@ -62,7 +62,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
               <TableBody>
                 {orders.map((o) => (
                   <TableRow key={o.id}>
-                    <TableCell className="font-medium tabular-nums">#{o.orderNumber}</TableCell>
+                    <TableCell className="font-mono text-[13px] font-medium tabular-nums">#{o.orderNumber}</TableCell>
                     <TableCell className="text-muted-foreground">{date.format(o.placedAt)}</TableCell>
                     <TableCell><StatusBadge tone={TONES[o.status] ?? "neutral"}><span className="capitalize">{o.status}</span></StatusBadge></TableCell>
                     <TableCell className="text-right tabular-nums">{formatMoney(o.totalMinor, o.currency)}</TableCell>

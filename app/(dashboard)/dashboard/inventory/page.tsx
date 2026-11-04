@@ -74,7 +74,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
                   <span className="block text-xs text-muted-foreground capitalize">{h.reason}{h.note ? ` · ${h.note}` : ""}</span>
                 </span>
                 <span className="text-right tabular-nums">
-                  <span className={h.delta > 0 ? "text-success" : "text-destructive"}>{h.delta > 0 ? `+${h.delta}` : h.delta}</span>
+                  <span className={h.delta > 0 ? "text-success-text" : "text-destructive"}>{h.delta > 0 ? `+${h.delta}` : h.delta}</span>
                   <span className="text-muted-foreground"> → {h.quantityAfter}</span>
                   <span className="block text-xs text-muted-foreground">{when.format(h.createdAt)}</span>
                 </span>

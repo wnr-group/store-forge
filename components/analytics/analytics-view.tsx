@@ -21,7 +21,7 @@ function Stat({ label, value, hint, delta }: { label: string; value: string; hin
       <p className="mt-1.5 text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
       <p className="mt-1 flex min-h-4 items-center gap-1 text-xs text-muted-foreground">
         {delta != null ? (
-          <span className={cn("inline-flex items-center gap-0.5 font-medium", delta >= 0 ? "text-success" : "text-destructive")}>
+          <span className={cn("inline-flex items-center gap-0.5 font-medium", delta >= 0 ? "text-success-text" : "text-destructive")}>
             {delta >= 0 ? <ArrowUpRight className="size-3" aria-hidden /> : <ArrowDownRight className="size-3" aria-hidden />}
             {Math.abs(delta).toFixed(0)}%
             <span className="sr-only">{delta >= 0 ? " increase" : " decrease"}</span>
@@ -120,7 +120,7 @@ export function AnalyticsView({ data, currency, detailed = false }: Props) {
               {data.recentOrders.map((o) => (
                 <li key={o.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                   <span className="min-w-0">
-                    <span className="font-medium tabular-nums">#{o.orderNumber}</span>
+                    <span className="font-mono text-[13px] font-medium tabular-nums">#{o.orderNumber}</span>
                     <span className="ml-2 text-muted-foreground">{o.customerName ?? "Guest"}</span>
                     <span className="block text-xs text-muted-foreground">{dateTime.format(o.placedAt)}</span>
                   </span>
@@ -156,7 +156,7 @@ export function AnalyticsView({ data, currency, detailed = false }: Props) {
                 </li>
               ))}
             </ul>
-            <Link href={`${ROUTES.inventory}?stock=low`} className="inline-flex items-center gap-1 text-xs font-medium underline-offset-2 hover:underline">
+            <Link href={`${ROUTES.inventory}?stock=low`} className="inline-flex items-center gap-1 text-xs font-medium text-primary-hover underline-offset-2 hover:underline">
               <BarChart3 className="size-3" aria-hidden /> Manage inventory
             </Link>
           </>

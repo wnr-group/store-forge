@@ -19,9 +19,9 @@ export function SidebarNav({ collapsed = false, onNavigate }: { collapsed?: bool
             aria-current={active ? "page" : undefined}
             aria-label={collapsed ? item.label : undefined}
             className={cn(
-              "flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors outline-none",
-              "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-              active && "bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_2px_0_0_var(--sidebar-ring)]",
+              "flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium text-sidebar-foreground transition-colors outline-none",
+              "hover:bg-sidebar-accent hover:text-white focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+              active && "bg-sidebar-accent text-white shadow-[inset_2px_0_0_var(--sidebar-ring)]",
               collapsed && "justify-center px-0",
             )}
           >

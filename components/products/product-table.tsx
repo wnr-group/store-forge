@@ -141,8 +141,8 @@ export function ProductTable({ rows, currency, canManage, canDelete }: Props) {
                   <Link href={`${ROUTES.products}/${r.id}`} className="flex items-center gap-3 rounded outline-none focus-visible:ring-2 focus-visible:ring-ring">
                     <Thumb path={r.imagePath} name={r.name} />
                     <span className="min-w-0">
-                      <span className="block truncate font-medium group-hover:underline">{r.name}</span>
-                      <span className="block truncate text-xs text-muted-foreground">{r.sku ? `SKU ${r.sku}` : r.hasVariants ? "Multiple SKUs" : "No SKU"}</span>
+                      <span className="block truncate font-medium group-hover:text-primary">{r.name}</span>
+                      <span className="block truncate font-mono text-xs text-muted-foreground">{r.sku ? r.sku : r.hasVariants ? "Multiple SKUs" : "No SKU"}</span>
                     </span>
                   </Link>
                 </TableCell>

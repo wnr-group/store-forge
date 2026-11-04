@@ -2,10 +2,11 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const TONES = {
-  active: "bg-success/12 text-success border-success/25",
+  active: "bg-success/12 text-success-text border-success/25",
   draft: "bg-muted text-muted-foreground border-transparent",
-  warning: "bg-warning/15 text-warning border-warning/30",
-  danger: "bg-destructive/10 text-destructive border-destructive/25",
+  warning: "bg-warning/15 text-warning-text border-warning/35",
+  danger: "bg-error/10 text-destructive border-error/30",
+  info: "bg-info/10 text-info-text border-info/30",
   neutral: "bg-secondary text-secondary-foreground border-transparent",
 } as const;
 

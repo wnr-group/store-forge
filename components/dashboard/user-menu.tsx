@@ -32,18 +32,18 @@ export function UserMenu({ name, email, role, compact = false, children }: Props
       <DropdownMenuTrigger
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "h-auto w-full justify-start gap-2.5 px-1.5 py-1.5",
+          "h-auto w-full justify-start gap-2.5 px-1.5 py-1.5 text-white hover:bg-sidebar-accent hover:text-white aria-expanded:bg-sidebar-accent aria-expanded:text-white",
           compact && "justify-center px-0",
         )}
         aria-label="Account menu"
       >
         <Avatar className="size-7">
-          <AvatarFallback className="text-[11px]">{initials(name || email)}</AvatarFallback>
+          <AvatarFallback className="bg-primary text-[11px] text-primary-foreground">{initials(name || email)}</AvatarFallback>
         </Avatar>
         {compact ? null : (
           <span className="min-w-0 flex-1 text-left leading-tight">
             <span className="block truncate text-sm font-medium">{name || email}</span>
-            <span className="block truncate text-xs font-normal capitalize text-muted-foreground">{role}</span>
+            <span className="block truncate text-xs font-normal capitalize text-sidebar-foreground">{role}</span>
           </span>
         )}
       </DropdownMenuTrigger>

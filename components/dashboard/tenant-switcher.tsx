@@ -40,7 +40,7 @@ export function TenantSwitcher({ activeTenantId, tenants, storeName, compact = f
       <DropdownMenuTrigger
         className={cn(
           buttonVariants({ variant: "outline" }),
-          "h-10 w-full justify-between gap-2 bg-background px-2.5",
+          "h-10 w-full justify-between gap-2 border-sidebar-border bg-sidebar-accent px-2.5 text-white hover:bg-sidebar-accent/70 hover:text-white aria-expanded:bg-sidebar-accent aria-expanded:text-white",
           compact && "justify-center px-0",
         )}
         aria-label="Switch workspace"
@@ -50,7 +50,7 @@ export function TenantSwitcher({ activeTenantId, tenants, storeName, compact = f
           <>
             <span className="min-w-0 flex-1 text-left leading-tight">
               <span className="block truncate text-sm">{storeName ?? active?.name ?? "Workspace"}</span>
-              {storeName ? <span className="block truncate text-[11px] font-normal text-muted-foreground">{active?.name}</span> : null}
+              {storeName ? <span className="block truncate text-[11px] font-normal text-sidebar-foreground">{active?.name}</span> : null}
             </span>
             <ChevronsUpDown className="opacity-60" aria-hidden />
           </>
