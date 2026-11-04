@@ -68,6 +68,18 @@ export const requireWorkspace = cache(async () => {
   return { user, active, store, tenants };
 });
 
+/**
+ * The active tenant (DB-verified membership), optionally requiring a permission.
+ * For flows that must authorise BEFORE doing non-database work (e.g. Storage calls)
+ * and then open their own transaction with `withTenantDb({ tenantId })`.
+ */
+export async function requireActiveTenant(permission?: Permission): Promise<TenantMembership> {
+  const membership = await getActiveTenant();
+  if (!membership) throw new AppError("NOT_FOUND", "No workspace found. Complete onboarding first.");
+  if (permission) await requireTenantRole(membership.tenant.id, permission);
+  return membership;
+}
+
 export type TenantDbContext = { tenantId: string; role: Role; userId: string };
 
 /**
