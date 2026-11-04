@@ -3,6 +3,9 @@ export const APP_NAME = "StoreForge";
 /** Cookie holding the *preferred* tenant id. It is a hint only - never proof of access. */
 export const ACTIVE_TENANT_COOKIE = "sf_active_tenant";
 
+/** UI preference cookie: "1" when the desktop sidebar is collapsed. */
+export const SIDEBAR_COOKIE = "sf_sidebar";
+
 export const ROUTES = {
   home: "/",
   login: "/login",
@@ -13,6 +16,13 @@ export const ROUTES = {
   authCallback: "/auth/callback",
   onboarding: "/onboarding",
   dashboard: "/dashboard",
+  products: "/dashboard/products",
+  categories: "/dashboard/categories",
+  collections: "/dashboard/collections",
+  inventory: "/dashboard/inventory",
+  customers: "/dashboard/customers",
+  analytics: "/dashboard/analytics",
+  settings: "/dashboard/settings",
 } as const;
 
 /** Routes that require a signed-in user (enforced again server-side in the data layer). */

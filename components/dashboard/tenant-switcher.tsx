@@ -18,10 +18,12 @@ import { cn } from "@/lib/utils";
 type Props = {
   activeTenantId: string;
   tenants: { id: string; name: string; role: string }[];
+  storeName?: string;
+  compact?: boolean;
 };
 
 /** Workspace switcher. The server re-verifies membership; the id here is only a request. */
-export function TenantSwitcher({ activeTenantId, tenants }: Props) {
+export function TenantSwitcher({ activeTenantId, tenants, storeName, compact = false }: Props) {
   const [pending, startTransition] = useTransition();
   const active = tenants.find((t) => t.id === activeTenantId);
 
@@ -36,12 +38,23 @@ export function TenantSwitcher({ activeTenantId, tenants }: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={cn(buttonVariants({ variant: "outline" }), "max-w-56 justify-between gap-2")}
+        className={cn(
+          buttonVariants({ variant: "outline" }),
+          "h-10 w-full justify-between gap-2 bg-background px-2.5",
+          compact && "justify-center px-0",
+        )}
         aria-label="Switch workspace"
       >
         {pending ? <Loader2 className="animate-spin" aria-hidden /> : <Building2 aria-hidden />}
-        <span className="truncate">{active?.name ?? "Workspace"}</span>
-        <ChevronsUpDown className="opacity-60" aria-hidden />
+        {compact ? null : (
+          <>
+            <span className="min-w-0 flex-1 text-left leading-tight">
+              <span className="block truncate text-sm">{storeName ?? active?.name ?? "Workspace"}</span>
+              {storeName ? <span className="block truncate text-[11px] font-normal text-muted-foreground">{active?.name}</span> : null}
+            </span>
+            <ChevronsUpDown className="opacity-60" aria-hidden />
+          </>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-60">
         <DropdownMenuGroup>
