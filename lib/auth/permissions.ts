@@ -20,6 +20,11 @@ const PERMISSIONS = {
   "tenant:manage": ["owner", "admin"],
   "tenant:delete": ["owner"],
   "members:manage": ["owner", "admin"],
+  // Catalog, stock and customers: everyone can create/edit; only owner/admin can delete.
+  "catalog:manage": ["owner", "admin", "staff"],
+  "catalog:delete": ["owner", "admin"],
+  "customers:manage": ["owner", "admin", "staff"],
+  "customers:delete": ["owner", "admin"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;
@@ -31,6 +36,10 @@ export function can(role: Role, permission: Permission): boolean {
 export const canViewDashboard = (role: Role) => can(role, "dashboard:view");
 export const canManageStore = (role: Role) => can(role, "store:manage");
 export const canManageTenant = (role: Role) => can(role, "tenant:manage");
+export const canManageCatalog = (role: Role) => can(role, "catalog:manage");
+export const canDeleteCatalog = (role: Role) => can(role, "catalog:delete");
+export const canManageCustomers = (role: Role) => can(role, "customers:manage");
+export const canDeleteCustomers = (role: Role) => can(role, "customers:delete");
 export const canManageMembers = (role: Role) => can(role, "members:manage");
 
 /** Which roles `actor` may assign to others. 'owner' is never assignable. */

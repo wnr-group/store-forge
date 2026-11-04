@@ -3,3 +3,5 @@ export * from "./memberships";
 export * from "./profiles";
 export * from "./stores";
 export * from "./tenants";
+export * from "./catalog";
+export * from "./customers";

@@ -26,13 +26,29 @@ export type VerifyDeps = {
   readOnly: boolean;
 };
 
-const TABLES = ["profiles", "tenants", "memberships", "stores"] as const;
+const TABLES = [
+  "profiles", "tenants", "memberships", "stores",
+  "categories", "collections", "products", "product_images", "product_options", "product_variants",
+  "collection_products", "inventory_adjustments", "customers", "orders", "order_items",
+] as const;
 
 const EXPECTED_POLICIES = [
-  "memberships_delete", "memberships_insert_managers", "memberships_select_members", "memberships_update_owner",
-  "profiles_select_own", "profiles_update_own",
-  "stores_delete_owner", "stores_insert_admins", "stores_select_members", "stores_update_admins",
-  "tenants_delete_owner", "tenants_select_members", "tenants_update_admins",
+  "categories_delete_admins", "categories_insert_editors", "categories_select_members",
+  "categories_update_editors", "collection_products_delete_editors", "collection_products_insert_editors",
+  "collection_products_select_members", "collection_products_update_editors", "collections_delete_admins",
+  "collections_insert_editors", "collections_select_members", "collections_update_editors",
+  "customers_delete_admins", "customers_insert_editors", "customers_select_members",
+  "customers_update_editors", "inventory_adjustments_insert_editors", "inventory_adjustments_select_members",
+  "memberships_delete", "memberships_insert_managers", "memberships_select_members",
+  "memberships_update_owner", "order_items_select_members", "orders_select_members",
+  "product_images_delete_editors", "product_images_insert_editors", "product_images_select_members",
+  "product_images_update_editors", "product_options_delete_editors", "product_options_insert_editors",
+  "product_options_select_members", "product_options_update_editors", "product_variants_delete_editors",
+  "product_variants_insert_editors", "product_variants_select_members", "product_variants_update_editors",
+  "products_delete_admins", "products_insert_editors", "products_select_members", "products_update_editors",
+  "profiles_select_own", "profiles_update_own", "stores_delete_owner", "stores_insert_admins",
+  "stores_select_members", "stores_update_admins", "tenants_delete_owner", "tenants_select_members",
+  "tenants_update_admins",
 ].sort();
 
 const FUNCTIONS = {
@@ -42,6 +58,8 @@ const FUNCTIONS = {
     "public.is_valid_store_slug(text)",
     "public.is_tenant_member(uuid)",
     "public.has_tenant_role(uuid,text[])",
+    "public.storage_path_tenant(text)",
+    "public.can_write_storage_object(text)",
   ],
   nobody: ["public.handle_new_user()"],
 };
@@ -164,7 +182,45 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
     }, "table privileges");
   });
 
-  await check("function-grants", "function EXECUTE: authenticated yes; anon / PUBLIC / storeforge_app (directly) no", async () => {
+  await check("catalog-grants", "catalog: tenant_id immutable, orders read-only, stock ledger append-only", async () => {
+    const [r] = await admin<Record<string, boolean>>(`select
+      has_column_privilege('authenticated','public.products','tenant_id','update') as upd_product_tenant,
+      has_column_privilege('authenticated','public.product_variants','tenant_id','update') as upd_variant_tenant,
+      has_column_privilege('authenticated','public.customers','tenant_id','update') as upd_customer_tenant,
+      has_table_privilege('authenticated','public.orders','insert,update,delete') as orders_write,
+      has_table_privilege('authenticated','public.order_items','insert,update,delete') as order_items_write,
+      has_table_privilege('authenticated','public.inventory_adjustments','update,delete') as ledger_rewrite,
+      has_table_privilege('authenticated','public.products','select,insert,delete') as products_dml`);
+    eq(r, {
+      upd_product_tenant: false, upd_variant_tenant: false, upd_customer_tenant: false,
+      orders_write: false, order_items_write: false, ledger_rewrite: false, products_dml: true,
+    }, "catalog privileges");
+  });
+
+  await check("storage", "product-image bucket is public-read with tenant-restricted writes (Supabase Storage only)", async () => {
+    const [has] = await admin<{ present: boolean }>("select to_regclass('storage.objects') is not null as present");
+    if (!has.present) return "not applicable: no storage schema in this database";
+    const [bucket] = await admin<{ public: boolean; file_size_limit: number | null; allowed_mime_types: string[] | null }>(
+      "select public, file_size_limit, allowed_mime_types from storage.buckets where id = 'products'",
+    );
+    assert(bucket, "bucket `products` does not exist");
+    eq(bucket.public, true, "bucket public");
+    assert(bucket.file_size_limit !== null && bucket.file_size_limit <= 10 * 1024 * 1024, `file_size_limit=${bucket.file_size_limit}`);
+    eq([...(bucket.allowed_mime_types ?? [])].sort(), ["image/jpeg", "image/png", "image/webp"], "allowed mime types");
+    const rows = await admin<{ policyname: string; roles: string; cmd: string }>(
+      "select policyname, roles::text as roles, cmd from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'products_objects_%' order by 1",
+    );
+    eq(rows.map((r) => r.policyname), ["products_objects_delete", "products_objects_insert", "products_objects_select", "products_objects_update"], "storage policies");
+    assert(rows.every((r) => r.roles === "{authenticated}"), `storage policy roles: ${rows.map((r) => r.roles).join(",")}`);
+    // No broader write policy may exist for anon/public on this bucket.
+    const loose = await admin<{ policyname: string }>(
+      "select policyname from pg_policies where schemaname='storage' and tablename='objects' and cmd in ('INSERT','UPDATE','DELETE','ALL') and policyname not like 'products_objects_%' and (roles::text like '%anon%' or roles::text like '%public%') and coalesce(qual,'') || coalesce(with_check,'') like '%products%'",
+    );
+    assert(loose.length === 0, `unexpected write policies on the products bucket: ${loose.map((l) => l.policyname).join(", ")}`);
+    return "bucket `products` public, 5MB, images only";
+  });
+
+  await check("function-grants","function EXECUTE: authenticated yes; anon / PUBLIC / storeforge_app (directly) no", async () => {
     const problems: string[] = [];
     for (const fn of [...FUNCTIONS.authenticatedOnly, ...FUNCTIONS.nobody]) {
       const [r] = await admin<{ anon: boolean; authenticated: boolean; app: boolean; public_exec: boolean }>(`select
@@ -196,9 +252,13 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
 
   await check("triggers", "updated_at triggers and the auth.users profile trigger exist", async () => {
     const rows = await admin<{ tgname: string }>(
-      "select tgname from pg_trigger where not tgisinternal and tgname in ('profiles_set_updated_at','tenants_set_updated_at','stores_set_updated_at','on_auth_user_created') order by 1",
+      "select tgname from pg_trigger where not tgisinternal and tgname in ('profiles_set_updated_at','tenants_set_updated_at','stores_set_updated_at','on_auth_user_created','categories_set_updated_at','collections_set_updated_at','products_set_updated_at','product_variants_set_updated_at','customers_set_updated_at') order by 1",
     );
-    eq(rows.map((r) => r.tgname), ["on_auth_user_created", "profiles_set_updated_at", "stores_set_updated_at", "tenants_set_updated_at"], "triggers");
+    eq(rows.map((r) => r.tgname), [
+      "categories_set_updated_at", "collections_set_updated_at", "customers_set_updated_at", "on_auth_user_created",
+      "product_variants_set_updated_at", "products_set_updated_at", "profiles_set_updated_at", "stores_set_updated_at",
+      "tenants_set_updated_at",
+    ], "triggers");
   });
 
   await check("migrations-applied", "all Drizzle migrations are recorded as applied", async () => {
@@ -239,6 +299,7 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
     ["onboarding", "onboarding is atomic, idempotent and conflict-safe"],
     ["onboarding-identity", "onboarding rejects missing, unknown and unprivileged identities"],
     ["rls-isolation", "merchant A cannot read, modify, delete or write into merchant B"],
+    ["catalog-isolation", "merchant A cannot read, edit or reference merchant B's catalog"],
     ["rollback", "a failed transaction leaves no partial rows"],
     ["pool-sequential", "sequential requests as different users never share an identity"],
     ["pool-concurrent", "parallel requests through the pooler stay isolated"],
@@ -370,7 +431,53 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       assert(intact && intact.name !== "pwned", "B's store was modified");
     });
 
-    await check("rollback", writeChecks[5][1], async () => {
+    await check("catalog-isolation", writeChecks[5][1], async () => {
+      const [catB] = await admin<{ id: string }>(`insert into public.categories (tenant_id, name, slug) values (${lit(tenantB)}, 'B Category', 'b-category') returning id`);
+      const [prodB] = await admin<{ id: string }>(`insert into public.products (tenant_id, name, slug, price_minor) values (${lit(tenantB)}, 'B Product', 'b-product', 100) returning id`);
+      await admin(`insert into public.customers (tenant_id, email, full_name) values (${lit(tenantB)}, 'cust-b@example.invalid', 'B Customer')`);
+      await withUserContext(app, a, async (tx) => {
+        const seen = rowsOf(await tx.execute(sql`select
+          (select count(*) from public.products where id = ${prodB.id})::int as products,
+          (select count(*) from public.categories where id = ${catB.id})::int as categories,
+          (select count(*) from public.customers where tenant_id = ${tenantB})::int as customers`));
+        eq(seen, [{ products: 0, categories: 0, customers: 0 }], "B rows visible to A");
+        const upd = rowsOf(await tx.execute(sql`update public.products set name = 'pwned' where id = ${prodB.id} returning id`));
+        const del = rowsOf(await tx.execute(sql`delete from public.products where id = ${prodB.id} returning id`));
+        const stock = rowsOf(await tx.execute(sql`update public.products set quantity = 999 where id = ${prodB.id} returning id`));
+        eq([upd.length, del.length, stock.length], [0, 0, 0], "rows affected in B's catalog");
+      });
+      const writeB = await denied(
+        withUserContext(app, a, (tx) => tx.execute(sql`insert into public.products (tenant_id, name, slug) values (${tenantB}, 'Evil', 'evil')`)),
+        "inserting a product into B's tenant",
+        /row-level security/,
+      );
+      assert(/row-level security/.test(writeB), `expected an RLS violation, got: ${writeB}`);
+      await denied(
+        withUserContext(app, a, (tx) => tx.execute(sql`insert into public.products (tenant_id, name, slug, category_id) values (${tenantA}, 'Mine', 'mine', ${catB.id})`)),
+        "pointing A's product at B's category",
+        /row-level security/,
+      );
+      const [mine] = await withUserContext(app, a, async (tx) =>
+        rowsOf<{ id: string }>(await tx.execute(sql`insert into public.products (tenant_id, name, slug, price_minor) values (${tenantA}, 'Mine', 'mine', 500) returning id`)),
+      );
+      await denied(
+        withUserContext(app, a, (tx) => tx.execute(sql`update public.products set tenant_id = ${tenantB} where id = ${mine.id}`)),
+        "moving a product to another tenant",
+        /permission denied/,
+      );
+      await denied(
+        withUserContext(app, a, (tx) => tx.execute(sql`insert into public.inventory_adjustments (tenant_id, product_id, delta, quantity_after, reason, created_by) values (${tenantA}, ${mine.id}, 1, 1, 'restock', ${b})`)),
+        "writing a stock adjustment as someone else",
+        /row-level security/,
+      );
+      await denied(
+        withUserContext(app, a, (tx) => tx.execute(sql`insert into public.orders (tenant_id, order_number, currency, subtotal_minor, total_minor) values (${tenantA}, 1, 'INR', 1, 1)`)),
+        "creating an order from the dashboard",
+        /permission denied/,
+      );
+    });
+
+    await check("rollback", writeChecks[6][1], async () => {
       await denied(
         withUserContext(app, a, async (tx) => {
           await tx.execute(sql`insert into public.stores (tenant_id, name, slug) values (${tenantA}, 'Temp Store', ${`dbverify-${tag}-rollback`})`);
@@ -390,7 +497,7 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
         return { uid: who.uid, ids };
       });
 
-    await check("pool-sequential", writeChecks[6][1], async () => {
+    await check("pool-sequential", writeChecks[7][1], async () => {
       for (let i = 0; i < 12; i++) {
         const uid = i % 2 === 0 ? a : b;
         const got = await visible(uid);
@@ -398,7 +505,7 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       }
     });
 
-    await check("pool-concurrent", writeChecks[7][1], async () => {
+    await check("pool-concurrent", writeChecks[8][1], async () => {
       const n = Math.max(1, deps.concurrency);
       const uids = Array.from({ length: n }, (_, i) => (i % 2 === 0 ? a : b));
       const results = await Promise.all(uids.map(visible));
@@ -406,7 +513,7 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       return `${n} parallel transactions`;
     });
 
-    await check("control", writeChecks[8][1], async () => {
+    await check("control", writeChecks[9][1], async () => {
       const [r] = await admin<{ n: number }>(`select count(*)::int as n from public.tenants where id in (${lit(tenantA)}, ${lit(tenantB)})`);
       eq(r.n, 2, "tenants visible to the privileged connection");
       const got = await visible(a);

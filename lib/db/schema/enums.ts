@@ -11,3 +11,21 @@ export type StoreStatus = (typeof STORE_STATUSES)[number];
 
 /** Shared by tenants.slug and stores.slug (also enforced by is_valid_store_slug()). */
 export const SLUG_PATTERN = "^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$";
+
+export const PRODUCT_STATUSES = ["draft", "active"] as const;
+export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
+
+export const COLLECTION_STATUSES = ["draft", "active"] as const;
+export type CollectionStatus = (typeof COLLECTION_STATUSES)[number];
+
+export const INVENTORY_REASONS = ["restock", "correction", "return", "damage", "sale", "other"] as const;
+export type InventoryReason = (typeof INVENTORY_REASONS)[number];
+
+export const ORDER_STATUSES = ["pending", "paid", "fulfilled", "cancelled", "refunded"] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+/** Order statuses that count as revenue in analytics and customer totals. */
+export const REVENUE_ORDER_STATUSES = ["paid", "fulfilled"] as const satisfies readonly OrderStatus[];
+
+/** Same shape as SLUG_PATTERN but allows the 1-char-per-end minimum used for catalog slugs (2-80 chars). */
+export const CATALOG_SLUG_PATTERN = "^[a-z0-9]+(-[a-z0-9]+)*$";
