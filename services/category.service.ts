@@ -15,7 +15,7 @@ export async function listCategories(): Promise<CategoryRow[]> {
     const rows = await tx
       .select({
         category: categories,
-        productCount: sql<number>`(select count(*)::int from ${products} p where p.category_id = ${categories.id})`,
+        productCount: sql<number>`(select count(*)::int from "products" p where p.category_id = "categories"."id")`,
       })
       .from(categories)
       .where(eq(categories.tenantId, ctx.tenantId))
@@ -43,13 +43,17 @@ async function assertNoCycle(tx: DbTx, tenantId: string, id: string, parentId: s
   }
 }
 
+function padSlug(s: string) {
+  return s.length >= 2 ? s : `${s}-item`;
+}
+
 export async function createCategory(input: ReturnType<typeof normalize>): Promise<{ id: string }> {
   return withTenantDb({ permission: "catalog:manage" }, (tx, ctx) =>
     mapErrors(async () => {
       await assertNoCycle(tx, ctx.tenantId, "", input.parentId);
       const [row] = await tx
         .insert(categories)
-        .values({ tenantId: ctx.tenantId, name: input.name, slug: input.slug ?? (slugify(input.name) || "category"), description: input.description, parentId: input.parentId })
+        .values({ tenantId: ctx.tenantId, name: input.name, slug: input.slug ?? padSlug(slugify(input.name) || "category"), description: input.description, parentId: input.parentId })
         .returning({ id: categories.id });
       return row;
     }),

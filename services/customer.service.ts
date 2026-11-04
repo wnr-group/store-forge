@@ -13,9 +13,9 @@ export type CustomerRow = Customer & { orderCount: number; totalSpentMinor: numb
 const revenueStatuses = sql.join(REVENUE_ORDER_STATUSES.map((s) => sql`${s}`), sql`, `);
 
 /** Per-customer order aggregates, computed in SQL from real orders (revenue statuses only for spend). */
-const orderCount = sql<number>`(select count(*)::int from ${orders} o where o.customer_id = ${customers.id})`;
-const spent = sql<number>`coalesce((select sum(o.total_minor) from ${orders} o where o.customer_id = ${customers.id} and o.status in (${revenueStatuses})), 0)::float8`;
-const lastOrder = sql<Date | null>`(select max(o.placed_at) from ${orders} o where o.customer_id = ${customers.id})`;
+const orderCount = sql<number>`(select count(*)::int from "orders" o where o.customer_id = "customers"."id")`;
+const spent = sql<number>`coalesce((select sum(o.total_minor) from "orders" o where o.customer_id = "customers"."id" and o.status in (${revenueStatuses})), 0)::float8`;
+const lastOrder = sql<Date | null>`(select max(o.placed_at) from "orders" o where o.customer_id = "customers"."id")`;
 
 export async function listCustomers(q: CustomerListQuery): Promise<Paged<CustomerRow>> {
   return withTenantDb({}, async (tx, ctx) => {

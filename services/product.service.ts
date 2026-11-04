@@ -24,9 +24,11 @@ import { productFolder } from "@/lib/storage/paths";
 import { verifyObjects, removeObjects } from "@/lib/storage/server";
 
 /** Stock the merchant can actually sell: variant total for products with variants, else the product quantity. */
-const effectiveStock = sql<number>`case when ${products.hasVariants}
-  then coalesce((select sum(v.quantity) from ${productVariants} v where v.product_id = ${products.id} and v.is_active), 0)
-  else ${products.quantity} end`;
+// NOTE: correlated subqueries use explicit "products"."id": Drizzle omits the table qualifier in
+// single-table selects, and a bare "id" would silently bind to the INNER table.
+const effectiveStock = sql<number>`case when "products"."has_variants"
+  then coalesce((select sum(v.quantity) from "product_variants" v where v.product_id = "products"."id" and v.is_active), 0)
+  else "products"."quantity" end`;
 
 export type ProductRow = {
   id: string;
@@ -92,12 +94,12 @@ export async function listProducts(q: ProductListQuery): Promise<Paged<ProductRo
           status: products.status,
           priceMinor: products.priceMinor,
           hasVariants: products.hasVariants,
-          variantCount: sql<number>`(select count(*)::int from ${productVariants} v where v.product_id = ${products.id})`,
+          variantCount: sql<number>`(select count(*)::int from "product_variants" v where v.product_id = "products"."id")`,
           trackInventory: products.trackInventory,
           stock: sql<number>`${effectiveStock}::int`,
           lowStockThreshold: products.lowStockThreshold,
           categoryName: categories.name,
-          imagePath: sql<string | null>`(select i.storage_path from ${productImages} i where i.product_id = ${products.id} order by i.is_primary desc, i.position asc limit 1)`,
+          imagePath: sql<string | null>`(select i.storage_path from "product_images" i where i.product_id = "products"."id" order by i.is_primary desc, i.position asc limit 1)`,
           updatedAt: products.updatedAt,
           createdAt: products.createdAt,
         })
@@ -147,7 +149,8 @@ function money(value: string | null, currency: string, label: string): number | 
 }
 
 async function uniqueSlug(tx: DbTx, tenantId: string, base: string, excludeId?: string): Promise<string> {
-  const root = base || "product";
+  // The DB check requires 2-80 chars; pad one-letter names ("A" -> "a-item").
+  const root = base.length >= 2 ? base : `${base || "product"}-item`;
   const taken = await tx
     .select({ slug: products.slug })
     .from(products)

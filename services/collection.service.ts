@@ -16,7 +16,7 @@ export async function listCollections(): Promise<CollectionRow[]> {
     const rows = await tx
       .select({
         collection: collections,
-        productCount: sql<number>`(select count(*)::int from ${collectionProducts} cp where cp.collection_id = ${collections.id})`,
+        productCount: sql<number>`(select count(*)::int from "collection_products" cp where cp.collection_id = "collections"."id")`,
       })
       .from(collections)
       .where(eq(collections.tenantId, ctx.tenantId))
@@ -62,7 +62,7 @@ export async function createCollection(id: string, input: Values): Promise<{ id:
         id,
         tenantId: ctx.tenantId,
         name: input.name,
-        slug: input.slug ?? (slugify(input.name) || "collection"),
+        slug: input.slug ?? (slugify(input.name).padEnd(2, "x") || "collection"),
         description: input.description,
         status: input.status,
         imagePath: image?.path ?? null,
