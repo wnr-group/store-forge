@@ -6,7 +6,6 @@ import type { DbTx } from "@/lib/db/tenant-db";
 import { AppError } from "@/lib/errors";
 import { withTenantDb } from "@/lib/tenant/context";
 import { slugify } from "@/lib/utils/slug";
-import type { CategoryInput } from "@/lib/validations/catalog";
 
 export type CategoryRow = Category & { productCount: number; parentName: string | null };
 
@@ -85,6 +84,6 @@ export async function deleteCategory(id: string): Promise<void> {
 }
 
 /** Shape the validated form input for the service layer. */
-export function normalize(input: Pick<CategoryInput, "name" | "description" | "parentId"> & { slug?: string }) {
+export function normalize(input: { name: string; slug?: string; description?: string | null; parentId?: string | null }) {
   return { name: input.name, slug: input.slug, description: input.description ?? null, parentId: input.parentId ?? null };
 }

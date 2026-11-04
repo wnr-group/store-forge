@@ -5,8 +5,8 @@ import { mapErrors } from "@/lib/db/errors";
 import { rowsOf } from "@/lib/db/user-context";
 import { AppError } from "@/lib/errors";
 import { withTenantDb } from "@/lib/tenant/context";
-import { PAGE_SIZE, type InventoryAdjustInput } from "@/lib/validations/catalog";
-import { inventoryAdjustSchema } from "@/lib/validations/catalog";
+import type { z } from "zod";
+import { PAGE_SIZE, type inventoryAdjustSchema } from "@/lib/validations/catalog";
 import type { Paged } from "./product.service";
 
 export type StockState = "in" | "low" | "out" | "untracked";
@@ -99,8 +99,9 @@ export async function listAdjustments(limit = 15): Promise<AdjustmentRow[]> {
  * (FOR UPDATE) so concurrent adjustments serialise, and the quantity >= 0 CHECK
  * constraint is the final guard against negative stock.
  */
-export async function adjustStock(input: InventoryAdjustInput): Promise<{ quantity: number }> {
-  const v = inventoryAdjustSchema.parse(input);
+export type AdjustStockInput = Omit<z.output<typeof inventoryAdjustSchema>, "note"> & { note?: string | null };
+
+export async function adjustStock(v: AdjustStockInput): Promise<{ quantity: number }> {
   return withTenantDb({ permission: "catalog:manage" }, (tx, ctx) =>
     mapErrors(async () => {
       const [product] = await tx
@@ -140,7 +141,7 @@ export async function adjustStock(input: InventoryAdjustInput): Promise<{ quanti
         delta,
         quantityAfter: next,
         reason: v.reason,
-        note: v.note,
+        note: v.note ?? null,
         createdBy: ctx.userId,
       });
       return { quantity: next };
