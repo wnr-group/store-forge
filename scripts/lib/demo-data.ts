@@ -327,10 +327,12 @@ export function buildDemoPlan(tenantId: string, userId: string, now: Date) {
     collections,
     products,
     options,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- strip planning-only fields
     variants: variants.map(({ productKey: _k, ...v }) => v),
     collectionProducts,
     customers,
     orders,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- strip planning-only fields
     orderItems: items.map(({ unit: _u, ...i }) => i),
     adjustments,
   };

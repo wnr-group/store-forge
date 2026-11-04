@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import { FieldLabel } from "@/components/shared/field-label";
 import { FormField } from "@/components/shared/form-field";
 
+type FormFieldProps = React.ComponentProps<typeof FormField>;
+
 const html = (el: React.ReactElement) => renderToStaticMarkup(el);
 
 describe("FieldLabel", () => {
@@ -40,7 +42,7 @@ describe("FieldLabel", () => {
 
 describe("FormField", () => {
   it("announces errors with role=alert, links the message id and flags the wrapper", () => {
-    const out = html(createElement(FormField, { id: "price", label: "Price", required: true, error: "Price is required.", children: createElement("input", { id: "price" }) }));
+    const out = html(createElement(FormField, { id: "price", label: "Price", required: true, error: "Price is required." } as FormFieldProps, createElement("input", { id: "price" })));
     expect(out).toContain('id="price-msg"');
     expect(out).toContain('role="alert"');
     expect(out).toContain("Price is required.");
@@ -48,7 +50,7 @@ describe("FormField", () => {
   });
 
   it("shows the hint, without an alert, when there is no error", () => {
-    const out = html(createElement(FormField, { id: "slug", label: "Slug", optional: true, hint: "Leave blank to generate.", children: createElement("input", { id: "slug" }) }));
+    const out = html(createElement(FormField, { id: "slug", label: "Slug", optional: true, hint: "Leave blank to generate." } as FormFieldProps, createElement("input", { id: "slug" })));
     expect(out).toContain("Leave blank to generate.");
     expect(out).not.toContain('role="alert"');
     expect(out).toContain("(Optional)");
