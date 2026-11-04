@@ -1,10 +1,15 @@
+import Link from "next/link";
+import { Settings } from "lucide-react";
+import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { AppShell } from "@/components/dashboard/app-shell";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumbs";
 import { CommandSearch } from "@/components/dashboard/command-search";
+import { Notifications, NotificationsFallback } from "@/components/dashboard/notifications";
 import { TenantSwitcher } from "@/components/dashboard/tenant-switcher";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { UserMenu } from "@/components/dashboard/user-menu";
-import { SIDEBAR_COOKIE } from "@/config/app";
+import { ROUTES, SIDEBAR_COOKIE } from "@/config/app";
 import { canViewDashboard, ROLE_LABELS } from "@/lib/auth/permissions";
 import { AppError } from "@/lib/errors";
 import { requireWorkspace } from "@/lib/tenant/context";
@@ -23,6 +28,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
     tenants: tenants.map((t) => ({ id: t.tenant.id, name: t.tenant.name, role: t.role })),
   };
   const role = ROLE_LABELS[active.role];
+  const accountLink = (
+    <DropdownMenuItem render={<Link href={ROUTES.settings} />}>
+      <Settings aria-hidden /> Account settings
+    </DropdownMenuItem>
+  );
   const collapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "1";
 
   return (
@@ -30,14 +40,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
       defaultCollapsed={collapsed}
       switcher={{ full: <TenantSwitcher {...switcherProps} />, compact: <TenantSwitcher {...switcherProps} compact /> }}
       footer={{
-        full: <UserMenu name={name} email={email} role={role} />,
-        compact: <UserMenu name={name} email={email} role={role} compact />,
+        full: <UserMenu name={name} email={email} role={role}>{accountLink}</UserMenu>,
+        compact: <UserMenu name={name} email={email} role={role} compact>{accountLink}</UserMenu>,
       }}
       header={
         <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
           <Breadcrumbs />
           <div className="flex items-center gap-2">
             <CommandSearch />
+            <Suspense fallback={<NotificationsFallback />}>
+              <Notifications />
+            </Suspense>
           </div>
         </div>
       }
