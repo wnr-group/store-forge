@@ -154,6 +154,21 @@ Only the message `ALL CHECKS PASSED` means the setup is correct. Re-run it after
 npm run db:seed -- --confirm-dev
 ```
 
+**Step 5 (optional). Seed a demo store.** `npm run db:seed:demo` creates one dedicated demo store, **Urban Nest** (slug `urban-nest-demo`), with 26 products (57 variants), 8 categories, 6 collections, 28 customers, 46 orders over the last 90 days and an inventory ledger, plus three dummy logins. **Local/dev projects only: the passwords are public, so never run it against a real project.** It refuses to run when `NODE_ENV` or `VERCEL_ENV` is `production`, needs `SEED_DEMO_DATA=true`, and is safe to re-run (existing rows are skipped).
+
+```bash
+SEED_DEMO_DATA=true npm run db:seed:demo
+# PowerShell: $env:SEED_DEMO_DATA='true'; npm run db:seed:demo
+```
+
+| Role | URL | Email | Password |
+|---|---|---|---|
+| Owner (runs the demo store) | http://localhost:3000/login | owner@demo.test | Demo1234 |
+| Admin | http://localhost:3000/login | admin@demo.test | Demo1234 |
+| Staff | http://localhost:3000/login | staff@demo.test | Demo1234 |
+
+To make an existing confirmed user the owner instead, set `SEED_DEMO_USER_EMAIL=you@example.com`; the dummy logins are then not created.
+
 **Troubleshooting**
 
 | Problem | Fix |
@@ -193,3 +208,4 @@ Team invitations, ownership transfer and a member-management UI do not exist yet
 | `npm run db:check` | Check migration history |
 | `npm run db:verify` | Verify roles, RLS and isolation on the real database |
 | `npm run db:seed` | Seed development data (`-- --confirm-dev` required) |
+| `npm run db:seed:demo` | Seed the Urban Nest demo store and owner/admin/staff logins (see Database Setup) |

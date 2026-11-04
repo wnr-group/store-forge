@@ -14,7 +14,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
     "db:verify": "tsx --conditions=react-server scripts/verify-db.ts",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "tsx scripts/seed.ts",
+    "db:seed:demo": "tsx scripts/seed-demo-data.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
