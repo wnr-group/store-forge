@@ -17,7 +17,7 @@ import { mapErrors } from "@/lib/db/errors";
 import type { DbTx } from "@/lib/db/tenant-db";
 import { requireActiveTenant, withTenantDb } from "@/lib/tenant/context";
 import { AppError } from "@/lib/errors";
-import { parseMoney } from "@/lib/money";
+import { currencyDigits, parseMoney } from "@/lib/money";
 import { slugify } from "@/lib/utils/slug";
 import { PAGE_SIZE, type ProductListQuery, type ProductValues } from "@/lib/validations/catalog";
 import { productFolder } from "@/lib/storage/paths";
@@ -141,10 +141,15 @@ export async function getProduct(id: string): Promise<ProductDetail | null> {
 // Writes
 // ---------------------------------------------------------------------------
 
-function money(value: string | null, currency: string, label: string): number | null {
+/** Converts typed money to minor units; the store currency decides how many decimals are allowed. */
+function money(value: string | null, currency: string, label: string, field: string): number | null {
   if (value === null) return null;
   const minor = parseMoney(value, currency);
-  if (minor === null) throw new AppError("VALIDATION", `${label} is not a valid amount.`, { [label.toLowerCase()]: "Invalid amount" });
+  if (minor === null) {
+    const digits = currencyDigits(currency);
+    const hint = digits === 0 ? "a whole amount" : `at most ${digits} decimal places`;
+    throw new AppError("VALIDATION", `${label} must be a valid amount (${hint} for ${currency}).`, { [field]: `Use ${hint}.` });
+  }
   return minor;
 }
 
@@ -193,8 +198,8 @@ async function syncVariants(tx: DbTx, tenantId: string, productId: string, value
       title: Object.values(v.options).join(" / "),
       options: v.options,
       sku: v.sku,
-      priceMinor: money(v.price, currency, "Variant price") ?? 0,
-      compareAtPriceMinor: money(v.compareAtPrice, currency, "Compare-at price"),
+      priceMinor: money(v.price, currency, "Variant price", `variants.${position}.price`) ?? 0,
+      compareAtPriceMinor: money(v.compareAtPrice, currency, "Compare-at price", `variants.${position}.compareAtPrice`),
       quantity: v.quantity,
       imageId: v.imagePath ? (imageIdMap.get(v.imagePath) ?? null) : null,
       isActive: v.isActive,
@@ -259,9 +264,9 @@ function productColumns(values: ProductValues, currency: string) {
     categoryId: values.categoryId,
     // With variants, SKU / price / stock live on the variants; the product row keeps its base price for display.
     sku: hasVariants ? null : values.sku,
-    priceMinor: money(values.price, currency, "Price") ?? 0,
-    compareAtPriceMinor: money(values.compareAtPrice, currency, "Compare-at price"),
-    costMinor: money(values.cost, currency, "Cost"),
+    priceMinor: money(values.price, currency, "Price", "price") ?? 0,
+    compareAtPriceMinor: money(values.compareAtPrice, currency, "Compare-at price", "compareAtPrice"),
+    costMinor: money(values.cost, currency, "Cost per item", "cost"),
     hasVariants,
     trackInventory: values.trackInventory,
     quantity: hasVariants ? 0 : values.quantity,

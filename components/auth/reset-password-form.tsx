@@ -33,7 +33,7 @@ export function ResetPasswordForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-3">
       <FormError message={formError} />
-      <FormField id="password" label="New password" error={errors.password?.message} hint="8+ characters with a letter and a number">
+      <FormField required id="password" label="New password" error={errors.password?.message} hint="8+ characters with a letter and a number">
         <PasswordInput
           id="password"
           autoComplete="new-password"
@@ -42,7 +42,7 @@ export function ResetPasswordForm() {
           {...register("password")}
         />
       </FormField>
-      <FormField id="confirmPassword" label="Confirm new password" error={errors.confirmPassword?.message}>
+      <FormField required id="confirmPassword" label="Confirm new password" error={errors.confirmPassword?.message}>
         <PasswordInput
           id="confirmPassword"
           autoComplete="new-password"

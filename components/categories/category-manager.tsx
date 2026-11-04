@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FolderTree, Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { cn } from "@/lib/utils";
 import { categoryInputSchema } from "@/lib/validations/catalog";
 import type { CategoryRow } from "@/services/category.service";
@@ -40,30 +41,29 @@ function descendants(rows: CategoryRow[], id: string): Set<string> {
 export function CategoryManager({ rows, canManage, canDelete }: { rows: CategoryRow[]; canManage: boolean; canDelete: boolean }) {
   const router = useRouter();
   const [draft, setDraft] = useState<Draft | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [formError, setFormError] = useState<string | null>(null);
+  const { errors, formError, pending, validate, validateField, clear, fail, reset, submit } = useFormErrors();
   const [toDelete, setToDelete] = useState<CategoryRow | null>(null);
-  const [pending, startTransition] = useTransition();
+
+  const payloadOf = (d: Draft) => ({ name: d.name, slug: d.slug.trim() || undefined, description: d.description, parentId: d.parentId || null });
+  const change = (patch: Partial<Draft>, field: string) => {
+    if (draft) setDraft({ ...draft, ...patch });
+    clear(field);
+  };
+  const blur = (field: string) => () => draft && validateField(categoryInputSchema, payloadOf(draft), field);
 
   const open = (r?: CategoryRow) => {
-    setErrors({});
-    setFormError(null);
+    reset();
     setDraft(r ? { id: r.id, name: r.name, slug: r.slug, description: r.description ?? "", parentId: r.parentId ?? "" } : blank);
   };
 
   const save = () => {
     if (!draft) return;
-    const payload = { name: draft.name, slug: draft.slug.trim() || undefined, description: draft.description, parentId: draft.parentId || null };
-    const parsed = categoryInputSchema.safeParse(payload);
-    if (!parsed.success) {
-      setErrors(Object.fromEntries(parsed.error.issues.map((i) => [i.path.join("."), i.message])));
-      return;
-    }
-    startTransition(async () => {
+    const payload = payloadOf(draft);
+    if (!validate(categoryInputSchema, payload)) return;
+    submit(async () => {
       const res = await saveCategoryAction(draft.id, payload);
       if (!res.ok) {
-        setErrors(res.fieldErrors ?? {});
-        setFormError(res.error);
+        fail(res);
         return;
       }
       toast.success(draft.id ? "Category updated" : "Category created");
@@ -154,28 +154,28 @@ export function CategoryManager({ rows, canManage, canDelete }: { rows: Category
               className="space-y-3"
               noValidate
             >
-              {formError ? <p role="alert" className="text-sm text-destructive">{formError}</p> : null}
-              <FormField id="cat-name" label="Name" error={errors.name}>
-                <Input id="cat-name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} aria-invalid={Boolean(errors.name)} aria-describedby="cat-name-msg" autoFocus />
+              {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
+              <FormField id="cat-name" label="Category name" required error={errors.name}>
+                <Input id="cat-name" value={draft.name} onChange={(e) => change({ name: e.target.value }, "name")} onBlur={blur("name")} aria-invalid={Boolean(errors.name)} aria-describedby="cat-name-msg" aria-required autoFocus disabled={pending} />
               </FormField>
-              <FormField id="cat-slug" label="URL handle" error={errors.slug} hint={draft.id ? undefined : "Leave blank to generate from the name."}>
-                <Input id="cat-slug" value={draft.slug} onChange={(e) => setDraft({ ...draft, slug: e.target.value })} aria-invalid={Boolean(errors.slug)} aria-describedby="cat-slug-msg" />
+              <FormField id="cat-slug" label="Slug" required={Boolean(draft.id)} optional={!draft.id} error={errors.slug} hint={draft.id ? "Lowercase letters, numbers and hyphens." : "Leave blank to generate it from the name."}>
+                <Input id="cat-slug" value={draft.slug} onChange={(e) => change({ slug: e.target.value }, "slug")} onBlur={blur("slug")} aria-invalid={Boolean(errors.slug)} aria-describedby="cat-slug-msg" disabled={pending} />
               </FormField>
-              <FormField id="cat-parent" label="Parent category" error={errors.parentId}>
-                <NativeSelect id="cat-parent" value={draft.parentId} onChange={(e) => setDraft({ ...draft, parentId: e.target.value })}>
+              <FormField id="cat-parent" label="Parent category" optional error={errors.parentId}>
+                <NativeSelect id="cat-parent" value={draft.parentId} onChange={(e) => change({ parentId: e.target.value }, "parentId")} aria-invalid={Boolean(errors.parentId)} aria-describedby="cat-parent-msg" disabled={pending}>
                   <option value="">None (top level)</option>
                   {rows.filter((r) => !blocked.has(r.id)).map((r) => (
                     <option key={r.id} value={r.id}>{r.name}</option>
                   ))}
                 </NativeSelect>
               </FormField>
-              <FormField id="cat-desc" label="Description" error={errors.description}>
-                <Textarea id="cat-desc" rows={3} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} aria-describedby="cat-desc-msg" />
+              <FormField id="cat-desc" label="Description" optional error={errors.description}>
+                <Textarea id="cat-desc" rows={3} value={draft.description} onChange={(e) => change({ description: e.target.value }, "description")} onBlur={blur("description")} aria-invalid={Boolean(errors.description)} aria-describedby="cat-desc-msg" disabled={pending} />
               </FormField>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setDraft(null)} disabled={pending}>Cancel</Button>
                 <Button type="submit" disabled={pending}>
-                  {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} Save
+                  {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Saving…" : "Save"}
                 </Button>
               </DialogFooter>
             </form>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, Search, Trash2 } from "lucide-react";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { ROUTES } from "@/config/app";
+import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { cn } from "@/lib/utils";
 import { collectionInputSchema } from "@/lib/validations/catalog";
 import type { Collection } from "@/lib/db/schema";
@@ -39,29 +40,29 @@ export function CollectionForm({ mode, initial, products, canDelete }: Props) {
   const [image, setImage] = useState<ImageItem[]>(
     initial?.imagePath ? [{ key: "existing", path: initial.imagePath, altText: null, progress: 100, status: "done", saved: true }] : [],
   );
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const visible = useMemo(() => products.filter((p) => p.name.toLowerCase().includes(filter.trim().toLowerCase())), [products, filter]);
   const uploading = image.some((i) => i.status === "uploading");
 
-  const submit = () => {
-    setErrors({});
-    setFormError(null);
+  const buildPayload = () => {
     const done = image.find((i) => i.status === "done" && i.path);
-    const payload = { name, slug: slug.trim() || undefined, description, status, imagePath: done?.path ?? null, productIds: picked };
-    const parsed = collectionInputSchema.safeParse(payload);
-    if (!parsed.success) {
-      setErrors(Object.fromEntries(parsed.error.issues.map((i) => [i.path.join("."), i.message])));
+    return { name, slug: slug.trim() || undefined, description, status, imagePath: done?.path ?? null, productIds: picked };
+  };
+  const blur = (field: string) => () => validateField(collectionInputSchema, buildPayload(), field);
+
+  const submit = () => {
+    const payload = buildPayload();
+    if (!validate(collectionInputSchema, payload)) return;
+    if (image.some((i) => i.status === "error")) {
+      fail({ ok: false, error: "Remove the image that failed to upload, or upload it again." });
       return;
     }
-    startTransition(async () => {
+    send(async () => {
       const res = await saveCollectionAction(mode, id, payload);
       if (!res.ok) {
-        setErrors(res.fieldErrors ?? {});
-        setFormError(res.error);
+        fail(res);
         return;
       }
       toast.success(mode === "create" ? "Collection created" : "Changes saved");
@@ -78,18 +79,18 @@ export function CollectionForm({ mode, initial, products, canDelete }: Props) {
         submit();
       }}
     >
-      {formError ? <div role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">{formError}</div> : null}
+      {formError ? <div role="alert" className="mb-4 rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">{formError}</div> : null}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="space-y-4">
           <SectionCard title="Details">
-            <FormField id="col-name" label="Name" error={errors.name}>
-              <Input id="col-name" value={name} onChange={(e) => setName(e.target.value)} aria-invalid={Boolean(errors.name)} aria-describedby="col-name-msg" disabled={pending} autoFocus={mode === "create"} />
+            <FormField id="col-name" label="Collection name" required error={errors.name}>
+              <Input id="col-name" value={name} onChange={(e) => { setName(e.target.value); clear("name"); }} onBlur={blur("name")} aria-invalid={Boolean(errors.name)} aria-describedby="col-name-msg" aria-required disabled={pending} autoFocus={mode === "create"} />
             </FormField>
-            <FormField id="col-slug" label="URL handle" error={errors.slug} hint={mode === "create" ? "Leave blank to generate from the name." : undefined}>
-              <Input id="col-slug" value={slug} onChange={(e) => setSlug(e.target.value)} aria-invalid={Boolean(errors.slug)} aria-describedby="col-slug-msg" disabled={pending} />
+            <FormField id="col-slug" label="Slug" required={mode === "edit"} optional={mode === "create"} error={errors.slug} hint={mode === "create" ? "Leave blank to generate it from the name." : "Lowercase letters, numbers and hyphens."}>
+              <Input id="col-slug" value={slug} onChange={(e) => { setSlug(e.target.value); clear("slug"); }} onBlur={blur("slug")} aria-invalid={Boolean(errors.slug)} aria-describedby="col-slug-msg" disabled={pending} />
             </FormField>
-            <FormField id="col-desc" label="Description" error={errors.description}>
-              <Textarea id="col-desc" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} aria-describedby="col-desc-msg" disabled={pending} />
+            <FormField id="col-desc" label="Description" optional error={errors.description}>
+              <Textarea id="col-desc" rows={4} value={description} onChange={(e) => { setDescription(e.target.value); clear("description"); }} onBlur={blur("description")} aria-invalid={Boolean(errors.description)} aria-describedby="col-desc-msg" disabled={pending} />
             </FormField>
           </SectionCard>
 
@@ -98,7 +99,7 @@ export function CollectionForm({ mode, initial, products, canDelete }: Props) {
               <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
               <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter products" aria-label="Filter products" className="pl-8" />
             </div>
-            {errors.productIds ? <p role="alert" className="text-xs text-destructive">{errors.productIds}</p> : null}
+            {errors.productIds ? <p role="alert" className="text-xs text-error">{errors.productIds}</p> : null}
             {products.length === 0 ? (
               <p className="text-sm text-muted-foreground">No products yet. <Link href={`${ROUTES.products}/new`} className="text-link underline underline-offset-2">Add one</Link> first.</p>
             ) : (
@@ -143,7 +144,7 @@ export function CollectionForm({ mode, initial, products, canDelete }: Props) {
           <Link href={ROUTES.collections} className={cn(buttonVariants({ variant: "outline" }), "h-9")}>{mode === "create" ? "Cancel" : "Back"}</Link>
           <Button type="submit" className="h-9" disabled={pending || uploading}>
             {pending ? <Loader2 className="animate-spin" aria-hidden /> : null}
-            {mode === "create" ? "Create collection" : "Save changes"}
+            {pending ? "Saving…" : mode === "create" ? "Create collection" : "Save changes"}
           </Button>
         </div>
       </div>

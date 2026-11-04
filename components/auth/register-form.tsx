@@ -49,7 +49,7 @@ export function RegisterForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-3">
       <FormError message={formError} />
-      <FormField id="fullName" label="Full name" error={errors.fullName?.message}>
+      <FormField required id="fullName" label="Full name" error={errors.fullName?.message}>
         <Input
           id="fullName"
           autoComplete="name"
@@ -59,7 +59,7 @@ export function RegisterForm() {
           {...register("fullName")}
         />
       </FormField>
-      <FormField id="email" label="Work email" error={errors.email?.message}>
+      <FormField required id="email" label="Work email" error={errors.email?.message}>
         <Input
           id="email"
           type="email"
@@ -70,7 +70,7 @@ export function RegisterForm() {
           {...register("email")}
         />
       </FormField>
-      <FormField id="password" label="Password" error={errors.password?.message} hint="8+ characters with a letter and a number">
+      <FormField required id="password" label="Password" error={errors.password?.message} hint="8+ characters with a letter and a number">
         <PasswordInput
           id="password"
           autoComplete="new-password"
@@ -79,7 +79,7 @@ export function RegisterForm() {
           {...register("password")}
         />
       </FormField>
-      <FormField id="confirmPassword" label="Confirm password" error={errors.confirmPassword?.message}>
+      <FormField required id="confirmPassword" label="Confirm password" error={errors.confirmPassword?.message}>
         <PasswordInput
           id="confirmPassword"
           autoComplete="new-password"

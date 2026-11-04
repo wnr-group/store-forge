@@ -46,7 +46,7 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-3">
       <FormError message={formError} />
-      <FormField id="email" label="Email" error={errors.email?.message}>
+      <FormField required id="email" label="Email" error={errors.email?.message}>
         <Input
           id="email"
           type="email"

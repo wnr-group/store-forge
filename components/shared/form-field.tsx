@@ -1,4 +1,4 @@
-import { Label } from "@/components/ui/label";
+import { FieldLabel } from "@/components/shared/field-label";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -9,21 +9,30 @@ type Props = {
   className?: string;
   children: React.ReactNode;
   labelAside?: React.ReactNode;
+  /** Mandatory field: red asterisk. Keep in sync with the schema. */
+  required?: boolean;
+  /** Optional field: "(Optional)" next to the label. */
+  optional?: boolean;
+  /** Tooltip help next to the label. */
+  help?: string;
 };
 
-/** Label + control + accessible error/hint text. Controls should set aria-describedby={`${id}-msg`}. */
-export function FormField({ id, label, error, hint, className, children, labelAside }: Props) {
+/**
+ * Label + control + accessible error/hint text. Controls should set aria-invalid and
+ * aria-describedby={`${id}-msg`}. Errors are announced (role="alert") and styled with the error token.
+ */
+export function FormField({ id, label, error, hint, className, children, labelAside, required, optional, help }: Props) {
   return (
-    <div className={cn("space-y-1.5", className)}>
+    <div className={cn("space-y-1.5", className)} data-invalid={error ? "true" : undefined}>
       <div className="flex items-center justify-between">
-        <Label htmlFor={id}>{label}</Label>
+        <FieldLabel label={label} htmlFor={id} required={required} optional={optional} help={help} />
         {labelAside}
       </div>
       {children}
       <p
         id={`${id}-msg`}
         role={error ? "alert" : undefined}
-        className={cn("min-h-4 text-xs", error ? "text-destructive" : "text-muted-foreground")}
+        className={cn("min-h-4 text-xs", error ? "text-error" : "text-muted-foreground")}
       >
         {error ?? hint}
       </p>

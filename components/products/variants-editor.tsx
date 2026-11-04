@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Wand2, X } from "lucide-react";
+import { RequiredIndicator } from "@/components/shared/field-label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -31,6 +32,16 @@ type Props = {
   onOptionsChange: (o: OptionDraft[]) => void;
   onVariantsChange: (v: VariantDraft[]) => void;
 };
+
+/** Compact error line for a table cell / option row; announced to assistive tech. */
+function CellError({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <p id={id} role="alert" className="mt-0.5 max-w-40 text-[11px] leading-tight text-error">
+      {message}
+    </p>
+  );
+}
 
 const signature = (o: Record<string, string>) => JSON.stringify(Object.keys(o).sort().map((k) => [k, o[k]]));
 
@@ -77,7 +88,10 @@ export function VariantsEditor({ options, variants, basePrice, imagePaths, track
       {options.map((opt, i) => (
         <div key={i} className="space-y-2 rounded-lg border bg-card p-3">
           <div className="flex items-center gap-2">
-            <Input value={opt.name} onChange={(e) => setOption(i, { name: e.target.value })} placeholder="Option name, e.g. Size" aria-label={`Option ${i + 1} name`} disabled={disabled} className="max-w-56" />
+            <div>
+              <Input value={opt.name} onChange={(e) => setOption(i, { name: e.target.value })} placeholder="Option name, e.g. Size" aria-label={`Option ${i + 1} name (required)`} aria-required aria-invalid={Boolean(errors[`options.${i}.name`])} aria-describedby={`opt-${i}-name-msg`} disabled={disabled} className="max-w-56" />
+              <CellError id={`opt-${i}-name-msg`} message={errors[`options.${i}.name`]} />
+            </div>
             <Button type="button" variant="ghost" size="icon-sm" onClick={() => onOptionsChange(options.filter((_, idx) => idx !== i))} disabled={disabled} aria-label={`Remove option ${opt.name || i + 1}`}>
               <X aria-hidden />
             </Button>
@@ -102,14 +116,18 @@ export function VariantsEditor({ options, variants, basePrice, imagePaths, track
               }}
               onBlur={() => addValues(i, draft[i] ?? "")}
               placeholder="Type a value, press Enter"
-              aria-label={`Values for ${opt.name || `option ${i + 1}`}`}
+              aria-label={`Values for ${opt.name || `option ${i + 1}`} (required)`}
+              aria-required
+              aria-invalid={Boolean(errors[`options.${i}.values`])}
+              aria-describedby={`opt-${i}-values-msg`}
               disabled={disabled}
               className="h-7 w-44"
             />
           </div>
+          <CellError id={`opt-${i}-values-msg`} message={errors[`options.${i}.values`]} />
         </div>
       ))}
-      {errors.options ? <p role="alert" className="text-xs text-destructive">{errors.options}</p> : null}
+      {errors.options ? <p role="alert" className="text-xs text-error">{errors.options}</p> : null}
 
       <div className="flex flex-wrap items-center gap-2">
         {options.length < 3 ? (
@@ -122,10 +140,10 @@ export function VariantsEditor({ options, variants, basePrice, imagePaths, track
             <Wand2 aria-hidden /> {variants.length ? "Update variants" : "Generate variants"} ({total})
           </Button>
         ) : null}
-        {total > MAX_VARIANTS ? <span className="text-xs text-destructive">Too many combinations (max {MAX_VARIANTS}).</span> : null}
+        {total > MAX_VARIANTS ? <span className="text-xs text-error">Too many combinations (max {MAX_VARIANTS}).</span> : null}
       </div>
       {options.length > 0 && stale && variants.length > 0 ? <p className="text-xs text-muted-foreground">Options changed. Update variants to apply (existing prices and stock are kept for combinations that remain).</p> : null}
-      {errors.variants ? <p role="alert" className="text-xs text-destructive">{errors.variants}</p> : null}
+      {errors.variants ? <p role="alert" className="text-xs text-error">{errors.variants}</p> : null}
 
       {variants.length > 0 ? (
         <div className="overflow-x-auto rounded-lg border">
@@ -133,10 +151,10 @@ export function VariantsEditor({ options, variants, basePrice, imagePaths, track
             <thead className="bg-muted/40 text-left text-xs text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 font-medium">Variant</th>
-                <th className="px-2 py-2 font-medium">SKU</th>
-                <th className="px-2 py-2 font-medium">Price</th>
-                <th className="px-2 py-2 font-medium">Compare-at</th>
-                <th className="px-2 py-2 font-medium">Stock</th>
+                <th className="px-2 py-2 font-medium">SKU <span className="font-normal">(Optional)</span></th>
+                <th className="px-2 py-2 font-medium">Price<RequiredIndicator /></th>
+                <th className="px-2 py-2 font-medium">Compare-at <span className="font-normal">(Optional)</span></th>
+                <th className="px-2 py-2 font-medium">Stock{trackInventory ? <RequiredIndicator /> : null}</th>
                 <th className="px-2 py-2 font-medium">Image</th>
                 <th className="px-2 py-2 font-medium">Active</th>
               </tr>
@@ -146,16 +164,20 @@ export function VariantsEditor({ options, variants, basePrice, imagePaths, track
                 <tr key={signature(v.options)} className={v.isActive ? undefined : "opacity-60"}>
                   <td className="px-3 py-2 font-medium">{Object.values(v.options).join(" / ")}</td>
                   <td className="px-2 py-1.5">
-                    <Input value={v.sku} onChange={(e) => setVariant(i, { sku: e.target.value })} aria-label={`SKU for ${Object.values(v.options).join(" ")}`} aria-invalid={Boolean(errors[`variants.${i}.sku`])} disabled={disabled} className="h-7 w-28" />
+                    <Input value={v.sku} onChange={(e) => setVariant(i, { sku: e.target.value })} aria-label={`SKU for ${Object.values(v.options).join(" ")}`} aria-invalid={Boolean(errors[`variants.${i}.sku`])} aria-describedby={`v-${i}-sku-msg`} disabled={disabled} className="h-7 w-28" />
+                    <CellError id={`v-${i}-sku-msg`} message={errors[`variants.${i}.sku`]} />
                   </td>
                   <td className="px-2 py-1.5">
-                    <Input value={v.price} onChange={(e) => setVariant(i, { price: e.target.value })} inputMode="decimal" aria-label={`Price for ${Object.values(v.options).join(" ")}`} aria-invalid={Boolean(errors[`variants.${i}.price`])} disabled={disabled} className="h-7 w-24" />
+                    <Input value={v.price} onChange={(e) => setVariant(i, { price: e.target.value })} inputMode="decimal" aria-label={`Price for ${Object.values(v.options).join(" ")} (required)`} aria-required aria-invalid={Boolean(errors[`variants.${i}.price`])} aria-describedby={`v-${i}-price-msg`} disabled={disabled} className="h-7 w-24" />
+                    <CellError id={`v-${i}-price-msg`} message={errors[`variants.${i}.price`]} />
                   </td>
                   <td className="px-2 py-1.5">
-                    <Input value={v.compareAtPrice} onChange={(e) => setVariant(i, { compareAtPrice: e.target.value })} inputMode="decimal" aria-label={`Compare-at price for ${Object.values(v.options).join(" ")}`} disabled={disabled} className="h-7 w-24" />
+                    <Input value={v.compareAtPrice} onChange={(e) => setVariant(i, { compareAtPrice: e.target.value })} inputMode="decimal" aria-label={`Compare-at price for ${Object.values(v.options).join(" ")}`} aria-invalid={Boolean(errors[`variants.${i}.compareAtPrice`])} aria-describedby={`v-${i}-compareAtPrice-msg`} disabled={disabled} className="h-7 w-24" />
+                    <CellError id={`v-${i}-compareAtPrice-msg`} message={errors[`variants.${i}.compareAtPrice`]} />
                   </td>
                   <td className="px-2 py-1.5">
-                    <Input value={String(v.quantity)} onChange={(e) => setVariant(i, { quantity: e.target.value })} inputMode="numeric" aria-label={`Stock for ${Object.values(v.options).join(" ")}`} aria-invalid={Boolean(errors[`variants.${i}.quantity`])} disabled={disabled || !trackInventory} className="h-7 w-20" />
+                    <Input value={String(v.quantity)} onChange={(e) => setVariant(i, { quantity: e.target.value })} inputMode="numeric" aria-label={`Stock for ${Object.values(v.options).join(" ")}`} aria-required={trackInventory || undefined} aria-invalid={Boolean(errors[`variants.${i}.quantity`])} aria-describedby={`v-${i}-quantity-msg`} disabled={disabled || !trackInventory} className="h-7 w-20" />
+                    <CellError id={`v-${i}-quantity-msg`} message={errors[`variants.${i}.quantity`]} />
                   </td>
                   <td className="px-2 py-1.5">
                     <NativeSelect aria-label={`Image for ${Object.values(v.options).join(" ")}`} value={v.imagePath ?? ""} onChange={(e) => setVariant(i, { imagePath: e.target.value || null })} disabled={disabled || imagePaths.length === 0} className="h-7 w-28">

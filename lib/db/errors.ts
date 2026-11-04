@@ -13,12 +13,12 @@ const field = (name: string, message: string) => ({ [name]: message });
 
 /** Known constraint names -> messages that are safe to show. Anything else is rethrown (and logged by toFailure). */
 const RULES: Rule[] = [
-  { match: /products_tenant_id_slug_key/, error: () => new AppError("CONFLICT", "That URL handle is already used by another product.", field("slug", "Already in use")) },
-  { match: /products_tenant_id_sku_key|product_variants_tenant_id_sku_key/, error: () => new AppError("CONFLICT", "That SKU is already used.", field("sku", "SKU already in use")) },
-  { match: /categories_tenant_id_slug_key/, error: () => new AppError("CONFLICT", "That URL handle is already used by another category.", field("slug", "Already in use")) },
-  { match: /collections_tenant_id_slug_key/, error: () => new AppError("CONFLICT", "That URL handle is already used by another collection.", field("slug", "Already in use")) },
-  { match: /customers_tenant_id_email_key/, error: () => new AppError("CONFLICT", "A customer with that email already exists.", field("email", "Already exists")) },
-  { match: /stores_slug_key/, error: () => new AppError("CONFLICT", "That store address is already taken.", field("slug", "Already taken")) },
+  { match: /products_tenant_id_slug_key/, error: () => new AppError("CONFLICT", "That URL handle is already used by another product.", field("slug", "This slug is already in use.")) },
+  { match: /products_tenant_id_sku_key|product_variants_tenant_id_sku_key/, error: () => new AppError("CONFLICT", "That SKU is already used.", field("sku", "This SKU is already in use.")) },
+  { match: /categories_tenant_id_slug_key/, error: () => new AppError("CONFLICT", "That URL handle is already used by another category.", field("slug", "This slug is already in use.")) },
+  { match: /collections_tenant_id_slug_key/, error: () => new AppError("CONFLICT", "That URL handle is already used by another collection.", field("slug", "This slug is already in use.")) },
+  { match: /customers_tenant_id_email_key/, error: () => new AppError("CONFLICT", "A customer with that email already exists.", field("email", "A customer with this email address already exists.")) },
+  { match: /stores_slug_key/, error: () => new AppError("CONFLICT", "That store address is already taken.", field("slug", "This store address is already taken.")) },
   { match: /product_variants_product_id_options_key/, error: () => new AppError("VALIDATION", "Two variants have the same option combination.") },
   { match: /(product_variants|products)_quantity_check|inventory_adjustments_quantity_after_check/, error: () => new AppError("VALIDATION", "Stock cannot go below zero.") },
   { match: /product_images_one_primary_idx/, error: () => new AppError("VALIDATION", "A product can only have one primary image.") },

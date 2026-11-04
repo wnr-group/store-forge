@@ -96,7 +96,7 @@ export function OnboardingForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-3">
       <FormError message={formError} />
-      <FormField id="businessName" label="Business name" error={errors.businessName?.message} hint="Your legal or trading name">
+      <FormField required id="businessName" label="Business name" error={errors.businessName?.message} hint="Your legal or trading name">
         <Input
           id="businessName"
           autoComplete="organization"
@@ -106,7 +106,7 @@ export function OnboardingForm() {
           {...register("businessName")}
         />
       </FormField>
-      <FormField id="storeName" label="Store name" error={errors.storeName?.message}>
+      <FormField required id="storeName" label="Store name" error={errors.storeName?.message}>
         <Input
           id="storeName"
           placeholder="Acme Store"
@@ -115,7 +115,7 @@ export function OnboardingForm() {
           {...register("storeName")}
         />
       </FormField>
-      <FormField id="storeSlug" label="Store address" error={errors.storeSlug?.message}>
+      <FormField required id="storeSlug" label="Store slug" error={errors.storeSlug?.message}>
         <div className="flex items-center">
           <Input
             id="storeSlug"
@@ -138,7 +138,7 @@ export function OnboardingForm() {
           {slugHint}
         </p>
       </FormField>
-      <FormField id="description" label="Description (optional)" error={errors.description?.message}>
+      <FormField optional id="description" label="Description" error={errors.description?.message}>
         <textarea
           id="description"
           rows={3}

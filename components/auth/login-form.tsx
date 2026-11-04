@@ -34,7 +34,7 @@ export function LoginForm({ next }: { next?: string }) {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-3">
       <FormError message={formError} />
-      <FormField id="email" label="Email" error={errors.email?.message}>
+      <FormField required id="email" label="Email" error={errors.email?.message}>
         <Input
           id="email"
           type="email"
@@ -45,7 +45,7 @@ export function LoginForm({ next }: { next?: string }) {
           {...register("email")}
         />
       </FormField>
-      <FormField
+      <FormField required
         id="password"
         label="Password"
         error={errors.password?.message}

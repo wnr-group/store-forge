@@ -33,7 +33,7 @@ export async function updateStoreSettings(v: StoreSettingsValues): Promise<void>
       if (!store) throw new AppError("NOT_FOUND", "This workspace does not have a store.");
       if (v.slug !== store.slug) {
         const rows = rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.is_store_slug_available(${v.slug}) as ok`));
-        if (!rows[0]?.ok) throw new AppError("CONFLICT", "That store address is not available.", { slug: "Not available" });
+        if (!rows[0]?.ok) throw new AppError("CONFLICT", "That store address is not available.", { slug: "This store address is not available." });
       }
       if (v.currency !== store.currency && (await hasMoneyData(tx, ctx.tenantId)))
         throw new AppError("VALIDATION", "Currency cannot be changed once you have products or orders.", { currency: "Locked: prices already exist" });

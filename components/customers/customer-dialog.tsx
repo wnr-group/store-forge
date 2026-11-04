@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ROUTES } from "@/config/app";
+import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { customerInputSchema } from "@/lib/validations/catalog";
 
 type Customer = { id: string; fullName: string; email: string; phone: string | null; notes: string | null };
@@ -20,24 +21,19 @@ type Props = { open: boolean; onOpenChange: (open: boolean) => void; customer?: 
 export function CustomerDialog({ open, onOpenChange, customer }: Props) {
   const router = useRouter();
   const [v, setV] = useState({ fullName: customer?.fullName ?? "", email: customer?.email ?? "", phone: customer?.phone ?? "", notes: customer?.notes ?? "" });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-  const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setV({ ...v, [k]: e.target.value });
+  const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
+  const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setV({ ...v, [k]: e.target.value });
+    clear(k);
+  };
+  const blur = (k: keyof typeof v) => () => validateField(customerInputSchema, v, k);
 
   const submit = () => {
-    setFormError(null);
-    const parsed = customerInputSchema.safeParse(v);
-    if (!parsed.success) {
-      setErrors(Object.fromEntries(parsed.error.issues.map((i) => [i.path.join("."), i.message])));
-      return;
-    }
-    setErrors({});
-    startTransition(async () => {
+    if (!validate(customerInputSchema, v)) return;
+    send(async () => {
       const res = await saveCustomerAction(customer?.id ?? null, v);
       if (!res.ok) {
-        setErrors(res.fieldErrors ?? {});
-        setFormError(res.error);
+        fail(res);
         return;
       }
       toast.success(customer ? "Customer updated" : "Customer added");
@@ -62,23 +58,23 @@ export function CustomerDialog({ open, onOpenChange, customer }: Props) {
             submit();
           }}
         >
-          {formError ? <p role="alert" className="text-sm text-destructive">{formError}</p> : null}
-          <FormField id="cu-name" label="Full name" error={errors.fullName}>
-            <Input id="cu-name" value={v.fullName} onChange={set("fullName")} aria-invalid={Boolean(errors.fullName)} aria-describedby="cu-name-msg" autoFocus autoComplete="off" />
+          {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
+          <FormField id="cu-name" label="Customer name" required error={errors.fullName}>
+            <Input id="cu-name" value={v.fullName} onChange={set("fullName")} onBlur={blur("fullName")} aria-invalid={Boolean(errors.fullName)} aria-describedby="cu-name-msg" aria-required autoFocus autoComplete="off" disabled={pending} />
           </FormField>
-          <FormField id="cu-email" label="Email" error={errors.email}>
-            <Input id="cu-email" type="email" value={v.email} onChange={set("email")} aria-invalid={Boolean(errors.email)} aria-describedby="cu-email-msg" autoComplete="off" />
+          <FormField id="cu-email" label="Email address" required error={errors.email}>
+            <Input id="cu-email" type="email" value={v.email} onChange={set("email")} onBlur={blur("email")} aria-invalid={Boolean(errors.email)} aria-describedby="cu-email-msg" aria-required autoComplete="off" disabled={pending} />
           </FormField>
-          <FormField id="cu-phone" label="Phone (optional)" error={errors.phone}>
-            <Input id="cu-phone" type="tel" value={v.phone} onChange={set("phone")} aria-invalid={Boolean(errors.phone)} aria-describedby="cu-phone-msg" autoComplete="off" />
+          <FormField id="cu-phone" label="Phone" optional error={errors.phone} hint="Include the country code for international numbers.">
+            <Input id="cu-phone" type="tel" value={v.phone} onChange={set("phone")} onBlur={blur("phone")} aria-invalid={Boolean(errors.phone)} aria-describedby="cu-phone-msg" autoComplete="off" disabled={pending} />
           </FormField>
-          <FormField id="cu-notes" label="Notes (optional)" error={errors.notes}>
-            <Textarea id="cu-notes" rows={3} value={v.notes} onChange={set("notes")} aria-describedby="cu-notes-msg" />
+          <FormField id="cu-notes" label="Notes" optional error={errors.notes}>
+            <Textarea id="cu-notes" rows={3} value={v.notes} onChange={set("notes")} onBlur={blur("notes")} aria-invalid={Boolean(errors.notes)} aria-describedby="cu-notes-msg" disabled={pending} />
           </FormField>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>Cancel</Button>
             <Button type="submit" disabled={pending}>
-              {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {customer ? "Save" : "Add customer"}
+              {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Saving…" : customer ? "Save" : "Add customer"}
             </Button>
           </DialogFooter>
         </form>

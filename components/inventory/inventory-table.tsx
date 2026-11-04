@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, SlidersHorizontal } from "lucide-react";
@@ -15,6 +15,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROUTES } from "@/config/app";
 import { INVENTORY_REASONS } from "@/lib/db/schema/enums";
+import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { inventoryAdjustSchema } from "@/lib/validations/catalog";
 import type { InventoryRow } from "@/services/inventory.service";
 
@@ -43,9 +44,7 @@ export function InventoryTable({ rows, canAdjust }: { rows: InventoryRow[]; canA
   const [value, setValue] = useState("");
   const [reason, setReason] = useState<(typeof INVENTORY_REASONS)[number]>("restock");
   const [note, setNote] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const { errors, formError, pending, validate, validateField, clear, fail, reset, submit: send } = useFormErrors();
 
   const open = (r: InventoryRow) => {
     setTarget(r);
@@ -53,26 +52,23 @@ export function InventoryTable({ rows, canAdjust }: { rows: InventoryRow[]; canA
     setValue("");
     setReason("restock");
     setNote("");
-    setErrors({});
-    setFormError(null);
+    reset();
   };
 
   const num = Number(value);
   const preview = target && value.trim() !== "" && Number.isInteger(num) ? (mode === "set" ? num : target.quantity + num) : null;
 
+  const payloadOf = (t: InventoryRow) => ({ productId: t.productId, variantId: t.variantId, mode, value, reason, note });
+  const blur = (field: string) => () => target && validateField(inventoryAdjustSchema, payloadOf(target), field);
+
   const submit = () => {
     if (!target) return;
-    const payload = { productId: target.productId, variantId: target.variantId, mode, value, reason, note };
-    const parsed = inventoryAdjustSchema.safeParse(payload);
-    if (!parsed.success) {
-      setErrors(Object.fromEntries(parsed.error.issues.map((i) => [i.path.join("."), i.message])));
-      return;
-    }
-    startTransition(async () => {
+    const payload = payloadOf(target);
+    if (!validate(inventoryAdjustSchema, payload)) return;
+    send(async () => {
       const res = await adjustStockAction(payload);
       if (!res.ok) {
-        setErrors(res.fieldErrors ?? {});
-        setFormError(res.error);
+        fail(res);
         return;
       }
       toast.success(`Stock updated to ${res.data?.quantity}`);
@@ -131,32 +127,32 @@ export function InventoryTable({ rows, canAdjust }: { rows: InventoryRow[]; canA
               submit();
             }}
           >
-            {formError ? <p role="alert" className="text-sm text-destructive">{formError}</p> : null}
+            {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
             <div className="grid grid-cols-2 gap-3">
-              <FormField id="adj-mode" label="Change">
-                <NativeSelect id="adj-mode" value={mode} onChange={(e) => setMode(e.target.value as "add" | "set")}>
+              <FormField id="adj-mode" label="Adjustment type" required>
+                <NativeSelect id="adj-mode" value={mode} onChange={(e) => { setMode(e.target.value as "add" | "set"); clear("value"); }} aria-required disabled={pending}>
                   <option value="add">Add / remove</option>
                   <option value="set">Set to exact count</option>
                 </NativeSelect>
               </FormField>
-              <FormField id="adj-value" label={mode === "add" ? "Quantity (+/−)" : "New count"} error={errors.value} hint={preview !== null ? `New stock: ${preview}` : undefined}>
-                <Input id="adj-value" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} aria-invalid={Boolean(errors.value)} aria-describedby="adj-value-msg" autoFocus placeholder={mode === "add" ? "e.g. 10 or -3" : "e.g. 42"} />
+              <FormField id="adj-value" label={mode === "add" ? "Quantity (+/−)" : "New count"} required error={errors.value} hint={preview !== null ? `New stock: ${preview}` : undefined}>
+                <Input id="adj-value" inputMode="numeric" value={value} onChange={(e) => { setValue(e.target.value); clear("value"); }} onBlur={blur("value")} aria-invalid={Boolean(errors.value)} aria-describedby="adj-value-msg" aria-required disabled={pending} autoFocus placeholder={mode === "add" ? "e.g. 10 or -3" : "e.g. 42"} />
               </FormField>
             </div>
-            <FormField id="adj-reason" label="Reason" error={errors.reason}>
-              <NativeSelect id="adj-reason" value={reason} onChange={(e) => setReason(e.target.value as typeof reason)}>
+            <FormField id="adj-reason" label="Reason" required error={errors.reason}>
+              <NativeSelect id="adj-reason" value={reason} onChange={(e) => { setReason(e.target.value as typeof reason); clear("reason"); }} aria-invalid={Boolean(errors.reason)} aria-describedby="adj-reason-msg" aria-required disabled={pending}>
                 {INVENTORY_REASONS.map((r) => (
                   <option key={r} value={r}>{REASON_LABELS[r]}</option>
                 ))}
               </NativeSelect>
             </FormField>
-            <FormField id="adj-note" label="Note (optional)" error={errors.note}>
-              <Input id="adj-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} aria-describedby="adj-note-msg" />
+            <FormField id="adj-note" label="Note" optional error={errors.note}>
+              <Input id="adj-note" value={note} onChange={(e) => { setNote(e.target.value); clear("note"); }} onBlur={blur("note")} aria-invalid={Boolean(errors.note)} aria-describedby="adj-note-msg" disabled={pending} />
             </FormField>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setTarget(null)} disabled={pending}>Cancel</Button>
               <Button type="submit" disabled={pending}>
-                {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} Update stock
+                {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Updating…" : "Update stock"}
               </Button>
             </DialogFooter>
           </form>
