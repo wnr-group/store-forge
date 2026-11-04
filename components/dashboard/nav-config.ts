@@ -1,4 +1,4 @@
-import { Boxes, FolderTree, LayoutDashboard, Layers, Package, type LucideIcon } from "lucide-react";
+import { Boxes, FolderTree, LayoutDashboard, Layers, Package, Settings, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 
 export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean };
@@ -10,6 +10,8 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.categories, label: "Categories", icon: FolderTree },
   { href: ROUTES.collections, label: "Collections", icon: Layers },
   { href: ROUTES.inventory, label: "Inventory", icon: Boxes },
+  { href: ROUTES.customers, label: "Customers", icon: Users },
+  { href: ROUTES.settings, label: "Settings", icon: Settings },
 ];
 
 export function isActive(pathname: string, item: Pick<NavItem, "href" | "exact">) {

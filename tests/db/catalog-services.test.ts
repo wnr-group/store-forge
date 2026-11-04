@@ -32,6 +32,7 @@ import { createCategory, deleteCategory, listCategories, normalize, updateCatego
 import { createCollection, getCollection } from "@/services/collection.service";
 import { createCustomer, deleteCustomer, getCustomer, listCustomers } from "@/services/customer.service";
 import { adjustStock, listAdjustments, listInventory } from "@/services/inventory.service";
+import { isCurrencyLocked, updateStoreSettings } from "@/services/store-settings.service";
 import { createProduct, deleteProducts, duplicateProduct, getProduct, listProducts, setProductsStatus, updateProduct } from "@/services/product.service";
 
 let pg: PGlite;
@@ -329,5 +330,35 @@ describe("customers and analytics (real orders only)", () => {
     expect(a.recentOrders[0].customerName).toBeTruthy();
     // Tenant B's own order never leaks into A's numbers, and vice versa.
     expect((await as(bob, () => getAnalytics(30, "Asia/Kolkata"))).totalSalesMinor).toBe(424242);
+  });
+});
+
+describe("store settings", () => {
+  const settings = (over: Record<string, unknown> = {}) => ({
+    name: "Alpha Shop", slug: "alpha-shop", description: null, contactEmail: "hello@alpha.test", contactPhone: "+911234567890",
+    currency: "INR", timezone: "Asia/Kolkata", logoPath: null, ...over,
+  });
+
+  it("owner can update; staff get FORBIDDEN", async () => {
+    await as(alice, () => updateStoreSettings(settings({ description: "Hand made", timezone: "UTC" })));
+    const [s] = await q("select description, timezone, contact_email from stores where tenant_id=$1", [tenantA]);
+    expect(s).toMatchObject({ description: "Hand made", timezone: "UTC", contact_email: "hello@alpha.test" });
+    expect(await fail(as(staff, () => updateStoreSettings(settings({ name: "Hacked" }))))).toBe("FORBIDDEN");
+  });
+
+  it("rejects a taken store address and an unknown timezone", async () => {
+    expect(await fail(as(alice, () => updateStoreSettings(settings({ slug: "beta-shop" }))))).toBe("CONFLICT");
+    expect(await fail(as(alice, () => updateStoreSettings(settings({ timezone: "Mars/Olympus" }))))).toBe("VALIDATION");
+  });
+
+  it("locks the currency once products exist (stored minor units would change meaning)", async () => {
+    expect(await as(alice, () => isCurrencyLocked())).toBe(true);
+    expect(await fail(as(alice, () => updateStoreSettings(settings({ currency: "JPY" }))))).toBe("VALIDATION");
+    const [s] = await q("select currency from stores where tenant_id=$1", [tenantA]);
+    expect(s.currency).toBe("INR");
+  });
+
+  it("the logo path must sit in the tenant's store/ folder (database check)", async () => {
+    await expect(q("update stores set logo_url=$1 where tenant_id=$2", [`${tenantB}/store/logo.png`, tenantA])).rejects.toThrow(/stores_logo_path_check/);
   });
 });

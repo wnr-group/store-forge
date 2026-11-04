@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, eq, sql } from "drizzle-orm";
-import { stores } from "@/lib/db/schema";
+import { orders, products, stores } from "@/lib/db/schema";
 import { mapErrors } from "@/lib/db/errors";
 import { rowsOf } from "@/lib/db/user-context";
 import { AppError } from "@/lib/errors";
@@ -35,6 +35,8 @@ export async function updateStoreSettings(v: StoreSettingsValues): Promise<void>
         const rows = rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.is_store_slug_available(${v.slug}) as ok`));
         if (!rows[0]?.ok) throw new AppError("CONFLICT", "That store address is not available.", { slug: "Not available" });
       }
+      if (v.currency !== store.currency && (await hasMoneyData(tx, ctx.tenantId)))
+        throw new AppError("VALIDATION", "Currency cannot be changed once you have products or orders.", { currency: "Locked: prices already exist" });
       if (v.timezone && !isValidTimeZone(v.timezone)) throw new AppError("VALIDATION", "Unknown timezone.", { timezone: "Choose a valid timezone" });
       await tx
         .update(stores)
@@ -53,6 +55,20 @@ export async function updateStoreSettings(v: StoreSettingsValues): Promise<void>
     }),
   );
   if (previousLogo && previousLogo !== (logo?.path ?? null)) await removeObjects([previousLogo]);
+}
+
+type Tx = Parameters<Parameters<typeof withTenantDb>[1]>[0];
+
+/** Amounts are stored in the currency's minor units, so the currency is fixed once any exist. */
+async function hasMoneyData(tx: Tx, tenantId: string): Promise<boolean> {
+  const [p] = await tx.select({ id: products.id }).from(products).where(eq(products.tenantId, tenantId)).limit(1);
+  if (p) return true;
+  const [o] = await tx.select({ id: orders.id }).from(orders).where(eq(orders.tenantId, tenantId)).limit(1);
+  return Boolean(o);
+}
+
+export async function isCurrencyLocked(): Promise<boolean> {
+  return withTenantDb({}, (tx, ctx) => hasMoneyData(tx, ctx.tenantId));
 }
 
 function isValidTimeZone(tz: string): boolean {
