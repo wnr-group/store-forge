@@ -27,7 +27,7 @@ export type VerifyDeps = {
 };
 
 const TABLES = [
-  "profiles", "tenants", "memberships", "stores",
+  "profiles", "tenants", "memberships", "stores", "platform_admins",
   "categories", "collections", "products", "product_images", "product_options", "product_variants",
   "collection_products", "inventory_adjustments", "customers", "orders", "order_items",
 ] as const;
@@ -53,7 +53,14 @@ const EXPECTED_POLICIES = [
 
 const FUNCTIONS = {
   authenticatedOnly: [
-    "public.create_tenant_with_store(text,text,text,text)",
+    "public.platform_provision_tenant(uuid,text,text,text,text,text,text)",
+    "public.platform_list_tenants(uuid)",
+    "public.platform_set_tenant_status(uuid,text)",
+    "public.is_platform_admin()",
+    "public.list_tenant_team(uuid)",
+    "public.update_team_member_name(uuid,uuid,text)",
+    "public.remove_team_member(uuid,uuid)",
+    "public.get_public_storefront(text)",
     "public.is_store_slug_available(text)",
     "public.is_valid_store_slug(text)",
     "public.is_tenant_member(uuid)",
@@ -61,7 +68,7 @@ const FUNCTIONS = {
     "public.storage_path_tenant(text)",
     "public.can_write_storage_object(text)",
   ],
-  nobody: ["public.handle_new_user()"],
+  nobody: ["public.handle_new_user()", "public.block_platform_admin_membership()"],
 };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -245,9 +252,30 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
     assert(rows.length === 0, `unpinned: ${rows.map((r) => r.proname).join(", ")}`);
   });
 
-  await check("onboarding-signature", "create_tenant_with_store() takes no user-id argument", async () => {
-    const [r] = await admin<{ args: string }>("select pg_get_function_arguments('public.create_tenant_with_store(text,text,text,text)'::regprocedure) as args");
-    assert(!/uuid|user/i.test(r.args), `arguments: ${r.args}`);
+  await check("no-self-service-onboarding", "the public create_tenant_with_store() function is gone; tenants are created only by platform_provision_tenant()", async () => {
+    const old = await admin("select 1 from pg_proc where pronamespace = 'public'::regnamespace and proname = 'create_tenant_with_store'");
+    assert(old.length === 0, "create_tenant_with_store() still exists: any signed-in user could create a tenant");
+    const [r] = await admin<{ definer: boolean; body: string }>(
+      "select prosecdef as definer, prosrc as body from pg_proc where oid = 'public.platform_provision_tenant(uuid,text,text,text,text,text,text)'::regprocedure",
+    );
+    assert(r.definer && /is_platform_admin\(\)/.test(r.body), "platform_provision_tenant() must be SECURITY DEFINER and check is_platform_admin()");
+  });
+
+  await check("platform-admins-private", "platform_admins is unreachable for anon, authenticated and storeforge_app (no grants, no policies)", async () => {
+    const [r] = await admin<Record<string, boolean>>(`select
+      has_table_privilege('anon','public.platform_admins','select,insert,update,delete') as anon,
+      has_table_privilege('authenticated','public.platform_admins','select,insert,update,delete') as authenticated,
+      has_table_privilege('storeforge_app','public.platform_admins','select,insert,update,delete') as app,
+      exists (select 1 from pg_policies where schemaname='public' and tablename='platform_admins') as has_policy`);
+    eq(r, { anon: false, authenticated: false, app: false, has_policy: false }, "platform_admins access");
+  });
+
+  await check("tenant-status-columns", "authenticated cannot change tenants.status; owners can deactivate members", async () => {
+    const [r] = await admin<Record<string, boolean>>(`select
+      has_column_privilege('authenticated','public.tenants','status','update') as tenant_status,
+      has_column_privilege('authenticated','public.tenants','contact_phone','update') as tenant_phone,
+      has_column_privilege('authenticated','public.memberships','status','update') as member_status`);
+    eq(r, { tenant_status: false, tenant_phone: false, member_status: true }, "column privileges");
   });
 
   await check("triggers", "updated_at triggers and the auth.users profile trigger exist", async () => {
@@ -296,14 +324,15 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
   const writeChecks: Array<[string, string]> = [
     ["fixtures", "throwaway users are created and get profiles from the auth trigger"],
     ["identity-lifecycle", "user identity is set inside the transaction and cleared after it"],
-    ["onboarding", "onboarding is atomic, idempotent and conflict-safe"],
-    ["onboarding-identity", "onboarding rejects missing, unknown and unprivileged identities"],
+    ["onboarding", "company provisioning is atomic, idempotent and conflict-safe"],
+    ["onboarding-identity", "provisioning rejects missing, unknown and non-admin identities"],
     ["rls-isolation", "merchant A cannot read, modify, delete or write into merchant B"],
     ["catalog-isolation", "merchant A cannot read, edit or reference merchant B's catalog"],
     ["rollback", "a failed transaction leaves no partial rows"],
     ["pool-sequential", "sequential requests as different users never share an identity"],
     ["pool-concurrent", "parallel requests through the pooler stay isolated"],
     ["control", "negative control: a privileged connection sees both tenants, user contexts see only their own"],
+    ["platform-boundaries", "owners have no platform authority; a suspended company is invisible to its members"],
   ];
 
   if (deps.readOnly) {
@@ -313,9 +342,10 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
 
   let a = "";
   let b = "";
+  let p = ""; // throwaway Platform Admin
   try {
     await check("fixtures", writeChecks[0][1], async () => {
-      for (const label of ["a", "b"]) {
+      for (const label of ["a", "b", "p"]) {
         const id = randomUUID();
         users.push(id);
         await admin(`insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -323,16 +353,18 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
           values ('00000000-0000-0000-0000-000000000000', ${lit(id)}, 'authenticated', 'authenticated', ${lit(`dbverify-${tag}-${label}@example.invalid`)},
             '', now(), '{"provider":"email","providers":["email"]}'::jsonb, ${lit(JSON.stringify({ full_name: `DB Verify ${label}` }))}::jsonb, now(), now(), '', '', '', '')`);
       }
-      [a, b] = users;
+      [a, b, p] = users;
+      await admin(`insert into public.platform_admins (user_id) values (${lit(p)})`);
       const profiles = await admin<{ id: string }>(`select id from public.profiles where id in (${users.map(lit).join(",")})`);
-      eq(profiles.length, 2, "profiles created by trigger");
+      eq(profiles.length, 3, "profiles created by trigger");
     });
-    if (users.length !== 2) throw new Error("fixtures unavailable");
+    if (users.length !== 3) throw new Error("fixtures unavailable");
 
-    const onboard = (uid: string, slug: string) =>
-      withUserContext(app, uid, async (tx) =>
+    /** Provision `owner`'s company, acting as `actor` (default: the throwaway Platform Admin). */
+    const onboard = (owner: string, slug: string, actor = p) =>
+      withUserContext(app, actor, async (tx) =>
         rowsOf<{ r: { tenant_id: string; created: boolean } }>(
-          await tx.execute(sql`select public.create_tenant_with_store(${"DB Verify Co"}, ${"DB Verify Store"}, ${slug}, ${null}) as r`),
+          await tx.execute(sql`select public.platform_provision_tenant(${owner}::uuid, ${"DB Verify Co"}, ${"DB Verify Store"}, ${slug}, ${null}, ${null}, ${null}) as r`),
         )[0].r,
       );
     const slugA = `dbverify-${tag}-a`;
@@ -360,23 +392,25 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
 
     await check("onboarding-identity", writeChecks[3][1], async () => {
       const ghost = randomUUID();
-      const m1 = await denied(onboard(ghost, `dbverify-${tag}-ghost`), "a user id that is not in auth.users", /not_authenticated/);
-      assert(/not_authenticated/.test(m1), `ghost user: expected not_authenticated, got: ${m1}`);
+      const m1 = await denied(onboard(ghost, `dbverify-${tag}-ghost`), "an owner id that is not in auth.users", /owner_not_found/);
+      assert(/owner_not_found/.test(m1), `ghost owner: expected owner_not_found, got: ${m1}`);
+      const m0 = await denied(onboard(a, `dbverify-${tag}-selfmade`, a), "a regular user provisioning their own company", /not_platform_admin/);
+      assert(/not_platform_admin/.test(m0), `non-admin: expected not_platform_admin, got: ${m0}`);
       const m2 = await denied(
-        app.transaction((tx) => tx.execute(sql`select public.create_tenant_with_store('X Co','X Store',${`dbverify-${tag}-noctx`},null)`)),
+        app.transaction((tx) => tx.execute(sql`select public.platform_provision_tenant(${a}::uuid,'X Co','X Store',${`dbverify-${tag}-noctx`},null,null,null)`)),
         "calling the function with no user context",
-        /not_authenticated|permission denied/,
+        /not_platform_admin|permission denied/,
       );
       const m3 = await denied(
         app.transaction(async (tx) => {
           await tx.execute(sql`select set_config('request.jwt.claims', ${JSON.stringify({ sub: "" })}, true)`);
           await tx.execute(sql.raw("set local role authenticated"));
-          await tx.execute(sql`select public.create_tenant_with_store('X Co','X Store',${`dbverify-${tag}-empty`},null)`);
+          await tx.execute(sql`select public.platform_provision_tenant(${a}::uuid,'X Co','X Store',${`dbverify-${tag}-empty`},null,null,null)`);
         }),
         "calling the function with an empty identity",
-        /not_authenticated|invalid input syntax/,
+        /not_platform_admin|invalid input syntax/,
       );
-      assert(/not_authenticated|invalid input syntax|permission denied/.test(m2 + m3), `unexpected errors: ${m2} / ${m3}`);
+      assert(/not_platform_admin|invalid input syntax|permission denied/.test(m2 + m3), `unexpected errors: ${m2} / ${m3}`);
       const rows = await admin<{ n: number }>(`select count(*)::int as n from public.stores where slug like ${lit(`dbverify-${tag}-%`)} and slug not in (${lit(slugA)}, ${lit(slugB)})`);
       eq(rows[0].n, 0, "rows created by rejected calls");
     });
@@ -518,6 +552,35 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       eq(r.n, 2, "tenants visible to the privileged connection");
       const got = await visible(a);
       eq(got.ids.length, 1, "tenants visible in A's user context");
+    });
+
+    await check("platform-boundaries", writeChecks[10][1], async () => {
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_tenants(null)`)), "an owner listing all companies", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_set_tenant_status(${tenantA}::uuid, 'suspended')`)), "an owner suspending a company", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`update public.tenants set status = 'active' where id = ${tenantA}`)), "an owner editing tenants.status", /permission denied/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_admins`)), "an owner reading platform_admins", /permission denied/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`insert into public.platform_admins (user_id) values (${a})`)), "an owner making themselves Platform Admin", /permission denied/);
+      await denied(
+        withUserContext(app, a, (tx) => tx.execute(sql`insert into public.memberships (tenant_id, user_id, role) values (${tenantA}, ${p}, 'staff')`)),
+        "an owner adding the Platform Admin to their team",
+        /platform_admin_cannot_be_member/,
+      );
+      const isAdmin = (uid: string) => withUserContext(app, uid, async (tx) => rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.is_platform_admin() as ok`))[0].ok);
+      eq([await isAdmin(p), await isAdmin(a)], [true, false], "is_platform_admin()");
+      const listed = await withUserContext(app, p, async (tx) =>
+        rowsOf<{ id: string }>(await tx.execute(sql`select id from public.platform_list_tenants(null) where id in (${sql.raw(lit(tenantA))}, ${sql.raw(lit(tenantB))})`)).length,
+      );
+      eq(listed, 2, "companies listed to the Platform Admin");
+      // Suspension is enforced by RLS itself, then fully reversible.
+      try {
+        await withUserContext(app, p, (tx) => tx.execute(sql`select public.platform_set_tenant_status(${tenantB}::uuid, 'suspended')`));
+        eq((await visible(b)).ids, [], "tenants visible to a member of a suspended company");
+        const stores = await withUserContext(app, b, async (tx) => rowsOf(await tx.execute(sql`select id from public.stores where tenant_id = ${tenantB}`)).length);
+        eq(stores, 0, "stores visible to a member of a suspended company");
+      } finally {
+        await withUserContext(app, p, (tx) => tx.execute(sql`select public.platform_set_tenant_status(${tenantB}::uuid, 'active')`));
+      }
+      eq((await visible(b)).ids, [tenantB], "tenants visible after reactivation");
     });
   } catch (e) {
     checks.push({ id: "fixtures-abort", title: "fixture setup", status: "fail", detail: chain(e) });

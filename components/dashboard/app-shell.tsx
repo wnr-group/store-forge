@@ -6,8 +6,9 @@ import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ROUTES, SIDEBAR_COOKIE } from "@/config/app";
+import { SIDEBAR_COOKIE } from "@/config/app";
 import { cn } from "@/lib/utils";
+import type { NavKey } from "./nav-config";
 import { SidebarNav } from "./sidebar-nav";
 
 /** Server-rendered slots; each has a full and a compact (icon-only) rendering. */
@@ -16,11 +17,14 @@ type Props = {
   footer: { full: React.ReactNode; compact: React.ReactNode };
   header: React.ReactNode;
   defaultCollapsed?: boolean;
+  /** Which navigation to render, and where the logo links. */
+  navKey: NavKey;
+  homeHref: string;
   children: React.ReactNode;
 };
 
 /** Responsive shell: collapsible sidebar on desktop, drawer below `lg`. Slots are server-rendered. */
-export function AppShell({ switcher, header, footer, defaultCollapsed = false, children }: Props) {
+export function AppShell({ switcher, header, footer, defaultCollapsed = false, navKey, homeHref, children }: Props) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [drawer, setDrawer] = useState(false);
 
@@ -41,11 +45,11 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, c
           )}
         >
           <div className={cn("flex h-14 items-center border-b border-sidebar-border px-3", collapsed && "justify-center px-0")}>
-            {collapsed ? <Logo href={ROUTES.dashboard} className="text-white [&>span:last-child]:hidden" /> : <Logo href={ROUTES.dashboard} className="text-white" />}
+            {collapsed ? <Logo href={homeHref} className="text-white [&>span:last-child]:hidden" /> : <Logo href={homeHref} className="text-white" />}
           </div>
           <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
             {collapsed ? switcher.compact : switcher.full}
-            <SidebarNav collapsed={collapsed} />
+            <SidebarNav navKey={navKey} collapsed={collapsed} />
           </div>
           <div className="border-t border-sidebar-border p-2.5">{collapsed ? footer.compact : footer.full}</div>
           <Button
@@ -65,11 +69,11 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, c
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <SheetDescription className="sr-only">Main dashboard navigation</SheetDescription>
             <div className="flex h-14 items-center border-b border-sidebar-border px-3">
-              <Logo href={ROUTES.dashboard} className="text-white" />
+              <Logo href={homeHref} className="text-white" />
             </div>
             <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
               {switcher.full}
-              <SidebarNav onNavigate={() => setDrawer(false)} />
+              <SidebarNav navKey={navKey} onNavigate={() => setDrawer(false)} />
             </div>
             <div className="border-t border-sidebar-border p-2.5">{footer.full}</div>
           </SheetContent>

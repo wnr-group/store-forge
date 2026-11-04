@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type Props = { title: string; description?: string; actions?: React.ReactNode; className?: string };
+type Props = { title: string; description?: React.ReactNode; actions?: React.ReactNode; className?: string };
 
 export function PageHeader({ title, description, actions, className }: Props) {
   return (

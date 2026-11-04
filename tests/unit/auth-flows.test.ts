@@ -1,13 +1,17 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const auth = {
-  signUp: vi.fn(),
   signInWithPassword: vi.fn(),
   signOut: vi.fn(),
-  resetPasswordForEmail: vi.fn(),
   updateUser: vi.fn(),
+  getUser: vi.fn(),
 };
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth }) }));
+vi.mock("@/lib/auth/session", () => ({
+  getCurrentUser: async () => (await auth.getUser()).data.user,
+}));
 
 const redirect = vi.fn((url: string) => {
   throw Object.assign(new Error("NEXT_REDIRECT"), { url });
@@ -16,15 +20,8 @@ vi.mock("next/navigation", () => ({ redirect: (u: string) => redirect(u) }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: vi.fn(), set: vi.fn(), getAll: () => [] }) }));
 
-import { forgotPasswordAction, loginAction, logoutAction, registerAction, resetPasswordAction } from "@/app/(auth)/actions";
-
-const validRegistration = {
-  fullName: "Jane Doe",
-  email: "jane@example.com",
-  password: "hunter22x",
-  confirmPassword: "hunter22x",
-  acceptTerms: true,
-};
+import * as authActions from "@/app/(auth)/actions";
+import { changePasswordAction, loginAction, logoutAction } from "@/app/(auth)/actions";
 
 const redirected = async (p: Promise<unknown>) => p.then(() => null, (e: { url?: string }) => e.url ?? null);
 
@@ -32,47 +29,35 @@ beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "a".repeat(30));
   vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
-  for (const fn of [...Object.values(auth), redirect]) fn.mockClear();
+  for (const fn of [...Object.values(auth), redirect]) fn.mockReset();
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
-describe("registration", () => {
-  it("sends the user to verify-email when confirmation is required (no session)", async () => {
-    auth.signUp.mockResolvedValue({ data: { user: { identities: [{}] }, session: null }, error: null });
-    const url = await redirected(registerAction(validRegistration));
-    expect(url).toBe("/verify-email?email=jane%40example.com");
-    const arg = auth.signUp.mock.calls[0][0];
-    expect(arg.options.emailRedirectTo).toBe("http://localhost:3000/auth/callback?next=%2Fdashboard");
-    expect(arg.options.data).toEqual({ full_name: "Jane Doe" });
+describe("public registration is disabled", () => {
+  it("exports no sign-up, verification or e-mail recovery action", () => {
+    expect(Object.keys(authActions).sort()).toEqual(["changePasswordAction", "loginAction", "logoutAction"]);
   });
 
-  it("goes straight to the dashboard when a session is returned", async () => {
-    auth.signUp.mockResolvedValue({ data: { user: { identities: [{}] }, session: {} }, error: null });
-    expect(await redirected(registerAction(validRegistration))).toBe("/dashboard");
+  it.each(["register", "verify-email", "forgot-password", "reset-password"])("has no /%s page", (route) => {
+    expect(existsSync(join(process.cwd(), "app", "(auth)", route))).toBe(false);
   });
 
-  it("reports duplicate emails (obfuscated user without identities)", async () => {
-    auth.signUp.mockResolvedValue({ data: { user: { identities: [] }, session: null }, error: null });
-    const res = await registerAction(validRegistration);
-    expect(res).toMatchObject({ ok: false, code: "CONFLICT", fieldErrors: { email: expect.any(String) } });
+  it("has no email-link callback route and no onboarding page", () => {
+    expect(existsSync(join(process.cwd(), "app", "auth", "callback"))).toBe(false);
+    expect(existsSync(join(process.cwd(), "app", "(dashboard)", "onboarding"))).toBe(false);
   });
 
-  it("reports duplicate emails (explicit error)", async () => {
-    auth.signUp.mockResolvedValue({ data: {}, error: { code: "user_already_exists", status: 422, message: "x" } });
-    expect(await registerAction(validRegistration)).toMatchObject({ ok: false, code: "CONFLICT" });
-  });
-
-  it("rejects invalid input on the server without calling Supabase", async () => {
-    const res = await registerAction({ ...validRegistration, confirmPassword: "nope" });
-    expect(res).toMatchObject({ ok: false, code: "VALIDATION" });
-    expect(auth.signUp).not.toHaveBeenCalled();
+  it("the auth service never calls signUp", async () => {
+    const service = await import("@/services/auth.service");
+    expect(Object.keys(service).sort()).toEqual(["changePassword", "signIn", "signOut"]);
   });
 });
 
-describe("login / logout", () => {
-  it("redirects to the dashboard on success", async () => {
+describe("login / logout (provisioned accounts, no email verification step)", () => {
+  it("signs in with email and password and redirects to the dashboard", async () => {
     auth.signInWithPassword.mockResolvedValue({ error: null });
-    expect(await redirected(loginAction({ email: "a@b.co", password: "x" }))).toBe("/dashboard");
+    expect(await redirected(loginAction({ email: "A@B.co", password: "x" }))).toBe("/dashboard");
+    expect(auth.signInWithPassword).toHaveBeenCalledWith({ email: "a@b.co", password: "x" });
   });
 
   it("honours a safe next path but not an external one", async () => {
@@ -91,6 +76,13 @@ describe("login / logout", () => {
     });
   });
 
+  it("does not ask provisioned users to verify an email", async () => {
+    auth.signInWithPassword.mockResolvedValue({ error: { code: "email_not_confirmed", status: 400, message: "x" } });
+    const res = await loginAction({ email: "a@b.co", password: "x" });
+    expect(res).toMatchObject({ ok: false, code: "UNAUTHENTICATED" });
+    expect(JSON.stringify(res)).not.toMatch(/inbox|verify your email/i);
+  });
+
   it("does not leak unexpected backend errors", async () => {
     auth.signInWithPassword.mockResolvedValue({ error: { code: "unexpected_failure", status: 500, message: "db password=secret" } });
     const res = await loginAction({ email: "a@b.co", password: "x" });
@@ -105,37 +97,33 @@ describe("login / logout", () => {
   });
 });
 
-describe("password recovery", () => {
-  it("requests a reset email pointing at the reset page via the callback", async () => {
-    auth.resetPasswordForEmail.mockResolvedValue({ error: null });
-    expect(await forgotPasswordAction({ email: "a@b.co" })).toEqual({ ok: true });
-    expect(auth.resetPasswordForEmail).toHaveBeenCalledWith("a@b.co", {
-      redirectTo: "http://localhost:3000/auth/callback?next=%2Freset-password",
-    });
-  });
+describe("change password (after first sign-in)", () => {
+  const input = { currentPassword: "initial-pass-1", password: "newpass12", confirmPassword: "newpass12" };
 
-  it("answers identically when the email is unknown (no account enumeration)", async () => {
-    auth.resetPasswordForEmail.mockResolvedValue({ error: { status: 400, code: "user_not_found", message: "x" } });
-    expect(await forgotPasswordAction({ email: "ghost@b.co" })).toEqual({ ok: true });
-  });
-
-  it("updates the password then redirects", async () => {
+  it("re-verifies the current password, then updates it", async () => {
+    auth.getUser.mockResolvedValue({ data: { user: { email: "o@acme.com" } } });
+    auth.signInWithPassword.mockResolvedValue({ error: null });
     auth.updateUser.mockResolvedValue({ error: null });
-    const url = await redirected(resetPasswordAction({ password: "newpass12", confirmPassword: "newpass12" }));
-    expect(url).toBe("/dashboard");
+    expect(await changePasswordAction(input)).toEqual({ ok: true });
+    expect(auth.signInWithPassword).toHaveBeenCalledWith({ email: "o@acme.com", password: "initial-pass-1" });
     expect(auth.updateUser).toHaveBeenCalledWith({ password: "newpass12" });
   });
 
-  it("fails clearly when the recovery session is gone", async () => {
-    auth.updateUser.mockResolvedValue({ error: { status: 401, code: "session_not_found", message: "x" } });
-    expect(await resetPasswordAction({ password: "newpass12", confirmPassword: "newpass12" })).toMatchObject({
-      ok: false,
-      code: "UNAUTHENTICATED",
-    });
+  it("refuses a wrong current password without changing anything", async () => {
+    auth.getUser.mockResolvedValue({ data: { user: { email: "o@acme.com" } } });
+    auth.signInWithPassword.mockResolvedValue({ error: { code: "invalid_credentials", status: 400, message: "x" } });
+    expect(await changePasswordAction(input)).toMatchObject({ ok: false, code: "VALIDATION", fieldErrors: { currentPassword: expect.any(String) } });
+    expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("requires a signed-in user", async () => {
+    auth.getUser.mockResolvedValue({ data: { user: null } });
+    expect(await changePasswordAction(input)).toMatchObject({ ok: false, code: "UNAUTHENTICATED" });
+    expect(auth.updateUser).not.toHaveBeenCalled();
   });
 
   it("rejects mismatched passwords before calling Supabase", async () => {
-    expect(await resetPasswordAction({ password: "newpass12", confirmPassword: "other123" })).toMatchObject({ ok: false });
+    expect(await changePasswordAction({ ...input, confirmPassword: "other123" })).toMatchObject({ ok: false, code: "VALIDATION" });
     expect(auth.updateUser).not.toHaveBeenCalled();
   });
 });

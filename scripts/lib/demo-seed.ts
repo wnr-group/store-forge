@@ -23,6 +23,9 @@ export const DEMO_USERS = [
   { id: "d0000000-0000-4000-8000-000000000002", email: "admin@demo.test", name: "Arun Admin", role: "admin" },
   { id: "d0000000-0000-4000-8000-000000000003", email: "staff@demo.test", name: "Sana Staff", role: "staff" },
 ] as const;
+/** The Platform Admin who provisions the demo company (signs in at /login and lands on /admin). */
+export const DEMO_PLATFORM_ADMIN = { id: "d0000000-0000-4000-8000-000000000004", email: "platform@demo.test", name: "Priya Platform" } as const;
+const DEMO_LOGINS = [...DEMO_USERS, DEMO_PLATFORM_ADMIN];
 
 /**
  * Creates the dummy Auth users (same technique as scripts/seed.sql: the hosted project has no
@@ -30,7 +33,7 @@ export const DEMO_USERS = [
  */
 export async function ensureDemoUsers(db: Db): Promise<void> {
   await db.execute(sql.raw("create extension if not exists pgcrypto with schema extensions"));
-  for (const u of DEMO_USERS) {
+  for (const u of DEMO_LOGINS) {
     await db.execute(sql`
       insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
         raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
@@ -80,12 +83,13 @@ export async function seedDemoData(db: Db, userId: string, now = new Date(), tea
   return db.transaction(async (tx) => {
     const t = tx as unknown as Db;
 
-    // 1. Onboard as the demo user (RLS-aware SECURITY DEFINER function), then drop back to the owner role.
-    const claims = JSON.stringify({ sub: userId, role: "authenticated" });
-    await t.execute(sql`select set_config('request.jwt.claims', ${claims}, true), set_config('request.jwt.claim.sub', ${userId}, true)`);
+    // 1. Provision the company as the demo Platform Admin (the only way tenants are created), then drop back to the owner role.
+    await t.execute(sql`insert into public.platform_admins (user_id) values (${DEMO_PLATFORM_ADMIN.id}::uuid) on conflict do nothing`);
+    const claims = JSON.stringify({ sub: DEMO_PLATFORM_ADMIN.id, role: "authenticated" });
+    await t.execute(sql`select set_config('request.jwt.claims', ${claims}, true), set_config('request.jwt.claim.sub', ${DEMO_PLATFORM_ADMIN.id}, true)`);
     await t.execute(sql.raw("set local role authenticated"));
     const [onboard] = rowsOf<{ r: { tenant_id: string; created: boolean } | string }>(
-      await t.execute(sql`select public.create_tenant_with_store(${DEMO_TENANT_NAME}, ${DEMO_STORE.name}, ${DEMO_STORE.slug}, ${DEMO_STORE.description}) as r`),
+      await t.execute(sql`select public.platform_provision_tenant(${userId}::uuid, ${DEMO_TENANT_NAME}, ${DEMO_STORE.name}, ${DEMO_STORE.slug}, ${DEMO_STORE.description}) as r`),
     );
     await t.execute(sql.raw("reset role"));
     const result = typeof onboard.r === "string" ? (JSON.parse(onboard.r) as { tenant_id: string; created: boolean }) : onboard.r;

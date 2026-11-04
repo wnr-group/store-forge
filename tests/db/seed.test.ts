@@ -17,7 +17,8 @@ afterAll(async () => db.close());
 
 describe("development seed", () => {
   it("creates users, profiles (via trigger), tenants, memberships and stores", async () => {
-    expect((await db.query("select 1 from profiles")).rows).toHaveLength(3);
+    expect((await db.query("select 1 from profiles")).rows).toHaveLength(4);
+    expect((await db.query("select 1 from platform_admins")).rows).toHaveLength(1);
     expect((await db.query("select 1 from stores")).rows).toHaveLength(2);
     expect((await db.query("select 1 from memberships")).rows).toHaveLength(3);
   });

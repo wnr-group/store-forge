@@ -78,19 +78,41 @@ export async function asUser<T>(db: PGlite, userId: string | null, fn: () => Pro
   }
 }
 
+/** Inserts a Platform Admin the way `npm run admin:create` does: privileged write, never through the API. */
+export async function createPlatformAdmin(db: PGlite, email = "platform.admin@example.test"): Promise<string> {
+  const existing = await db.query<{ id: string }>("select id from auth.users where email = $1", [email]);
+  const id = existing.rows[0]?.id ?? (await createUser(db, email, "Platform Admin"));
+  await db.query("insert into platform_admins (user_id) values ($1) on conflict do nothing", [id]);
+  return id;
+}
+
+export type Provisioned = { tenant_id: string; store_id: string; store_slug: string; created: boolean };
+
+/** Provision `ownerId`'s company as the Platform Admin (the only way tenants are created). */
+export async function provision(
+  db: PGlite,
+  adminId: string,
+  ownerId: string,
+  storeSlug: string,
+  names: { tenant?: string; store?: string } = {},
+) {
+  return asUser(db, adminId, async () => {
+    const res = await db.query<{ r: Provisioned }>(
+      "select public.platform_provision_tenant($1, $2, $3, $4) as r",
+      [ownerId, names.tenant ?? `${storeSlug} Inc`, names.store ?? `${storeSlug} Store`, storeSlug],
+    );
+    return res.rows[0].r;
+  });
+}
+
+/** Shorthand used by most suites: creates a company owned by `userId` (via a harness-created Platform Admin). */
 export async function onboard(
   db: PGlite,
   userId: string,
   storeSlug: string,
   names: { tenant?: string; store?: string } = {},
 ) {
-  return asUser(db, userId, async () => {
-    const res = await db.query<{ r: { tenant_id: string; store_id: string; created: boolean } }>(
-      "select public.create_tenant_with_store($1, $2, $3, null) as r",
-      [names.tenant ?? `${storeSlug} Inc`, names.store ?? `${storeSlug} Store`, storeSlug],
-    );
-    return res.rows[0].r;
-  });
+  return provision(db, await createPlatformAdmin(db), userId, storeSlug, names);
 }
 
 /**

@@ -1,33 +1,31 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Info } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ROUTES } from "@/config/app";
+import { notFound } from "next/navigation";
+import { getRequestStoreSlug } from "@/lib/tenant/request";
 import { safeNextPath } from "@/lib/utils/redirect";
+import { getPublicStorefront } from "@/services/storefront.service";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; error?: string }> }) {
   const { next, error } = await searchParams;
+  // <store>.<root>/login: only for a store that exists and is live (unknown / suspended -> 404).
+  const slug = await getRequestStoreSlug();
+  const store = slug ? await getPublicStorefront(slug) : null;
+  if (slug && !store) notFound();
   return (
     <AuthShell
-      title="Welcome back"
-      description="Sign in to manage your store."
-      footer={
-        <>
-          New to StoreForge?{" "}
-          <Link href={ROUTES.register} className="font-medium text-foreground hover:underline">
-            Create an account
-          </Link>
-        </>
-      }
+      title={store ? `Sign in to ${store.name}` : "Welcome back"}
+      description="Sign in with the email and password you were given."
+      footer="Accounts are created for you by your StoreForge administrator or company owner. Forgot your password? Ask them to reset it."
     >
       {error === "callback" ? (
         <Alert variant="destructive">
           <Info aria-hidden />
-          <AlertDescription>That link is invalid or has expired. Please sign in or request a new one.</AlertDescription>
+          <AlertDescription>Your session could not be verified. Please sign in again.</AlertDescription>
         </Alert>
       ) : null}
       <LoginForm next={next ? safeNextPath(next) : undefined} />

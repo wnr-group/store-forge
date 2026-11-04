@@ -9,6 +9,7 @@ const h = vi.hoisted(() => ({
   user: null as { id: string } | null,
   orm: null as unknown,
   cookie: undefined as string | undefined,
+  storeSlug: null as string | null,
   cookieSets: [] as Array<[string, string]>,
 }));
 
@@ -27,6 +28,7 @@ vi.mock("next/headers", () => ({
     get: () => (h.cookie ? { value: h.cookie } : undefined),
     set: (name: string, value: string) => void h.cookieSets.push([name, value]),
   }),
+  headers: async () => ({ get: (name: string) => (name === "x-sf-store" ? h.storeSlug : null) }),
 }));
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => {
@@ -35,7 +37,7 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
-import { checkSlugAction, createWorkspaceAction, switchTenantAction } from "@/app/(dashboard)/actions";
+import { switchTenantAction } from "@/app/(dashboard)/actions";
 import { dbSchema, type Database } from "@/lib/db";
 import { memberships, stores, tenants } from "@/lib/db/schema";
 import { withAuthenticatedDb } from "@/lib/db/tenant-db";
@@ -211,8 +213,8 @@ describe("database RLS still protects even if application checks are bypassed", 
 });
 
 describe("requireWorkspace", () => {
-  it("redirects to onboarding when the user has no tenant", async () => {
-    expect(await as(carol, () => code(requireWorkspace()))).toMatch(/NEXT_REDIRECT.*\/onboarding/);
+  it("redirects to the no-workspace page when the user has no active tenant", async () => {
+    expect(await as(carol, () => code(requireWorkspace()))).toMatch(/NEXT_REDIRECT.*\/no-workspace/);
   });
 
   it("redirects to login when signed out", async () => {
@@ -248,51 +250,30 @@ describe("switchTenantAction", () => {
   });
 });
 
-describe("createWorkspaceAction (onboarding end to end)", () => {
-  const input = { businessName: "Carol Trading", storeName: "Carol Store", storeSlug: "carol-store", description: "Hello" };
-  const tenantCount = async () => (await pg.query("select count(*)::int n from tenants where created_by = $1", [carol])).rows[0] as { n: number };
+describe("store subdomain host (x-sf-store) selects the workspace", () => {
+  const onHost = async <T>(slug: string, user: string | null, fn: () => Promise<T>, cookie?: string) => {
+    h.storeSlug = slug;
+    try {
+      return await as(user, fn, cookie);
+    } finally {
+      h.storeSlug = null;
+    }
+  };
 
-  it("creates tenant, owner membership and store, sets the active tenant and redirects", async () => {
-    expect(await as(carol, () => code(createWorkspaceAction(input)))).toMatch(/NEXT_REDIRECT.*\/dashboard/);
-    expect(h.cookieSets).toHaveLength(1);
-    const [m] = (await pg.query<{ role: string; slug: string }>(
-      "select m.role, s.slug from memberships m join stores s on s.tenant_id = m.tenant_id where m.user_id = $1",
-      [carol],
-    )).rows;
-    expect(m).toEqual({ role: "owner", slug: "carol-store" });
+  it("a member gets the workspace that owns the host's store, whatever the cookie says", async () => {
+    // dave: owner of delta-shop (D) and staff in alpha-shop (A)
+    expect((await onHost("alpha-shop", dave, getActiveTenant, tenantD))?.tenant.id).toBe(tenantA);
+    expect((await onHost("delta-shop", dave, getActiveTenant, tenantA))?.tenant.id).toBe(tenantD);
   });
 
-  it("a repeated submission does not create a second tenant", async () => {
-    expect(await as(carol, () => code(createWorkspaceAction(input)))).toMatch(/NEXT_REDIRECT/);
-    expect(await tenantCount()).toEqual({ n: 1 });
+  it("a user who is not a member of that store's company gets no workspace (and so cannot reach its dashboard)", async () => {
+    expect(await onHost("beta-shop", alice, getActiveTenant)).toBeNull(); // alice owns A, not B
+    expect(await onHost("beta-shop", alice, getActiveTenant, tenantA)).toBeNull();
+    expect(await onHost("no-such-store", alice, getActiveTenant)).toBeNull();
+    expect(await onHost("beta-shop", alice, () => code(requireWorkspace()))).toMatch(/NEXT_REDIRECT.*\/no-workspace/);
   });
 
-  it("reports a taken store address as a field error", async () => {
-    const res = await as(bob, () => createWorkspaceAction({ ...input, storeSlug: "carol-store" }));
-    expect(res).toMatchObject({ ok: false, code: "CONFLICT", fieldErrors: { storeSlug: expect.any(String) } });
-  });
-
-  it("validates input on the server before touching the database", async () => {
-    const res = await as(carol, () => createWorkspaceAction({ ...input, storeSlug: "Admin" }));
-    expect(res).toMatchObject({ ok: false, code: "VALIDATION" });
-  });
-
-  it("reports an expired session instead of redirecting", async () => {
-    expect(await as(null, () => createWorkspaceAction({ ...input, storeSlug: "ghost-store" }))).toMatchObject({
-      ok: false,
-      code: "UNAUTHENTICATED",
-    });
-  });
-});
-
-describe("checkSlugAction", () => {
-  it("reports free, taken and invalid slugs", async () => {
-    expect(await as(carol, () => checkSlugAction("brand-new-shop"))).toEqual({ available: true });
-    expect(await as(carol, () => checkSlugAction("beta-shop"))).toEqual({ available: false });
-    expect(await as(carol, () => checkSlugAction("Bad Slug"))).toMatchObject({ available: false, reason: expect.any(String) });
-  });
-
-  it("does not reveal availability to signed-out callers", async () => {
-    expect(await as(null, () => checkSlugAction("brand-new-shop"))).toMatchObject({ available: false });
+  it("without a store host the normal membership/cookie rules still apply", async () => {
+    expect((await as(dave, getActiveTenant, tenantA))?.tenant.id).toBe(tenantA);
   });
 });

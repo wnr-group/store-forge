@@ -19,7 +19,8 @@ const PERMISSIONS = {
   "store:delete": ["owner"],
   "tenant:manage": ["owner", "admin"],
   "tenant:delete": ["owner"],
-  "members:manage": ["owner", "admin"],
+  // Creating accounts is Owner-only: it needs the privileged Admin Auth API and must stay inside the Owner's own tenant.
+  "members:manage": ["owner"],
   // Catalog, stock and customers: everyone can create/edit; only owner/admin can delete.
   "catalog:manage": ["owner", "admin", "staff"],
   "catalog:delete": ["owner", "admin"],
@@ -42,11 +43,17 @@ export const canManageCustomers = (role: Role) => can(role, "customers:manage");
 export const canDeleteCustomers = (role: Role) => can(role, "customers:delete");
 export const canManageMembers = (role: Role) => can(role, "members:manage");
 
-/** Which roles `actor` may assign to others. 'owner' is never assignable. */
-export function assignableRoles(actor: Role): Role[] {
-  if (actor === "owner") return ["admin", "staff"];
-  if (actor === "admin") return ["staff"];
-  return [];
+/** Team roles an Owner may assign. 'owner' is never assignable; Platform Admin is not a tenant role at all. */
+export const ASSIGNABLE_ROLES = ["admin", "staff"] as const satisfies readonly Role[];
+export type AssignableRole = (typeof ASSIGNABLE_ROLES)[number];
+
+/** Which roles `actor` may assign to others. */
+export function assignableRoles(actor: Role): AssignableRole[] {
+  return actor === "owner" ? [...ASSIGNABLE_ROLES] : [];
 }
 
-export const ROLE_LABELS: Record<Role, string> = { owner: "Owner", admin: "Admin", staff: "Staff" };
+/**
+ * The middle role is stored as `admin` (RLS policies reference it) but shown as "Manager"
+ * so it is never confused with the StoreForge Platform Admin.
+ */
+export const ROLE_LABELS: Record<Role, string> = { owner: "Owner", admin: "Manager", staff: "Staff" };

@@ -4,11 +4,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ACTIVE_TENANT_COOKIE, ROUTES } from "@/config/app";
 import { can, type Permission, type Role } from "@/lib/auth/permissions";
+import { isPlatformAdmin } from "@/lib/auth/platform";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { withAuthenticatedDb, type DbTx } from "@/lib/db/tenant-db";
 import { AppError } from "@/lib/errors";
+import { getRequestStoreSlug } from "@/lib/tenant/request";
 import { resolveActiveTenant } from "@/lib/tenant/resolve";
-import { getPrimaryStore } from "@/services/store.service";
+import { getPrimaryStore, getTenantIdForStoreSlug } from "@/services/store.service";
 import { listMembershipsForUser, type TenantMembership } from "@/services/tenant.service";
 
 /**
@@ -35,6 +37,14 @@ export const getUserTenants = cache(async (): Promise<TenantMembership[]> => {
 export const getActiveTenant = cache(async (): Promise<TenantMembership | null> => {
   const memberships = await getUserTenants();
   if (memberships.length === 0) return null;
+  // On <store>.<root domain> the host (set by the proxy, never by the client) names the workspace.
+  // The user must be a member of THAT store's tenant; the cookie preference is ignored, and a user
+  // from another company gets no workspace here rather than silently landing in their own.
+  const storeSlug = await getRequestStoreSlug();
+  if (storeSlug) {
+    const tenantId = await getTenantIdForStoreSlug(storeSlug);
+    return memberships.find((m) => m.tenant.id === tenantId) ?? null;
+  }
   const preferred = (await cookies()).get(ACTIVE_TENANT_COOKIE)?.value;
   return resolveActiveTenant(memberships, preferred);
 });
@@ -58,12 +68,13 @@ export async function requireTenantRole(tenantId: string, permission: Permission
 
 /**
  * For protected pages: signed-in user + active tenant + its primary store,
- * or a redirect (login / onboarding).
+ * or a redirect (login / admin area / no-workspace notice).
  */
 export const requireWorkspace = cache(async () => {
   const user = await requireUser();
   const active = await getActiveTenant();
-  if (!active) redirect(ROUTES.onboarding);
+  // No (active) workspace: Platform Admins belong in the admin area; everyone else cannot self-onboard.
+  if (!active) redirect((await isPlatformAdmin()) ? ROUTES.admin : ROUTES.noWorkspace);
   const [store, tenants] = await Promise.all([getPrimaryStore(active.tenant.id), getUserTenants()]);
   return { user, active, store, tenants };
 });
@@ -75,7 +86,7 @@ export const requireWorkspace = cache(async () => {
  */
 export async function requireActiveTenant(permission?: Permission): Promise<TenantMembership> {
   const membership = await getActiveTenant();
-  if (!membership) throw new AppError("NOT_FOUND", "No workspace found. Complete onboarding first.");
+  if (!membership) throw new AppError("NOT_FOUND", "No active workspace. Please contact your administrator.");
   if (permission) await requireTenantRole(membership.tenant.id, permission);
   return membership;
 }
@@ -103,7 +114,7 @@ export async function withTenantDb<T>(
       : await requireTenantAccess(options.tenantId);
   } else {
     membership = await getActiveTenant();
-    if (!membership) throw new AppError("NOT_FOUND", "No workspace found. Complete onboarding first.");
+    if (!membership) throw new AppError("NOT_FOUND", "No active workspace. Please contact your administrator.");
     if (options.permission) await requireTenantRole(membership.tenant.id, options.permission);
   }
   const { tenant, role } = membership;

@@ -1,18 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { assignableRoles, can, canManageMembers, canManageStore, canManageTenant, canViewDashboard, isRole } from "@/lib/auth/permissions";
+import { assignableRoles, can, canManageMembers, canManageStore, canManageTenant, canViewDashboard, isRole, ROLE_LABELS } from "@/lib/auth/permissions";
 import { resolveActiveTenant } from "@/lib/tenant/resolve";
 import { safeNextPath } from "@/lib/utils/redirect";
 import { slugify } from "@/lib/utils/slug";
-import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from "@/lib/validations/auth";
-import { onboardingSchema } from "@/lib/validations/onboarding";
+import { changePasswordSchema, loginSchema, resetPasswordSchema } from "@/lib/validations/auth";
+import { createCompanySchema } from "@/lib/validations/company";
+import { createMemberSchema, updateMemberSchema } from "@/lib/validations/team";
 
 describe("RBAC", () => {
-  it("owner and admin manage; staff only views", () => {
+  it("owner and admin (Manager) manage the store; staff only views; only the owner manages members", () => {
     for (const role of ["owner", "admin"] as const) {
       expect(canManageStore(role)).toBe(true);
       expect(canManageTenant(role)).toBe(true);
-      expect(canManageMembers(role)).toBe(true);
     }
+    expect(canManageMembers("owner")).toBe(true);
+    expect(canManageMembers("admin")).toBe(false);
     expect(canViewDashboard("staff")).toBe(true);
     expect(canManageStore("staff")).toBe(false);
     expect(canManageTenant("staff")).toBe(false);
@@ -25,10 +27,11 @@ describe("RBAC", () => {
     expect(can("admin", "tenant:delete")).toBe(false);
   });
 
-  it("owner role is never assignable; admins can only assign staff", () => {
+  it("only the owner can assign roles, and never owner; the middle role is labelled Manager", () => {
     expect(assignableRoles("owner")).toEqual(["admin", "staff"]);
-    expect(assignableRoles("admin")).toEqual(["staff"]);
+    expect(assignableRoles("admin")).toEqual([]);
     expect(assignableRoles("staff")).toEqual([]);
+    expect(ROLE_LABELS.admin).toBe("Manager");
   });
 
   it("rejects unknown role strings", () => {
@@ -78,47 +81,71 @@ describe("slugify", () => {
 });
 
 describe("auth validation", () => {
-  const valid = { fullName: "Jane Doe", email: " Jane@Example.COM ", password: "hunter22x", confirmPassword: "hunter22x", acceptTerms: true };
-
-  it("accepts a valid registration and normalises email", () => {
-    const r = registerSchema.safeParse(valid);
+  it("validates the login payload and normalises the email", () => {
+    expect(loginSchema.safeParse({ email: "nope", password: "x" }).success).toBe(false);
+    const r = loginSchema.safeParse({ email: " Jane@Example.COM ", password: "x" });
     expect(r.success && r.data.email).toBe("jane@example.com");
   });
 
-  it("rejects mismatched passwords", () => {
-    const r = registerSchema.safeParse({ ...valid, confirmPassword: "different1" });
-    expect(r.success).toBe(false);
-    expect(!r.success && r.error.issues[0].path).toEqual(["confirmPassword"]);
-  });
-
   it.each(["short1", "allletters", "12345678"])("rejects weak password %s", (password) => {
-    expect(registerSchema.safeParse({ ...valid, password, confirmPassword: password }).success).toBe(false);
+    expect(resetPasswordSchema.safeParse({ password }).success).toBe(false);
   });
 
-  it("requires terms acceptance", () => {
-    expect(registerSchema.safeParse({ ...valid, acceptTerms: false }).success).toBe(false);
-  });
-
-  it("validates login, forgot and reset payloads", () => {
-    expect(loginSchema.safeParse({ email: "nope", password: "x" }).success).toBe(false);
-    expect(forgotPasswordSchema.safeParse({ email: "a@b.co" }).success).toBe(true);
-    expect(resetPasswordSchema.safeParse({ password: "abcdefg1", confirmPassword: "abcdefg2" }).success).toBe(false);
+  it("change password: confirmation must match and the new password must differ", () => {
+    const ok = { currentPassword: "oldpass12", password: "newpass12", confirmPassword: "newpass12" };
+    expect(changePasswordSchema.safeParse(ok).success).toBe(true);
+    expect(changePasswordSchema.safeParse({ ...ok, confirmPassword: "other123" }).success).toBe(false);
+    expect(changePasswordSchema.safeParse({ ...ok, password: "oldpass12", confirmPassword: "oldpass12" }).success).toBe(false);
   });
 });
 
-describe("onboarding validation", () => {
-  const base = { businessName: "Acme", storeName: "Acme Store", storeSlug: "acme-store" };
+describe("company provisioning validation", () => {
+  const base = {
+    companyName: "Acme Trading", storeName: "Acme Store", storeSlug: "acme-store",
+    ownerName: "Olivia Owner", ownerEmail: " Owner@Acme.COM ", ownerPassword: "initial-pass-1",
+  };
 
-  it("accepts valid input and lowercases the slug", () => {
-    const r = onboardingSchema.safeParse({ ...base, storeSlug: " Acme-Store " });
-    expect(r.success && r.data.storeSlug).toBe("acme-store");
+  it("accepts valid input, normalises the email and the slug, and nulls empty optionals", () => {
+    const r = createCompanySchema.safeParse({ ...base, storeSlug: " Acme-Store ", contactPhone: "", address: "" });
+    expect(r.success && r.data).toMatchObject({ ownerEmail: "owner@acme.com", storeSlug: "acme-store", contactPhone: null, address: null });
   });
 
   it.each(["ab", "-acme", "acme-", "ac me", "acme--store", "admin", "www", "a_b_c"])("rejects slug %s", (storeSlug) => {
-    expect(onboardingSchema.safeParse({ ...base, storeSlug }).success).toBe(false);
+    expect(createCompanySchema.safeParse({ ...base, storeSlug }).success).toBe(false);
+  });
+
+  it("requires owner details and a policy-compliant password", () => {
+    for (const missing of ["companyName", "storeName", "ownerName", "ownerEmail", "ownerPassword"] as const) {
+      expect(createCompanySchema.safeParse({ ...base, [missing]: "" }).success, missing).toBe(false);
+    }
+    expect(createCompanySchema.safeParse({ ...base, ownerPassword: "nodigitshere" }).success).toBe(false);
   });
 
   it("rejects over-long descriptions", () => {
-    expect(onboardingSchema.safeParse({ ...base, description: "x".repeat(501) }).success).toBe(false);
+    expect(createCompanySchema.safeParse({ ...base, storeDescription: "x".repeat(501) }).success).toBe(false);
+  });
+
+  it("ignores any role or tenant the browser tries to smuggle in", () => {
+    const r = createCompanySchema.safeParse({ ...base, role: "platform_admin", tenantId: "x", ownerId: "y" });
+    expect(r.success && Object.keys(r.data)).not.toEqual(expect.arrayContaining(["role", "tenantId", "ownerId"]));
+  });
+});
+
+describe("team member validation", () => {
+  const base = { fullName: "Sana Staff", email: "Sana@Acme.com", password: "initial-pass-1", role: "staff" };
+
+  it("accepts manager (stored as admin) and staff only", () => {
+    expect(createMemberSchema.safeParse(base).success).toBe(true);
+    expect(createMemberSchema.safeParse({ ...base, role: "admin" }).success).toBe(true);
+  });
+
+  it.each(["owner", "platform_admin", "superuser", "", undefined])("rejects privileged or unknown role %s", (role) => {
+    expect(createMemberSchema.safeParse({ ...base, role }).success).toBe(false);
+    expect(updateMemberSchema.safeParse({ userId: "3f2b1c9e-8a4d-4c1e-9f6a-2b7d5e8c1a40", fullName: "Sana Staff", role }).success).toBe(false);
+  });
+
+  it("does not accept a tenant id from the browser", () => {
+    const r = createMemberSchema.safeParse({ ...base, tenantId: "3f2b1c9e-8a4d-4c1e-9f6a-2b7d5e8c1a40" });
+    expect(r.success && "tenantId" in r.data).toBe(false);
   });
 });

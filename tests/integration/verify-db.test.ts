@@ -121,9 +121,33 @@ describe("db:verify FAILS on unsafe databases (the verifier is not vacuous)", ()
       expectFail: ["policies", "table-grants", "rls-isolation"],
     },
     {
-      name: "anon may execute the onboarding function",
-      mutate: async (pg) => void (await pg.exec("grant execute on function public.create_tenant_with_store(text,text,text,text) to anon")),
+      name: "anon may execute the platform provisioning function",
+      mutate: async (pg) => void (await pg.exec("grant execute on function public.platform_provision_tenant(uuid,text,text,text,text,text,text) to anon")),
       expectFail: ["function-grants"],
+    },
+    {
+      name: "the old self-service create_tenant_with_store() is back",
+      mutate: async (pg) =>
+        void (await pg.exec(
+          "create function public.create_tenant_with_store(a text, b text, c text, d text) returns jsonb language sql as $$ select '{}'::jsonb $$",
+        )),
+      expectFail: ["no-self-service-onboarding"],
+    },
+    {
+      name: "authenticated can read and write platform_admins (self-promotion)",
+      mutate: async (pg) => void (await pg.exec("grant select, insert on public.platform_admins to authenticated")),
+      expectFail: ["platform-admins-private", "platform-boundaries"],
+    },
+    {
+      name: "tenant owners may edit tenants.status (they could un-suspend themselves)",
+      mutate: async (pg) => void (await pg.exec("grant update (status) on public.tenants to authenticated")),
+      expectFail: ["tenant-status-columns", "platform-boundaries"],
+    },
+    {
+      name: "the Platform Admin check was weakened to always return true",
+      mutate: async (pg) =>
+        void (await pg.exec("create or replace function public.is_platform_admin() returns boolean language sql stable security definer set search_path = '' as $$ select true $$")),
+      expectFail: ["platform-boundaries"],
     },
     {
       name: "a SECURITY DEFINER helper has no pinned search_path",

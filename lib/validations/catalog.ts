@@ -13,7 +13,7 @@ import {
   requiredText,
   wholeNumber,
 } from "./fields";
-import { storeSlugSchema } from "./onboarding";
+import { storeSlugSchema } from "./company";
 
 /** Browser-supplied values are validated again on the server; nothing here is trusted. */
 

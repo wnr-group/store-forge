@@ -49,10 +49,6 @@ export async function updateSession(request: NextRequest) {
     return redirectTo(`${ROUTES.login}${next ? `?next=${encodeURIComponent(next)}` : ""}`);
   }
 
-  if (!isSignedIn && matches(pathname, ROUTES.resetPassword)) {
-    return redirectTo(`${ROUTES.forgotPassword}?error=expired`);
-  }
-
   if (isSignedIn && GUEST_ONLY_ROUTES.some((r) => matches(pathname, r))) {
     return redirectTo(ROUTES.dashboard);
   }

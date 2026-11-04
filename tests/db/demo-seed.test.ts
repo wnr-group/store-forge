@@ -88,8 +88,10 @@ describe("demo seed", () => {
 });
 
 describe("demo team", () => {
-  it("creates three users with profiles and owner/admin/staff memberships, once", async () => {
-    expect((await pg.query("select 1 from auth.users where email like '%@demo.test'")).rows).toHaveLength(3);
+  it("creates the team plus a Platform Admin, with owner/admin/staff memberships (admin has none), once", async () => {
+    expect((await pg.query("select 1 from auth.users where email like '%@demo.test'")).rows).toHaveLength(4);
+    expect((await pg.query("select email from platform_admins a join auth.users u on u.id = a.user_id where u.email like '%@demo.test'")).rows).toEqual([{ email: "platform@demo.test" }]);
+    expect((await pg.query("select 1 from memberships m join platform_admins a on a.user_id = m.user_id")).rows).toHaveLength(0);
     const roles = (await pg.query<{ email: string; role: string }>("select u.email, m.role from memberships m join auth.users u on u.id = m.user_id where m.tenant_id = $1 order by 2", [first.tenantId])).rows;
     expect(roles.map((r) => r.role)).toEqual(["admin", "owner", "staff"]);
     const seen = await asUser(pg, DEMO_USERS[2].id, async () => (await pg.query("select 1 from customers")).rows.length);

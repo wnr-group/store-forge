@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { asAppConnection, asUser, createDb, createUser } from "./harness";
+import { asAppConnection, asUser, createDb, createPlatformAdmin, createUser, onboard, provision } from "./harness";
 
 let db: PGlite;
 const rows = async <T = Record<string, unknown>>(sql: string, params: unknown[] = []) =>
@@ -94,9 +94,7 @@ describe("storeforge_app login role", () => {
   it("gets RLS-filtered data only after the transaction-local context is set", async () => {
     const owner = await createUser(db, "owner@example.test");
     const other = await createUser(db, "other@example.test");
-    await asUser(db, owner, () =>
-      db.query("select public.create_tenant_with_store('Owner Co','Owner Store','owner-store')"),
-    );
+    await onboard(db, owner, "owner-store");
 
     await asAppConnection(db, async () => {
       const visible = async (uid: string) => {
@@ -119,7 +117,7 @@ describe("storeforge_app login role", () => {
 
 describe("function and table grants", () => {
   const FN = {
-    create: "public.create_tenant_with_store(text,text,text,text)",
+    create: "public.platform_provision_tenant(uuid,text,text,text,text,text,text)",
     available: "public.is_store_slug_available(text)",
     member: "public.is_tenant_member(uuid)",
     role: "public.has_tenant_role(uuid,text[])",
@@ -154,35 +152,53 @@ describe("function and table grants", () => {
   });
 });
 
-describe("create_tenant_with_store() validates identity", () => {
-  const call = (slug: string) =>
-    db.query("select public.create_tenant_with_store('Biz Co', 'Biz Store', $1)", [slug]);
+describe("platform_provision_tenant() is Platform-Admin only", () => {
+  const call = (owner: string, slug: string) =>
+    db.query("select public.platform_provision_tenant($1, 'Biz Co', 'Biz Store', $2)", [owner, slug]);
   const countTenants = async () => (await rows<{ n: number }>("select count(*)::int n from tenants"))[0].n;
 
-  it("takes no user-id argument - identity can only come from the request context", async () => {
-    const [{ args }] = await rows<{ args: string }>(
-      "select pg_get_function_arguments('public.create_tenant_with_store(text,text,text,text)'::regprocedure) as args",
-    );
-    expect(args).not.toMatch(/uuid|user/i);
+  it("the old self-service onboarding function no longer exists", async () => {
+    const found = await rows("select 1 from pg_proc where proname = 'create_tenant_with_store'");
+    expect(found).toHaveLength(0);
   });
 
   it("rejects calls with no identity", async () => {
+    const owner = await createUser(db, "pp-owner1@example.test");
     const before = await countTenants();
     await db.query("select set_config('request.jwt.claims', '', false)");
-    await expect(call("no-identity")).rejects.toThrow(/not_authenticated/);
+    await db.exec("set role authenticated");
+    try {
+      await expect(call(owner, "no-identity")).rejects.toThrow(/not_platform_admin/);
+    } finally {
+      await db.exec("reset role");
+    }
     expect(await countTenants()).toBe(before);
   });
 
-  it("rejects an identity that is not a real auth user", async () => {
+  it("rejects an ordinary signed-in user, even when naming themselves as the owner", async () => {
+    const user = await createUser(db, "pp-user@example.test");
     const before = await countTenants();
-    await expect(
-      asUser(db, "99999999-9999-9999-9999-999999999999", () => call("ghost-user")),
-    ).rejects.toThrow(/not_authenticated/);
+    await expect(asUser(db, user, () => call(user, "self-service"))).rejects.toThrow(/not_platform_admin/);
+    expect(await countTenants()).toBe(before);
+  });
+
+  it("rejects a tenant owner (tenant roles carry no platform authority)", async () => {
+    const owner = await createUser(db, "pp-owner2@example.test");
+    await onboard(db, owner, "pp-owner-shop");
+    const other = await createUser(db, "pp-other@example.test");
+    await expect(asUser(db, owner, () => call(other, "owner-made"))).rejects.toThrow(/not_platform_admin/);
+  });
+
+  it("rejects an owner id that is not a real auth user", async () => {
+    const admin = await createPlatformAdmin(db);
+    const before = await countTenants();
+    await expect(provision(db, admin, "99999999-9999-9999-9999-999999999999", "ghost-user")).rejects.toThrow(/owner_not_found/);
     expect(await countTenants()).toBe(before);
   });
 
   it("rejects anon at the privilege level", async () => {
-    await expect(asUser(db, null, () => call("anon-call"))).rejects.toThrow(/permission denied/);
+    const owner = await createUser(db, "pp-owner3@example.test");
+    await expect(asUser(db, null, () => call(owner, "anon-call"))).rejects.toThrow(/permission denied/);
   });
 
   it("slug availability check also requires an identity", async () => {

@@ -31,7 +31,7 @@ afterAll(async () => {
   await db.close();
 });
 
-describe("onboarding RPC", () => {
+describe("platform provisioning RPC", () => {
   it("creates tenant, owner membership and store", async () => {
     const [m] = await q<{ role: string }>("select role from memberships where tenant_id=$1 and user_id=$2", [tenantA, alice]);
     expect(m.role).toBe("owner");
@@ -58,8 +58,15 @@ describe("onboarding RPC", () => {
 
   it("rejects unauthenticated callers", async () => {
     await expect(
-      asUser(db, null, () => db.query("select public.create_tenant_with_store('Biz','Store','anon-shop')")),
+      asUser(db, null, () => db.query("select public.platform_provision_tenant($1,'Biz','Store','anon-shop')", [carol])),
     ).rejects.toThrow();
+  });
+
+  it("rejects a regular (non-admin) signed-in user, so there is no self-service tenant creation", async () => {
+    await expect(
+      asUser(db, carol, () => db.query("select public.platform_provision_tenant($1,'Biz','Store','self-made')", [carol])),
+    ).rejects.toThrow(/not_platform_admin/);
+    expect(await q("select 1 from tenants where slug = 'self-made'")).toHaveLength(0);
   });
 
   it("rolls back everything if a later step fails", async () => {

@@ -18,12 +18,12 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const titleCase = (s: string) => s.replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 
 /** Breadcrumb trail derived from the URL: /dashboard/products/<id>/edit -> Overview / Products / Details / Edit. */
-export function Breadcrumbs() {
+export function Breadcrumbs({ base = ROUTES.dashboard, rootLabel = "Overview" }: { base?: string; rootLabel?: string }) {
   const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean).slice(1); // drop "dashboard"
+  const segments = pathname.split("/").filter(Boolean).slice(1); // drop the area segment ("dashboard" / "admin")
   const crumbs = segments.map((seg, i) => ({
     label: UUID.test(seg) ? "Details" : titleCase(seg),
-    href: `${ROUTES.dashboard}/${segments.slice(0, i + 1).join("/")}`,
+    href: `${base}/${segments.slice(0, i + 1).join("/")}`,
   }));
 
   return (
@@ -31,9 +31,9 @@ export function Breadcrumbs() {
       <BreadcrumbList className="flex-nowrap">
         <BreadcrumbItem className={crumbs.length ? "hidden sm:inline-flex" : undefined}>
           {crumbs.length ? (
-            <BreadcrumbLink render={<Link href={ROUTES.dashboard} />}>Overview</BreadcrumbLink>
+            <BreadcrumbLink render={<Link href={base} />}>{rootLabel}</BreadcrumbLink>
           ) : (
-            <BreadcrumbPage>Overview</BreadcrumbPage>
+            <BreadcrumbPage>{rootLabel}</BreadcrumbPage>
           )}
         </BreadcrumbItem>
         {crumbs.map((c, i) => {

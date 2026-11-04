@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/shared/page-header";
+import { ChangePasswordForm } from "@/components/settings/change-password-form";
 import { ProfileForm } from "@/components/settings/profile-form";
 import { StoreSettingsForm } from "@/components/settings/store-settings-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,7 @@ export default async function SettingsPage() {
           </Card>
         )}
         <ProfileForm fullName={profile.fullName ?? ""} email={user.email ?? ""} role={ROLE_LABELS[active.role]} />
+        <ChangePasswordForm />
       </div>
     </>
   );

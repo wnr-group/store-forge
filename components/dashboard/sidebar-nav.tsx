@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { isActive, NAV_ITEMS } from "./nav-config";
+import { isActive, NAV_SETS, type NavKey } from "./nav-config";
 
-export function SidebarNav({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
+export function SidebarNav({ navKey, collapsed = false, onNavigate }: { navKey: NavKey; collapsed?: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Main" className="flex flex-col gap-0.5">
-      {NAV_ITEMS.map((item) => {
+      {NAV_SETS[navKey].map((item) => {
         const active = isActive(pathname, item);
         const link = (
           <Link

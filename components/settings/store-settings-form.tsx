@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { saveStoreSettingsAction } from "@/app/(dashboard)/dashboard/settings/actions";
 import { ImageUploader, type ImageItem } from "@/components/products/image-uploader";
+import { storefrontHost } from "@/lib/tenant/host";
 import { FormField } from "@/components/shared/form-field";
 import { SectionCard } from "@/components/shared/section-card";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,7 @@ export function StoreSettingsForm({ store, canEdit, currencyLocked }: Props) {
           <FormField id="st-name" label="Store name" required error={errors.name}>
             <Input id="st-name" value={v.name} onChange={set("name")} onBlur={blur("name")} disabled={off} aria-invalid={Boolean(errors.name)} aria-describedby="st-name-msg" aria-required />
           </FormField>
-          <FormField id="st-slug" label="Store slug" required error={errors.slug} hint={`${v.slug || "your-store"}.storeforge.app`}>
+          <FormField id="st-slug" label="Store slug" required error={errors.slug} hint={`Your store is served at ${storefrontHost(v.slug || "your-store", process.env.NEXT_PUBLIC_ROOT_DOMAIN)}`}>
             <Input id="st-slug" value={v.slug} onChange={set("slug")} onBlur={blur("slug")} disabled={off} aria-invalid={Boolean(errors.slug)} aria-describedby="st-slug-msg" aria-required />
           </FormField>
         </div>

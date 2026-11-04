@@ -8,7 +8,7 @@ const FEATURES = [
   {
     icon: Layers,
     title: "Your own workspace",
-    text: "Every merchant gets an isolated workspace for their store, team and data.",
+    text: "Every company gets an isolated workspace for its store, team and data.",
   },
   {
     icon: ShieldCheck,
@@ -32,9 +32,6 @@ export default function LandingPage() {
             <Link href={ROUTES.login} className={buttonVariants({ variant: "ghost" })}>
               Sign in
             </Link>
-            <Link href={ROUTES.register} className={buttonVariants()}>
-              Get started
-            </Link>
           </nav>
         </div>
       </header>
@@ -50,17 +47,14 @@ export default function LandingPage() {
               Multi-tenant commerce platform
             </p>
             <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
-              Launch your online store in minutes
+              Run your online store, your way
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-lg text-pretty text-muted-foreground">
-              StoreForge gives every merchant a secure, dedicated workspace to build and run their business.
+              Companies are set up by the StoreForge team. Sign in with the account you were given to manage your catalog, inventory and team.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href={ROUTES.register} className={buttonVariants({ size: "lg", className: "h-10 px-4" })}>
-                Create your store <ArrowRight aria-hidden />
-              </Link>
-              <Link href={ROUTES.login} className={buttonVariants({ variant: "outline", size: "lg", className: "h-10 px-4" })}>
-                Sign in
+              <Link href={ROUTES.login} className={buttonVariants({ size: "lg", className: "h-10 px-4" })}>
+                Sign in <ArrowRight aria-hidden />
               </Link>
             </div>
           </div>

@@ -12,7 +12,7 @@
  */
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { assertSeedAllowed, DEMO_PASSWORD, DEMO_USERS, ensureDemoUsers, seedDemoData, verifyDemoData } from "./lib/demo-seed";
+import { assertSeedAllowed, DEMO_PASSWORD, DEMO_PLATFORM_ADMIN, DEMO_USERS, ensureDemoUsers, seedDemoData, verifyDemoData } from "./lib/demo-seed";
 
 try {
   process.loadEnvFile(".env.local");
@@ -41,7 +41,7 @@ async function main() {
     if (builtIn) {
       console.log(`
 Demo logins (password for all: ${DEMO_PASSWORD}). Local/dev projects only.`);
-      console.table(DEMO_USERS.map((u) => ({ role: u.role, email: u.email, password: DEMO_PASSWORD })));
+      console.table([...DEMO_USERS, { ...DEMO_PLATFORM_ADMIN, role: "platform_admin" }].map((u) => ({ role: u.role, email: u.email, password: DEMO_PASSWORD })));
     }
     if (problems.length) {
       console.error("Consistency problems:\n - " + problems.join("\n - "));

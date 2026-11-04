@@ -28,3 +28,14 @@ export async function getPrimaryStore(tenantId: string): Promise<Store | null> {
     return store ?? null;
   });
 }
+
+/**
+ * The tenant that owns the store with this slug - but only if the signed-in user is a member of it:
+ * RLS hides every other tenant's stores, so a non-member (or a suspended company) gets null.
+ */
+export async function getTenantIdForStoreSlug(slug: string): Promise<string | null> {
+  return withAuthenticatedDb(async (tx) => {
+    const [row] = await tx.select({ tenantId: stores.tenantId }).from(stores).where(eq(stores.slug, slug)).limit(1);
+    return row?.tenantId ?? null;
+  });
+}

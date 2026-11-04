@@ -90,3 +90,21 @@ export async function withUserContext<T>(db: Database, userId: string, fn: (tx: 
     return fn(tx);
   });
 }
+
+/**
+ * Runs `fn` as the request role with NO user identity, for the public storefront only. Anonymous
+ * visitors are never granted table access: this role sees no rows through RLS, so the only way to
+ * read public data is the narrow SECURITY DEFINER function get_public_storefront(). The same RLS
+ * guard as withUserContext runs, and nothing leaks past the transaction.
+ */
+export async function withPublicContext<T>(db: Database, fn: (tx: DbTx) => Promise<T>): Promise<T> {
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`select set_config('request.jwt.claims', '', true), set_config('request.jwt.claim.sub', '', true)`);
+    await tx.execute(REQUEST_ROLE_SQL);
+    if (!verified.has(db)) {
+      await assertRlsEnforced(tx);
+      verified.add(db);
+    }
+    return fn(tx);
+  });
+}

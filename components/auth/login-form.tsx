@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginAction } from "@/app/(auth)/actions";
@@ -10,7 +9,6 @@ import { FormField } from "@/components/shared/form-field";
 import { PasswordInput } from "@/components/shared/password-input";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
-import { ROUTES } from "@/config/app";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 
 export function LoginForm({ next }: { next?: string }) {
@@ -32,7 +30,7 @@ export function LoginForm({ next }: { next?: string }) {
   });
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-3">
+    <form method="post" onSubmit={onSubmit} noValidate className="space-y-3">
       <FormError message={formError} />
       <FormField required id="email" label="Email" error={errors.email?.message}>
         <Input
@@ -45,16 +43,7 @@ export function LoginForm({ next }: { next?: string }) {
           {...register("email")}
         />
       </FormField>
-      <FormField required
-        id="password"
-        label="Password"
-        error={errors.password?.message}
-        labelAside={
-          <Link href={ROUTES.forgotPassword} className="text-xs text-muted-foreground hover:text-foreground hover:underline">
-            Forgot password?
-          </Link>
-        }
-      >
+      <FormField required id="password" label="Password" error={errors.password?.message}>
         <PasswordInput
           id="password"
           autoComplete="current-password"

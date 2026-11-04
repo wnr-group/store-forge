@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ROUTES } from "@/config/app";
+import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
 import { requireWorkspace } from "@/lib/tenant/context";
 import { getAnalytics } from "@/services/analytics.service";
 
@@ -25,15 +26,33 @@ export default async function DashboardPage() {
     );
   }
   const data = await getAnalytics(30, store.timezone);
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  const storeUrl = storefrontUrl(store.slug, root);
 
   return (
     <>
       <PageHeader
         title={store.name}
-        description={`${active.tenant.name} · ${store.slug}.storeforge.app`}
+        description={
+          storeUrl ? (
+            <>
+              {active.tenant.name} ·{" "}
+              <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground underline-offset-4 hover:underline">
+                {storefrontHost(store.slug, root)}
+              </a>
+            </>
+          ) : (
+            active.tenant.name
+          )
+        }
         actions={
           <>
             <StatusBadge tone={store.status === "active" ? "active" : "draft"}><span className="capitalize">{store.status}</span></StatusBadge>
+            {storeUrl ? (
+              <a href={storeUrl} target="_blank" rel="noopener noreferrer" className={buttonVariants()}>
+                View store <ExternalLink aria-hidden />
+              </a>
+            ) : null}
             <Link href={ROUTES.analytics} className={buttonVariants({ variant: "outline" })}>
               Analytics <ExternalLink className="opacity-60" aria-hidden />
             </Link>

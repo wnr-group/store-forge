@@ -63,6 +63,19 @@ const serverSchema = z.object({
 
 export type ServerEnv = z.infer<typeof serverSchema>;
 
+/**
+ * Supabase service-role key. Used ONLY by lib/supabase/admin.ts to call the Admin Auth API
+ * (create / confirm users, set passwords, delete users) from protected server code. It is never
+ * used for database queries and must never be prefixed NEXT_PUBLIC_.
+ */
+export function getServiceRoleKey(): string {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key || key.length < 20) {
+    throw new Error("Missing or invalid environment variable: SUPABASE_SERVICE_ROLE_KEY (server-only). See .env.example.");
+  }
+  return key;
+}
+
 let cachedServer: ServerEnv | undefined;
 
 export function getServerEnv(): ServerEnv {

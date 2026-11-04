@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { dbSchema, type Database } from "@/lib/db";
 import { memberships, stores, tenants } from "@/lib/db/schema";
 import { RlsGuardError, rowsOf, withUserContext } from "@/lib/db/user-context";
-import { asAppConnection, createDb, createUser, onboard } from "./harness";
+import { asAppConnection, createDb, createPlatformAdmin, createUser, onboard } from "./harness";
 
 let pg: PGlite;
 let alice: string;
@@ -222,19 +222,22 @@ describe("transactions", () => {
     expect((await pg.query("select 1 from stores where slug = 'second-store'")).rows).toHaveLength(1);
   });
 
-  it("onboarding through Drizzle is atomic and idempotent", async () => {
+  it("provisioning through Drizzle is Platform-Admin only, atomic and idempotent", async () => {
+    const admin = await createPlatformAdmin(pg);
     await asAppConnection(pg, async () => {
-      const call = (uid: string, slug: string) =>
-        withUserContext(orm, uid, async (tx) =>
+      const call = (actor: string, owner: string, slug: string) =>
+        withUserContext(orm, actor, async (tx) =>
           rowsOf<{ r: { tenant_id: string; created: boolean } }>(
-            await tx.execute(sql`select public.create_tenant_with_store(${"Carol Co"}, ${"Carol Store"}, ${slug}, ${null}) as r`),
+            await tx.execute(sql`select public.platform_provision_tenant(${owner}::uuid, ${"Carol Co"}, ${"Carol Store"}, ${slug}, ${null}) as r`),
           )[0].r,
         );
-      const first = await call(carol, "carol-shop");
-      const again = await call(carol, "carol-shop");
+      const first = await call(admin, carol, "carol-shop");
+      const again = await call(admin, carol, "carol-shop");
       expect(first.created).toBe(true);
       expect(again).toMatchObject({ created: false, tenant_id: first.tenant_id });
-      expect(await failure(call(bob, "carol-shop"))).toMatch(/slug_taken/);
+      expect(await failure(call(admin, bob, "carol-shop"))).toMatch(/slug_taken/);
+      // The same call from a regular user (even naming themselves owner) is refused.
+      expect(await failure(call(carol, carol, "carol-self-made"))).toMatch(/not_platform_admin/);
     });
     expect((await pg.query("select count(*)::int n from tenants where created_by = $1", [carol])).rows[0]).toEqual({ n: 1 });
   });

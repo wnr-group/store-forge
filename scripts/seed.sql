@@ -8,7 +8,8 @@
 --   merchant.a@example.test  -> owner of "Alpha Goods" (store: alpha-goods)
 --   merchant.b@example.test  -> owner of "Beta Wares"  (store: beta-wares)
 --                               and staff in Alpha Goods (multi-tenant demo)
---   newcomer@example.test    -> no tenant yet (lands on onboarding)
+--   newcomer@example.test    -> no tenant (lands on the "no workspace" page: nobody can self-onboard)
+--   platform@example.test    -> StoreForge Platform Admin (lands on /admin, creates companies)
 -- =============================================================================
 
 create extension if not exists pgcrypto with schema extensions;
@@ -21,7 +22,8 @@ begin
     select * from (values
       ('11111111-1111-1111-1111-111111111111'::uuid, 'merchant.a@example.test', 'Alice Merchant'),
       ('22222222-2222-2222-2222-222222222222'::uuid, 'merchant.b@example.test', 'Bob Merchant'),
-      ('33333333-3333-3333-3333-333333333333'::uuid, 'newcomer@example.test',  'Nina Newcomer')
+      ('33333333-3333-3333-3333-333333333333'::uuid, 'newcomer@example.test',  'Nina Newcomer'),
+      ('44444444-4444-4444-4444-444444444444'::uuid, 'platform@example.test',  'Priya Platform')
     ) as t(id, email, full_name)
   loop
     insert into auth.users (
@@ -48,7 +50,7 @@ begin
 end $$;
 
 -- Seed runs as the table owner, so it can write tenants/memberships directly
--- (end users can only create them through create_tenant_with_store()).
+-- (tenants are created in the app only by a Platform Admin through platform_provision_tenant()).
 insert into public.tenants (id, name, slug, created_by) values
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Alpha Goods Ltd', 'alpha-goods', '11111111-1111-1111-1111-111111111111'),
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Beta Wares Pvt Ltd', 'beta-wares', '22222222-2222-2222-2222-222222222222')
@@ -59,6 +61,10 @@ insert into public.memberships (tenant_id, user_id, role) values
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '22222222-2222-2222-2222-222222222222', 'owner'),
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '22222222-2222-2222-2222-222222222222', 'staff')
 on conflict (tenant_id, user_id) do nothing;
+
+insert into public.platform_admins (user_id) values
+  ('44444444-4444-4444-4444-444444444444')
+on conflict do nothing;
 
 insert into public.stores (tenant_id, name, slug, description) values
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Alpha Goods', 'alpha-goods', 'Demo store for Merchant A.'),

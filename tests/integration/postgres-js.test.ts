@@ -2,7 +2,7 @@ import type { PGlite } from "@electric-sql/pglite";
 import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { createDb, createUser, onboard } from "../db/harness";
+import { createDb, createPlatformAdmin, createUser, onboard } from "../db/harness";
 
 /**
  * Drives the REAL production database path - getDatabase() -> postgres-js
@@ -19,18 +19,23 @@ vi.mock("@/lib/auth/session", () => ({ getCurrentUser: async () => h.user, requi
 import { getDatabase } from "@/lib/db";
 import { memberships, stores, tenants } from "@/lib/db/schema";
 import { withAuthenticatedDb } from "@/lib/db/tenant-db";
-import { rowsOf, withUserContext } from "@/lib/db/user-context";
+import { rowsOf, withPublicContext, withUserContext } from "@/lib/db/user-context";
+import { getPublicStorefront } from "@/services/storefront.service";
 import { listStores } from "@/services/store.service";
-import { createTenantWithStore, isStoreSlugAvailable, listMembershipsForUser } from "@/services/tenant.service";
+import { createTenantRecords, listCompanies } from "@/services/platform.service";
+import { listMembershipsForUser } from "@/services/tenant.service";
+import type { CreateCompanyValues } from "@/lib/validations/company";
 
 let pg: PGlite;
 let server: PGLiteSocketServer;
 let alice: string;
 let bob: string;
 let carol: string;
+let platformAdmin: string;
 let tenantA: string;
 let tenantB: string;
 
+const withPublicContextCount = () => withPublicContext(getDatabase(), async (tx) => rowsOf<{ n: number }>(await tx.execute(sql`select count(*)::int n from public.tenants`))[0].n);
 const as = <T>(user: string | null, fn: () => Promise<T>) => {
   h.user = user ? { id: user } : null;
   return fn();
@@ -56,6 +61,7 @@ beforeAll(async () => {
   alice = await createUser(pg, "alice@example.test");
   bob = await createUser(pg, "bob@example.test");
   carol = await createUser(pg, "carol@example.test");
+  platformAdmin = await createPlatformAdmin(pg);
   tenantA = (await onboard(pg, alice, "alpha-shop")).tenant_id;
   tenantB = (await onboard(pg, bob, "beta-shop")).tenant_id;
 
@@ -153,27 +159,52 @@ describe("services over the real driver", () => {
     await expect(as(null, listMembershipsForUser)).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
   });
 
-  it("onboards atomically and idempotently (jsonb result parsed by the driver)", async () => {
-    const first = await as(carol, () => createTenantWithStore({ businessName: "Carol Co", storeName: "Carol Store", storeSlug: "carol-store" }));
+  const company = (storeSlug: string, ownerId = "owner"): CreateCompanyValues => ({
+    companyName: "Carol Co", storeName: "Carol Store", storeSlug, storeDescription: null, contactPhone: "+91 98765 43210", address: "1 Main Street",
+    ownerName: "Carol", ownerEmail: `${ownerId}@example.test`, ownerPassword: "initial-pass-1",
+  });
+
+  it("provisions a company atomically and idempotently (jsonb result parsed by the driver)", async () => {
+    const first = await as(platformAdmin, () => createTenantRecords(carol, company("carol-store")));
     expect(first).toMatchObject({ created: true, store_slug: "carol-store" });
-    const again = await as(carol, () => createTenantWithStore({ businessName: "Carol Co", storeName: "Carol Store", storeSlug: "carol-store" }));
+    const again = await as(platformAdmin, () => createTenantRecords(carol, company("carol-store")));
     expect(again).toMatchObject({ created: false, tenant_id: first.tenant_id });
     expect(await admin("select count(*)::int n from tenants where created_by = $1", [carol])).toEqual([{ n: 1 }]);
     expect(await admin("select role from memberships where user_id = $1", [carol])).toEqual([{ role: "owner" }]);
+    expect(await admin("select status, contact_phone, address from tenants where id = $1", [first.tenant_id])).toEqual([
+      { status: "active", contact_phone: "+91 98765 43210", address: "1 Main Street" },
+    ]);
   });
 
-  it("maps database errors from the driver's error chain to field errors", async () => {
+  it("maps database errors from the driver error chain to field errors", async () => {
     await expect(
-      as(bob, () => createTenantWithStore({ businessName: "Bob Two", storeName: "Bob Two", storeSlug: "carol-store" })),
+      as(platformAdmin, () => createTenantRecords(bob, company("carol-store"))),
     ).rejects.toMatchObject({ code: "CONFLICT", fieldErrors: { storeSlug: expect.any(String) } });
     await expect(
-      as(bob, () => createTenantWithStore({ businessName: "Bob Two", storeName: "Bob Two", storeSlug: "admin" })),
+      as(platformAdmin, () => createTenantRecords(bob, company("admin"))),
     ).rejects.toMatchObject({ code: "VALIDATION" });
   });
 
-  it("checks slug availability", async () => {
-    expect(await as(bob, () => isStoreSlugAvailable("brand-new-shop"))).toBe(true);
-    expect(await as(bob, () => isStoreSlugAvailable("alpha-shop"))).toBe(false);
+  it("refuses a regular user or tenant owner even when they call the service directly", async () => {
+    await expect(as(bob, () => createTenantRecords(bob, company("bobs-second")))).rejects.toMatchObject({ code: "FORBIDDEN" });
+    expect(await admin("select 1 from stores where slug = $1", ["bobs-second"])).toHaveLength(0);
+  });
+
+  it("lists companies only for the Platform Admin", async () => {
+    const list = await as(platformAdmin, () => listCompanies());
+    expect(list.map((c) => c.storeSlug)).toEqual(expect.arrayContaining(["alpha-shop", "beta-shop", "carol-store"]));
+    expect(list.find((c) => c.storeSlug === "alpha-shop")).toMatchObject({ status: "active", memberCount: 1 });
+    await expect(as(alice, () => listCompanies())).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(null, () => listCompanies())).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+  });
+
+  it("serves the public storefront with no session, through the real driver and the app role", async () => {
+    const store = await as(null, () => getPublicStorefront("alpha-shop"));
+    expect(store).toMatchObject({ slug: "alpha-shop", products: [] });
+    expect(await as(null, () => getPublicStorefront("no-such-shop"))).toBeNull();
+    expect(await as(null, () => getPublicStorefront("admin"))).toBeNull();
+    // The identity-less request role reads no tables directly.
+    expect(await as(null, () => withPublicContextCount())).toBe(0);
   });
 
   it("withAuthenticatedDb never accepts an identity from the caller", async () => {

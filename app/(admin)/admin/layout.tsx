@@ -1,0 +1,54 @@
+import Link from "next/link";
+import { KeyRound, ShieldCheck } from "lucide-react";
+import { AppShell } from "@/components/dashboard/app-shell";
+import { Breadcrumbs } from "@/components/dashboard/breadcrumbs";
+import { ThemeToggle } from "@/components/dashboard/theme-toggle";
+import { UserMenu } from "@/components/dashboard/user-menu";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { ROUTES, SIDEBAR_COOKIE } from "@/config/app";
+import { requirePlatformAdminPage } from "@/lib/auth/platform";
+import { cookies } from "next/headers";
+
+/**
+ * Server-side gate for the whole Platform Admin area: validated session AND is_platform_admin()
+ * in the database. Tenant roles (even Owner) never pass this check. Each admin action and service
+ * repeats it, so this layout is a UX gate, not the only protection.
+ */
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const user = await requirePlatformAdminPage();
+  const name = (user.user_metadata?.full_name as string | undefined) ?? "";
+  const email = user.email ?? "";
+  const collapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "1";
+  const accountLink = (
+    <DropdownMenuItem render={<Link href={ROUTES.adminAccount} />}>
+      <KeyRound aria-hidden /> Change password
+    </DropdownMenuItem>
+  );
+  const badge = (compact: boolean) => (
+    <div className="flex h-10 items-center justify-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent px-2.5 text-sm font-medium text-white">
+      <ShieldCheck className="size-4 shrink-0" aria-hidden />
+      {compact ? <span className="sr-only">Platform Admin</span> : <span className="flex-1 truncate">Platform Admin</span>}
+    </div>
+  );
+
+  return (
+    <AppShell
+      navKey="admin"
+      homeHref={ROUTES.admin}
+      defaultCollapsed={collapsed}
+      switcher={{ full: badge(false), compact: badge(true) }}
+      footer={{
+        full: <UserMenu name={name} email={email} role="Platform Admin">{accountLink}</UserMenu>,
+        compact: <UserMenu name={name} email={email} role="Platform Admin" compact>{accountLink}</UserMenu>,
+      }}
+      header={
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+          <Breadcrumbs base={ROUTES.admin} rootLabel="Overview" />
+          <ThemeToggle />
+        </div>
+      }
+    >
+      {children}
+    </AppShell>
+  );
+}

@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, FolderTree, LayoutDashboard, Layers, Package, Settings, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, FolderTree, LayoutDashboard, Layers, Package, PlusCircle, Settings, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 
 export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean };
@@ -14,6 +14,23 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.analytics, label: "Analytics", icon: BarChart3 },
   { href: ROUTES.settings, label: "Settings", icon: Settings },
 ];
+
+export const OWNER_NAV_ITEMS: NavItem[] = [
+  ...NAV_ITEMS.slice(0, -1),
+  { href: ROUTES.team, label: "Team members", icon: UserCog },
+  NAV_ITEMS[NAV_ITEMS.length - 1],
+];
+
+/** Platform Admin area: companies only - no merchant data. */
+export const ADMIN_NAV_ITEMS: NavItem[] = [
+  { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: ROUTES.adminCompanies, label: "Companies", icon: Building2, exact: true },
+  { href: ROUTES.adminNewCompany, label: "Create company", icon: PlusCircle },
+];
+
+/** Serializable key: icon components cannot cross the server -> client boundary. */
+export type NavKey = "merchant" | "owner" | "admin";
+export const NAV_SETS: Record<NavKey, NavItem[]> = { merchant: NAV_ITEMS, owner: OWNER_NAV_ITEMS, admin: ADMIN_NAV_ITEMS };
 
 export function isActive(pathname: string, item: Pick<NavItem, "href" | "exact">) {
   return item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);

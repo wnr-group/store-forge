@@ -6,6 +6,14 @@
 export const MEMBERSHIP_ROLES = ["owner", "admin", "staff"] as const;
 export type MembershipRole = (typeof MEMBERSHIP_ROLES)[number];
 
+/** A deactivated membership keeps its row but grants no access (enforced by is_tenant_member / has_tenant_role). */
+export const MEMBERSHIP_STATUSES = ["active", "disabled"] as const;
+export type MembershipStatus = (typeof MEMBERSHIP_STATUSES)[number];
+
+/** A suspended company is invisible to all of its members at the database level. */
+export const TENANT_STATUSES = ["active", "suspended"] as const;
+export type TenantStatus = (typeof TENANT_STATUSES)[number];
+
 export const STORE_STATUSES = ["active", "inactive", "suspended"] as const;
 export type StoreStatus = (typeof STORE_STATUSES)[number];
 
