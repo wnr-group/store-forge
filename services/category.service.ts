@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, eq, sql } from "drizzle-orm";
-import { categories, products, type Category } from "@/lib/db/schema";
+import { categories, type Category } from "@/lib/db/schema";
 import { mapErrors } from "@/lib/db/errors";
 import type { DbTx } from "@/lib/db/tenant-db";
 import { AppError } from "@/lib/errors";
