@@ -4,9 +4,9 @@ Multi-tenant e-commerce SaaS foundation: sign-up/login, merchant onboarding, ten
 
 **Stack:** Next.js 16 · TypeScript · Tailwind CSS 4 · shadcn/ui · Supabase Auth · Drizzle ORM · Supabase PostgreSQL
 
-> **Scope:** foundation only. Products, orders, payments and public storefronts are not built yet.
+> **Scope:** auth, multi-tenancy and the merchant dashboard (products, variants, categories, collections, inventory, customers, analytics, settings). Checkout, orders creation, payments and public storefronts are not built yet.
 >
-> **Status:** RLS is tested on in-process PostgreSQL (PGlite), **not yet verified on Supabase**. It counts as verified only when `npm run db:verify` ends with `ALL CHECKS PASSED` (see [Setup](#setup), step 5).
+> **Status:** RLS and role isolation pass `npm run db:verify` (28 checks) against the real Supabase project. Re-run it after any migration, policy or grant change (see [Setup](#setup), step 5).
 
 ## How it works
 
@@ -27,14 +27,40 @@ Multi-tenant e-commerce SaaS foundation: sign-up/login, merchant onboarding, ten
 
 Rules live in `lib/auth/permissions.ts` (app) and `drizzle/0002_rls_policies.sql` (database). Keep them in sync.
 
+## Merchant dashboard
+
+| Area | What it does |
+|---|---|
+| Overview / Analytics | Sales, orders, customers, average order value, sales chart, best sellers, recent orders, low stock. Computed from real orders; shows an empty state until the store has orders. |
+| Products | Server-side search, filters, sorting and pagination; bulk publish/draft/delete; editor with images, pricing, inventory, variants and organization. |
+| Variants | Options (for example Size, Color) generate combinations. Each has its own SKU, price, image and stock. |
+| Categories / Collections | Categories form a hierarchy. Collections are hand-picked groups with an image and a draft/active status. |
+| Inventory | One row per sellable unit, low/out-of-stock states, locked adjustments and a ledger. Stock never goes negative. |
+| Customers | Search, pagination, detail with order history, add/edit/delete. |
+| Settings | Store profile, contact, currency and timezone (owner/admin only) and your own account. |
+
+**Roles:** owner, admin and staff can create and edit catalog data, stock and customers. Only owner and admin can delete them or change store settings.
+
+**Orders are read-only.** There is no checkout yet, so the dashboard cannot create orders and `authenticated` has no INSERT privilege on `orders`. Analytics and customer totals read that table and stay empty until a checkout service writes to it.
+
+**Money** is stored as integer minor units in the store currency, so the currency is locked once products or orders exist.
+
+### Product images (Supabase Storage)
+
+- Migration `0006` creates the public-read `products` bucket (5 MB, JPEG/PNG/WebP) and its policies. Locally and in tests, where there is no Storage schema, that step is skipped.
+- Paths are `{tenant_id}/{product_id}/{file}`, `{tenant_id}/collections/{id}/{file}` and `{tenant_id}/store/{file}`. Policies require tenant membership from the first path segment. The `store/` folder needs owner or admin.
+- The browser uploads straight to Storage through one-time signed URLs that the server issues after checking your role. Before saving, the server confirms each file exists and takes its type and size from Storage, not from the browser. The database also constrains `storage_path` to the product's own folder.
+- Image rows and files change together: files are deleted only after the transaction that unlinks them commits. A file uploaded but never saved can stay behind if the browser closes first.
+- The service-role key is never used.
+
 ## Project structure
 
 ```
-app/          Routes: (auth), (dashboard), auth/callback
-components/   UI components
+app/          Routes: (auth), (dashboard)/dashboard/*, auth/callback
+components/   UI (ui/ = shadcn), dashboard/ shell, one folder per feature
 config/       Env validation and constants
-lib/          db/ (schema, RLS-aware client), auth/, tenant/, supabase/
-services/     Auth, tenant and store logic
+lib/          db/ (schema, RLS-aware client), auth/, tenant/, storage/, validations/, money
+services/     One service per area (product, category, collection, inventory, customer, analytics, store, profile)
 drizzle/      SQL migrations (source of truth for the database)
 scripts/      db:verify and db:seed
 tests/        db/, integration/, unit/
@@ -115,11 +141,11 @@ History: `0000_baseline` → `0001_triggers_and_functions` → `0002_rls_policie
 
 ## Tests
 
-- `tests/db`: real migrations on PGlite, covering RLS, roles, grants and onboarding.
+- `tests/db`: real migrations on PGlite, covering RLS, roles, grants, onboarding, the catalog tables and the services (products, variants, stock, customers, analytics, settings).
 - `tests/integration`: the production path (postgres-js as `storeforge_app`) and `db:verify` itself.
 - `tests/unit`: RBAC, validation, route protection and auth actions.
 
-**Not covered:** real Supabase Auth emails, the Supabase pooler, and browser end-to-end flows. Test those manually: register → confirm email → onboarding → dashboard → sign out/in → password reset, plus a second account to confirm tenants can't see each other's data.
+**Not covered by automated tests:** real Supabase Auth emails, Supabase Storage (checked by `db:verify` for bucket and policies, and by hand for uploads), and browser end-to-end flows. Test those manually: register → confirm email → onboarding → dashboard → sign out/in → password reset, plus a second account to confirm tenants can't see each other's data.
 
 ## Deploying to Vercel
 
@@ -131,5 +157,7 @@ History: `0000_baseline` → `0001_triggers_and_functions` → `0002_rls_policie
 ## Known limitations
 
 - No team invitations, ownership transfer or member-management UI yet (the RLS policies already exist).
+- No checkout, so orders cannot be created yet (see above).
+- Duplicating a product copies its details and variants but not its images.
 - Storefront subdomains (`<slug>.storeforge.app`) are shown but not served.
 - Users can read only their own profile row.
