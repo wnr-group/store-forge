@@ -6,6 +6,7 @@ import { AppShell } from "@/components/dashboard/app-shell";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumbs";
 import { CommandSearch } from "@/components/dashboard/command-search";
 import { Notifications, NotificationsFallback } from "@/components/dashboard/notifications";
+import { ThemeToggle } from "@/components/dashboard/theme-toggle";
 import { TenantSwitcher } from "@/components/dashboard/tenant-switcher";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { UserMenu } from "@/components/dashboard/user-menu";
@@ -48,6 +49,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Breadcrumbs />
           <div className="flex items-center gap-2">
             <CommandSearch />
+            <ThemeToggle />
             <Suspense fallback={<NotificationsFallback />}>
               <Notifications />
             </Suspense>

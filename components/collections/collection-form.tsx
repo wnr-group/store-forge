@@ -100,7 +100,7 @@ export function CollectionForm({ mode, initial, products, canDelete }: Props) {
             </div>
             {errors.productIds ? <p role="alert" className="text-xs text-destructive">{errors.productIds}</p> : null}
             {products.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No products yet. <Link href={`${ROUTES.products}/new`} className="text-primary-hover underline underline-offset-2">Add one</Link> first.</p>
+              <p className="text-sm text-muted-foreground">No products yet. <Link href={`${ROUTES.products}/new`} className="text-link underline underline-offset-2">Add one</Link> first.</p>
             ) : (
               <ul className="max-h-72 divide-y overflow-y-auto rounded-lg border">
                 {visible.map((p) => (

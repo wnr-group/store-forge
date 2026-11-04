@@ -156,7 +156,7 @@ export function AnalyticsView({ data, currency, detailed = false }: Props) {
                 </li>
               ))}
             </ul>
-            <Link href={`${ROUTES.inventory}?stock=low`} className="inline-flex items-center gap-1 text-xs font-medium text-primary-hover underline-offset-2 hover:underline">
+            <Link href={`${ROUTES.inventory}?stock=low`} className="inline-flex items-center gap-1 text-xs font-medium text-link underline-offset-2 hover:underline">
               <BarChart3 className="size-3" aria-hidden /> Manage inventory
             </Link>
           </>

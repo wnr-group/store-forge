@@ -57,6 +57,7 @@
   --color-info-text: var(--info-text);
   --color-error: var(--error);
   --color-lavender: var(--lavender);
+  --color-link: var(--link);
   --font-heading: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -67,6 +68,7 @@
  * brand fills (#16A36A, #E6A23C, #3985E8) cannot reach 4.5:1 contrast on white.
  */
 :root {
+  color-scheme: light;
   --background: #f7f7f5;
   --foreground: #191d2b;
   --card: #ffffff;
@@ -77,6 +79,7 @@
   --primary-hover: #5148e5;
   --primary-foreground: #ffffff;
   --lavender: #a5a0ff;
+  --link: #5148e5;
   --secondary: #f1f1f5;
   --secondary-foreground: #191d2b;
   --muted: #f1f1f5;
@@ -111,44 +114,48 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --success: oklch(0.72 0.14 155);
-  --success-text: oklch(0.8 0.14 155);
-  --warning: oklch(0.78 0.14 80);
-  --warning-text: oklch(0.85 0.12 80);
-  --info: oklch(0.7 0.13 255);
-  --info-text: oklch(0.8 0.1 255);
-  --primary-hover: oklch(0.85 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  color-scheme: dark;
+  --background: #0e1224;
+  --foreground: #e9ebf5;
+  --card: #161b30;
+  --card-foreground: #e9ebf5;
+  --popover: #1a2038;
+  --popover-foreground: #e9ebf5;
+  --primary: #635bff;
+  --primary-hover: #5148e5;
+  --primary-foreground: #ffffff;
+  --lavender: #a5a0ff;
+  --link: #a5a0ff;
+  --secondary: #1e2440;
+  --secondary-foreground: #e9ebf5;
+  --muted: #1e2440;
+  --muted-foreground: #9aa2bb;
+  --accent: #252c4d;
+  --accent-foreground: #e9ebf5;
+  --destructive: #f08080;
+  --error: #e05252;
+  --success: #16a36a;
+  --success-text: #4fd69a;
+  --warning: #e6a23c;
+  --warning-text: #f2bd6b;
+  --info: #3985e8;
+  --info-text: #7fb2f4;
+  --border: #262d48;
+  --input: #6b749b;
+  --ring: #8c86ff;
+  --chart-1: #8c85ff;
+  --chart-2: #a5a0ff;
+  --chart-3: #6e68e0;
+  --chart-4: #5aa0f0;
+  --chart-5: #3cc088;
+  --sidebar: #0a0e1c;
+  --sidebar-foreground: #b4bad0;
+  --sidebar-primary: #635bff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1b2140;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1d2340;
+  --sidebar-ring: #a5a0ff;
 }
 
 @layer base {
@@ -171,4 +178,33 @@
       transition-duration: 0.01ms !important;
     }
   }
+}
+/*
+ * Theme switching. With the View Transitions API the new theme is revealed as a circle
+ * growing from the toggle (animated in ThemeToggle). Browsers without it get a short
+ * colour cross-fade via .theme-fade, which is only present during the switch so normal
+ * hover/focus transitions are unaffected. Reduced-motion users get an instant change.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+}
+.theme-fade,
+.theme-fade *,
+.theme-fade *::before,
+.theme-fade *::after {
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease,
+    border-color 0.35s ease,
+    fill 0.35s ease,
+    stroke 0.35s ease,
+    box-shadow 0.35s ease !important;
 }

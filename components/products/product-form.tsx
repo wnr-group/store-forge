@@ -301,7 +301,7 @@ export function ProductForm({ mode, currency, categories, collections, initial, 
               <legend className="text-sm font-medium">Collections</legend>
               {collections.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
-                  No collections yet. <Link href={ROUTES.collections} className="text-primary-hover underline underline-offset-2">Create one</Link>.
+                  No collections yet. <Link href={ROUTES.collections} className="text-link underline underline-offset-2">Create one</Link>.
                 </p>
               ) : (
                 <ul className="max-h-44 space-y-1.5 overflow-y-auto pr-1">
