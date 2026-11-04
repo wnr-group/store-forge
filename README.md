@@ -1,211 +1,195 @@
 # StoreForge
 
-## 1. Overview
+Multi-tenant e-commerce SaaS foundation: authentication, merchant onboarding, tenant isolation enforced by PostgreSQL Row Level Security, RBAC and an active-workspace context.
 
-StoreForge is a multi-tenant e-commerce SaaS foundation. A merchant signs up, creates a workspace with a store, and manages their catalog from a dashboard. Every workspace's data is isolated from every other workspace by PostgreSQL Row Level Security (RLS), so one merchant can never see another's data.
+**Stack:** Next.js 16 (App Router) · TypeScript (strict) · Tailwind CSS 4 · shadcn/ui · **Supabase Auth** (`@supabase/ssr`) · **Drizzle ORM** + Drizzle Kit · Supabase PostgreSQL.
 
-**What is built:** authentication, merchant onboarding, tenant isolation, role-based access and the merchant dashboard.
+> **Scope: Task 1 foundation.** Products, inventory, orders, payments, public storefronts and custom domains are intentionally not implemented yet.
 
-**What is not built yet:** checkout, order creation, payments and public storefronts. Orders are read-only in the dashboard, so analytics and customer totals stay empty until a checkout service writes orders.
+> **Verification status.** The database security model is covered by automated tests that run the real migrations against an in-process PostgreSQL (PGlite) and the real `postgres` driver over a wire connection. It has **not** been verified against an actual Supabase project until you run `npm run db:verify` there and it ends with `ALL CHECKS PASSED` (see [Verify RLS on Supabase](#verify-rls-on-supabase)).
 
-## 2. Features
+## Architecture
 
-| Area | What it does |
+```
+Browser ──► Next.js (RSC, Server Actions, Route Handlers)
+              │
+              ├─ Supabase Auth ........ sign up / in / out, sessions, password recovery   (@supabase/ssr, cookies)
+              │
+              └─ Drizzle ORM .......... ALL application data access
+                    └─ postgres-js ──► Supabase transaction pooler (:6543) ──► PostgreSQL
+                         role: storeforge_app   (login role, NOBYPASSRLS, member of `authenticated` only)
+                         per request:  BEGIN; set_config(claims, userId, local); SET LOCAL ROLE authenticated; … ; COMMIT
+```
+
+```
+app/                    routes: (auth) login/register/…, (dashboard) dashboard + onboarding, auth/callback
+proxy.ts                Next 16 request interception (session refresh + optimistic route gating)
+components/             ui/ (shadcn), auth/, onboarding/, dashboard/, shared/
+config/                 env validation, app constants
+lib/
+  db/
+    schema/             Drizzle tables (profiles, tenants, memberships, stores) + shared constants
+    relations.ts        Drizzle relations
+    index.ts            INTERNAL pooled postgres-js client (never queried directly)
+    user-context.ts     withUserContext(): per-request identity + RLS guard
+    tenant-db.ts        withAuthenticatedDb(): validated session -> user-context transaction
+  tenant/context.ts     getUserTenants, getActiveTenant, requireTenantAccess/Role, withTenantDb
+  auth/                 getCurrentUser()/requireUser(), permissions.ts (central RBAC)
+  supabase/             browser / server / proxy clients — AUTHENTICATION ONLY
+services/               auth (Supabase Auth), tenant + store (Drizzle)
+types/                  shared types
+drizzle/                migrations (generated + custom SQL) — the single source of truth for the database
+scripts/                db:verify, db:seed
+tests/                  db/ (RLS + roles on real Postgres), integration/ (postgres-js, verifier), unit/
+```
+
+### Why Drizzle, and why Supabase Auth stays
+
+- **Drizzle** gives typed, composable queries and real transactions against plain PostgreSQL, with migrations kept as reviewable SQL. It replaces `supabase.from()` for application data; there is exactly one data-access layer.
+- **Supabase Auth** still owns identities, passwords, email verification and sessions. We do not store passwords or hash anything ourselves. Drizzle only *references* `auth.users`.
+- **Row Level Security stays on**, in the database, as the real security boundary.
+
+### How tenant isolation works (defence in depth)
+
+A direct Postgres connection does **not** carry the Supabase user's identity the way PostgREST does, so the app establishes it explicitly:
+
+1. **Session validation** — `withAuthenticatedDb()` gets the user from `supabase.auth.getUser()` (verified by the Auth server). It accepts **no user-id parameter**; identity cannot be supplied by a caller.
+2. **Transaction-local identity** — `withUserContext()` opens a transaction and sets `request.jwt.claims` / `request.jwt.claim.sub` with `set_config(…, true)` and runs `SET LOCAL ROLE authenticated`. Everything is discarded at COMMIT/ROLLBACK, so a pooled connection can never carry one request's identity into the next. The user id is checked to be a UUID and passed as a bind parameter; the role name is a hard-coded constant.
+3. **A login role that can't cheat** — the app connects as `storeforge_app`: `NOBYPASSRLS`, `NOSUPERUSER`, `NOINHERIT` (no privileges of its own), member of `authenticated` **only** (it cannot `SET ROLE` to `service_role`, `anon` or `postgres`). `DATABASE_URL` is rejected at startup if it uses the `postgres` owner role.
+4. **Runtime RLS guard** — the first request per process asserts the request role is `authenticated` and that neither it nor the login role is a superuser / `BYPASSRLS`; otherwise it throws before any user code runs.
+5. **RLS policies** — `profiles`, `tenants`, `memberships`, `stores` (see `drizzle/0002_rls_policies.sql`). Policies call `SECURITY DEFINER` helpers (`is_tenant_member`, `has_tenant_role`) with a pinned `search_path` that inspect only `auth.uid()`, which avoids policy recursion. Column-level grants make `tenant_id`, `user_id`, `created_by` immutable. Tenants and `owner` memberships have **no INSERT policy**: they can only be created by `create_tenant_with_store()`.
+6. **Application checks** — `requireTenantAccess` / `requireTenantRole` / `withTenantDb` look membership up in the database. The `sf_active_tenant` cookie is only a *preference*, matched against real memberships and ignored if it doesn't match. These are redundant with RLS by design.
+
+### Onboarding
+
+`create_tenant_with_store(tenant_name, store_name, store_slug, description)` creates tenant → owner membership → store in one transaction. It takes **no user id** (identity is `auth.uid()`, and the user must exist in `auth.users`), a per-user advisory lock serialises double submits, repeating the same request returns the existing tenant, and slug races surface as `slug_taken` with full rollback. It is called through Drizzle inside the user-context transaction.
+
+### Roles
+
+| Role  | Can |
 |---|---|
-| Auth | Register, email confirmation, login, forgot/reset password, sign out |
-| Onboarding | Creates a workspace and its first store in one database transaction |
-| Overview / Analytics | Sales, orders, customers, average order value, sales chart, best sellers, recent orders, low stock (empty until orders exist) |
-| Products | Server-side search, filters, sorting and pagination; bulk publish, draft and delete; editor with images, pricing, inventory, variants and organization |
-| Variants | Options such as Size or Color generate combinations, each with its own SKU, price, image and stock |
-| Categories / Collections | Hierarchical categories; hand-picked collections with an image and draft/active status |
-| Inventory | One row per sellable unit, low and out-of-stock states, locked adjustments and a ledger. Stock never goes negative |
-| Customers | Search, pagination, detail view with order history, add/edit/delete |
-| Settings | Store profile, contact, currency and timezone (owner/admin only) and your own account |
-| Themes | Light, dark and system themes |
-| Product images | Uploaded straight to Supabase Storage through one-time signed URLs (JPEG/PNG/WebP, max 5 MB) |
+| owner | everything: tenant, stores, members (admin/staff), deletes |
+| admin | edit tenant + stores, add/remove **staff** |
+| staff | view dashboard / read store data |
 
-Money is stored as integer minor units in the store currency, so the currency is locked once products or orders exist.
+App-side rules: `lib/auth/permissions.ts`. Database rules: `drizzle/0002_rls_policies.sql`. Keep them in sync.
 
-## 3. Tech Stack
+## Setup
 
-- **Framework:** Next.js 16 (App Router), React 19, TypeScript
-- **UI:** Tailwind CSS 4, shadcn/ui, Base UI, Recharts, Lucide icons
-- **Forms and validation:** React Hook Form, Zod
-- **Auth:** Supabase Auth (`@supabase/ssr`)
-- **Database:** Supabase PostgreSQL with Drizzle ORM and `postgres-js`
-- **File storage:** Supabase Storage
-- **Testing:** Vitest, with PGlite for database tests (no Docker needed)
+Requires Node ≥ 20.9 and a hosted Supabase project (no Docker needed).
 
-## 4. Architecture
+### 1. Create a Supabase project
+Dashboard → **New project**; save the database password.
+Project Settings → **API**: copy the **Project URL** and **anon** key. (The `service_role` key is not used by this app.)
 
-- **Supabase Auth** manages users, passwords and sessions.
-- **Drizzle ORM** handles all application data. The app connects through the Supabase transaction pooler as a limited role, `storeforge_app`.
-- **RLS is the real security boundary.** For each request the app opens a transaction, sets the user's identity and switches to the `authenticated` role, so RLS policies apply. Everything resets when the transaction ends.
-- `storeforge_app` cannot bypass RLS or switch to `postgres`, `anon` or `service_role`. The app refuses to start if `DATABASE_URL` uses `postgres`.
-- App-level checks (`requireTenantAccess`, `requireTenantRole`) deliberately duplicate RLS.
-- Workspaces are created only through the `create_tenant_with_store()` database function.
-- The Supabase service-role key is never used.
+### 2. Configure Supabase Auth (dashboard)
+- **Authentication → Providers → Email**: enabled. Keep **Confirm email** on for production (the app supports both modes).
+- **Authentication → URL Configuration**: *Site URL* `http://localhost:3000` (production: your domain). *Redirect URLs*: add `http://localhost:3000/auth/callback` and `https://<your-domain>/auth/callback` (Vercel previews: `https://*-<team>.vercel.app/auth/callback`).
+- **Email templates**: defaults work with `/auth/callback` (PKCE `code`). For custom templates link to `/auth/callback?token_hash={{ .TokenHash }}&type=email&next=/dashboard` (recovery: `type=recovery&next=/reset-password`).
+- **SMTP**: the built-in mailer is heavily rate-limited; configure custom SMTP before going live.
 
-```
-app/          Routes: (auth), (dashboard)/dashboard/*, auth/callback
-components/   UI (ui/ = shadcn), dashboard/ shell, one folder per feature
-config/       Environment validation and constants
-lib/          db/ (schema, RLS-aware client), auth/, tenant/, storage/, validations/, money
-services/     One service per area (product, category, collection, inventory, customer, analytics, store, profile)
-drizzle/      SQL migrations (source of truth for the database)
-scripts/      db:verify and db:seed
-tests/        db/, integration/, unit/
-proxy.ts      Session refresh and route protection
-```
+### 3. Connection strings
+Dashboard → **Connect** shows exact strings for your region. You need two:
 
-**Migrations:** the Drizzle schema defines tables, columns and indexes. Policies, functions, triggers, grants and roles live in custom SQL migrations. Never edit an applied migration; add a new one. Create one with `npx drizzle-kit generate --custom --name=<name>` and separate statements with `--> statement-breakpoint`.
+| Variable | Used by | Connection | User |
+|---|---|---|---|
+| `DATABASE_URL` | the running app | **Transaction pooler**, port **6543** | `storeforge_app.<project-ref>` |
+| `DIRECT_URL` | migrations, `db:seed`, `db:verify` | Direct (`db.<ref>.supabase.co:5432`), or **Session pooler** port 5432 if you need IPv4 | `postgres` (direct) / `postgres.<project-ref>` (session pooler) |
 
-**Storage:** migration `0006` creates the public-read `products` bucket. Paths are `{tenant_id}/{product_id}/{file}`, `{tenant_id}/collections/{id}/{file}` and `{tenant_id}/store/{file}`, and policies check tenant membership from the first path segment.
+The app uses `prepare: false` (required by transaction-mode poolers) and a small pool per instance.
 
-## 5. Installation
-
-**Requirements**
-
-- Node.js 20.9 or newer
-- npm
-- Git
-- A free [Supabase](https://supabase.com) account. A hosted Supabase project is required; there is no local database mode.
-
-**Steps**
-
+### 4. Environment
 ```bash
-git clone https://github.com/wnr-group/store-forge.git
-cd store-forge
+cp .env.example .env.local     # PowerShell: Copy-Item .env.example .env.local
+```
+Fill in every variable. `.env.local` is git-ignored. Database variables are server-only and must never be prefixed `NEXT_PUBLIC_`. Set `DATABASE_URL` **after** step 5 (the role needs its password first); put only `DIRECT_URL` and the Supabase values in at first.
+
+### 5. Migrate and create the application role
+```bash
 npm install
+npm run db:migrate        # applies drizzle/*.sql using DIRECT_URL (postgres)
 ```
-
-Then continue with sections 6 and 7. Once those are done, start the app:
-
-```bash
-npm run dev
-```
-
-Open http://localhost:3000, register an account, confirm your email, and complete onboarding.
-
-## 6. Environment Setup
-
-**Step 1. Create a Supabase project** and copy the Project URL and anon key from Project Settings → API.
-
-**Step 2. Configure Auth** in Supabase under Authentication:
-
-- Enable the Email provider.
-- Set Site URL to `http://localhost:3000`.
-- Add `http://localhost:3000/auth/callback` to Redirect URLs.
-- For anything beyond testing, configure custom SMTP. The built-in mailer is heavily rate-limited, and confirmation emails may be delayed or blocked.
-
-**Step 3. Create your env file.**
-
-```bash
-cp .env.example .env.local          # macOS / Linux / Git Bash
-Copy-Item .env.example .env.local   # Windows PowerShell
-```
-
-**Step 4. Fill in the variables.**
-
-| Variable | Purpose | Value |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Auth and image URLs | Project URL from step 1 |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Auth | Anon key from step 1 |
-| `NEXT_PUBLIC_APP_URL` | Email links | `http://localhost:3000` |
-| `DIRECT_URL` | Migrations, seed, verify only | `postgres` user. Direct connection `db.<ref>.supabase.co:5432`, or the **session pooler** (port 5432) if your network has no IPv6 |
-| `DATABASE_URL` | The running app | **Transaction pooler** (port 6543), user `storeforge_app.<project-ref>` |
-
-Find the connection strings in Supabase → Connect. Notes:
-
-- Percent-encode special characters in passwords (for example `@` becomes `%40`).
-- Never prefix database variables with `NEXT_PUBLIC_`; they must stay server-only.
-- Don't fill in the `storeforge_app` password in `DATABASE_URL` yet. You set it in the next section.
-
-## 7. Database Setup
-
-**Step 1. Apply migrations.** This creates the tables, RLS policies, functions, storage bucket and the `storeforge_app` role.
-
-```bash
-npm run db:migrate
-```
-
-If it fails on `GRANT authenticated TO storeforge_app`, run that one statement in the Supabase SQL Editor as the project owner, then run `npm run db:migrate` again.
-
-**Step 2. Set the app role's password.** The migration creates `storeforge_app` without a password. In the Supabase SQL Editor run:
-
+Migration `0004_app_role.sql` creates the `storeforge_app` login role **without a password** (secrets must not live in git). Set one yourself in the Supabase **SQL Editor**:
 ```sql
 ALTER ROLE storeforge_app WITH PASSWORD '<long random password>';
 ```
+Use a URL-safe password (or percent-encode it) in `DATABASE_URL`:
+`postgresql://storeforge_app.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres`
 
-Put that password into `DATABASE_URL` in `.env.local`.
+If `db:migrate` fails on `GRANT authenticated TO storeforge_app`, your project's `postgres` role lacks admin rights on `authenticated`; run `GRANT authenticated TO storeforge_app;` from the SQL Editor as the project owner and re-run.
 
-**Step 3. Verify isolation.**
-
+### 6. Verify RLS on Supabase
 ```bash
-npm run db:verify                  # full check; temporary test users are cleaned up
-npm run db:verify -- --read-only   # connection and catalog checks only
+npm run db:verify                 # full: catalog + behaviour + throwaway fixtures (cleaned up)
+npm run db:verify -- --read-only  # catalog and connection checks only (creates nothing)
 ```
+It runs against **your real** `DATABASE_URL` (the production path) and checks: the role's attributes and memberships, RLS enabled on every table, the exact policy set, table/column grants, function `EXECUTE` rights, pinned `search_path`s, triggers, applied migrations; that the app connection has no access without a user context and cannot `SET ROLE` to a privileged role; that identity is set and cleared per transaction; onboarding atomicity, idempotency and identity validation (unknown/missing user ids are rejected); cross-tenant read/update/delete/insert blocking; rollback; and that **20 parallel mixed-user requests through the pooler never share an identity**.
 
-Only the message `ALL CHECKS PASSED` means the setup is correct. Re-run it after any migration, policy or grant change.
+Only `ALL CHECKS PASSED` means verified. Any failure exits non-zero. `--read-only` runs print that the result is incomplete. The script uses clearly-labelled throwaway users (`dbverify-*@example.invalid`) and removes them, even after failures.
 
-**Step 4 (optional). Seed demo data.** For development projects only. It creates demo users with a publicly known password, so never run it against production.
-
+### 7. (Optional) Seed development data
+Dev projects only — creates demo users with a **publicly known password** (`scripts/seed.sql`):
 ```bash
 npm run db:seed -- --confirm-dev
 ```
 
-**Step 5 (optional). Seed a demo store.** `npm run db:seed:demo` creates one dedicated demo store, **Urban Nest** (slug `urban-nest-demo`), with 26 products (57 variants), 8 categories, 6 collections, 28 customers, 46 orders over the last 90 days and an inventory ledger, plus three dummy logins. **Local/dev projects only: the passwords are public, so never run it against a real project.** It refuses to run when `NODE_ENV` or `VERCEL_ENV` is `production`, needs `SEED_DEMO_DATA=true`, and is safe to re-run (existing rows are skipped).
-
+### 8. Run
 ```bash
-SEED_DEMO_DATA=true npm run db:seed:demo
-# PowerShell: $env:SEED_DEMO_DATA='true'; npm run db:seed:demo
+npm run dev     # http://localhost:3000
 ```
 
-| Role | URL | Email | Password |
-|---|---|---|---|
-| Owner (runs the demo store) | http://localhost:3000/login | owner@demo.test | Demo1234 |
-| Admin | http://localhost:3000/login | admin@demo.test | Demo1234 |
-| Staff | http://localhost:3000/login | staff@demo.test | Demo1234 |
-
-To make an existing confirmed user the owner instead, set `SEED_DEMO_USER_EMAIL=you@example.com`; the dummy logins are then not created.
-
-**Troubleshooting**
-
-| Problem | Fix |
-|---|---|
-| App refuses to start | `DATABASE_URL` is using `postgres`. Use `storeforge_app.<project-ref>` on port 6543 |
-| `db:migrate` can't connect | Your network may lack IPv6. Use the session pooler (port 5432) in `DIRECT_URL` |
-| Authentication or password errors | Check that special characters in the password are percent-encoded |
-| Confirmation email never arrives | Check spam, wait for the rate limit to reset, or configure custom SMTP |
-| Redirect or callback error after confirming email | Add `http://localhost:3000/auth/callback` to Redirect URLs in Supabase |
-
-## 8. Roles
-
-| Role | Can |
-|---|---|
-| owner | Everything: workspace, stores, members and deletes |
-| admin | Edit workspace and stores, add/remove staff, delete catalog data |
-| staff | View the dashboard; create and edit catalog data, stock and customers |
-
-Owner, admin and staff can all create and edit catalog data, stock and customers. Only owner and admin can delete them or change store settings. The person who completes onboarding becomes the owner.
-
-Rules are defined in two places that must be kept in sync: `lib/auth/permissions.ts` (app) and `drizzle/0002_rls_policies.sql` (database).
-
-Team invitations, ownership transfer and a member-management UI do not exist yet, although the RLS policies for them are already in place.
-
-## 9. Commands
+## Migrations (Drizzle Kit)
 
 | Command | Purpose |
 |---|---|
-| `npm run dev` | Start the development server at http://localhost:3000 |
-| `npm run build` | Create a production build |
-| `npm run start` | Run the production build |
-| `npm run typecheck` | Type-check with TypeScript |
-| `npm run lint` | Lint with ESLint |
-| `npm test` | Run all tests with Vitest (no Docker or external services needed) |
-| `npm run db:generate` | Generate a migration from schema changes |
+| `npm run db:generate` | Generate a migration from schema changes in `lib/db/schema` |
+| `npx drizzle-kit generate --custom --name=<name>` | Scaffold a hand-written SQL migration (RLS, functions, triggers, grants) |
 | `npm run db:migrate` | Apply pending migrations (uses `DIRECT_URL`) |
-| `npm run db:check` | Check migration history |
-| `npm run db:verify` | Verify roles, RLS and isolation on the real database |
-| `npm run db:seed` | Seed development data (`-- --confirm-dev` required) |
-| `npm run db:seed:demo` | Seed the Urban Nest demo store and owner/admin/staff logins (see Database Setup) |
+| `npm run db:check` | Check migration history consistency |
+
+Rules of thumb:
+- The Drizzle schema describes tables, columns, constraints and indexes. **Policies, functions, triggers, grants and roles live in custom SQL migrations** — never define policies with `pgPolicy` (two sources of truth).
+- Separate each statement in custom SQL with `--> statement-breakpoint` (the migrator runs statements one at a time).
+- Never edit an already-applied migration; add a new one.
+- After changing the schema, confirm there is no drift: `npx drizzle-kit generate` should print *"No schema changes, nothing to migrate"*.
+- Production: run `npm run db:migrate` against the production project **before** deploying code that needs it, then `npm run db:verify`.
+
+Migration history: `0000_baseline` (tables) → `0001_triggers_and_functions` → `0002_rls_policies` → `0003_onboarding_function` → `0004_app_role`.
+
+## Scripts
+
+| Command | Purpose |
+|---|---|
+| `npm run dev` / `build` / `start` | Next.js |
+| `npm run typecheck` · `npm run lint` | `tsc --noEmit` · ESLint |
+| `npm test` | Vitest (see below) |
+| `npm run db:*` | generate · migrate · check · seed · verify |
+
+## Tests
+
+`npm test` needs no Docker or external services (it caps itself at 3 parallel workers because each DB test file boots an in-process Postgres):
+
+- **`tests/db`** — applies the *real* Drizzle migrations to [PGlite](https://pglite.dev) with a minimal stand-in for Supabase's `auth` schema, `auth.uid()` and roles, then exercises RLS: cross-tenant read/update/delete, role escalation, owner protection, multi-tenant membership, grants, the `storeforge_app` role's privileges, the user-context transaction (identity set/cleared, no leakage between sequential/interleaved requests, rollback, malformed ids), the RLS guard, tenant context, active-tenant switching, forged tenant ids, and onboarding.
+- **`tests/integration`** — the *production* path: `getDatabase()` → postgres-js (`prepare:false`) over a real wire connection as `storeforge_app`; plus tests that prove `db:verify` **passes on a correct database and fails on each of ten deliberately unsafe ones** (role bypass, inherited privileges, escalation membership, RLS disabled, extra permissive policy, public function grant, unpinned `search_path`, missing trigger, unapplied migration, unreachable database).
+- **`tests/unit`** — RBAC, validation, open-redirect protection, proxy route gating, and auth server actions with Supabase Auth mocked.
+
+**Not covered by automated tests:** real Supabase Auth behaviour (email delivery, verification links, token expiry); the Supabase pooler (Supavisor) and your project's real role privileges (that is what `db:verify` is for); true concurrent transactions (PGlite is a single backend session); browser end-to-end flows.
+
+### Manual end-to-end checklist
+1. Register → email link → land in the app → `/onboarding`.
+2. Create workspace → `/dashboard` shows you as Owner.
+3. Sign out → `/dashboard` redirects to `/login`; sign in again.
+4. Register a second merchant in a private window, create a store; confirm neither sees the other's data.
+5. Forgot password → email → `/reset-password` → new password works.
+
+## Deploying to Vercel
+1. Import the repo (framework: Next.js).
+2. **Environment Variables** (Production + Preview): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, and **`DATABASE_URL`** (transaction pooler, `storeforge_app`). Do **not** add `DIRECT_URL` or any `postgres` credentials to Vercel — migrations run from your machine or CI.
+3. Add the production URL and `/auth/callback` to Supabase **Redirect URLs**.
+4. Run `npm run db:migrate` and `npm run db:verify` against production before the first deploy.
+
+## Known limitations / next steps
+- Team invitations, ownership transfer and member-management UI are out of scope; the RLS policies for them already exist.
+- Each tenant-scoped operation opens its own short transaction (membership lookup is cached per request); expect slightly more latency than PostgREST.
+- Storefront subdomain routing (`<slug>.storeforge.app`) is displayed but not served yet.
+- Profile reads are limited to your own row; add a policy (or a view) when the team UI needs teammates' names.
