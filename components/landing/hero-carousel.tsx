@@ -76,7 +76,7 @@ export function HeroCarousel() {
 
   return (
     <section aria-roledescription="carousel" aria-label="Featured" className="relative">
-      <h1 className="sr-only">StoreForge by WNR: build, manage and grow your online store</h1>
+      <h1 className="sr-only">StoreForge: build, manage and grow your online store</h1>
       <div
         className="relative h-[calc(100svh-6.3125rem)] max-h-[58rem] min-h-[34rem] w-full overflow-hidden bg-[#0f1d2e]"
         // Hovering never pauses the timer. It only holds while someone is tabbing through the controls (keyboard

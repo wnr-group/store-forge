@@ -15,7 +15,7 @@ export function AnnouncementBar() {
     <div className="bg-lp-primary text-white">
       <Container className="flex min-h-9 items-center justify-center py-2 text-center text-[13px]">
         <p className="text-pretty">
-          <span className="font-medium">Introducing StoreForge, a commerce platform by WNR</span>
+          <span className="font-medium">Introducing StoreForge</span>
           <span className="hidden text-white/80 sm:inline"> — everything you need to build and grow your online store.</span>
         </p>
       </Container>
@@ -29,7 +29,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-lp-border bg-lp-bg">
       <Container className="flex h-16 items-center justify-between gap-6">
-        <a href="#top" aria-label="StoreForge by WNR, back to top" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
+        <a href="#top" aria-label="StoreForge, back to top" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
           <BrandLogo />
         </a>
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
@@ -87,7 +87,7 @@ export function SiteFooter() {
           <div className="max-w-sm">
             <BrandLogo />
             <p className="mt-4 text-sm leading-6 text-lp-text">
-              StoreForge is a multi-tenant commerce platform built by WNR. Each company gets its own catalog, inventory, customers, team and a public storefront on its own subdomain.
+              StoreForge is a commerce platform for online sellers. Each company gets its own catalog, inventory, customers, team and a public storefront on its own subdomain.
             </p>
             <a href={ROUTES.login} className={lpButton("secondary", "mt-5 h-10")}>
               Login <ArrowRight className="size-4" aria-hidden />
@@ -109,17 +109,12 @@ export function SiteFooter() {
           ))}
         </div>
         <div className="mt-12 flex flex-col gap-2 border-t border-lp-border pt-6 text-xs text-lp-text sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} WNR. StoreForge is a WNR product. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} StoreForge. All rights reserved.</p>
           <p>
-            Photography from{" "}
-            <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
-              Unsplash
-            </a>{" "}
-            and{" "}
-            <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
-              Pexels
+            Powered by{" "}
+            <a href="https://www.wnradvisory.com/" target="_blank" rel="noopener noreferrer" className="font-medium text-lp-heading underline-offset-4 hover:underline">
+              WNR Group
             </a>
-            .
           </p>
         </div>
       </Container>

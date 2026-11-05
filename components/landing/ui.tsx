@@ -40,7 +40,7 @@ export const lpButton = (variant: Variant = "primary", className?: string) =>
     className,
   );
 
-/** WNR + StoreForge brand lock-up. The mark is the same shelf-bars glyph used in the product. */
+/** StoreForge brand lock-up. The mark is the same shelf-bars glyph used in the product. */
 export function BrandLogo({ className, light = false }: { className?: string; light?: boolean }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
@@ -50,10 +50,7 @@ export function BrandLogo({ className, light = false }: { className?: string; li
         <rect x="8" y="14.25" width="12" height="3.5" rx="1.75" className={light ? "fill-lp-primary" : "fill-white"} />
         <rect x="8" y="19.5" width="8" height="3.5" rx="1.75" className={light ? "fill-lp-primary" : "fill-white"} />
       </svg>
-      <span className="flex flex-col leading-none">
-        <span className={cn("text-[17px] font-semibold tracking-tight", light ? "text-white" : "text-lp-heading")}>{APP_NAME}</span>
-        <span className={cn("mt-1 text-[10px] font-medium tracking-[0.14em]", light ? "text-white/70" : "text-lp-text")}>BY WNR</span>
-      </span>
+      <span className={cn("text-[19px] leading-none font-semibold tracking-tight", light ? "text-white" : "text-lp-heading")}>{APP_NAME}</span>
     </span>
   );
 }

@@ -1,9 +1,9 @@
 import Image from "next/image";
-import { ArrowRight, BarChart3, MessageCircle, PackageCheck, ShoppingBag, Smartphone, Store, Tag, type LucideIcon } from "lucide-react";
+import { ArrowRight, BarChart3, Check, MessageCircle, PackageCheck, ShoppingBag, Smartphone, Store, Tag, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { cn } from "@/lib/utils";
 import { FeatureExplorer } from "./feature-explorer";
-import { Container, Photo, Section, SectionHeading, lpButton } from "./ui";
+import { Container, Section, SectionHeading, lpButton } from "./ui";
 
 const stagger = (i: number) => ({ "--i": i }) as React.CSSProperties;
 
@@ -118,7 +118,7 @@ export function PlatformIntro() {
     <Section id="platform">
       <Container>
         <SectionHeading eyebrow="The platform" title="Everything Your Business Needs to Sell Online." align="center">
-          StoreForge, from WNR, helps you open an online store and run it day to day, without juggling tools.
+          StoreForge helps you open an online store and run it day to day, without juggling tools.
         </SectionHeading>
 
         <ol className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-12 lg:gap-5">
@@ -156,91 +156,87 @@ export function FeatureShowcase() {
 
 /* ------------------------------------------------------------------ B2C shopping experience */
 
-const SAMPLE_PRODUCTS = [
-  { name: "Leather everyday bag", price: "₹3,499", src: "/landing/shop-bag.webp", alt: "A black leather handbag with sunglasses, a phone and essentials on a pink background" },
-  { name: "Linen shirt collection", price: "₹1,299", was: "₹1,799", src: "/landing/shop-fashion.webp", alt: "Shirts and tops hanging on a clothing rail" },
-  { name: "Everyday essentials", price: "₹2,799", src: "/landing/shop-essentials.webp", alt: "A watch, camera, notebook and earbuds arranged on a white surface" },
-];
-
 const SHOP_POINTS = [
-  { icon: Tag, title: "Discover exciting products", text: "Product photos, names, descriptions and prices, with sale prices shown clearly." },
-  { icon: Smartphone, title: "Beautiful on any screen", text: "Your storefront looks great on phones, tablets and computers." },
-  { icon: Store, title: "A store that is yours", text: "Your own web address, with your name and logo on it." },
+  {
+    icon: Tag,
+    title: "Discover exciting products",
+    text: "Product photos, names, descriptions and prices, with sale prices shown clearly.",
+    src: "/landing/shop-discover.webp",
+    alt: "A smiling woman holding a cream cable-knit sweater up against herself in front of a boutique mirror",
+    width: 1122,
+    height: 1402,
+    position: "40% 38%",
+  },
+  {
+    icon: Smartphone,
+    title: "Beautiful on any screen",
+    text: "Your storefront looks great on phones, tablets and computers.",
+    src: "/landing/shop-anyscreen.webp",
+    alt: "A smiling man in glasses looking at his phone at a tram stop at golden hour, holding a coffee",
+    width: 1400,
+    height: 1120,
+    position: "50% 40%",
+  },
+  {
+    icon: Store,
+    title: "A store that is yours",
+    text: "Your own web address, with your name and logo on it.",
+    src: "/landing/shop-yours.webp",
+    alt: "A shop owner in a navy apron stamping a plain kraft-paper gift bag at her shop counter",
+    width: 1448,
+    height: 1086,
+    position: "56% 45%",
+  },
 ];
 
-function ProductCard({ p, compact = false }: { p: (typeof SAMPLE_PRODUCTS)[number]; compact?: boolean }) {
-  return (
-    <div className="overflow-hidden rounded-lg border border-lp-border bg-white">
-      <Image src={p.src} alt={p.alt} width={900} height={600} sizes={compact ? "110px" : "(min-width: 1024px) 170px, 30vw"} className="aspect-[4/3] w-full object-cover" />
-      <div className={compact ? "p-2" : "p-3"}>
-        <p className={compact ? "truncate text-[11px] font-medium text-lp-heading" : "truncate text-sm font-medium text-lp-heading"}>{p.name}</p>
-        <p className={compact ? "mt-0.5 text-[11px] text-lp-heading" : "mt-1 text-sm text-lp-heading"}>
-          {p.price}
-          {"was" in p && p.was && !compact ? <span className="ml-1.5 text-lp-text line-through">{p.was}</span> : null}
-        </p>
-      </div>
-    </div>
-  );
-}
-
+/**
+ * An expanding photo gallery: three tall panels share the row, and the one under the pointer (or with keyboard focus)
+ * widens while the others narrow. Each panel always shows its title and description, so nothing depends on hover.
+ */
 export function ShoppingExperience() {
   return (
-    <Section id="solutions">
+    <Section id="solutions" className="border-y border-lp-border bg-lp-soft/70">
       <Container>
-        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
-          <div>
-            <SectionHeading eyebrow="For your customers" title="A Better Shopping Experience Starts Here.">
-              Give your customers a clean, fast storefront where they can discover and browse everything you sell.
-            </SectionHeading>
-            <ul className="mt-8 space-y-5">
-              {SHOP_POINTS.map((p, i) => (
-                <li key={p.title} style={stagger(i)} className="lp-reveal flex gap-3">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-lp-soft text-lp-primary">
-                    <p.icon className="size-[18px]" strokeWidth={1.75} aria-hidden />
-                  </span>
-                  <span>
-                    <span className="block text-sm font-semibold text-lp-heading">{p.title}</span>
-                    <span className="mt-0.5 block text-sm leading-6 text-lp-text">{p.text}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <SectionHeading eyebrow="For your customers" title="A Better Shopping Experience Starts Here." align="center">
+          Give your customers a clean, fast storefront where they can discover and browse everything you sell.
+        </SectionHeading>
 
-          <figure className="lp-reveal relative pb-6">
-            <div className="overflow-hidden rounded-xl border border-lp-border bg-lp-bg shadow-[0_24px_60px_-22px_rgba(23,43,66,0.28)] sm:mr-36">
-              <div className="flex h-9 items-center gap-1.5 border-b border-lp-border bg-white px-3.5">
-                <span className="size-2.5 rounded-full bg-[#e2e8f0]" aria-hidden />
-                <span className="size-2.5 rounded-full bg-[#e2e8f0]" aria-hidden />
-                <span className="size-2.5 rounded-full bg-[#e2e8f0]" aria-hidden />
-              </div>
-              <div className="flex h-12 items-center border-b border-lp-border bg-white px-4 text-sm font-semibold text-lp-heading">Your store</div>
-              <div className="grid grid-cols-3 gap-3 p-4">
-                {SAMPLE_PRODUCTS.map((p) => (
-                  <ProductCard key={p.name} p={p} />
-                ))}
-              </div>
-            </div>
-            <div className="mx-auto mt-6 w-40 rounded-[1.75rem] border-[6px] border-lp-heading bg-lp-bg p-2 shadow-[0_24px_50px_-18px_rgba(23,43,66,0.4)] sm:absolute sm:right-0 sm:bottom-0 sm:mx-0 sm:mt-0">
-              <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-lp-heading/30" aria-hidden />
-              <div className="mb-2 px-1 text-[11px] font-semibold text-lp-heading">Your store</div>
-              <div className="grid grid-cols-2 gap-1.5">
-                <ProductCard p={SAMPLE_PRODUCTS[0]} compact />
-                <ProductCard p={SAMPLE_PRODUCTS[2]} compact />
-              </div>
-            </div>
-            <figcaption className="mt-6 text-xs text-lp-text sm:mr-36">Illustration of a storefront with sample products on desktop and mobile.</figcaption>
-          </figure>
-        </div>
+        <ol className="mt-14 flex flex-col gap-4 lg:h-[34rem] lg:flex-row lg:gap-5">
+          {SHOP_POINTS.map((p, i) => (
+            <li
+              key={p.title}
+              tabIndex={0}
+              style={stagger(i)}
+              className="lp-reveal group relative isolate flex min-h-[24rem] flex-col overflow-hidden rounded-2xl border border-lp-border bg-lp-heading shadow-[0_28px_60px_-34px_rgba(23,43,66,0.6)] outline-none transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:ring-2 focus-visible:ring-lp-primary focus-visible:ring-offset-2 motion-reduce:transition-none lg:min-h-0 lg:flex-1 lg:hover:flex-[2.3] lg:focus-visible:flex-[2.3]"
+            >
+              <Image
+                src={p.src}
+                alt={p.alt}
+                fill
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                style={{ objectPosition: p.position }}
+                className="-z-10 object-cover transition-transform duration-[1200ms] ease-out motion-safe:group-hover:scale-[1.06]"
+              />
+              <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0f1d2e]/90 via-[#0f1d2e]/30 to-transparent" aria-hidden />
 
-        <div className="mt-16 grid gap-4 sm:grid-cols-3">
-          {[
-            { src: "/landing/shop-shoppers.webp", w: 1200, h: 675, alt: "Three smiling women carrying colourful shopping bags in a mall", caption: "Discover what is new" },
-            { src: "/landing/shop-mobile.webp", w: 1200, h: 675, alt: "A woman on a sofa looking at her smartphone while holding a bank card", caption: "Browse from the sofa" },
-            { src: "/landing/shop-boutique.webp", w: 900, h: 1600, alt: "Colourful garments on racks inside a bright fashion boutique", caption: "Find something you love", pos: "center 72%" },
-          ].map((ph, i) => (
-            <Photo key={ph.src} src={ph.src} alt={ph.alt} width={ph.w} height={ph.h} sizes="(min-width: 640px) 33vw, 100vw" caption={ph.caption} objectPosition={ph.pos} style={stagger(i)} className="lp-reveal aspect-[4/3]" />
+              <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
+                <span className="inline-flex w-fit rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold tabular-nums text-lp-primary">0{i + 1}</span>
+                <div>
+                  <span className="flex size-11 items-center justify-center rounded-xl bg-lp-accent text-lp-heading">
+                    <p.icon className="size-5" strokeWidth={1.9} aria-hidden />
+                  </span>
+                  <h3 className="mt-4 text-2xl font-semibold tracking-tight text-white">{p.title}</h3>
+                  <p className="mt-2 max-w-xs text-sm leading-6 text-white/85">{p.text}</p>
+                </div>
+              </div>
+            </li>
           ))}
+        </ol>
+
+        <div className="lp-reveal mt-12 flex justify-center">
+          <a href={ROUTES.login} className={lpButton("primary", "h-12 px-7 text-[15px]")}>
+            Start Your Store <ArrowRight className="size-4" aria-hidden />
+          </a>
         </div>
       </Container>
     </Section>
@@ -250,25 +246,93 @@ export function ShoppingExperience() {
 /* ------------------------------------------------------------------ How it works */
 
 const STEPS = [
-  { title: "Create Your Store", text: "Your company, store and owner account are set up for you, ready to go.", src: "/landing/step-create.webp", alt: "A woman at a laptop with a notebook, setting up her business", w: 1000, h: 563 },
-  { title: "Add Your Products", text: "Add photos, prices and stock, and organise everything into categories and collections.", src: "/landing/step-products.webp", alt: "Two women carefully preparing products and gift packaging at a table", w: 1000, h: 668 },
-  { title: "Launch and Start Selling", text: "Share your store link, invite your team and keep an eye on sales as they come in.", src: "/landing/step-orders.webp", alt: "A shop owner packing a customer's order at a desk with a laptop beside a rail of clothes", w: 1000, h: 668 },
+  {
+    title: "Create Your Store",
+    text: "Your company, store and owner account are set up for you, ready to go.",
+    points: ["Your store name, logo and details", "An owner login that is ready to use", "Its own web address"],
+    src: "/landing/step-kitchen.webp",
+    alt: "A smiling man in glasses setting up his online store on a laptop at a sunny kitchen table, with a notebook of sketches beside him",
+    position: "58% 40%",
+    tone: "border-lp-border bg-white text-lp-heading",
+    muted: "text-lp-text",
+    numeral: "text-lp-primary/15",
+    tick: "text-lp-primary",
+  },
+  {
+    title: "Add Your Products",
+    text: "Add photos, prices and stock, and organise everything into categories and collections.",
+    points: ["Photos, variants and prices", "Categories and collections", "Stock levels for every product"],
+    src: "/landing/step-studio.webp",
+    alt: "A woman in a navy apron photographing a handmade ceramic vase on a cream backdrop with a phone on a tripod and a softbox light",
+    position: "52% 45%",
+    tone: "border-lp-border bg-[#e9eff6] text-lp-heading",
+    muted: "text-lp-text",
+    numeral: "text-lp-primary/15",
+    tick: "text-lp-primary",
+  },
+  {
+    title: "Launch and Start Selling",
+    text: "Share your store link, invite your team and keep an eye on sales as they come in.",
+    points: ["Share your store link", "Invite your team", "Follow sales and stock"],
+    src: "/landing/step-celebrate.webp",
+    alt: "A woman and a man cheering together as they look at a phone, with stacked kraft-paper parcels ready to ship behind them",
+    position: "50% 40%",
+    tone: "border-lp-primary bg-lp-primary text-white",
+    muted: "text-white/80",
+    numeral: "text-white/15",
+    tick: "text-lp-accent",
+  },
 ];
 
+/**
+ * Three large cards that stack as you scroll: each one sticks in place and the next slides over it (large screens only;
+ * on small screens they simply follow one another). The cards go white, soft blue, then brand navy.
+ */
 export function HowItWorks() {
   return (
-    <Section id="how-it-works" className="border-t border-lp-border bg-white">
+    <Section id="how-it-works" className="bg-white">
       <Container>
-        <SectionHeading eyebrow="How it works" title="Start Selling Online in Three Simple Steps." align="center" />
-        <ol className="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
-          {STEPS.map((s, i) => (
-            <li key={s.title} style={stagger(i)} className="lp-reveal">
-              <Photo src={s.src} alt={s.alt} width={s.w} height={s.h} sizes="(min-width: 768px) 360px, 100vw" className="aspect-[4/3]" />
-              <div className="mt-5 flex items-center gap-3">
-                <span className="flex size-8 items-center justify-center rounded-full bg-lp-primary text-sm font-semibold text-white">{i + 1}</span>
-                <h3 className="text-lg font-semibold text-lp-heading">{s.title}</h3>
+        <SectionHeading eyebrow="How it works" title="Start Selling Online in Three Simple Steps." align="center">
+          From a first login to your first sale, the path is short.
+        </SectionHeading>
+
+        <ol className="mt-14 space-y-6 lg:space-y-0">
+          {STEPS.map((st, i) => (
+            <li
+              key={st.title}
+              style={{ "--i": i } as React.CSSProperties}
+              className={cn(
+                "overflow-hidden rounded-3xl border shadow-[0_30px_60px_-36px_rgba(23,43,66,0.45)] lg:sticky lg:top-[calc(6rem+var(--i)*1.5rem)] lg:h-[26rem]",
+                i < STEPS.length - 1 && "lg:mb-24",
+                st.tone,
+              )}
+            >
+              <div className={cn("grid h-full lg:grid-cols-2", i % 2 === 1 && "lg:[&>*:first-child]:order-2")}>
+                <div className="relative flex flex-col justify-center p-7 sm:p-10 lg:p-12">
+                  <span className={cn("pointer-events-none absolute top-3 right-5 text-[5rem] leading-none font-semibold tracking-tighter select-none sm:text-[9rem]", st.numeral)} aria-hidden>
+                    0{i + 1}
+                  </span>
+                  <p className="relative text-sm font-medium text-lp-accent">Step {i + 1}</p>
+                  <h3 className="relative mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{st.title}</h3>
+                  <p className={cn("relative mt-4 max-w-md text-base leading-7", st.muted)}>{st.text}</p>
+                  <ul className="relative mt-6 space-y-2.5">
+                    {st.points.map((pt) => (
+                      <li key={pt} className="flex items-center gap-3 text-sm font-medium">
+                        <Check className={cn("size-4 shrink-0", st.tick)} strokeWidth={2.5} aria-hidden />
+                        {pt}
+                      </li>
+                    ))}
+                  </ul>
+                  {i === STEPS.length - 1 ? (
+                    <a href={ROUTES.login} className={lpButton("light", "relative mt-8 h-11 w-fit")}>
+                      Start Your Store <ArrowRight className="size-4" aria-hidden />
+                    </a>
+                  ) : null}
+                </div>
+                <div className="relative order-first aspect-[16/10] lg:order-none lg:aspect-auto">
+                  <Image src={st.src} alt={st.alt} fill sizes="(min-width: 1024px) 560px, 100vw" style={{ objectPosition: st.position }} className="object-cover" />
+                </div>
               </div>
-              <p className="mt-2 text-sm leading-6 text-lp-text md:pr-4">{s.text}</p>
             </li>
           ))}
         </ol>
