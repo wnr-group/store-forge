@@ -61,6 +61,72 @@
 }
 
 /*
+ * Public landing page palette. Fixed light colours on purpose: the marketing page does not follow the dashboard's
+ * light/dark preference. Used as bg-lp-bg, text-lp-heading, border-lp-border ...
+ */
+@theme {
+  --color-lp-bg: #f8fafc;
+  --color-lp-soft: #eef3f8;
+  --color-lp-card: #ffffff;
+  --color-lp-primary: #234b72;
+  --color-lp-primary-hover: #1b3b5a;
+  --color-lp-heading: #172b42;
+  --color-lp-text: #64748b;
+  --color-lp-accent: #d9a45b;
+  --color-lp-border: #e5eaf0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/*
+ * Landing page motion. Everything is opt-in for people who allow motion, and degrades to fully visible content.
+ * .lp-reveal: fades and rises as it scrolls into view (CSS scroll-driven animation, no JavaScript; browsers without
+ * support simply show the content). --i staggers siblings. .lp-stagger: children of the active hero slide rise in order.
+ */
+@keyframes lp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes lp-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.lp-progress {
+  transform-origin: left center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .lp-reveal {
+      animation: lp-rise linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--i, 0) * 6%) entry calc(32% + var(--i, 0) * 6%);
+    }
+  }
+  /* Hero timer: the active card's bar fills over the slide's duration; finishing it advances the carousel. */
+  .lp-progress[data-run="true"] {
+    animation: lp-progress var(--lp-dur, 7000ms) linear forwards;
+  }
+  .lp-slide[data-active="true"] .lp-stagger > * {
+    animation: lp-rise 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 110ms + 200ms);
+  }
+}
+
+/*
  * StoreForge design tokens (Linear-inspired workspace theme). Colours are defined once here; components use the
  * semantic Tailwind names (bg-card, text-muted-foreground, bg-sidebar...). Surfaces are white on a very light gray
  * workspace, text is neutral charcoal, and the single indigo accent marks primary actions, links, focus and selection.
