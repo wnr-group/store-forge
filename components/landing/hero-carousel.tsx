@@ -25,7 +25,7 @@ const SLIDES: Slide[] = [
     title: ["Everything You Need", "to Build Your", "Online Store."],
     text: "Bring your business online with a beautiful storefront and everything you need to start selling.",
     cta: { label: "Start Your Store", href: ROUTES.login },
-    image: { src: "/landing/hero-store.webp", alt: "A smiling entrepreneur working on a laptop at a wooden desk, with shelves of crafts on a navy wall behind him", position: "78% 40%" },
+    image: { src: "/landing/hero-woman.webp", alt: "A woman in a navy shirt smiling as she works on a laptop at a wooden desk, with navy shelves of ceramics and plants behind her", position: "78% 40%" },
   },
   {
     eyebrow: "Manage your business",

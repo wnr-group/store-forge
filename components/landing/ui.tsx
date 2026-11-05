@@ -16,12 +16,12 @@ export function Section({ id, className, children }: { id?: string; className?: 
 }
 
 /** Section label, heading and optional lead paragraph. */
-export function SectionHeading({ eyebrow, title, children, align = "left", className }: { eyebrow?: string; title: string; children?: React.ReactNode; align?: "left" | "center"; className?: string }) {
+export function SectionHeading({ eyebrow, title, children, align = "left", className, dark = false }: { eyebrow?: string; title: string; children?: React.ReactNode; align?: "left" | "center"; className?: string; dark?: boolean }) {
   return (
     <div className={cn("lp-reveal max-w-2xl", align === "center" && "mx-auto text-center", className)}>
-      {eyebrow ? <p className="text-sm font-medium text-lp-primary">{eyebrow}</p> : null}
-      <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance text-lp-heading sm:text-4xl sm:leading-[1.15]">{title}</h2>
-      {children ? <p className="mt-4 text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">{children}</p> : null}
+      {eyebrow ? <p className={cn("text-sm font-medium", dark ? "text-lp-accent" : "text-lp-primary")}>{eyebrow}</p> : null}
+      <h2 className={cn("mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-4xl sm:leading-[1.15]", dark ? "text-white" : "text-lp-heading")}>{title}</h2>
+      {children ? <p className={cn("mt-4 text-base leading-7 text-pretty sm:text-lg sm:leading-8", dark ? "text-white/75" : "text-lp-text")}>{children}</p> : null}
     </div>
   );
 }

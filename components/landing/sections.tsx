@@ -1,20 +1,117 @@
 import Image from "next/image";
-import { ArrowRight, BarChart3, Check, MessageCircle, PackageCheck, ShoppingBag, Smartphone, Store, Tag } from "lucide-react";
+import { ArrowRight, BarChart3, MessageCircle, PackageCheck, ShoppingBag, Smartphone, Store, Tag, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { cn } from "@/lib/utils";
+import { FeatureExplorer } from "./feature-explorer";
 import { Container, Photo, Section, SectionHeading, lpButton } from "./ui";
 
 const stagger = (i: number) => ({ "--i": i }) as React.CSSProperties;
 
 /* ------------------------------------------------------------------ Platform introduction */
 
-const INTRO_POINTS = [
-  { icon: Store, title: "Create your online store", text: "Open a storefront of your own, with your name and logo, on its own web address." },
-  { icon: PackageCheck, title: "Manage your products", text: "Keep photos, variants, prices and stock organised in one place." },
-  { icon: ShoppingBag, title: "Organize orders", text: "See every order and where it stands, from new to fulfilled." },
-  { icon: MessageCircle, title: "Connect with customers", text: "Know who buys from you, how often and how much they spend." },
-  { icon: BarChart3, title: "Understand your business", text: "Follow your sales and spot your best sellers at a glance." },
+type Capability = {
+  icon: LucideIcon;
+  title: string;
+  text: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  /** Grid placement on large screens and the focal point of the crop. */
+  span: string;
+  heightClass: string;
+  position?: string;
+};
+
+const CAPABILITIES: Capability[] = [
+  {
+    icon: Store,
+    title: "Create your online store",
+    text: "Open a storefront of your own, with your name and logo, on its own web address.",
+    src: "/landing/platform-store.webp",
+    alt: "A smiling shop owner in a navy apron standing in the open doorway of a brick boutique at golden hour",
+    width: 1400,
+    height: 788,
+    span: "md:col-span-2 lg:col-span-7",
+    heightClass: "lg:h-[26rem]",
+    position: "70% 40%",
+  },
+  {
+    icon: PackageCheck,
+    title: "Manage your products",
+    text: "Keep photos, variants, prices and stock organised in one place.",
+    src: "/landing/platform-products.webp",
+    alt: "Overhead view of hands arranging a navy mug, a brass candle, a leather card holder and a cream scarf on a grey surface",
+    width: 1200,
+    height: 800,
+    span: "lg:col-span-5",
+    heightClass: "lg:h-[26rem]",
+    position: "50% 50%",
+  },
+  {
+    icon: ShoppingBag,
+    title: "Organize orders",
+    text: "See every order and where it stands, from new to fulfilled.",
+    src: "/landing/platform-orders.webp",
+    alt: "A man and a woman in navy aprons wrapping kraft-paper parcels together at a packing bench",
+    width: 1200,
+    height: 675,
+    span: "lg:col-span-4",
+    heightClass: "lg:h-[24rem]",
+    position: "50% 30%",
+  },
+  {
+    icon: MessageCircle,
+    title: "Connect with customers",
+    text: "Know who buys from you, how often and how much they spend.",
+    src: "/landing/platform-customers.webp",
+    alt: "A delighted customer opening a kraft-paper parcel tied with gold twine on a sofa at home",
+    width: 1200,
+    height: 675,
+    span: "lg:col-span-4",
+    heightClass: "lg:h-[24rem]",
+    position: "55% 35%",
+  },
+  {
+    icon: BarChart3,
+    title: "Understand your business",
+    text: "Follow your sales and spot your best sellers at a glance.",
+    src: "/landing/platform-insights.webp",
+    alt: "A man smiling as he works on a laptop at a wooden desk, with parcels and folded knitwear beside him",
+    width: 900,
+    height: 1125,
+    span: "md:col-span-2 lg:col-span-4",
+    heightClass: "lg:h-[24rem]",
+    position: "50% 30%",
+  },
 ];
+
+function CapabilityTile({ c, index }: { c: Capability; index: number }) {
+  return (
+    <li style={stagger(index % 3)} className={cn("lp-reveal group relative isolate min-h-[20rem] overflow-hidden rounded-2xl border border-lp-border bg-lp-heading shadow-[0_24px_50px_-30px_rgba(23,43,66,0.5)] md:min-h-[22rem]", c.span, c.heightClass)}>
+      <Image
+        src={c.src}
+        alt={c.alt}
+        fill
+        sizes="(min-width: 1024px) 40vw, (min-width: 768px) 50vw, 100vw"
+        style={{ objectPosition: c.position }}
+        className="-z-10 object-cover transition-transform duration-[900ms] ease-out motion-safe:group-hover:scale-[1.05]"
+      />
+      {/* Navy wash from the bottom so the caption always reads clearly */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0f1d2e]/90 via-[#0f1d2e]/35 to-transparent" aria-hidden />
+      <div className="flex h-full flex-col justify-between p-5 sm:p-6">
+        <span className="inline-flex w-fit items-center rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold tabular-nums text-lp-primary">0{index + 1}</span>
+        <div>
+          <span className="flex size-10 items-center justify-center rounded-lg bg-lp-accent text-lp-heading">
+            <c.icon className="size-5" strokeWidth={1.9} aria-hidden />
+          </span>
+          <h3 className="mt-4 text-xl font-semibold tracking-tight text-white sm:text-2xl">{c.title}</h3>
+          <p className="mt-1.5 max-w-sm text-sm leading-6 text-white/85">{c.text}</p>
+        </div>
+      </div>
+    </li>
+  );
+}
 
 export function PlatformIntro() {
   return (
@@ -24,38 +121,11 @@ export function PlatformIntro() {
           StoreForge, from WNR, helps you open an online store and run it day to day, without juggling tools.
         </SectionHeading>
 
-        <div className="mt-14 grid items-stretch gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14">
-          {/* Photograph */}
-          <Photo
-            src="/landing/hero-workspace.webp"
-            alt="A person typing on a laptop at a wooden desk with a notebook, headphones and a cup of coffee"
-            width={1600}
-            height={900}
-            sizes="(min-width: 1024px) 480px, 100vw"
-            className="lp-reveal aspect-[4/3] shadow-[0_28px_60px_-28px_rgba(23,43,66,0.4)] lg:aspect-auto lg:min-h-[28rem]"
-            imgClassName="object-[30%_50%]"
-          />
-
-          {/* Capabilities: one row each, numbered and separated by thin rules */}
-          <ol className="divide-y divide-lp-border border-y border-lp-border">
-            {INTRO_POINTS.map((p, i) => (
-              <li key={p.title} style={stagger(i)} className="lp-reveal group relative">
-                <div className="flex items-start gap-4 px-1 py-5 transition-colors duration-200 sm:gap-5 sm:py-6">
-                  <span className="mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-xl border border-lp-border bg-white text-lp-primary shadow-sm transition-colors duration-200 group-hover:border-lp-primary group-hover:bg-lp-primary group-hover:text-white motion-reduce:transition-none">
-                    <p.icon className="size-5" strokeWidth={1.75} aria-hidden />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-base font-semibold text-lp-heading">{p.title}</span>
-                    <span className="mt-1 block text-sm leading-6 text-lp-text">{p.text}</span>
-                  </span>
-                  <span className="pt-1 text-sm font-medium tabular-nums text-lp-accent" aria-hidden>
-                    0{i + 1}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
+        <ol className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-12 lg:gap-5">
+          {CAPABILITIES.map((c, i) => (
+            <CapabilityTile key={c.title} c={c} index={i} />
+          ))}
+        </ol>
 
         <div className="lp-reveal mt-12 flex justify-center">
           <a href="#features" className={lpButton("secondary", "h-11")}>
@@ -69,82 +139,15 @@ export function PlatformIntro() {
 
 /* ------------------------------------------------------------------ Key features */
 
-type Feature = { title: string; lead: string; points: string[]; photo: { src: string; alt: string; width: number; height: number; position?: string } };
-
-const FEATURES: Feature[] = [
-  {
-    title: "Easy Store Management",
-    lead: "Run your whole store from one simple place.",
-    points: ["Set up your store name, logo and details once", "Invite your team and choose what each person can do", "Open your store on its own web address"],
-    photo: { src: "/landing/feature-store.webp", alt: "A shop owner in a cap standing in front of shelves of folded clothes in his store", width: 1200, height: 800 },
-  },
-  {
-    title: "Product and Inventory Management",
-    lead: "Keep every product organised and well stocked.",
-    points: ["Add products with photos, variants and prices", "Group them into categories and collections", "Spot low stock before it becomes a problem"],
-    photo: { src: "/landing/feature-inventory.webp", alt: "Stacks of cardboard shipping boxes and packaging supplies in a storeroom", width: 1400, height: 593 },
-  },
-  {
-    title: "Order Management",
-    lead: "See every order and where it stands.",
-    points: ["Recent orders and their status on your overview", "Know what is paid, pending or fulfilled", "Follow your sales as orders come in"],
-    photo: { src: "/landing/feature-orders.webp", alt: "A woman at a desk with a laptop labelling a parcel to send to a customer", width: 1200, height: 801 },
-  },
-  {
-    title: "Customer Management",
-    lead: "Know the people who buy from you.",
-    points: ["A searchable list of every customer", "See how many orders they placed and what they spent", "Find a customer's details in one click"],
-    photo: { src: "/landing/feature-customers.webp", alt: "A smiling man talking on his phone at a table with a laptop outdoors", width: 1200, height: 800 },
-  },
-  {
-    title: "Business Analytics",
-    lead: "Understand what is working, and do more of it.",
-    points: ["Sales and orders over 7, 30 or 90 days", "See your best-selling products at a glance", "Get a heads-up about products running low"],
-    photo: { src: "/landing/feature-insights.webp", alt: "A team around a table looking at printed charts and reports", width: 1200, height: 675 },
-  },
-  {
-    title: "Store Customization",
-    lead: "Make your store look and feel like yours.",
-    points: ["Add your logo and a description of your business", "Set your currency and timezone", "Show contact details customers can use"],
-    photo: { src: "/landing/feature-customize.webp", alt: "A designer holding colour swatches over a desk while choosing a palette", width: 1200, height: 1800, position: "center 35%" },
-  },
-];
-
 export function FeatureShowcase() {
   return (
-    <Section id="features" className="border-y border-lp-border bg-white">
+    <Section id="features" className="bg-lp-heading">
       <Container>
-        <SectionHeading eyebrow="Features" title="Powerful Tools. Simpler Business Management." />
-        <div className="mt-16 space-y-20 sm:space-y-28">
-          {FEATURES.map((f, i) => {
-            const flip = i % 2 === 1;
-            return (
-              <div key={f.title} className="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
-                <div className={cn("lp-reveal", flip && "lg:order-2")}>
-                  <p className="text-sm font-medium text-lp-accent">0{i + 1}</p>
-                  <h3 className="mt-2 text-2xl font-semibold tracking-tight text-balance text-lp-heading sm:text-3xl">{f.title}</h3>
-                  <p className="mt-3 text-lg leading-8 text-lp-text">{f.lead}</p>
-                  <ul className="mt-6 space-y-3">
-                    {f.points.map((p, k) => (
-                      <li key={p} style={stagger(k + 1)} className="lp-reveal flex gap-3 text-sm leading-6 text-lp-heading">
-                        <Check className="mt-0.5 size-4 shrink-0 text-lp-primary" strokeWidth={2.25} aria-hidden />
-                        {p}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <Photo
-                  src={f.photo.src}
-                  alt={f.photo.alt}
-                  width={f.photo.width}
-                  height={f.photo.height}
-                  sizes="(min-width: 1024px) 560px, 100vw"
-                  objectPosition={f.photo.position}
-                  className={cn("lp-reveal aspect-[4/3] shadow-[0_20px_50px_-26px_rgba(23,43,66,0.3)]", flip && "lg:order-1")}
-                />
-              </div>
-            );
-          })}
+        <SectionHeading dark eyebrow="Features" title="Powerful Tools. Simpler Business Management." align="center">
+          Everything you need to run your store, in one place. Pick a feature to see what it does for you.
+        </SectionHeading>
+        <div className="mt-14">
+          <FeatureExplorer />
         </div>
       </Container>
     </Section>
