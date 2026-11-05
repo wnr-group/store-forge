@@ -10,8 +10,8 @@ import { withAuthenticatedDb, type DbTx } from "@/lib/db/tenant-db";
 import { AppError } from "@/lib/errors";
 import { getRequestStoreSlug } from "@/lib/tenant/request";
 import { resolveActiveTenant } from "@/lib/tenant/resolve";
-import { getPrimaryStore, getTenantIdForStoreSlug } from "@/services/store.service";
-import { listMembershipsForUser, type TenantMembership } from "@/services/tenant.service";
+import { getPrimaryStoreInTx, getTenantIdForStoreSlugInTx, type Store } from "@/services/store.service";
+import { listMembershipsInTx, type TenantMembership } from "@/services/tenant.service";
 
 /**
  * SECURITY MODEL
@@ -23,31 +23,48 @@ import { listMembershipsForUser, type TenantMembership } from "@/services/tenant
  * again independently of this code.
  */
 
-/** All tenants the validated user belongs to (one query, memoised per request). */
-export const getUserTenants = cache(async (): Promise<TenantMembership[]> => {
+type WorkspaceData = { memberships: TenantMembership[]; active: TenantMembership | null; store: Store | null };
+
+/**
+ * Everything needed to know "who is this user here": memberships, the active tenant and its primary store, loaded in
+ * ONE transaction acting as the user (memoised per request). Each transaction costs several round trips to the
+ * database, so resolving these in separate transactions made every page wait for three of them in a row.
+ *
+ * Same rules as before, same role and RLS: the host's store (set by the proxy) or the cookie only *select among* the
+ * user's DB-verified memberships; a forged id or slug matches nothing.
+ */
+const loadWorkspaceData = cache(async (): Promise<WorkspaceData> => {
   const user = await getCurrentUser();
-  if (!user) return [];
-  return listMembershipsForUser();
+  if (!user) return { memberships: [], active: null, store: null };
+  const storeSlug = await getRequestStoreSlug();
+  const preferred = storeSlug ? undefined : (await cookies()).get(ACTIVE_TENANT_COOKIE)?.value;
+  return withAuthenticatedDb(async (tx, u) => {
+    const [memberships, hostTenantId] = await Promise.all([
+      listMembershipsInTx(tx, u.id),
+      storeSlug ? getTenantIdForStoreSlugInTx(tx, storeSlug) : Promise.resolve(null),
+    ]);
+    // On <store>.<root domain> the host names the workspace. The user must be a member of THAT store's tenant; the
+    // cookie preference is ignored, and a user from another company gets no workspace here rather than silently
+    // landing in their own.
+    const active =
+      memberships.length === 0
+        ? null
+        : storeSlug
+          ? (memberships.find((m) => m.tenant.id === hostTenantId) ?? null)
+          : resolveActiveTenant(memberships, preferred);
+    const store = active ? await getPrimaryStoreInTx(tx, active.tenant.id) : null;
+    return { memberships, active, store };
+  });
 });
+
+/** All tenants the validated user belongs to (shares the request's single workspace transaction). */
+export const getUserTenants = cache(async (): Promise<TenantMembership[]> => (await loadWorkspaceData()).memberships);
 
 /**
  * The active tenant: the cookie's tenant if (and only if) the user is a
  * member of it, else their first tenant, else null (needs onboarding).
  */
-export const getActiveTenant = cache(async (): Promise<TenantMembership | null> => {
-  const memberships = await getUserTenants();
-  if (memberships.length === 0) return null;
-  // On <store>.<root domain> the host (set by the proxy, never by the client) names the workspace.
-  // The user must be a member of THAT store's tenant; the cookie preference is ignored, and a user
-  // from another company gets no workspace here rather than silently landing in their own.
-  const storeSlug = await getRequestStoreSlug();
-  if (storeSlug) {
-    const tenantId = await getTenantIdForStoreSlug(storeSlug);
-    return memberships.find((m) => m.tenant.id === tenantId) ?? null;
-  }
-  const preferred = (await cookies()).get(ACTIVE_TENANT_COOKIE)?.value;
-  return resolveActiveTenant(memberships, preferred);
-});
+export const getActiveTenant = cache(async (): Promise<TenantMembership | null> => (await loadWorkspaceData()).active);
 
 /** Verifies the user is a member of `tenantId` (never trusts the id itself). */
 export async function requireTenantAccess(tenantId: string): Promise<TenantMembership> {
@@ -75,7 +92,7 @@ export const requireWorkspace = cache(async () => {
   const active = await getActiveTenant();
   // No (active) workspace: Platform Admins belong in the admin area; everyone else cannot self-onboard.
   if (!active) redirect((await isPlatformAdmin()) ? ROUTES.admin : ROUTES.noWorkspace);
-  const [store, tenants] = await Promise.all([getPrimaryStore(active.tenant.id), getUserTenants()]);
+  const { store, memberships: tenants } = await loadWorkspaceData();
   return { user, active, store, tenants };
 });
 

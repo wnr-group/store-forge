@@ -9,7 +9,7 @@ import { ROUTES } from "@/config/app";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { RANGES, type Analytics } from "@/services/analytics.service";
-import { SalesChart } from "./sales-chart";
+import { SalesChart } from "./sales-chart-lazy";
 
 const dateTime = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 const TONES: Record<string, Tone> = { paid: "active", fulfilled: "active", pending: "warning", cancelled: "draft", refunded: "danger" };
