@@ -1,0 +1,32 @@
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import Script from "next/script";
+import { ThemedToaster } from "@/components/shared/themed-toaster";
+import { THEME_INIT_SCRIPT } from "@/lib/theme/script";
+import "./globals.css";
+
+// Self-hosted variable fonts (latin subset, app/fonts): no Google Fonts request at dev, build or run time, so the
+// app also works offline and Turbopack's dev font loader is not involved.
+// Inter: body, navigation, forms, tables. Manrope: page titles and section headings.
+const inter = localFont({ src: "./fonts/inter-latin.woff2", variable: "--font-inter", weight: "100 900", display: "swap" });
+const manrope = localFont({ src: "./fonts/manrope-latin.woff2", variable: "--font-manrope", weight: "200 800", display: "swap" });
+const geistMono = localFont({ src: "./fonts/geist-mono-latin.woff2", variable: "--font-geist-mono", weight: "100 900", display: "swap" });
+
+export const metadata: Metadata = {
+  title: { default: "StoreForge - launch your online store", template: "%s | StoreForge" },
+  description: "StoreForge lets merchants create and run their own online store on a secure, multi-tenant platform.",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    // suppressHydrationWarning: the theme-init script below sets the `dark` class before React hydrates.
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${manrope.variable} ${geistMono.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col">
+        {/* beforeInteractive: Next injects it into the initial HTML and runs it before hydration, without React re-rendering a <script>. */}
+        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {children}
+        <ThemedToaster />
+      </body>
+    </html>
+  );
+}
