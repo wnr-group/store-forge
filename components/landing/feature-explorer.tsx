@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowRight, BarChart3, Boxes, Check, Palette, ShoppingBag, Store, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { cn } from "@/lib/utils";
+import { Reveal } from "./motion";
 import { lpButton } from "./ui";
 
 type Feature = {
@@ -78,7 +79,7 @@ export function FeatureExplorer() {
   };
 
   return (
-    <div className="lp-reveal grid items-start gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
+    <Reveal className="grid items-start gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
       <ul className="divide-y divide-white/10 border-y border-white/10">
         {FEATURES.map((f, i) => {
           const isOpen = open === i;
@@ -143,23 +144,25 @@ export function FeatureExplorer() {
       </ul>
 
       {/* Large screens: the photographs crossfade as the open feature changes. */}
-      <div className="relative hidden aspect-[5/4] overflow-hidden rounded-2xl border border-white/10 bg-lp-primary shadow-[0_40px_80px_-40px_rgba(0,0,0,0.6)] lg:sticky lg:top-24 lg:block" aria-hidden={false}>
-        {FEATURES.map((f, i) => (
-          <Image
-            key={f.photo.src}
-            src={f.photo.src}
-            alt={i === open ? f.photo.alt : ""}
-            fill
-            sizes="(min-width: 1024px) 640px, 0px"
-            style={{ objectPosition: f.photo.position }}
-            className={cn("object-cover transition-opacity duration-700 ease-in-out motion-reduce:transition-none", i === open ? "opacity-100" : "opacity-0")}
-          />
-        ))}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0f1d2e]/85 to-transparent p-6 pt-20">
-          <p className="text-sm font-medium text-lp-accent">0{open + 1} / 0{FEATURES.length}</p>
-          <p className="mt-1 text-xl font-semibold tracking-tight text-white">{FEATURES[open].title}</p>
+      <div className="hidden lg:sticky lg:top-24 lg:block">
+        <div className="relative aspect-[5/4] overflow-hidden rounded-2xl border border-white/10 bg-lp-primary shadow-[0_40px_80px_-40px_rgba(0,0,0,0.6)]">
+          {FEATURES.map((f, i) => (
+            <Image
+              key={f.photo.src}
+              src={f.photo.src}
+              alt={i === open ? f.photo.alt : ""}
+              fill
+              sizes="(min-width: 1024px) 640px, 0px"
+              style={{ objectPosition: f.photo.position }}
+              className={cn("object-cover transition-opacity duration-700 ease-in-out motion-reduce:transition-none", i === open ? "opacity-100" : "opacity-0")}
+            />
+          ))}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0f1d2e]/85 to-transparent p-6 pt-20">
+            <p className="text-sm font-medium text-lp-accent">0{open + 1} / 0{FEATURES.length}</p>
+            <p className="mt-1 text-xl font-semibold tracking-tight text-white">{FEATURES[open].title}</p>
+          </div>
         </div>
       </div>
-    </div>
+    </Reveal>
   );
 }

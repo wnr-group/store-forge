@@ -3,9 +3,8 @@ import { ArrowRight, BarChart3, Check, MessageCircle, PackageCheck, ShoppingBag,
 import { ROUTES } from "@/config/app";
 import { cn } from "@/lib/utils";
 import { FeatureExplorer } from "./feature-explorer";
+import { Parallax, Reveal, StackItem, StackList } from "./motion";
 import { Container, Section, SectionHeading, lpButton } from "./ui";
-
-const stagger = (i: number) => ({ "--i": i }) as React.CSSProperties;
 
 /* ------------------------------------------------------------------ Platform introduction */
 
@@ -88,15 +87,17 @@ const CAPABILITIES: Capability[] = [
 
 function CapabilityTile({ c, index }: { c: Capability; index: number }) {
   return (
-    <li style={stagger(index % 3)} className={cn("lp-reveal group relative isolate min-h-[20rem] overflow-hidden rounded-2xl border border-lp-border bg-lp-heading shadow-[0_24px_50px_-30px_rgba(23,43,66,0.5)] md:min-h-[22rem]", c.span, c.heightClass)}>
-      <Image
-        src={c.src}
-        alt={c.alt}
-        fill
-        sizes="(min-width: 1024px) 40vw, (min-width: 768px) 50vw, 100vw"
-        style={{ objectPosition: c.position }}
-        className="-z-10 object-cover transition-transform duration-[900ms] ease-out motion-safe:group-hover:scale-[1.05]"
-      />
+    <Reveal as="li" delay={(index % 3) * 0.1} from={0.96} className={cn("group relative isolate min-h-[20rem] overflow-hidden rounded-2xl border border-lp-border bg-lp-heading shadow-[0_24px_50px_-30px_rgba(23,43,66,0.5)] md:min-h-[22rem]", c.span, c.heightClass)}>
+      <Parallax className="-z-10" distance={24}>
+        <Image
+          src={c.src}
+          alt={c.alt}
+          fill
+          sizes="(min-width: 1024px) 40vw, (min-width: 768px) 50vw, 100vw"
+          style={{ objectPosition: c.position }}
+          className="object-cover transition-transform duration-[900ms] ease-out motion-safe:group-hover:scale-[1.05]"
+        />
+      </Parallax>
       {/* Navy wash from the bottom so the caption always reads clearly */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0f1d2e]/90 via-[#0f1d2e]/35 to-transparent" aria-hidden />
       <div className="flex h-full flex-col justify-between p-5 sm:p-6">
@@ -109,7 +110,7 @@ function CapabilityTile({ c, index }: { c: Capability; index: number }) {
           <p className="mt-1.5 max-w-sm text-sm leading-6 text-white/85">{c.text}</p>
         </div>
       </div>
-    </li>
+    </Reveal>
   );
 }
 
@@ -127,11 +128,11 @@ export function PlatformIntro() {
           ))}
         </ol>
 
-        <div className="lp-reveal mt-12 flex justify-center">
+        <Reveal className="mt-12 flex justify-center">
           <a href="#features" className={lpButton("secondary", "h-11")}>
             See everything it can do <ArrowRight className="size-4" aria-hidden />
           </a>
-        </div>
+        </Reveal>
       </Container>
     </Section>
   );
@@ -203,20 +204,25 @@ export function ShoppingExperience() {
 
         <ol className="mt-14 flex flex-col gap-4 lg:h-[34rem] lg:flex-row lg:gap-5">
           {SHOP_POINTS.map((p, i) => (
-            <li
+            <Reveal
+              as="li"
               key={p.title}
               tabIndex={0}
-              style={stagger(i)}
-              className="lp-reveal group relative isolate flex min-h-[24rem] flex-col overflow-hidden rounded-2xl border border-lp-border bg-lp-heading shadow-[0_28px_60px_-34px_rgba(23,43,66,0.6)] outline-none transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:ring-2 focus-visible:ring-lp-primary focus-visible:ring-offset-2 motion-reduce:transition-none lg:min-h-0 lg:flex-1 lg:hover:flex-[2.3] lg:focus-visible:flex-[2.3]"
+              delay={i * 0.12}
+              y={44}
+              from={0.94}
+              className="group relative isolate flex min-h-[24rem] flex-col overflow-hidden rounded-2xl border border-lp-border bg-lp-heading shadow-[0_28px_60px_-34px_rgba(23,43,66,0.6)] outline-none transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:ring-2 focus-visible:ring-lp-primary focus-visible:ring-offset-2 motion-reduce:transition-none lg:min-h-0 lg:flex-1 lg:hover:flex-[2.3] lg:focus-visible:flex-[2.3]"
             >
-              <Image
-                src={p.src}
-                alt={p.alt}
-                fill
-                sizes="(min-width: 1024px) 40vw, 100vw"
-                style={{ objectPosition: p.position }}
-                className="-z-10 object-cover transition-transform duration-[1200ms] ease-out motion-safe:group-hover:scale-[1.06]"
-              />
+              <Parallax className="-z-10" distance={22}>
+                <Image
+                  src={p.src}
+                  alt={p.alt}
+                  fill
+                  sizes="(min-width: 1024px) 40vw, 100vw"
+                  style={{ objectPosition: p.position }}
+                  className="object-cover transition-transform duration-[1200ms] ease-out motion-safe:group-hover:scale-[1.06]"
+                />
+              </Parallax>
               <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0f1d2e]/90 via-[#0f1d2e]/30 to-transparent" aria-hidden />
 
               <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
@@ -229,15 +235,15 @@ export function ShoppingExperience() {
                   <p className="mt-2 max-w-xs text-sm leading-6 text-white/85">{p.text}</p>
                 </div>
               </div>
-            </li>
+            </Reveal>
           ))}
         </ol>
 
-        <div className="lp-reveal mt-12 flex justify-center">
+        <Reveal className="mt-12 flex justify-center">
           <a href={ROUTES.login} className={lpButton("primary", "h-12 px-7 text-[15px]")}>
             Start Your Store <ArrowRight className="size-4" aria-hidden />
           </a>
-        </div>
+        </Reveal>
       </Container>
     </Section>
   );
@@ -296,10 +302,11 @@ export function HowItWorks() {
           From a first login to your first sale, the path is short.
         </SectionHeading>
 
-        <ol className="mt-14 space-y-6 lg:space-y-0">
+        <StackList total={STEPS.length} className="mt-14 space-y-6 lg:space-y-0">
           {STEPS.map((st, i) => (
-            <li
+            <StackItem
               key={st.title}
+              index={i}
               style={{ "--i": i } as React.CSSProperties}
               className={cn(
                 "overflow-hidden rounded-3xl border shadow-[0_30px_60px_-36px_rgba(23,43,66,0.45)] lg:sticky lg:top-[calc(6rem+var(--i)*1.5rem)] lg:h-[26rem]",
@@ -333,9 +340,9 @@ export function HowItWorks() {
                   <Image src={st.src} alt={st.alt} fill sizes="(min-width: 1024px) 560px, 100vw" style={{ objectPosition: st.position }} className="object-cover" />
                 </div>
               </div>
-            </li>
+            </StackItem>
           ))}
-        </ol>
+        </StackList>
       </Container>
     </Section>
   );
@@ -346,7 +353,7 @@ export function HowItWorks() {
 export function FinalCta() {
   return (
     <section className="px-4 py-16 sm:px-6 sm:py-24">
-      <div className="lp-reveal relative mx-auto max-w-6xl overflow-hidden rounded-2xl bg-lp-heading">
+      <Reveal from={0.95} y={48} className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl bg-lp-heading">
         {/* Small screens: photo on top, text below on navy. Large screens: photo behind the text. */}
         <div className="relative aspect-[16/10] sm:absolute sm:inset-0 sm:aspect-auto">
           <Image
@@ -369,7 +376,7 @@ export function FinalCta() {
             </a>
           </div>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

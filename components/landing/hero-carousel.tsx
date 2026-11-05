@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 import Image from "next/image";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { cn } from "@/lib/utils";
+import { useHeroScroll } from "./motion";
 import { lpButton } from "./ui";
 
 /** How long each banner stays. The same value drives the progress bars, so what you see is what the timer does. */
@@ -53,6 +55,8 @@ export function HeroCarousel() {
   const [keyboardFocus, setKeyboardFocus] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const heroScroll = useHeroScroll(sectionRef);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -75,7 +79,7 @@ export function HeroCarousel() {
   const playing = !userPaused && !keyboardFocus && !reduceMotion;
 
   return (
-    <section aria-roledescription="carousel" aria-label="Featured" className="relative">
+    <section ref={sectionRef} aria-roledescription="carousel" aria-label="Featured" className="relative">
       <h1 className="sr-only">StoreForge: build, manage and grow your online store</h1>
       <div
         className="relative h-[calc(100svh-6.3125rem)] max-h-[58rem] min-h-[34rem] w-full overflow-hidden bg-[#0f1d2e]"
@@ -110,7 +114,6 @@ export function HeroCarousel() {
                 alt={s.image.alt}
                 fill
                 sizes="100vw"
-                quality={78}
                 priority={i === 0}
                 style={{ objectPosition: s.image.position }}
                 className={cn("object-cover motion-safe:transition-transform motion-safe:duration-[9000ms] motion-safe:ease-out", active ? "scale-100" : "motion-safe:scale-110")}
@@ -119,7 +122,7 @@ export function HeroCarousel() {
               <div className="absolute inset-0 bg-[#0f1d2e]/60 sm:bg-transparent sm:bg-gradient-to-r sm:from-[#0f1d2e]/85 sm:via-[#0f1d2e]/50 sm:via-55% sm:to-transparent" aria-hidden />
               <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0f1d2e]/80 to-transparent" aria-hidden />
 
-              <div className="relative mx-auto flex h-full w-full max-w-6xl items-center px-4 pb-32 sm:px-6 sm:pb-28">
+              <motion.div style={{ y: heroScroll.y, opacity: heroScroll.opacity }} className="relative mx-auto flex h-full w-full max-w-6xl items-center px-4 pb-32 sm:px-6 sm:pb-28">
                 <div className="lp-stagger max-w-2xl">
                   <p style={vars(0)} className="inline-flex items-center gap-2 text-sm font-medium text-white/90">
                     <span className="size-1.5 rounded-full bg-lp-accent" aria-hidden />
@@ -143,7 +146,7 @@ export function HeroCarousel() {
                     </a>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
           );
         })}

@@ -84,8 +84,8 @@
 
 /*
  * Landing page motion. Everything is opt-in for people who allow motion, and degrades to fully visible content.
- * .lp-reveal: fades and rises as it scrolls into view (CSS scroll-driven animation, no JavaScript; browsers without
- * support simply show the content). --i staggers siblings. .lp-stagger: children of the active hero slide rise in order.
+ * Scroll reveals, parallax and the progress bar are done with Framer Motion (components/landing/motion.tsx).
+ * .lp-stagger: children of the active hero slide rise in order.
  */
 @keyframes lp-rise {
   from {
@@ -109,13 +109,6 @@
   transform-origin: left center;
 }
 @media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .lp-reveal {
-      animation: lp-rise linear both;
-      animation-timeline: view();
-      animation-range: entry calc(var(--i, 0) * 6%) entry calc(32% + var(--i, 0) * 6%);
-    }
-  }
   /* Hero timer: the active card's bar fills over the slide's duration; finishing it advances the carousel. */
   .lp-progress[data-run="true"] {
     animation: lp-progress var(--lp-dur, 7000ms) linear forwards;

@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { MobileMenu } from "./mobile-menu";
+import { Reveal } from "./motion";
 import { BrandLogo, Container, lpButton } from "./ui";
 
 /** In-page anchors only: every destination below exists. */
@@ -83,7 +84,7 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-lp-border bg-white">
       <Container className="py-14">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+        <Reveal y={20} className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
           <div className="max-w-sm">
             <BrandLogo />
             <p className="mt-4 text-sm leading-6 text-lp-text">
@@ -107,7 +108,7 @@ export function SiteFooter() {
               </ul>
             </nav>
           ))}
-        </div>
+        </Reveal>
         <div className="mt-12 flex flex-col gap-2 border-t border-lp-border pt-6 text-xs text-lp-text sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} StoreForge. All rights reserved.</p>
           <p>
