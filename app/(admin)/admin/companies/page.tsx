@@ -28,7 +28,7 @@ export default async function CompaniesPage() {
       {companies.length === 0 ? (
         <EmptyState icon={Building2} title="No companies yet" description="Create a company together with its owner account." action={create} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border bg-card">
+        <div className="overflow-x-auto rounded-lg border bg-card">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40">

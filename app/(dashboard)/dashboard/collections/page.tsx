@@ -34,7 +34,7 @@ export default async function CollectionsPage() {
             const src = publicImageUrl(c.imagePath);
             return (
               <li key={c.id}>
-                <Link href={`${ROUTES.collections}/${c.id}`} className="group block overflow-hidden rounded-xl border bg-card transition-shadow outline-none hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring">
+                <Link href={`${ROUTES.collections}/${c.id}`} className="group block overflow-hidden rounded-lg border bg-card transition-shadow outline-none hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring">
                   <div className="relative flex aspect-[16/9] items-center justify-center bg-muted text-muted-foreground">
                     {src ? <Image src={src} alt="" fill sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 100vw" className="object-cover" /> : <ImageIcon className="size-6" aria-hidden />}
                   </div>

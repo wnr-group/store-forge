@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { AnalyticsView } from "@/components/analytics/analytics-view";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -48,13 +48,8 @@ export default async function DashboardPage() {
         actions={
           <>
             <StatusBadge tone={store.status === "active" ? "active" : "draft"}><span className="capitalize">{store.status}</span></StatusBadge>
-            {storeUrl ? (
-              <a href={storeUrl} target="_blank" rel="noopener noreferrer" className={buttonVariants()}>
-                View store <ExternalLink aria-hidden />
-              </a>
-            ) : null}
             <Link href={ROUTES.analytics} className={buttonVariants({ variant: "outline" })}>
-              Analytics <ExternalLink className="opacity-60" aria-hidden />
+              <BarChart3 aria-hidden /> Analytics
             </Link>
           </>
         }

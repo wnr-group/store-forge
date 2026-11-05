@@ -13,6 +13,7 @@ import {
 } from "@/app/(dashboard)/dashboard/team/actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { FormField } from "@/components/shared/form-field";
+import { PageHeader } from "@/components/shared/page-header";
 import { PasswordInput } from "@/components/shared/password-input";
 import { ResetPasswordDialog } from "@/components/shared/reset-password-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -154,7 +155,7 @@ function EditMemberDialog({ member, onClose }: { member: MemberRow; onClose: () 
 type Pending = { kind: "edit" | "reset" | "toggle" | "remove"; member: MemberRow } | null;
 
 /** The Owner's team table. Every action is re-authorised on the server (Owner of the active tenant only). */
-export function TeamManager({ members }: { members: MemberRow[] }) {
+export function TeamManager({ members, description }: { members: MemberRow[]; description: string }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const [target, setTarget] = useState<Pending>(null);
@@ -163,12 +164,16 @@ export function TeamManager({ members }: { members: MemberRow[] }) {
 
   return (
     <>
-      <div className="mb-4 flex justify-end">
-        <Button onClick={() => setAdding(true)}>
-          <PlusCircle aria-hidden /> Add member
-        </Button>
-      </div>
-      <div className="overflow-x-auto rounded-xl border bg-card">
+      <PageHeader
+        title="Team members"
+        description={description}
+        actions={
+          <Button onClick={() => setAdding(true)}>
+            <PlusCircle aria-hidden /> Add member
+          </Button>
+        }
+      />
+      <div className="overflow-x-auto rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">

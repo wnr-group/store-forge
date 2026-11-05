@@ -8,6 +8,7 @@ import { discardUploadsAction } from "@/app/(dashboard)/dashboard/uploads/discar
 import { Button } from "@/components/ui/button";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
+import { uuid } from "@/lib/utils/uuid";
 import { IMAGE_MAX_BYTES, IMAGE_TYPES } from "@/lib/validations/catalog";
 
 export type ImageItem = {
@@ -78,7 +79,7 @@ export function ImageUploader({ value, onChange, scope, ownerId, max, disabled, 
     if (problems.length) setNotice(problems.join(". "));
     if (!files.length) return;
 
-    const items: ImageItem[] = files.map((f) => ({ key: crypto.randomUUID(), path: null, altText: null, preview: URL.createObjectURL(f), progress: 0, status: "uploading", saved: false }));
+    const items: ImageItem[] = files.map((f) => ({ key: uuid(), path: null, altText: null, preview: URL.createObjectURL(f), progress: 0, status: "uploading", saved: false }));
     if (single && value.some((v) => v.path && !v.saved)) void discardUploadsAction(value.flatMap((v) => (v.path && !v.saved ? [v.path] : [])));
     onChange((prev) => (single ? items : [...prev, ...items]));
 
@@ -142,7 +143,7 @@ export function ImageUploader({ value, onChange, scope, ownerId, max, disabled, 
                     </div>
                   ) : null}
                   {!single && index === 0 && item.status === "done" ? (
-                    <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-medium shadow-xs">
+                    <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-background px-2 py-0.5 text-[11px] font-medium">
                       <Star className="size-3 fill-current" aria-hidden /> Main
                     </span>
                   ) : null}

@@ -1,32 +1,32 @@
 import { BarChart3, Boxes, Building2, FolderTree, LayoutDashboard, Layers, Package, Palette, PlusCircle, Settings, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 
-export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean };
+export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean; group?: string };
 
 /** Only list pages that exist - no placeholder navigation. */
 export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.dashboard, label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: ROUTES.products, label: "Products", icon: Package },
-  { href: ROUTES.categories, label: "Categories", icon: FolderTree },
-  { href: ROUTES.collections, label: "Collections", icon: Layers },
-  { href: ROUTES.inventory, label: "Inventory", icon: Boxes },
-  { href: ROUTES.customers, label: "Customers", icon: Users },
-  { href: ROUTES.analytics, label: "Analytics", icon: BarChart3 },
-  { href: ROUTES.templates, label: "Templates", icon: Palette },
-  { href: ROUTES.settings, label: "Settings", icon: Settings },
+  { href: ROUTES.products, label: "Products", icon: Package, group: "Catalog" },
+  { href: ROUTES.categories, label: "Categories", icon: FolderTree, group: "Catalog" },
+  { href: ROUTES.collections, label: "Collections", icon: Layers, group: "Catalog" },
+  { href: ROUTES.inventory, label: "Inventory", icon: Boxes, group: "Catalog" },
+  { href: ROUTES.customers, label: "Customers", icon: Users, group: "Insights" },
+  { href: ROUTES.analytics, label: "Analytics", icon: BarChart3, group: "Insights" },
+  { href: ROUTES.templates, label: "Templates", icon: Palette, group: "Workspace" },
+  { href: ROUTES.settings, label: "Settings", icon: Settings, group: "Workspace" },
 ];
 
 export const OWNER_NAV_ITEMS: NavItem[] = [
   ...NAV_ITEMS.slice(0, -1),
-  { href: ROUTES.team, label: "Team members", icon: UserCog },
+  { href: ROUTES.team, label: "Team members", icon: UserCog, group: "Workspace" },
   NAV_ITEMS[NAV_ITEMS.length - 1],
 ];
 
 /** Platform Admin area: companies only - no merchant data. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: ROUTES.adminCompanies, label: "Companies", icon: Building2, exact: true },
-  { href: ROUTES.adminNewCompany, label: "Create company", icon: PlusCircle },
+  { href: ROUTES.adminCompanies, label: "Companies", icon: Building2, exact: true, group: "Platform" },
+  { href: ROUTES.adminNewCompany, label: "Create company", icon: PlusCircle, group: "Platform" },
 ];
 
 /** Serializable key: icon components cannot cross the server -> client boundary. */

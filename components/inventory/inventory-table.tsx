@@ -79,14 +79,14 @@ export function InventoryTable({ rows, canAdjust }: { rows: InventoryRow[]; canA
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border bg-card">
+      <div className="overflow-hidden rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
               <TableHead>Product</TableHead>
               <TableHead className="hidden sm:table-cell">SKU</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Available</TableHead>
+              <TableHead className="hidden text-right sm:table-cell">Available</TableHead>
               {canAdjust ? <TableHead className="w-24"><span className="sr-only">Adjust</span></TableHead> : null}
             </TableRow>
           </TableHeader>
@@ -96,14 +96,15 @@ export function InventoryTable({ rows, canAdjust }: { rows: InventoryRow[]; canA
                 <TableCell>
                   <Link href={`${ROUTES.products}/${r.productId}`} className="font-medium hover:text-primary hover:underline">{r.productName}</Link>
                   {r.variantTitle ? <span className="block text-xs text-muted-foreground">{r.variantTitle}</span> : null}
+                  {r.tracked ? <span className="block text-xs tabular-nums text-muted-foreground sm:hidden">{r.quantity} available</span> : null}
                 </TableCell>
                 <TableCell className="hidden font-mono text-xs text-muted-foreground sm:table-cell">{r.sku ?? "—"}</TableCell>
                 <TableCell><StockState row={r} /></TableCell>
-                <TableCell className="text-right tabular-nums">{r.tracked ? r.quantity : "—"}</TableCell>
+                <TableCell className="hidden text-right tabular-nums sm:table-cell">{r.tracked ? r.quantity : "—"}</TableCell>
                 {canAdjust ? (
                   <TableCell className="text-right">
-                    <Button size="sm" variant="outline" disabled={!r.tracked} onClick={() => open(r)} title={r.tracked ? undefined : "Inventory is not tracked for this product"}>
-                      <SlidersHorizontal aria-hidden /> Adjust
+                    <Button size="sm" variant="outline" disabled={!r.tracked} onClick={() => open(r)} aria-label={`Adjust stock for ${label(r)}`} title={r.tracked ? undefined : "Inventory is not tracked for this product"}>
+                      <SlidersHorizontal aria-hidden /> <span className="hidden sm:inline">Adjust</span>
                     </Button>
                   </TableCell>
                 ) : null}

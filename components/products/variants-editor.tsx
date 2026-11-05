@@ -98,7 +98,7 @@ export function VariantsEditor({ options, variants, basePrice, imagePaths, track
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             {opt.values.map((v) => (
-              <span key={v} className="inline-flex items-center gap-1 rounded-full border bg-muted px-2 py-0.5 text-xs">
+              <span key={v} className="inline-flex items-center gap-1 rounded-md border bg-muted px-2 py-0.5 text-xs">
                 {v}
                 <button type="button" disabled={disabled} onClick={() => setOption(i, { values: opt.values.filter((x) => x !== v) })} aria-label={`Remove ${v}`} className="rounded-full text-muted-foreground hover:text-foreground">
                   <X className="size-3" aria-hidden />

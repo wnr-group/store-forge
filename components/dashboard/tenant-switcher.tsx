@@ -40,7 +40,7 @@ export function TenantSwitcher({ activeTenantId, tenants, storeName, compact = f
       <DropdownMenuTrigger
         className={cn(
           buttonVariants({ variant: "outline" }),
-          "h-10 w-full justify-between gap-2 border-sidebar-border bg-sidebar-accent px-2.5 text-white hover:bg-sidebar-accent/70 hover:text-white aria-expanded:bg-sidebar-accent aria-expanded:text-white",
+          "h-10 w-full justify-between gap-2 border-sidebar-border bg-card px-2.5 text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent aria-expanded:text-sidebar-accent-foreground",
           compact && "justify-center px-0",
         )}
         aria-label="Switch workspace"

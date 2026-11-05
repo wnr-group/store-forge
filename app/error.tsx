@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 
@@ -15,9 +14,9 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
       </p>
       <div className="flex gap-2">
         <Button onClick={reset}>Try again</Button>
-        <Link href="/dashboard" className={buttonVariants({ variant: "outline" })}>
+        <a href="/dashboard" className={buttonVariants({ variant: "outline" })}>
           Go to dashboard
-        </Link>
+        </a>
       </div>
     </div>
   );

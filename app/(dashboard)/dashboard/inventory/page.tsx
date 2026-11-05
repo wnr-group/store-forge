@@ -65,7 +65,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
       {history.length > 0 ? (
         <section aria-labelledby="history" className="mt-10">
           <h2 id="history" className="mb-3 text-sm font-semibold">Recent adjustments</h2>
-          <ul className="divide-y rounded-xl border bg-card text-sm">
+          <ul className="divide-y rounded-lg border bg-card text-sm">
             {history.map((h) => (
               <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
                 <span className="min-w-0">

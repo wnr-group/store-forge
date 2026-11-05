@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -27,6 +27,15 @@ const names = (kind: "currency" | "timeZone") => {
   }
 };
 
+// Intl.supportedValuesOf() returns different lists in Node and in the browser, so rendering it during SSR makes the
+// <option> lists differ and hydration fails. The server (and the hydration pass) render only the fixed base lists;
+// the full browser lists are added right after, via useSyncExternalStore's separate server/client snapshots.
+const NO_EXTRA = { currencies: [] as string[], zones: [] as string[] };
+let clientExtra: typeof NO_EXTRA | undefined;
+const getClientExtra = () => (clientExtra ??= { currencies: names("currency"), zones: names("timeZone") });
+const getServerExtra = () => NO_EXTRA;
+const subscribeNever = () => () => {};
+
 export function StoreSettingsForm({ store, canEdit, currencyLocked }: Props) {
   const router = useRouter();
   const [v, setV] = useState({
@@ -42,8 +51,9 @@ export function StoreSettingsForm({ store, canEdit, currencyLocked }: Props) {
     store.logoUrl ? [{ key: "existing", path: store.logoUrl, altText: null, progress: 100, status: "done", saved: true }] : [],
   );
   const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
-  const currencies = useMemo(() => Array.from(new Set([store.currency, "INR", "USD", "EUR", "GBP", "AED", "SGD", "AUD", "CAD", ...names("currency")])), [store.currency]);
-  const zones = useMemo(() => Array.from(new Set([store.timezone, "Asia/Kolkata", "UTC", ...names("timeZone")])), [store.timezone]);
+  const extra = useSyncExternalStore(subscribeNever, getClientExtra, getServerExtra);
+  const currencies = useMemo(() => Array.from(new Set([store.currency, "INR", "USD", "EUR", "GBP", "AED", "SGD", "AUD", "CAD", ...extra.currencies])), [store.currency, extra]);
+  const zones = useMemo(() => Array.from(new Set([store.timezone, "Asia/Kolkata", "UTC", ...extra.zones])), [store.timezone, extra]);
   const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setV({ ...v, [k]: e.target.value });
     clear(k);

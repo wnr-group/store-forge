@@ -80,8 +80,9 @@ export async function withUserContext<T>(db: Database, userId: string, fn: (tx: 
       set_config('request.jwt.claims', ${claims}, true),
       set_config('request.jwt.claim.sub', ${userId}, true),
       set_config('request.jwt.claim.role', 'authenticated', true)`;
-    await tx.execute(setClaims);
-    await tx.execute(REQUEST_ROLE_SQL);
+    // Sent together (pipelined on this transaction's connection, executed in this order): saves one network round trip
+    // per request. The role switch still happens strictly after the claims are set, and before any query of `fn`.
+    await Promise.all([tx.execute(setClaims), tx.execute(REQUEST_ROLE_SQL)]);
 
     if (!verified.has(db)) {
       await assertRlsEnforced(tx);

@@ -56,105 +56,103 @@
   --color-info: var(--info);
   --color-info-text: var(--info-text);
   --color-error: var(--error);
-  --color-lavender: var(--lavender);
   --color-link: var(--link);
-  --font-heading: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 /*
- * Midnight Indigo design tokens. Colours are defined once here; components use the
- * semantic Tailwind names (bg-primary, text-muted-foreground, bg-sidebar...).
- * `-text` variants are darker shades of the status colours for small text, which the
- * brand fills (#16A36A, #E6A23C, #3985E8) cannot reach 4.5:1 contrast on white.
+ * StoreForge design tokens (Linear-inspired workspace theme). Colours are defined once here; components use the
+ * semantic Tailwind names (bg-card, text-muted-foreground, bg-sidebar...). Surfaces are white on a very light gray
+ * workspace, text is neutral charcoal, and the single indigo accent marks primary actions, links, focus and selection.
+ * `-text` variants are darker shades of the status colours for small text, which the fills cannot reach 4.5:1
+ * contrast with on white.
  */
 :root {
   color-scheme: light;
-  --background: #f7f7f5;
-  --foreground: #191d2b;
+  --background: #f7f8fa;
+  --foreground: #25262b;
   --card: #ffffff;
-  --card-foreground: #191d2b;
+  --card-foreground: #25262b;
   --popover: #ffffff;
-  --popover-foreground: #191d2b;
+  --popover-foreground: #25262b;
   --primary: #635bff;
-  --primary-hover: #5148e5;
+  --primary-hover: #5249e8;
   --primary-foreground: #ffffff;
-  --lavender: #a5a0ff;
-  --link: #5148e5;
-  --secondary: #f1f1f5;
-  --secondary-foreground: #191d2b;
-  --muted: #f1f1f5;
-  --muted-foreground: #687083;
-  --accent: #efeeff;
-  --accent-foreground: #191d2b;
-  --destructive: #c03a3a;
-  --error: #e05252;
+  --link: #5249e8;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #25262b;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #25262b;
+  --destructive: #c93f3f;
+  --error: #dc5353;
   --success: #16a36a;
-  --success-text: #0d7a4f;
-  --warning: #e6a23c;
-  --warning-text: #8a5a06;
+  --success-text: #0f7a50;
+  --warning: #d99a28;
+  --warning-text: #7a5410;
   --info: #3985e8;
   --info-text: #1f62bd;
-  --border: #e8e9ef;
-  --input: #838aa0;
+  --border: #e5e7eb;
+  --input: #d1d5db;
   --ring: #635bff;
   --chart-1: #635bff;
-  --chart-2: #7f78ff;
-  --chart-3: #a5a0ff;
-  --chart-4: #3985e8;
-  --chart-5: #16a36a;
-  --radius: 0.625rem;
-  --sidebar: #151a2d;
-  --sidebar-foreground: #c3c8d9;
+  --chart-2: #9ca3af;
+  --chart-3: #d1d5db;
+  --chart-4: #6b7280;
+  --chart-5: #e5e7eb;
+  --radius: 0.5rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #4b5563;
   --sidebar-primary: #635bff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #20263a;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #252b42;
-  --sidebar-ring: #a5a0ff;
+  --sidebar-accent: #f1f2f4;
+  --sidebar-accent-foreground: #25262b;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #635bff;
 }
 
 .dark {
   color-scheme: dark;
-  --background: #0e1224;
-  --foreground: #e9ebf5;
-  --card: #161b30;
-  --card-foreground: #e9ebf5;
-  --popover: #1a2038;
-  --popover-foreground: #e9ebf5;
-  --primary: #635bff;
-  --primary-hover: #5148e5;
-  --primary-foreground: #ffffff;
-  --lavender: #a5a0ff;
+  --background: #111214;
+  --foreground: #e8e9eb;
+  --card: #18191c;
+  --card-foreground: #e8e9eb;
+  --popover: #1c1d20;
+  --popover-foreground: #e8e9eb;
+  --primary: #7a73ff;
+  --primary-hover: #8d87ff;
+  --primary-foreground: #0f0e1a;
   --link: #a5a0ff;
-  --secondary: #1e2440;
-  --secondary-foreground: #e9ebf5;
-  --muted: #1e2440;
-  --muted-foreground: #9aa2bb;
-  --accent: #252c4d;
-  --accent-foreground: #e9ebf5;
+  --secondary: #222327;
+  --secondary-foreground: #e8e9eb;
+  --muted: #222327;
+  --muted-foreground: #9ca0a8;
+  --accent: #26272b;
+  --accent-foreground: #e8e9eb;
   --destructive: #f08080;
   --error: #e05252;
   --success: #16a36a;
   --success-text: #4fd69a;
-  --warning: #e6a23c;
-  --warning-text: #f2bd6b;
+  --warning: #d99a28;
+  --warning-text: #f2c26b;
   --info: #3985e8;
   --info-text: #7fb2f4;
-  --border: #262d48;
-  --input: #6b749b;
-  --ring: #8c86ff;
-  --chart-1: #8c85ff;
-  --chart-2: #a5a0ff;
-  --chart-3: #6e68e0;
-  --chart-4: #5aa0f0;
-  --chart-5: #3cc088;
-  --sidebar: #0a0e1c;
-  --sidebar-foreground: #b4bad0;
-  --sidebar-primary: #635bff;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1b2140;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #1d2340;
+  --border: #2a2b2f;
+  --input: #3a3c41;
+  --ring: #a5a0ff;
+  --chart-1: #8d87ff;
+  --chart-2: #7b7f88;
+  --chart-3: #4a4c52;
+  --chart-4: #9ca0a8;
+  --chart-5: #34363a;
+  --sidebar: #141517;
+  --sidebar-foreground: #a8acb3;
+  --sidebar-primary: #7a73ff;
+  --sidebar-primary-foreground: #0f0e1a;
+  --sidebar-accent: #222327;
+  --sidebar-accent-foreground: #e8e9eb;
+  --sidebar-border: #25262a;
   --sidebar-ring: #a5a0ff;
 }
 

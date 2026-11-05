@@ -47,7 +47,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             <EmptyState icon={SearchX} title="No customers match" description="Try a different name, email or phone number." />
           ) : (
             <>
-              <div className="overflow-x-auto rounded-xl border bg-card">
+              <div className="overflow-x-auto rounded-lg border bg-card">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/40 hover:bg-muted/40">

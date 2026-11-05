@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ROUTES } from "@/config/app";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { cn } from "@/lib/utils";
+import { uuid } from "@/lib/utils/uuid";
 import { collectionInputSchema } from "@/lib/validations/catalog";
 import type { Collection } from "@/lib/db/schema";
 
@@ -30,7 +31,7 @@ type Props = {
 
 export function CollectionForm({ mode, initial, products, canDelete }: Props) {
   const router = useRouter();
-  const [id] = useState(() => initial?.id ?? crypto.randomUUID());
+  const [id] = useState(() => initial?.id ?? uuid());
   const [name, setName] = useState(initial?.name ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -139,7 +140,7 @@ export function CollectionForm({ mode, initial, products, canDelete }: Props) {
         </div>
       </div>
 
-      <div className="sticky bottom-0 z-20 -mx-3 mt-6 border-t bg-background/90 backdrop-blur sm:-mx-6">
+      <div className="sticky bottom-0 z-20 -mx-3 mt-6 border-t bg-background sm:-mx-6">
         <div className="flex items-center justify-end gap-2 px-3 py-3 sm:px-6">
           <Link href={ROUTES.collections} className={cn(buttonVariants({ variant: "outline" }), "h-9")}>{mode === "create" ? "Cancel" : "Back"}</Link>
           <Button type="submit" className="h-9" disabled={pending || uploading}>
