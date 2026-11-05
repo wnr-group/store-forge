@@ -145,7 +145,7 @@ export function CreateCompanyForm() {
 
       <div className="flex justify-end">
         <Button type="submit" size="lg" disabled={pending}>
-          {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Creating…" : "Create company"}
+          {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Creating…" : "Create organization"}
         </Button>
       </div>
     </form>

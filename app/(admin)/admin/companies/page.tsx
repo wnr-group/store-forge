@@ -18,7 +18,7 @@ export default async function CompaniesPage() {
   const companies = await listCompanies();
   const create = (
     <Link href={ROUTES.adminNewCompany} className={buttonVariants()}>
-      <PlusCircle aria-hidden /> Create company
+      <PlusCircle aria-hidden /> Create organization
     </Link>
   );
 

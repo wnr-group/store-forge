@@ -28,7 +28,7 @@ export default async function AdminOverviewPage() {
         description="Companies using StoreForge. Only you can create companies and their owner accounts."
         actions={
           <Link href={ROUTES.adminNewCompany} className={buttonVariants()}>
-            <PlusCircle aria-hidden /> Create company
+            <PlusCircle aria-hidden /> Create organization
           </Link>
         }
       />

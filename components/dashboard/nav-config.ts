@@ -26,7 +26,7 @@ export const OWNER_NAV_ITEMS: NavItem[] = [
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard, exact: true },
   { href: ROUTES.adminCompanies, label: "Companies", icon: Building2, exact: true, group: "Platform" },
-  { href: ROUTES.adminNewCompany, label: "Create company", icon: PlusCircle, group: "Platform" },
+  { href: ROUTES.adminNewCompany, label: "Create organization", icon: PlusCircle, group: "Platform" },
 ];
 
 /** Serializable key: icon components cannot cross the server -> client boundary. */
