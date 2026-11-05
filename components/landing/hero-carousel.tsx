@@ -50,7 +50,7 @@ const vars = (i: number) => ({ "--i": i }) as React.CSSProperties;
 export function HeroCarousel() {
   const [index, setIndex] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
-  const [hovering, setHovering] = useState(false);
+  const [keyboardFocus, setKeyboardFocus] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
@@ -72,17 +72,17 @@ export function HeroCarousel() {
     [index],
   );
 
-  const playing = !userPaused && !hovering && !reduceMotion;
+  const playing = !userPaused && !keyboardFocus && !reduceMotion;
 
   return (
     <section aria-roledescription="carousel" aria-label="Featured" className="relative">
       <h1 className="sr-only">StoreForge by WNR: build, manage and grow your online store</h1>
       <div
         className="relative h-[calc(100svh-6.3125rem)] max-h-[58rem] min-h-[34rem] w-full overflow-hidden bg-[#0f1d2e]"
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
-        onFocus={() => setHovering(true)}
-        onBlur={() => setHovering(false)}
+        // Hovering never pauses the timer. It only holds while someone is tabbing through the controls (keyboard
+        // focus), so a mouse click on a control does not stop the slide show either.
+        onFocus={(e) => e.target.matches(":focus-visible") && setKeyboardFocus(true)}
+        onBlur={() => setKeyboardFocus(false)}
       >
         {SLIDES.map((s, i) => {
           const active = i === index;

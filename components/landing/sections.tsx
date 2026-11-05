@@ -9,43 +9,59 @@ const stagger = (i: number) => ({ "--i": i }) as React.CSSProperties;
 /* ------------------------------------------------------------------ Platform introduction */
 
 const INTRO_POINTS = [
-  { icon: Store, title: "Create your online store", text: "A storefront of your own, on its own web address." },
-  { icon: PackageCheck, title: "Manage your products", text: "Photos, variants, prices and stock in one place." },
-  { icon: ShoppingBag, title: "Organize orders", text: "See every order and where it stands." },
-  { icon: MessageCircle, title: "Connect with customers", text: "Know who buys from you and what they spend." },
-  { icon: BarChart3, title: "Understand your business", text: "Clear sales numbers and your best sellers." },
+  { icon: Store, title: "Create your online store", text: "Open a storefront of your own, with your name and logo, on its own web address." },
+  { icon: PackageCheck, title: "Manage your products", text: "Keep photos, variants, prices and stock organised in one place." },
+  { icon: ShoppingBag, title: "Organize orders", text: "See every order and where it stands, from new to fulfilled." },
+  { icon: MessageCircle, title: "Connect with customers", text: "Know who buys from you, how often and how much they spend." },
+  { icon: BarChart3, title: "Understand your business", text: "Follow your sales and spot your best sellers at a glance." },
 ];
 
 export function PlatformIntro() {
   return (
     <Section id="platform">
-      <Container className="grid items-center gap-12 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-16">
-        <div>
-          <SectionHeading eyebrow="The platform" title="Everything Your Business Needs to Sell Online.">
-            StoreForge, from WNR, helps you open an online store and run it day to day, without juggling tools. Add your products, keep track of orders and customers, and see how your business is doing.
-          </SectionHeading>
-          <ul className="mt-10 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+      <Container>
+        <SectionHeading eyebrow="The platform" title="Everything Your Business Needs to Sell Online." align="center">
+          StoreForge, from WNR, helps you open an online store and run it day to day, without juggling tools.
+        </SectionHeading>
+
+        <div className="mt-14 grid items-stretch gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14">
+          {/* Photograph */}
+          <Photo
+            src="/landing/hero-workspace.webp"
+            alt="A person typing on a laptop at a wooden desk with a notebook, headphones and a cup of coffee"
+            width={1600}
+            height={900}
+            sizes="(min-width: 1024px) 480px, 100vw"
+            className="lp-reveal aspect-[4/3] shadow-[0_28px_60px_-28px_rgba(23,43,66,0.4)] lg:aspect-auto lg:min-h-[28rem]"
+            imgClassName="object-[30%_50%]"
+          />
+
+          {/* Capabilities: one row each, numbered and separated by thin rules */}
+          <ol className="divide-y divide-lp-border border-y border-lp-border">
             {INTRO_POINTS.map((p, i) => (
-              <li key={p.title} style={stagger(i)} className="lp-reveal flex gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-lp-soft text-lp-primary">
-                  <p.icon className="size-5" strokeWidth={1.75} aria-hidden />
-                </span>
-                <span>
-                  <span className="block text-sm font-semibold text-lp-heading">{p.title}</span>
-                  <span className="mt-0.5 block text-sm leading-6 text-lp-text">{p.text}</span>
-                </span>
+              <li key={p.title} style={stagger(i)} className="lp-reveal group relative">
+                <div className="flex items-start gap-4 px-1 py-5 transition-colors duration-200 sm:gap-5 sm:py-6">
+                  <span className="mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-xl border border-lp-border bg-white text-lp-primary shadow-sm transition-colors duration-200 group-hover:border-lp-primary group-hover:bg-lp-primary group-hover:text-white motion-reduce:transition-none">
+                    <p.icon className="size-5" strokeWidth={1.75} aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-base font-semibold text-lp-heading">{p.title}</span>
+                    <span className="mt-1 block text-sm leading-6 text-lp-text">{p.text}</span>
+                  </span>
+                  <span className="pt-1 text-sm font-medium tabular-nums text-lp-accent" aria-hidden>
+                    0{i + 1}
+                  </span>
+                </div>
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
-        <Photo
-          src="/landing/hero-workspace.webp"
-          alt="A person typing on a laptop at a wooden desk with a notebook, headphones and a cup of coffee"
-          width={1600}
-          height={900}
-          sizes="(min-width: 1024px) 460px, 100vw"
-          className="lp-reveal aspect-[4/3] shadow-[0_20px_50px_-24px_rgba(23,43,66,0.3)]"
-        />
+
+        <div className="lp-reveal mt-12 flex justify-center">
+          <a href="#features" className={lpButton("secondary", "h-11")}>
+            See everything it can do <ArrowRight className="size-4" aria-hidden />
+          </a>
+        </div>
       </Container>
     </Section>
   );
