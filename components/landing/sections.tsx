@@ -347,10 +347,21 @@ export function FinalCta() {
   return (
     <section className="px-4 py-16 sm:px-6 sm:py-24">
       <div className="lp-reveal relative mx-auto max-w-6xl overflow-hidden rounded-2xl bg-lp-heading">
-        <Image src="/landing/cta-owner.webp" alt="A smiling business owner in an apron holding a Yes, we're open sign outside his shop" fill sizes="(min-width: 1152px) 1152px, 100vw" className="object-cover object-[center_50%]" />
-        <div className="absolute inset-0 bg-lp-heading/80 sm:bg-transparent sm:bg-gradient-to-r sm:from-lp-heading sm:from-35% sm:via-lp-heading/70 sm:via-55% sm:to-transparent" aria-hidden />
-        <div className="relative px-6 py-16 sm:px-12 sm:py-28 lg:px-16">
-          <h2 className="max-w-lg text-3xl font-semibold tracking-tight text-balance text-white sm:text-4xl sm:leading-[1.15]">Your Business Deserves to Be Online.</h2>
+        {/* Small screens: photo on top, text below on navy. Large screens: photo behind the text. */}
+        <div className="relative aspect-[16/10] sm:absolute sm:inset-0 sm:aspect-auto">
+          <Image
+            src="/landing/cta-welcome.webp"
+            alt="A smiling shop owner in a navy apron holding a Yes, we're open sign in the doorway of her pottery shop"
+            fill
+            sizes="(min-width: 1152px) 1152px, 100vw"
+            className="object-cover object-[62%_30%] sm:origin-[0%_100%] sm:scale-[1.12] sm:object-[0%_100%]"
+          />
+          {/* Navy wash only over the text side, so the owner stays bright on the right */}
+          <div className="absolute inset-0 hidden sm:block sm:bg-gradient-to-r sm:from-lp-heading sm:from-15% sm:via-lp-heading/65 sm:via-38% sm:to-transparent sm:to-62%" aria-hidden />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-lp-heading to-transparent sm:hidden" aria-hidden />
+        </div>
+        <div className="relative px-6 pt-4 pb-12 sm:px-12 sm:py-32 lg:px-16">
+          <h2 className="max-w-md text-3xl font-semibold tracking-tight text-balance text-white sm:text-4xl sm:leading-[1.15]">Your Business Deserves to Be Online.</h2>
           <p className="mt-4 max-w-md text-base leading-7 text-white/85 sm:text-lg">Start building your online presence and create better shopping experiences with StoreForge.</p>
           <div className="mt-8">
             <a href={ROUTES.login} className={lpButton("light", "h-12 px-7 text-[15px]")}>
@@ -362,4 +373,3 @@ export function FinalCta() {
     </section>
   );
 }
-
