@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/config/app";
 import { requireUser } from "@/lib/auth/session";
 import { isPlatformAdmin } from "@/lib/auth/platform";
-import { getUserTenants } from "@/lib/tenant/context";
+import { getActiveTenant } from "@/lib/tenant/context";
 
 export const metadata: Metadata = { title: "No workspace" };
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "No workspace" };
 export default async function NoWorkspacePage() {
   await requireUser();
   if (await isPlatformAdmin()) redirect(ROUTES.admin);
-  if ((await getUserTenants()).length > 0) redirect(ROUTES.dashboard);
+  if (await getActiveTenant()) redirect(ROUTES.dashboard);
 
   return (
     <AuthShell
