@@ -18,7 +18,7 @@ export default async function SettingsPage() {
   return (
     <>
       <PageHeader title="Settings" description={`${active.tenant.name} · you are ${ROLE_LABELS[active.role].toLowerCase()}`} />
-      <div className="max-w-3xl space-y-8">
+      <div className="max-w-5xl divide-y">
         {store ? (
           <StoreSettingsForm key={store.updatedAt.toISOString()} store={store} canEdit={canManageStore(active.role)} currencyLocked={locked} />
         ) : (
