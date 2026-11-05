@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { ROUTES } from "@/config/app";
 import { cn } from "@/lib/utils";
 import { useHeroScroll } from "./motion";
 import { lpButton } from "./ui";
@@ -26,7 +25,7 @@ const SLIDES: Slide[] = [
     eyebrow: "Build your online store",
     title: ["Everything You Need", "to Build Your", "Online Store."],
     text: "Bring your business online with a beautiful storefront and everything you need to start selling.",
-    cta: { label: "Start Your Store", href: ROUTES.login },
+    cta: { label: "See How It Works", href: "#how-it-works" },
     image: { src: "/landing/hero-woman.webp", alt: "A woman in a navy shirt smiling as she works on a laptop at a wooden desk, with navy shelves of ceramics and plants behind her", position: "78% 40%" },
   },
   {
@@ -40,15 +39,13 @@ const SLIDES: Slide[] = [
     eyebrow: "Grow your business",
     title: ["Turn Your Ideas Into", "a Growing Online", "Business."],
     text: "Showcase your products, connect with customers and create memorable shopping experiences.",
-    cta: { label: "Get Started", href: ROUTES.login },
+    cta: { label: "Explore the Platform", href: "#platform" },
     image: { src: "/landing/hero-grow.webp", alt: "Wooden shelves on a navy wall displaying folded knitwear, ceramics, a leather wallet, headphones and plants", position: "80% 50%" },
   },
 ];
 
 const vars = (i: number) => ({ "--i": i }) as React.CSSProperties;
 
-// Sign-in links are plain anchors: /login redirects signed-in users to /dashboard, and a redirected client-side
-// <Link> navigation fails in React's Flight client ("chunk.reason.enqueueModel is not a function").
 export function HeroCarousel() {
   const [index, setIndex] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);

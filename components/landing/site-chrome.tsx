@@ -1,8 +1,6 @@
-import { ArrowRight } from "lucide-react";
-import { ROUTES } from "@/config/app";
 import { MobileMenu } from "./mobile-menu";
 import { Reveal } from "./motion";
-import { BrandLogo, Container, lpButton } from "./ui";
+import { BrandLogo, Container } from "./ui";
 
 /** In-page anchors only: every destination below exists. */
 export const NAV_LINKS = [
@@ -24,8 +22,6 @@ export function AnnouncementBar() {
   );
 }
 
-// Sign-in links are plain anchors: /login redirects signed-in users to /dashboard, and a redirected client-side
-// <Link> navigation fails in React's Flight client ("chunk.reason.enqueueModel is not a function").
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-lp-border bg-lp-bg">
@@ -41,13 +37,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <a href={ROUTES.login} className="hidden rounded-md px-3 py-2 text-sm font-medium text-lp-heading transition-colors hover:bg-lp-soft sm:inline-flex">
-            Login
-          </a>
-          <a href={ROUTES.login} className={lpButton("primary", "hidden h-10 px-4 sm:inline-flex")}>
-            Get Started
-          </a>
-          <MobileMenu links={NAV_LINKS} loginHref={ROUTES.login} />
+          <MobileMenu links={NAV_LINKS} />
         </div>
       </Container>
     </header>
@@ -75,7 +65,6 @@ const FOOTER_COLUMNS = [
     links: [
       { href: "#solutions", label: "For online sellers" },
       { href: "#solutions", label: "For shoppers" },
-      { href: ROUTES.login, label: "Login" },
     ],
   },
 ] as const;
@@ -90,9 +79,6 @@ export function SiteFooter() {
             <p className="mt-4 text-sm leading-6 text-lp-text">
               StoreForge is a commerce platform for online sellers. Each company gets its own catalog, inventory, customers, team and a public storefront on its own subdomain.
             </p>
-            <a href={ROUTES.login} className={lpButton("secondary", "mt-5 h-10")}>
-              Login <ArrowRight className="size-4" aria-hidden />
-            </a>
           </div>
           {FOOTER_COLUMNS.map((col) => (
             <nav key={col.title} aria-label={col.title}>

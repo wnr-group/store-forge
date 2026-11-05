@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { lpButton } from "./ui";
 
 /** Below `md` the nav links collapse into this disclosure. It closes on Escape and when a link is chosen. */
-export function MobileMenu({ links, loginHref }: { links: readonly { href: string; label: string }[]; loginHref: string }) {
+export function MobileMenu({ links }: { links: readonly { href: string; label: string }[] }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -38,14 +37,6 @@ export function MobileMenu({ links, loginHref }: { links: readonly { href: strin
               </li>
             ))}
           </ul>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <a href={loginHref} className={lpButton("secondary")}>
-              Login
-            </a>
-            <a href={loginHref} className={lpButton("primary")}>
-              Get Started
-            </a>
-          </div>
         </nav>
       ) : null}
     </div>

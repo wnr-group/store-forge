@@ -2,11 +2,9 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { ArrowRight, BarChart3, Boxes, Check, Palette, ShoppingBag, Store, Users, type LucideIcon } from "lucide-react";
-import { ROUTES } from "@/config/app";
+import { BarChart3, Boxes, Check, Palette, ShoppingBag, Store, Users, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./motion";
-import { lpButton } from "./ui";
 
 type Feature = {
   icon: LucideIcon;
@@ -136,11 +134,6 @@ export function FeatureExplorer() {
             </li>
           );
         })}
-        <li className="px-5 py-6 sm:px-6">
-          <a href={ROUTES.login} className={lpButton("light", "h-11")}>
-            Start Your Store <ArrowRight className="size-4" aria-hidden />
-          </a>
-        </li>
       </ul>
 
       {/* Large screens: the photographs crossfade as the open feature changes. */}

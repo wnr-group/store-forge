@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { ArrowRight, BarChart3, Check, MessageCircle, PackageCheck, ShoppingBag, Smartphone, Store, Tag, type LucideIcon } from "lucide-react";
-import { ROUTES } from "@/config/app";
 import { cn } from "@/lib/utils";
 import { FeatureExplorer } from "./feature-explorer";
 import { Parallax, Reveal, StackItem, StackList } from "./motion";
@@ -239,11 +238,6 @@ export function ShoppingExperience() {
           ))}
         </ol>
 
-        <Reveal className="mt-12 flex justify-center">
-          <a href={ROUTES.login} className={lpButton("primary", "h-12 px-7 text-[15px]")}>
-            Start Your Store <ArrowRight className="size-4" aria-hidden />
-          </a>
-        </Reveal>
       </Container>
     </Section>
   );
@@ -330,11 +324,6 @@ export function HowItWorks() {
                       </li>
                     ))}
                   </ul>
-                  {i === STEPS.length - 1 ? (
-                    <a href={ROUTES.login} className={lpButton("light", "relative mt-8 h-11 w-fit")}>
-                      Start Your Store <ArrowRight className="size-4" aria-hidden />
-                    </a>
-                  ) : null}
                 </div>
                 <div className="relative order-first aspect-[16/10] lg:order-none lg:aspect-auto">
                   <Image src={st.src} alt={st.alt} fill sizes="(min-width: 1024px) 560px, 100vw" style={{ objectPosition: st.position }} className="object-cover" />
@@ -371,8 +360,8 @@ export function FinalCta() {
           <h2 className="max-w-md text-3xl font-semibold tracking-tight text-balance text-white sm:text-4xl sm:leading-[1.15]">Your Business Deserves to Be Online.</h2>
           <p className="mt-4 max-w-md text-base leading-7 text-white/85 sm:text-lg">Start building your online presence and create better shopping experiences with StoreForge.</p>
           <div className="mt-8">
-            <a href={ROUTES.login} className={lpButton("light", "h-12 px-7 text-[15px]")}>
-              Get Started <ArrowRight className="size-4" aria-hidden />
+            <a href="#platform" className={lpButton("light", "h-12 px-7 text-[15px]")}>
+              Explore the Platform <ArrowRight className="size-4" aria-hidden />
             </a>
           </div>
         </div>
