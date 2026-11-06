@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, type ComponentType } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -30,7 +30,7 @@ const store: StorefrontData = {
     { name: "Mug", slug: "mug", short_description: null, price_minor: 49900, compare_at_price_minor: null, image_path: null },
   ],
 };
-const render = (c: Parameters<typeof createElement>[0], props: object) => renderToStaticMarkup(createElement(c as never, props as never));
+const render = <P extends object>(c: ComponentType<P>, props: P) => renderToStaticMarkup(createElement(c, props));
 const unconfigured = (s: StorefrontData) => resolveTemplateSettings(s, null);
 
 beforeAll(() => vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co"));

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTemplateComponent } from "@/components/storefront/templates";
+import { TemplateView } from "@/components/storefront/templates";
 import { resolveTemplateKey, resolveTemplateSettings, savedFromPublic } from "@/lib/templates/resolve";
 import { getPublicStorefront } from "@/services/storefront.service";
 
@@ -23,11 +23,10 @@ export default async function StorefrontPage({ params }: Params) {
   const store = await getPublicStorefront(slug);
   if (!store) notFound();
 
-  const Template = getTemplateComponent(store.template?.key);
   const settings = resolveTemplateSettings(store, savedFromPublic(store.template));
   return (
     <div data-template={resolveTemplateKey(store.template?.key)} className="contents">
-      <Template store={store} settings={settings} />
+      <TemplateView templateKey={store.template?.key} store={store} settings={settings} />
     </div>
   );
 }
