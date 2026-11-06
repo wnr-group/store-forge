@@ -119,6 +119,22 @@
   }
 }
 
+/* Industries marquee: cards drift right to left. The track holds two identical groups, so -50% loops seamlessly. */
+@keyframes lp-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lp-marquee {
+    animation: lp-marquee var(--lp-marquee-dur, 80s) linear infinite;
+  }
+  .lp-marquee-wrap:hover .lp-marquee,
+  .lp-marquee-wrap:focus-within .lp-marquee {
+    animation-play-state: paused;
+  }
+}
+
 /* Integrations diagram: a slow dash drift along each connector line. */
 @keyframes lp-dash {
   to {

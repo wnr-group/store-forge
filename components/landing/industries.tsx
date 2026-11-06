@@ -1,22 +1,22 @@
-import { IndustriesShowcase, type IndustryCategory } from "./industries-showcase";
+import { IndustriesMarquee, type IndustryCategory } from "./industries-marquee";
 import { Reveal } from "./motion";
 import { Container, Section } from "./ui";
 
-/** Centralised category data. Add `image` to show a photo (a missing one shows "Image Coming Soon"), `href` once a category page exists. */
+/** Centralised category data. Add `image` to show a photo (a missing one shows "Image Coming Soon"). */
 const CATEGORIES: IndustryCategory[] = [
-  { name: "Electronics", icon: "smartphone", text: "Gadgets, computers, smartphones and accessories.", image: "/landing/cat-electronics.webp", alt: "A laptop, smartphone, tablet, camera, headphones and smart speaker on a dark desk", position: "50% 50%" },
-  { name: "Fashion & Clothing", icon: "shirt", text: "Apparel, footwear and fashion accessories.", image: "/landing/cat-fashion.webp", alt: "A blazer, folded shirts, jeans, suede shoes and a straw hat laid out on white", position: "50% 45%" },
-  { name: "Medicine & Healthcare", icon: "pill", text: "Pharmacy, wellness and healthcare products.", image: "/landing/cat-medicine.webp", alt: "Medicine bottles beside a miniature shopping cart filled with blister packs", position: "62% 50%" },
-  { name: "Beauty & Skincare", icon: "sparkles", text: "Cosmetics, skincare and personal care.", image: "/landing/cat-beauty.webp", alt: "Skincare serums and creams displayed on white pedestals against a purple backdrop", position: "50% 55%" },
-  { name: "Groceries & Food", icon: "basket", text: "Fresh produce, packaged food and daily essentials.", image: "/landing/cat-groceries.webp", alt: "Fresh vegetables, fruit, bread and packaged food arranged on a stone surface", position: "50% 50%" },
-  { name: "Home & Furniture", icon: "sofa", text: "Furniture, home decor and household products.", image: "/landing/cat-home.webp", alt: "An upholstered chair beside a wooden stool with a glass lamp, in front of a wood-slat wall", position: "32% 50%" },
-  { name: "Sports & Fitness", icon: "dumbbell", text: "Fitness equipment, sportswear and accessories.", image: "/landing/cat-sports.webp", alt: "Dumbbells, a foam block and a rolled yoga mat on a wooden floor", position: "55% 50%" },
-  { name: "Toys & Lifestyle", icon: "blocks", text: "Toys, games and lifestyle products.", image: "/landing/cat-toys.webp", alt: "A plush unicorn, puzzles, a play tent and wooden toys on a light blue backdrop", position: "50% 50%" },
+  { name: "Electronics", text: "Gadgets, computers, smartphones and accessories.", image: "/landing/cat-electronics.webp", alt: "A laptop, smartphone, tablet, camera, headphones and smart speaker on a dark desk", position: "50% 50%" },
+  { name: "Fashion & Clothing", text: "Apparel, footwear and fashion accessories.", image: "/landing/cat-fashion.webp", alt: "A blazer, folded shirts, jeans, suede shoes and a straw hat laid out on white", position: "50% 45%" },
+  { name: "Medicine & Healthcare", text: "Pharmacy, wellness and healthcare products.", image: "/landing/cat-medicine.webp", alt: "Medicine bottles beside a miniature shopping cart filled with blister packs", position: "68% 50%" },
+  { name: "Beauty & Skincare", text: "Cosmetics, skincare and personal care.", image: "/landing/cat-beauty.webp", alt: "Skincare serums and creams displayed on white pedestals against a purple backdrop", position: "50% 55%" },
+  { name: "Groceries & Food", text: "Fresh produce, packaged food and daily essentials.", image: "/landing/cat-groceries.webp", alt: "Fresh vegetables, fruit, bread and packaged food arranged on a stone surface", position: "50% 50%" },
+  { name: "Home & Furniture", text: "Furniture, home decor and household products.", image: "/landing/cat-home.webp", alt: "An upholstered chair beside a wooden stool with a glass lamp, in front of a wood-slat wall", position: "32% 50%" },
+  { name: "Sports & Fitness", text: "Fitness equipment, sportswear and accessories.", image: "/landing/cat-sports.webp", alt: "Dumbbells, a foam block and a rolled yoga mat on a wooden floor", position: "55% 50%" },
+  { name: "Toys & Lifestyle", text: "Toys, games and lifestyle products.", image: "/landing/cat-toys.webp", alt: "A plush unicorn, puzzles, a play tent and wooden toys on a light blue backdrop", position: "50% 50%" },
 ];
 
 export function Industries() {
   return (
-    <Section id="industries" className="bg-white py-24 sm:py-32">
+    <Section id="industries" className="overflow-hidden bg-white py-24 sm:py-32">
       <Container>
         <div className="grid items-end gap-6 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
           <Reveal y={20}>
@@ -29,10 +29,10 @@ export function Industries() {
             </p>
           </Reveal>
         </div>
-        <Reveal y={28} delay={0.12} className="mt-12 sm:mt-16">
-          <IndustriesShowcase categories={CATEGORIES} />
-        </Reveal>
       </Container>
+      <Reveal y={28} delay={0.12} className="mt-10 sm:mt-14">
+        <IndustriesMarquee categories={CATEGORIES} />
+      </Reveal>
     </Section>
   );
 }

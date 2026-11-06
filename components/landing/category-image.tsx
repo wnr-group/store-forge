@@ -19,7 +19,7 @@ export function ImagePlaceholder({ className, compact = false }: { className?: s
  * Category photo that fills its parent (which must be `relative`). A soft skeleton shows while it loads, the photo
  * eases in, and any load failure swaps in the "Image Coming Soon" placeholder instead of a broken image.
  */
-export function CategoryImage({ src, alt, sizes, position, priority }: { src?: string; alt: string; sizes: string; position?: string; priority?: boolean }) {
+export function CategoryImage({ src, alt, sizes, position, priority, eager }: { src?: string; alt: string; sizes: string; position?: string; priority?: boolean; eager?: boolean }) {
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const zoomRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +45,7 @@ export function CategoryImage({ src, alt, sizes, position, priority }: { src?: s
           fill
           sizes={sizes}
           priority={priority}
+          loading={eager ? "eager" : undefined}
           style={position ? { objectPosition: position } : undefined}
           onLoad={() => setState("ready")}
           onError={() => setState("error")}
