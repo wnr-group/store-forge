@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
@@ -31,9 +32,9 @@ export function MobileMenu({ links }: { links: readonly { href: string; label: s
           <ul className="divide-y divide-lp-border/70">
             {links.map((l) => (
               <li key={l.href}>
-                <a href={l.href} onClick={() => setOpen(false)} className="block px-3 py-4 text-lg font-medium tracking-tight text-lp-heading transition-colors hover:text-lp-primary">
+                <Link href={l.href} onClick={() => setOpen(false)} className="block px-3 py-4 text-lg font-medium tracking-tight text-lp-heading transition-colors hover:text-lp-primary">
                   {l.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { HeaderShell } from "./header-shell";
 import { MobileMenu } from "./mobile-menu";
 import { Reveal } from "./motion";
@@ -5,9 +6,11 @@ import { BrandLogo, Container } from "./ui";
 
 /** In-page anchors only: every destination below exists. */
 export const NAV_LINKS = [
-  { href: "#platform", label: "Platform" },
-  { href: "#features", label: "Features" },
-  { href: "#solutions", label: "Solutions" },
+  { href: "/#platform", label: "Platform" },
+  { href: "/#features", label: "Features" },
+  { href: "/#solutions", label: "Solutions" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ] as const;
 
 export function AnnouncementBar() {
@@ -28,18 +31,18 @@ export function SiteHeader() {
   return (
     <HeaderShell>
       <Container className="grid h-(--nav-h) grid-cols-[1fr_auto] items-center gap-6 transition-[height] duration-300 motion-reduce:transition-none md:grid-cols-[1fr_auto_1fr]">
-        <a href="#top" aria-label="StoreForge, back to top" className="justify-self-start rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
+        <Link href="/" aria-label="StoreForge, home" className="justify-self-start rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
           <BrandLogo />
-        </a>
+        </Link>
         <nav aria-label="Main" className="hidden items-center gap-1 rounded-full border border-lp-border/80 bg-white/70 p-1 shadow-[0_1px_2px_rgba(18,40,31,0.05)] backdrop-blur md:flex">
           {NAV_LINKS.map((l) => (
-            <a
+            <Link
               key={l.href}
               href={l.href}
               className="rounded-full px-4 py-1.5 text-sm font-medium text-lp-text outline-none transition-colors duration-200 hover:bg-lp-soft hover:text-lp-heading focus-visible:ring-2 focus-visible:ring-lp-primary"
             >
               {l.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="flex items-center justify-self-end">
@@ -54,23 +57,30 @@ const FOOTER_COLUMNS = [
   {
     title: "Platform",
     links: [
-      { href: "#platform", label: "Overview" },
-      { href: "#how-it-works", label: "How it works" },
+      { href: "/#platform", label: "Overview" },
+      { href: "/#how-it-works", label: "How it works" },
     ],
   },
   {
     title: "Features",
     links: [
-      { href: "#features", label: "Store management" },
-      { href: "#features", label: "Products and inventory" },
-      { href: "#features", label: "Orders and customers" },
+      { href: "/#features", label: "Store management" },
+      { href: "/#features", label: "Products and inventory" },
+      { href: "/#features", label: "Orders and customers" },
     ],
   },
   {
     title: "Solutions",
     links: [
-      { href: "#solutions", label: "For online sellers" },
-      { href: "#solutions", label: "For shoppers" },
+      { href: "/#solutions", label: "For online sellers" },
+      { href: "/#solutions", label: "For shoppers" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { href: "/about", label: "About" },
+      { href: "/contact", label: "Contact" },
     ],
   },
 ] as const;
@@ -80,7 +90,7 @@ export function SiteFooter() {
     <footer className="relative bg-lp-deep text-white">
       <span aria-hidden className="lp-gold-rule absolute inset-x-0 top-0 h-px" />
       <Container className="py-14">
-        <Reveal y={20} className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+        <Reveal y={20} className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))]">
           <div className="max-w-sm">
             <BrandLogo light />
             <p className="mt-4 text-sm leading-6 text-white/65">
@@ -93,9 +103,9 @@ export function SiteFooter() {
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((l) => (
                   <li key={l.label}>
-                    <a href={l.href} className="text-sm text-white/65 transition-colors hover:text-white">
+                    <Link href={l.href} className="text-sm text-white/65 transition-colors hover:text-white">
                       {l.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
