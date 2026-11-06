@@ -47,16 +47,11 @@ export const lpButton = (variant: Variant = "primary", className?: string) =>
     className,
   );
 
-/** StoreForge brand lock-up. The mark is the same shelf-bars glyph used in the product. */
+/** StoreForge brand lock-up. The mark is the gold handshake logo (public/logo.png), shared with the product. */
 export function BrandLogo({ className, light = false }: { className?: string; light?: boolean }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <svg viewBox="0 0 32 32" aria-hidden className="size-7 shrink-0">
-        <rect width="32" height="32" rx="8" className={light ? "fill-white" : "fill-lp-primary"} />
-        <rect x="8" y="9" width="16" height="3.5" rx="1.75" className={light ? "fill-lp-primary" : "fill-white"} />
-        <rect x="8" y="14.25" width="12" height="3.5" rx="1.75" className={light ? "fill-lp-primary" : "fill-white"} />
-        <rect x="8" y="19.5" width="8" height="3.5" rx="1.75" className="fill-lp-accent" />
-      </svg>
+      <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-8 w-auto shrink-0" />
       <span className={cn("lp-display text-[19px] leading-none font-extrabold tracking-tight", light ? "text-white" : "text-lp-heading")}>{APP_NAME}</span>
     </span>
   );
