@@ -23,6 +23,7 @@ export const ROUTES = {
   analytics: "/dashboard/analytics",
   team: "/dashboard/team",
   settings: "/dashboard/settings",
+  templates: "/dashboard/templates",
 } as const;
 
 /** Routes that require a signed-in user (enforced again server-side in the data layer). */
