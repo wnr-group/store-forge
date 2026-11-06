@@ -26,6 +26,7 @@ export const stores = pgTable(
   },
   (t) => [
     unique("stores_slug_key").on(t.slug),
+    unique("stores_tenant_id_id_key").on(t.tenantId, t.id),
     check("stores_name_check", sql`char_length(btrim(${t.name})) between 2 and 80`),
     check("stores_slug_check", sql`${t.slug} ~ ${sql.raw(`'${SLUG_PATTERN}'`)}`),
     check("stores_description_check", sql`${t.description} is null or char_length(${t.description}) <= 500`),
