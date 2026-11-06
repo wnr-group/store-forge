@@ -43,7 +43,7 @@ export function IndustriesShowcase({ categories }: { categories: readonly Indust
               <div
                 key={c.name}
                 aria-hidden={i !== active}
-                className={cn("absolute inset-0 transform-gpu transition-[opacity,transform] duration-[900ms] motion-reduce:transition-none", EASE, i === active ? "scale-100 opacity-100" : "pointer-events-none scale-[1.04] opacity-0")}
+                className={cn("absolute inset-0 transform-gpu transition-[opacity,scale] duration-[900ms] motion-reduce:transition-none", EASE, i === active ? "scale-100 opacity-100" : "pointer-events-none scale-[1.04] opacity-0")}
               >
                 {c.image ? <CategoryImage src={c.image} alt={c.alt} sizes="(min-width: 1024px) 55vw, 100vw" position={c.position} priority={i === 0} /> : <ImagePlaceholder />}
               </div>

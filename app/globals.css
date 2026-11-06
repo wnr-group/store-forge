@@ -150,6 +150,18 @@
   }
 }
 
+/* Integrations diagram: a slow dash drift along each connector line. */
+@keyframes lp-dash {
+  to {
+    stroke-dashoffset: -6;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lp-flow {
+    animation: lp-dash 1.6s linear infinite;
+  }
+}
+
 /*
  * StoreForge design tokens (Linear-inspired workspace theme). Colours are defined once here; components use the
  * semantic Tailwind names (bg-card, text-muted-foreground, bg-sidebar...). Surfaces are white on a very light gray

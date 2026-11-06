@@ -128,7 +128,7 @@ export function ProblemSolution() {
               <ul className="mt-5 flex flex-1 flex-col gap-3">
                 {PROBLEMS.map((p) => (
                   <li key={p.title} className="group flex-1">
-                    <div className="flex h-full items-center gap-4 rounded-xl border border-lp-border bg-white/70 p-4 transition-[transform,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-0.5 group-hover:border-rose-300/70 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+                    <div className="flex h-full items-center gap-4 rounded-xl border border-lp-border bg-white/70 p-4 transition-[translate,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-0.5 group-hover:border-rose-300/70 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
                       <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-rose-50 text-rose-600 ring-1 ring-rose-600/10">
                         <p.icon className="size-5" strokeWidth={1.75} aria-hidden />
                       </span>

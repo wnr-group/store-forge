@@ -171,7 +171,7 @@ export function Features() {
         <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f, i) => (
             <Reveal as="li" key={f.title} delay={(i % 3) * 0.12} y={32} amount={0.12} className="group h-full">
-              <article className="relative isolate flex h-full transform-gpu flex-col rounded-2xl border border-lp-border bg-lp-bg p-3 transition-[transform,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-1 group-hover:border-lp-primary/25 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+              <article className="relative isolate flex h-full transform-gpu flex-col rounded-2xl border border-lp-border bg-lp-bg p-3 transition-[translate,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-1 group-hover:border-lp-primary/25 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
                 {/* The shadow fades in on its own layer: animating box-shadow directly repaints every frame and looks choppy */}
                 <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 shadow-[0_20px_44px_-18px_rgba(23,43,66,0.28)] transition-opacity duration-500 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
                 <div aria-hidden className="h-48 overflow-hidden rounded-xl bg-lp-soft p-3.5">

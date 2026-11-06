@@ -5,6 +5,7 @@ import { Features } from "@/components/landing/features";
 import { HeroCarousel } from "@/components/landing/hero-carousel";
 import { MotionProvider, ScrollProgress } from "@/components/landing/motion";
 import { Industries } from "@/components/landing/industries";
+import { Integrations } from "@/components/landing/integrations";
 import { ProblemSolution } from "@/components/landing/problem-solution";
 import { AnnouncementBar, SiteFooter, SiteHeader } from "@/components/landing/site-chrome";
 
@@ -30,6 +31,7 @@ export default function LandingPage() {
           <Features />
           <ProblemSolution />
           <Industries />
+          <Integrations />
           <Faq />
           <FinalCta />
         </main>

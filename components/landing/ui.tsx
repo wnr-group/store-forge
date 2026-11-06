@@ -36,7 +36,7 @@ const BUTTON: Record<Variant, string> = {
 /** Class names for landing buttons rendered as plain anchors. */
 export const lpButton = (variant: Variant = "primary", className?: string) =>
   cn(
-    "group/btn inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium whitespace-nowrap transition-[background-color,transform,box-shadow] duration-200 outline-none hover:-translate-y-px hover:shadow-md focus-visible:ring-2 focus-visible:ring-lp-primary focus-visible:ring-offset-2 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none",
+    "group/btn inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium whitespace-nowrap transition-[background-color,translate,box-shadow] duration-200 outline-none hover:-translate-y-px hover:shadow-md focus-visible:ring-2 focus-visible:ring-lp-primary focus-visible:ring-offset-2 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none",
     BUTTON[variant],
     className,
   );
