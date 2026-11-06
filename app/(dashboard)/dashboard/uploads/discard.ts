@@ -3,7 +3,7 @@
 import { inArray } from "drizzle-orm";
 import { z } from "zod";
 import { run } from "@/lib/actions/run";
-import { collections, productImages, stores } from "@/lib/db/schema";
+import { collections, productImages, stores, storeTemplateSettings } from "@/lib/db/schema";
 import { AppError } from "@/lib/errors";
 import { removeObjects } from "@/lib/storage/server";
 import { requireActiveTenant, withTenantDb } from "@/lib/tenant/context";
@@ -22,12 +22,13 @@ export async function discardUploadsAction(paths: unknown) {
     const prefix = `${tenant.id}/`;
     if (list.some((p) => !p.startsWith(prefix) || p.includes(".."))) throw new AppError("FORBIDDEN", "You can only remove your own uploads.");
     const referenced = await withTenantDb({ tenantId: tenant.id }, async (tx) => {
-      const [a, b, c] = await Promise.all([
+      const [a, b, c, d] = await Promise.all([
         tx.select({ p: productImages.storagePath }).from(productImages).where(inArray(productImages.storagePath, list)),
         tx.select({ p: collections.imagePath }).from(collections).where(inArray(collections.imagePath, list)),
         tx.select({ p: stores.logoUrl }).from(stores).where(inArray(stores.logoUrl, list)),
+        tx.select({ p: storeTemplateSettings.heroImagePath }).from(storeTemplateSettings).where(inArray(storeTemplateSettings.heroImagePath, list)),
       ]);
-      return new Set([...a, ...b, ...c].map((r) => r.p));
+      return new Set([...a, ...b, ...c, ...d].map((r) => r.p));
     });
     await removeObjects(list.filter((p) => !referenced.has(p)));
   });

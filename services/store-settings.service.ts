@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, eq, sql } from "drizzle-orm";
-import { orders, products, stores } from "@/lib/db/schema";
+import { orders, products, stores, storeTemplateSettings } from "@/lib/db/schema";
 import { mapErrors } from "@/lib/db/errors";
 import { rowsOf } from "@/lib/db/user-context";
 import { AppError } from "@/lib/errors";
@@ -29,8 +29,17 @@ export async function updateStoreSettings(v: StoreSettingsValues): Promise<void>
   const logo = v.logoPath ? (await verifyObjects(storeFolder(tenant.id), [v.logoPath]))[0] : null;
   const previousLogo = await mapErrors(() =>
     withTenantDb({ tenantId: tenant.id, permission: "store:manage" }, async (tx, ctx) => {
-      const [store] = await tx.select().from(stores).where(eq(stores.tenantId, ctx.tenantId)).orderBy(asc(stores.createdAt), asc(stores.id)).limit(1);
+      // Locked so a path cannot be saved as both the logo and the template hero image at the same time (see template-settings.service).
+      const [store] = await tx.select().from(stores).where(eq(stores.tenantId, ctx.tenantId)).orderBy(asc(stores.createdAt), asc(stores.id)).limit(1).for("update");
       if (!store) throw new AppError("NOT_FOUND", "This workspace does not have a store.");
+      if (logo) {
+        const [clash] = await tx
+          .select({ id: storeTemplateSettings.storeId })
+          .from(storeTemplateSettings)
+          .where(and(eq(storeTemplateSettings.storeId, store.id), eq(storeTemplateSettings.heroImagePath, logo.path)))
+          .limit(1);
+        if (clash) throw new AppError("VALIDATION", "That image is already used as the template hero image. Upload a different image.", { logoPath: "Already used as the hero image" });
+      }
       if (v.slug !== store.slug) {
         const rows = rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.is_store_slug_available(${v.slug}) as ok`));
         if (!rows[0]?.ok) throw new AppError("CONFLICT", "That store address is not available.", { slug: "This store address is not available." });
