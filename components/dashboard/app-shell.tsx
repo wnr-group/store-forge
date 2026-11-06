@@ -41,7 +41,7 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
         <aside
           className={cn(
             "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-150 ease-out lg:flex",
-            collapsed ? "w-[3.75rem]" : "w-56",
+            collapsed ? "w-[4rem]" : "w-64",
           )}
         >
           <div className={cn("flex h-12 items-center border-b border-sidebar-border px-3", collapsed && "justify-center px-0")}>

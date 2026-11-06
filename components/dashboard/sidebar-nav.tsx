@@ -20,7 +20,7 @@ export function SidebarNav({ navKey, collapsed = false, onNavigate }: { navKey: 
             aria-current={active ? "page" : undefined}
             aria-label={collapsed ? item.label : undefined}
             className={cn(
-              "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-sm font-medium text-sidebar-foreground transition-colors duration-100 outline-none",
+              "flex h-9 items-center gap-3 rounded-md px-3 text-sm font-medium text-sidebar-foreground transition-colors duration-100 outline-none",
               "hover:bg-muted hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
               active && "bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent",
               collapsed && "justify-center px-0",
@@ -33,7 +33,7 @@ export function SidebarNav({ navKey, collapsed = false, onNavigate }: { navKey: 
         if (!collapsed) {
           return (
             <div key={item.href}>
-              {heading ? <p className="px-2.5 pt-4 pb-1 text-xs font-medium text-muted-foreground">{heading}</p> : null}
+              {heading ? <p className="px-3 pt-4 pb-1 text-xs font-medium text-muted-foreground">{heading}</p> : null}
               {link}
             </div>
           );
