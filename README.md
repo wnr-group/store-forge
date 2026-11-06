@@ -64,7 +64,7 @@ proxy.ts      Session refresh and route protection
 
 **Migrations:** the Drizzle schema defines tables, columns and indexes. Policies, functions, triggers, grants and roles live in custom SQL migrations. Never edit an applied migration; add a new one. Create one with `npx drizzle-kit generate --custom --name=<name>` and separate statements with `--> statement-breakpoint`.
 
-**Storage:** migration `0006` creates the public-read `products` bucket. Paths are `{tenant_id}/{product_id}/{file}`, `{tenant_id}/collections/{id}/{file}` and `{tenant_id}/store/{file}`, and policies check tenant membership from the first path segment.
+**Storage:** migration `0006` creates the public-read `products` bucket. Paths are `{tenant_id}/{product_id}/{file}`, `{tenant_id}/collections/{id}/{file}` and `{tenant_id}/store/{file}` (the store logo and the template hero image), and policies check tenant membership from the first path segment.
 
 ## 5. Installation
 
@@ -236,7 +236,7 @@ Rules are defined in two places that must be kept in sync: `lib/auth/permissions
 **7. Store subdomains.** Each company's first store is served publicly at `<store-address>.<root domain>`: `http://urban.lvh.me:3000` locally (`lvh.me` and every subdomain of it resolve to 127.0.0.1, so no hosts-file edits) and `https://urban.store-forge.com` in production. Set `NEXT_PUBLIC_ROOT_DOMAIN` (`lvh.me:3000` locally, `store-forge.com` in production, no scheme) and restart the dev server.
 
 - The proxy (`proxy.ts`) rewrites a request for `<slug>.<root>` to the public page `app/s/[slug]`. It reads only the Host header, so the slug is a hint, not an identity.
-- The page shows the store name, logo, description and **active** products, read through one database function, `get_public_storefront()`. Anonymous visitors still have no table access; the function returns `null` (a 404) for unknown, reserved, inactive and suspended stores, and never returns costs, SKUs, stock, customers or orders.
+- The page shows the store name, logo, description and **active** products, read through one database function, `get_public_storefront()`. Anonymous visitors still have no table access; the function returns `null` (a 404) for unknown, reserved, inactive and suspended stores, and never returns costs, SKUs, stock, customers or orders. The page renders the store's selected template (`store_template_settings`) with its saved customization; a store with no settings uses the default `classic` template.
 - **Each store host has its own sign-in and dashboard.** `http://mart-com.lvh.me:3000/login` signs in on that host and `/dashboard` there is that store's dashboard. The proxy sets an internal `x-sf-store` header from the Host (it deletes any client-supplied copy first), and the workspace is then the company that owns that store: a user who is not a member of it gets "No workspace available", not their own company. Cookies are per host, so signing in on one store never signs you in on another or on the root domain. The storefront header has a **Store login** link.
 - `/admin` (Platform Admin) and the unauthenticated landing page exist **only on the root domain**; on a store host `/admin` is a 404.
 - Reserved names (`www`, `app`, `api`, `admin`, ...) are never treated as stores. The Platform Admin's company page shows each store's URL.
