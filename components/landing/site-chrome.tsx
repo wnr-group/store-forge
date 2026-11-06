@@ -30,11 +30,11 @@ export function AnnouncementBar() {
 export function SiteHeader() {
   return (
     <HeaderShell>
-      <Container className="grid h-(--nav-h) grid-cols-[1fr_auto] items-center gap-6 transition-[height] duration-300 motion-reduce:transition-none md:grid-cols-[1fr_auto_1fr]">
-        <Link href="/" aria-label="StoreForge, home" className="justify-self-start rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
+      <Container className="flex h-(--nav-h) items-center justify-between gap-6 transition-[height] duration-300 motion-reduce:transition-none">
+        <Link href="/" aria-label="StoreForge, home" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
           <BrandLogo />
         </Link>
-        <nav aria-label="Main" className="hidden items-center gap-1 rounded-full border border-lp-border/80 bg-white/70 p-1 shadow-[0_1px_2px_rgba(18,40,31,0.05)] backdrop-blur md:flex">
+        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((l) => (
             <Link
               key={l.href}
@@ -45,9 +45,7 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <div className="flex items-center justify-self-end">
-          <MobileMenu links={NAV_LINKS} />
-        </div>
+        <MobileMenu links={NAV_LINKS} />
       </Container>
     </HeaderShell>
   );
