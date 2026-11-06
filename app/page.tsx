@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Faq } from "@/components/landing/faq";
 import { Features } from "@/components/landing/features";
 import { HeroCarousel } from "@/components/landing/hero-carousel";
 import { MotionProvider, ScrollProgress } from "@/components/landing/motion";
@@ -26,6 +27,7 @@ export default function LandingPage() {
           <HeroCarousel />
           <Features />
           <ProblemSolution />
+          <Faq />
         </main>
         <SiteFooter />
       </div>
