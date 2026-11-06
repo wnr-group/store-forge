@@ -1,15 +1,32 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Layers, LineChart, ShieldCheck, Store, type LucideIcon } from "lucide-react";
+import { ArrowRight, Compass, Layers, LineChart, ShieldCheck, Store, Target, type LucideIcon } from "lucide-react";
 import { Fade } from "@/components/landing/effects";
 import { PageHero, PageShell } from "@/components/landing/page-shell";
 import { Container, Section, SectionHeading, lpButton } from "@/components/landing/ui";
 import { Reveal } from "@/components/landing/motion";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "About",
   description: "StoreForge is a commerce platform that brings an online seller's products, orders, customers and storefront into one place.",
 };
+
+const DIRECTION: { icon: LucideIcon; label: string; title: string; text: string; dark?: boolean }[] = [
+  {
+    icon: Compass,
+    label: "Our vision",
+    title: "A world where anyone can run a great online store.",
+    text: "We want every seller, whatever their size, to have the tools to build a store they are proud of and the clarity to grow it with confidence.",
+    dark: true,
+  },
+  {
+    icon: Target,
+    label: "Our mission",
+    title: "Make running a store feel simple.",
+    text: "We bring products, inventory, orders, customers and the storefront into one organized, secure workspace, so sellers spend less time managing tools and more time building their business.",
+  },
+];
 
 const PRINCIPLES: { icon: LucideIcon; title: string; text: string }[] = [
   { icon: Layers, title: "One place for the work", text: "Products, inventory, orders and customers live together, so running a store does not mean juggling separate tools." },
@@ -26,14 +43,33 @@ export default function AboutPage() {
       </PageHero>
 
       <Section className="bg-white">
-        <Container className="grid gap-12 lg:grid-cols-2 lg:gap-20">
-          <SectionHeading eyebrow="Our mission" title="Make running a store feel simple.">
-            Selling online should not require stitching together a catalog tool, a spreadsheet for stock and an inbox for orders. We are building one organized workspace for all of it.
-          </SectionHeading>
-          <Reveal className="space-y-5 text-base leading-7 text-lp-text sm:text-lg sm:leading-8">
-            <p>StoreForge gives each business a secure workspace for products, categories, collections, inventory, customers and team members, alongside a storefront that shoppers can visit on its own subdomain.</p>
-            <p>We keep the product focused on the daily jobs of an online seller and describe it honestly, so you always know what the platform does today.</p>
-          </Reveal>
+        <Container>
+          <SectionHeading eyebrow="Vision and mission" title="Where we are heading, and how we get there." align="center" />
+          <ul className="mt-14 grid gap-5 lg:grid-cols-2">
+            {DIRECTION.map((d, i) => (
+              <li key={d.label}>
+                <Fade delay={i * 0.12} className="h-full">
+                  <article
+                    className={cn(
+                      "relative isolate flex h-full flex-col overflow-hidden rounded-3xl p-8 sm:p-10",
+                      d.dark ? "bg-lp-primary text-white" : "border border-lp-border bg-lp-bg text-lp-heading",
+                    )}
+                  >
+                    {d.dark ? <span aria-hidden className="pointer-events-none absolute -top-28 -right-20 -z-10 size-[20rem] rounded-full bg-[radial-gradient(circle,rgba(199,167,122,0.32),transparent_65%)]" /> : null}
+                    <span className={cn("grid size-12 place-items-center rounded-xl", d.dark ? "bg-white/10 text-lp-accent-light" : "bg-lp-secondary text-lp-primary")}>
+                      <d.icon className="size-6" aria-hidden />
+                    </span>
+                    <p className={cn("mt-6 inline-flex items-center gap-3 text-sm font-semibold tracking-wide", d.dark ? "text-lp-accent-light" : "text-lp-primary")}>
+                      <span aria-hidden className="lp-gold-rule h-px w-8" />
+                      {d.label}
+                    </p>
+                    <h3 className="mt-3 text-2xl font-extrabold tracking-tight text-balance sm:text-[1.75rem] sm:leading-[1.2]">{d.title}</h3>
+                    <p className={cn("mt-4 text-base leading-7 text-pretty sm:text-lg sm:leading-8", d.dark ? "text-white/75" : "text-lp-text")}>{d.text}</p>
+                  </article>
+                </Fade>
+              </li>
+            ))}
+          </ul>
         </Container>
       </Section>
 
