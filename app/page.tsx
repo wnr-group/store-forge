@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { HeroCarousel } from "@/components/landing/hero-carousel";
 import { MotionProvider, ScrollProgress } from "@/components/landing/motion";
-import { FeatureShowcase, FinalCta, HowItWorks, PlatformIntro, ShoppingExperience } from "@/components/landing/sections";
 import { AnnouncementBar, SiteFooter, SiteHeader } from "@/components/landing/site-chrome";
 
 export const metadata: Metadata = {
@@ -23,11 +22,6 @@ export default function LandingPage() {
         <SiteHeader />
         <main>
           <HeroCarousel />
-          <PlatformIntro />
-          <FeatureShowcase />
-          <ShoppingExperience />
-          <HowItWorks />
-          <FinalCta />
         </main>
         <SiteFooter />
       </div>
