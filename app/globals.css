@@ -119,6 +119,37 @@
   }
 }
 
+/* Closing CTA: gentle float for the dashboard preview and a one-time fill for its bars. */
+@keyframes lp-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes lp-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lp-float {
+    animation: lp-float 7s ease-in-out infinite;
+  }
+  .lp-float-slow {
+    animation: lp-float 9s ease-in-out -3s infinite;
+  }
+  .lp-fill {
+    transform-origin: left center;
+    animation: lp-fill 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+  }
+}
+
 /*
  * StoreForge design tokens (Linear-inspired workspace theme). Colours are defined once here; components use the
  * semantic Tailwind names (bg-card, text-muted-foreground, bg-sidebar...). Surfaces are white on a very light gray

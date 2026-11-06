@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FinalCta } from "@/components/landing/final-cta";
 import { Faq } from "@/components/landing/faq";
 import { Features } from "@/components/landing/features";
 import { HeroCarousel } from "@/components/landing/hero-carousel";
@@ -28,6 +29,7 @@ export default function LandingPage() {
           <Features />
           <ProblemSolution />
           <Faq />
+          <FinalCta />
         </main>
         <SiteFooter />
       </div>
