@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Features } from "@/components/landing/features";
 import { HeroCarousel } from "@/components/landing/hero-carousel";
 import { MotionProvider, ScrollProgress } from "@/components/landing/motion";
 import { AnnouncementBar, SiteFooter, SiteHeader } from "@/components/landing/site-chrome";
@@ -22,6 +23,7 @@ export default function LandingPage() {
         <SiteHeader />
         <main>
           <HeroCarousel />
+          <Features />
         </main>
         <SiteFooter />
       </div>
