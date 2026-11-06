@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Wipe } from "./effects";
 
 export type FaqItem = { q: string; a: string };
 
@@ -14,7 +15,7 @@ export function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
       {items.map((item, i) => {
         const isOpen = open === i;
         return (
-          <li key={item.q} className="border-t border-lp-border">
+          <Wipe as="li" key={item.q} delay={i * 0.08} amount={0.3} className="border-t border-lp-border">
             <h3>
               <button
                 type="button"
@@ -52,7 +53,7 @@ export function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
                 <p className="max-w-xl pb-6 pl-11 text-[15px] leading-7 text-lp-text sm:pl-[3.25rem] sm:text-base">{item.a}</p>
               </div>
             </div>
-          </li>
+          </Wipe>
         );
       })}
     </ul>

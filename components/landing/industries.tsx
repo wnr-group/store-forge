@@ -1,5 +1,5 @@
 import { IndustriesMarquee, type IndustryCategory } from "./industries-marquee";
-import { Reveal } from "./motion";
+import { Fade, Wipe } from "./effects";
 import { Container, Section } from "./ui";
 
 /** Centralised category data. Add `image` to show a photo (a missing one shows "Image Coming Soon"). */
@@ -19,20 +19,22 @@ export function Industries() {
     <Section id="industries" className="overflow-hidden bg-white py-24 sm:py-32">
       <Container>
         <div className="grid items-end gap-6 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
-          <Reveal y={20}>
-            <p className="text-sm font-medium tracking-wide text-lp-primary">ONE PLATFORM, MANY POSSIBILITIES</p>
+          <div>
+            <Fade as="p" className="text-sm font-medium tracking-wide text-lp-primary">ONE PLATFORM, MANY POSSIBILITIES</Fade>
+            <Wipe delay={0.1}>
             <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight text-balance text-lp-heading sm:text-5xl lg:text-6xl">Built for every kind of business.</h2>
-          </Reveal>
-          <Reveal y={20} delay={0.1}>
+            </Wipe>
+          </div>
+          <Fade delay={0.4}>
             <p className="max-w-md text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
               From electronics and fashion to healthcare and home essentials, StoreForge helps businesses organize their products, orders, inventory and everyday store operations in one place.
             </p>
-          </Reveal>
+          </Fade>
         </div>
       </Container>
-      <Reveal y={28} delay={0.12} className="mt-10 sm:mt-14">
+      <Fade delay={0.3} duration={1.6} className="mt-10 sm:mt-14">
         <IndustriesMarquee categories={CATEGORIES} />
-      </Reveal>
+      </Fade>
     </Section>
   );
 }

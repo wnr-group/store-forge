@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowRight, BarChart3, Check, EyeOff, Layers, LayoutDashboard, PackageX, Shuffle, Warehouse, Zap, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Reveal } from "./motion";
-import { Container, Section, SectionHeading } from "./ui";
+import { Fade, MaskRise, ScaleIn, SlideIn } from "./effects";
+import { Container, Section } from "./ui";
 
 const PROBLEMS: { icon: LucideIcon; title: string; text: string }[] = [
   { icon: Layers, title: "Too Many Tools", text: "Products, orders, customers and inventory spread across different platforms wastes valuable time." },
@@ -109,13 +109,19 @@ export function ProblemSolution() {
   return (
     <Section id="solutions" className="bg-lp-bg">
       <Container>
-        <SectionHeading eyebrow="THE PROBLEM & THE SOLUTION" title="Running an online store shouldn't feel like running five different businesses.">
-          Managing products, tracking orders, monitoring inventory and understanding sales across disconnected tools creates unnecessary complexity. StoreForge brings everything together so you can focus on growing your business.
-        </SectionHeading>
+        <div className="max-w-2xl">
+          <Fade as="p" className="text-sm font-medium tracking-wide text-lp-primary">THE PROBLEM &amp; THE SOLUTION</Fade>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance text-lp-heading sm:text-4xl sm:leading-[1.15]">
+            <MaskRise>Running an online store shouldn&apos;t feel like running five different businesses.</MaskRise>
+          </h2>
+          <Fade as="p" delay={0.3} className="mt-4 text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
+            Managing products, tracking orders, monitoring inventory and understanding sales across disconnected tools creates unnecessary complexity. StoreForge brings everything together so you can focus on growing your business.
+          </Fade>
+        </div>
 
         <div className="mt-14 grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.15fr)] lg:gap-6">
           {/* Problem */}
-          <Reveal y={28} className="h-full">
+          <SlideIn x={-72} className="h-full">
             <div className="flex h-full flex-col rounded-2xl border border-lp-border bg-lp-soft p-5 sm:p-7">
               <p className="text-sm font-semibold text-lp-text">The challenges</p>
               <div aria-hidden className="mt-4 flex flex-wrap gap-2">
@@ -141,10 +147,10 @@ export function ProblemSolution() {
                 ))}
               </ul>
             </div>
-          </Reveal>
+          </SlideIn>
 
           {/* Transition */}
-          <Reveal y={12} delay={0.1} className="flex items-center justify-center lg:flex-col">
+          <ScaleIn scale={0.3} y={0} delay={0.45} className="flex items-center justify-center lg:flex-col">
             <span aria-hidden className="h-px w-12 bg-lp-border lg:h-12 lg:w-px" />
             <span className="mx-3 grid size-11 place-items-center rounded-full border border-lp-border bg-white text-lp-primary shadow-sm lg:mx-0 lg:my-3">
               <ArrowRight className="hidden size-5 lg:block" strokeWidth={1.75} aria-hidden />
@@ -152,10 +158,10 @@ export function ProblemSolution() {
               <span className="sr-only">becomes</span>
             </span>
             <span aria-hidden className="h-px w-12 bg-lp-border lg:h-12 lg:w-px" />
-          </Reveal>
+          </ScaleIn>
 
           {/* Solution */}
-          <Reveal y={28} delay={0.15} className="h-full">
+          <SlideIn x={72} delay={0.1} className="h-full">
             <div className="flex h-full flex-col rounded-2xl border border-lp-border bg-white p-5 shadow-[0_1px_2px_rgba(23,43,66,0.04)] sm:p-7">
               <p className="text-sm font-semibold text-lp-primary">The StoreForge solution</p>
               <h3 className="mt-2 text-2xl font-semibold tracking-tight text-lp-heading sm:text-3xl">One platform. Complete control.</h3>
@@ -179,7 +185,7 @@ export function ProblemSolution() {
                 ))}
               </ul>
             </div>
-          </Reveal>
+          </SlideIn>
         </div>
       </Container>
     </Section>

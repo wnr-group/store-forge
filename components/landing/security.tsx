@@ -1,6 +1,6 @@
 import { Activity, ArrowRight, Check, Database, KeyRound, Lock, Minus, Server, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Reveal } from "./motion";
+import { Fade, LineDraw, SlideIn, Wipe } from "./effects";
 import { Container, Section } from "./ui";
 
 const HIGHLIGHTS: { icon: LucideIcon; text: string }[] = [
@@ -54,6 +54,7 @@ function SecurityVisual() {
   ];
   return (
     <div aria-hidden className="rounded-2xl border border-lp-border bg-lp-bg p-3 sm:p-5">
+      <SlideIn x={0} y={-28}>
       <Panel title="Access protection" icon={ShieldCheck}>
         <ul className="mt-4 divide-y divide-lp-border">
           {protection.map((p) => (
@@ -67,18 +68,20 @@ function SecurityVisual() {
           ))}
         </ul>
       </Panel>
+      </SlideIn>
 
       {/* Connectors from the overview down to the two panels below */}
       <div className="grid grid-cols-2">
         {[0, 1].map((i) => (
           <div key={i} className="flex flex-col items-center">
-            <span className="h-5 w-px bg-lp-border" />
-            <span className="size-1.5 rounded-full bg-lp-primary/40" />
+            <LineDraw axis="y" delay={0.35} className="h-5 w-px" lineClassName="bg-lp-border" />
+            <Fade as="span" delay={0.7} className="size-1.5 rounded-full bg-lp-primary/40" />
           </div>
         ))}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
+        <SlideIn x={0} y={36} delay={0.55}>
         <Panel title="Team access" icon={Users}>
           <div className="mt-4 grid grid-cols-[1fr_auto_auto] items-center gap-x-4 gap-y-2.5 text-[12px]">
             <span />
@@ -99,7 +102,9 @@ function SecurityVisual() {
             ))}
           </div>
         </Panel>
+        </SlideIn>
 
+        <SlideIn x={0} y={36} delay={0.7}>
         <Panel title="Protected data" icon={Database}>
           <ul className="mt-4 space-y-2.5 text-[12px]">
             <li className="flex items-center justify-between rounded-lg border border-lp-border px-3 py-2.5">
@@ -119,6 +124,7 @@ function SecurityVisual() {
           </ul>
           <p className="mt-3 text-[11px] leading-4 text-lp-text">Each company&apos;s data stays apart from every other company&apos;s.</p>
         </Panel>
+        </SlideIn>
       </div>
     </div>
   );
@@ -129,7 +135,7 @@ export function Security() {
     <Section id="security" className="bg-white py-24 sm:py-32">
       <Container>
         <div className="grid items-center gap-14 lg:grid-cols-[5fr_6fr] lg:gap-16">
-          <Reveal y={24}>
+          <Fade duration={1.4}>
             <p className="text-sm font-medium tracking-wide text-lp-primary">SECURITY &amp; RELIABILITY</p>
             <h2 className="mt-3 text-4xl leading-[1.1] font-semibold tracking-tight text-balance text-lp-heading sm:text-[2.6rem]">Your business deserves a secure foundation.</h2>
             <span aria-hidden className="mt-6 block h-0.5 w-14 bg-lp-primary" />
@@ -153,25 +159,26 @@ export function Security() {
               Explore how StoreForge works
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" aria-hidden />
             </a>
-          </Reveal>
-          <Reveal y={28} delay={0.12}>
-            <SecurityVisual />
-          </Reveal>
+          </Fade>
+          <SecurityVisual />
         </div>
 
         <ul className="mt-20 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:mt-28 lg:grid-cols-3">
           {FEATURES.map((f, i) => (
-            <Reveal as="li" key={f.title} y={22} delay={(i % 3) * 0.08} amount={0.15} className="border-t border-lp-border pt-6">
+            <li key={f.title} className="relative pt-6">
+              <LineDraw delay={(i % 3) * 0.12} className="absolute top-0 left-0 h-px w-full" lineClassName="bg-lp-border" />
+              <Fade delay={0.3 + (i % 3) * 0.12}>
               <span className="grid size-10 place-items-center rounded-lg border border-lp-border bg-lp-bg text-lp-primary">
                 <f.icon className="size-5" strokeWidth={1.75} aria-hidden />
               </span>
               <h3 className="mt-4 text-lg font-semibold tracking-tight text-lp-heading">{f.title}</h3>
               <p className="mt-2 text-[15px] leading-6 text-lp-text">{f.text}</p>
-            </Reveal>
+              </Fade>
+            </li>
           ))}
         </ul>
 
-        <Reveal y={20} className="mt-16 lg:mt-20">
+        <Wipe className="mt-16 lg:mt-20">
           <ul className="grid divide-y divide-lp-border overflow-hidden rounded-2xl border border-lp-border bg-lp-bg sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             {SUPPORT.map((s) => (
               <li key={s.title} className="flex items-start gap-4 p-6 sm:p-7">
@@ -185,7 +192,7 @@ export function Security() {
               </li>
             ))}
           </ul>
-        </Reveal>
+        </Wipe>
       </Container>
     </Section>
   );

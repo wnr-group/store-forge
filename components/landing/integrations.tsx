@@ -2,7 +2,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { INTEGRATION_ICONS, type IntegrationIcon } from "./integration-icons";
 import { IntegrationsDiagram } from "./integrations-diagram";
-import { Reveal } from "./motion";
+import { SlideIn } from "./effects";
 import { Container, Section } from "./ui";
 
 type Status = "available" | "coming-soon" | "planned";
@@ -38,7 +38,7 @@ const BENEFITS = ["Connect essential business tools", "Simplify everyday workflo
 function CategoryCard({ item, index, className }: { item: Integration; index: number; className?: string }) {
   const Icon = INTEGRATION_ICONS[item.icon];
   return (
-    <Reveal as="li" y={24} delay={(index % 3) * 0.08} amount={0.15} className={cn("group", className)}>
+    <SlideIn as="li" x={56} delay={(index % 3) * 0.1} amount={0.15} className={cn("group", className)}>
       <article className="relative isolate flex h-full transform-gpu flex-col rounded-2xl border border-lp-border bg-white p-6 transition-[translate,border-color] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:-translate-y-1.5 group-hover:border-lp-primary/30 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
         {/* Shadow fades in on its own layer; animating box-shadow directly repaints every frame and looks choppy */}
         <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 shadow-[0_24px_48px_-24px_rgba(23,43,66,0.3)] transition-opacity duration-700 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
@@ -58,7 +58,7 @@ function CategoryCard({ item, index, className }: { item: Integration; index: nu
           </ul>
         ) : null}
       </article>
-    </Reveal>
+    </SlideIn>
   );
 }
 
@@ -67,7 +67,7 @@ export function Integrations() {
     <Section id="integrations" className="bg-lp-bg py-24 sm:py-32">
       <Container>
         <div className="grid items-center gap-14 lg:grid-cols-[5fr_6fr] lg:gap-16">
-          <Reveal y={24}>
+          <SlideIn x={-48}>
             <p className="text-sm font-medium tracking-wide text-lp-primary">CONNECTED BUSINESS. SIMPLIFIED OPERATIONS.</p>
             <h2 className="mt-3 text-4xl leading-[1.1] font-semibold tracking-tight text-balance text-lp-heading sm:text-[2.6rem]">Everything works better when it&apos;s connected.</h2>
             <span aria-hidden className="mt-6 block h-0.5 w-14 bg-lp-primary" />
@@ -92,10 +92,8 @@ export function Integrations() {
               Explore Integrations
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" aria-hidden />
             </a>
-          </Reveal>
-          <Reveal y={28} delay={0.12} from={0.97}>
-            <IntegrationsDiagram nodes={INTEGRATIONS.map(({ id, label, icon }) => ({ id, label, icon }))} />
-          </Reveal>
+          </SlideIn>
+          <IntegrationsDiagram nodes={INTEGRATIONS.map(({ id, label, icon }) => ({ id, label, icon }))} />
         </div>
 
         <ul id="integration-categories" className="mt-20 grid scroll-mt-24 gap-4 sm:grid-cols-2 lg:mt-28 lg:grid-cols-6">

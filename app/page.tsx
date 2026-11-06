@@ -22,7 +22,7 @@ export default function LandingPage() {
       <div id="top" className="min-h-dvh bg-lp-bg font-sans text-lp-heading antialiased">
         {/* Without JavaScript nothing can animate in, so keep every revealed element visible */}
         <noscript>
-          <style>{"[data-reveal]{opacity:1!important;transform:none!important}"}</style>
+          <style>{"[data-reveal]{opacity:1!important;transform:none!important;clip-path:none!important}"}</style>
         </noscript>
         <ScrollProgress />
         <AnnouncementBar />

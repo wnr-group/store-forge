@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { FaqAccordion, type FaqItem } from "./faq-accordion";
-import { Reveal } from "./motion";
+import { SlideIn } from "./effects";
 import { Container, Section } from "./ui";
 
 // TODO: point this at the real support channel (email or contact page) once one exists.
@@ -23,14 +23,14 @@ export function Faq() {
       <Container>
         <div className="grid gap-12 lg:grid-cols-[2fr_3fr] lg:gap-20">
           <div className="lg:sticky lg:top-28 lg:self-start">
-            <Reveal y={20}>
+            <SlideIn x={-48}>
               <p className="text-sm font-medium tracking-wide text-lp-primary">GOT QUESTIONS?</p>
               <h2 className="mt-3 text-4xl font-semibold tracking-tight text-balance text-lp-heading sm:text-5xl sm:leading-[1.08]">Everything you need to know.</h2>
               <p className="mt-5 max-w-md text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
                 Have questions about managing your store with StoreForge? Find answers to common questions about getting started, managing your business and making the most of the platform.
               </p>
-            </Reveal>
-            <Reveal y={20} delay={0.1} className="mt-10 max-w-md border-l-2 border-lp-primary pl-5">
+            </SlideIn>
+            <SlideIn x={-48} delay={0.15} className="mt-10 max-w-md border-l-2 border-lp-primary pl-5">
               <p className="text-base font-semibold text-lp-heading">Still have questions?</p>
               <p className="mt-1.5 text-[15px] leading-6 text-lp-text">We&apos;re here to help you get the most out of StoreForge.</p>
               <a
@@ -40,11 +40,9 @@ export function Faq() {
                 Contact Support
                 <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" aria-hidden />
               </a>
-            </Reveal>
+            </SlideIn>
           </div>
-          <Reveal y={24} delay={0.08}>
-            <FaqAccordion items={FAQS} />
-          </Reveal>
+          <FaqAccordion items={FAQS} />
         </div>
       </Container>
     </Section>

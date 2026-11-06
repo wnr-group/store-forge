@@ -1,6 +1,6 @@
 import { BarChart3, LayoutDashboard, Package, ShoppingCart, Users, Warehouse, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Reveal } from "./motion";
+import { ScaleIn, SlideIn } from "./effects";
 import { Container, Section } from "./ui";
 
 /* Small UI sketches. They are decorative (aria-hidden) and use sample labels only. */
@@ -160,17 +160,17 @@ export function Features() {
     <Section id="features" className="bg-white">
       <Container>
         <div className="max-w-2xl">
-          <Reveal as="p" y={14} className="text-sm font-medium tracking-wide text-lp-primary">WHAT YOU CAN DO WITH STOREFORGE</Reveal>
-          <Reveal y={20} delay={0.08}>
+          <SlideIn as="p" x={-28} className="text-sm font-medium tracking-wide text-lp-primary">WHAT YOU CAN DO WITH STOREFORGE</SlideIn>
+          <SlideIn x={-28} delay={0.08}>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance text-lp-heading sm:text-4xl sm:leading-[1.15]">Everything your store needs. All in one place.</h2>
-          </Reveal>
-          <Reveal as="p" y={20} delay={0.16} className="mt-4 text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
+          </SlideIn>
+          <SlideIn as="p" x={-28} delay={0.16} className="mt-4 text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
             From managing products and orders to tracking inventory and understanding performance, StoreForge gives you the tools to run your e-commerce business with confidence.
-          </Reveal>
+          </SlideIn>
         </div>
         <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f, i) => (
-            <Reveal as="li" key={f.title} delay={(i % 3) * 0.12} y={32} amount={0.12} className="group h-full">
+            <ScaleIn as="li" key={f.title} scale={0.9} delay={((i % 3) + Math.floor(i / 3)) * 0.1} amount={0.12} className="group h-full">
               <article className="relative isolate flex h-full transform-gpu flex-col rounded-2xl border border-lp-border bg-lp-bg p-3 transition-[translate,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-1 group-hover:border-lp-primary/25 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
                 {/* The shadow fades in on its own layer: animating box-shadow directly repaints every frame and looks choppy */}
                 <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 shadow-[0_20px_44px_-18px_rgba(23,43,66,0.28)] transition-opacity duration-500 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
@@ -185,7 +185,7 @@ export function Features() {
                   <p className="mt-2 text-[15px] leading-6 text-lp-text">{f.text}</p>
                 </div>
               </article>
-            </Reveal>
+            </ScaleIn>
           ))}
         </ul>
       </Container>
