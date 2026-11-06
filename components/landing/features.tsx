@@ -10,7 +10,7 @@ const Bar = ({ className }: { className?: string }) => <span className={cn("bloc
 const TAG = {
   green: "bg-emerald-50 text-emerald-700 ring-emerald-600/15",
   amber: "bg-amber-50 text-amber-700 ring-amber-600/15",
-  blue: "bg-sky-50 text-sky-700 ring-sky-600/15",
+  blue: "bg-lp-secondary text-lp-primary ring-lp-primary/15",
   red: "bg-rose-50 text-rose-700 ring-rose-600/15",
 } as const;
 const Tag = ({ tone, children }: { tone: keyof typeof TAG; children: React.ReactNode }) => (
@@ -51,8 +51,8 @@ function DashboardPreview() {
 
 function ProductPreview() {
   const rows = [
-    ["Linen shirt", "$48.00", "bg-amber-100"],
-    ["Canvas tote", "$22.00", "bg-sky-100"],
+    ["Linen shirt", "$48.00", "bg-lp-accent/25"],
+    ["Canvas tote", "$22.00", "bg-lp-secondary"],
     ["Ceramic mug", "$16.50", "bg-rose-100"],
   ];
   return (
@@ -92,7 +92,7 @@ function InventoryPreview() {
     ["Canvas tote", 24, "Low", "amber"],
     ["Ceramic mug", 4, "Reorder", "red"],
   ];
-  const bar = { green: "bg-emerald-500", amber: "bg-amber-500", red: "bg-rose-500", blue: "bg-sky-500" } as const;
+  const bar = { green: "bg-emerald-500", amber: "bg-amber-500", red: "bg-rose-500", blue: "bg-lp-primary" } as const;
   return (
     <div className="space-y-2">
       {rows.map(([n, pct, label, tone]) => (
@@ -173,12 +173,12 @@ export function Features() {
             <ScaleIn as="li" key={f.title} scale={0.9} delay={((i % 3) + Math.floor(i / 3)) * 0.1} amount={0.12} className="group h-full">
               <article className="relative isolate flex h-full transform-gpu flex-col rounded-2xl border border-lp-border bg-lp-bg p-3 transition-[translate,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-1 group-hover:border-lp-primary/25 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
                 {/* The shadow fades in on its own layer: animating box-shadow directly repaints every frame and looks choppy */}
-                <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 shadow-[0_20px_44px_-18px_rgba(23,43,66,0.28)] transition-opacity duration-500 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
+                <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 shadow-[0_20px_44px_-18px_rgba(18,40,31,0.28)] transition-opacity duration-500 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
                 <div aria-hidden className="h-48 overflow-hidden rounded-xl bg-lp-soft p-3.5">
                   {f.visual}
                 </div>
                 <div className="flex flex-1 flex-col px-3 pt-5 pb-3">
-                  <span className="grid size-10 place-items-center rounded-lg border border-lp-border bg-white text-lp-primary shadow-[0_1px_2px_rgba(23,43,66,0.05)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-3 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none">
+                  <span className="grid size-10 place-items-center rounded-lg border border-lp-border bg-white text-lp-primary shadow-[0_1px_2px_rgba(18,40,31,0.05)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-3 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none">
                     <f.icon className="size-5" strokeWidth={1.75} aria-hidden />
                   </span>
                   <h3 className="mt-4 text-lg font-semibold tracking-tight text-lp-heading">{f.title}</h3>

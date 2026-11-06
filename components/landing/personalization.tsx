@@ -22,8 +22,8 @@ const SUPPORT: { icon: LucideIcon; title: string; text: string }[] = [
 ];
 
 const PRODUCTS = [
-  { name: "Linen shirt", price: "$48.00", was: null, tile: "bg-amber-100" },
-  { name: "Canvas tote", price: "$18.00", was: "$24.00", tile: "bg-sky-100" },
+  { name: "Linen shirt", price: "$48.00", was: null, tile: "bg-lp-accent/25" },
+  { name: "Canvas tote", price: "$18.00", was: "$24.00", tile: "bg-lp-secondary" },
   { name: "Ceramic mug", price: "$16.50", was: null, tile: "bg-rose-100" },
   { name: "Wool throw", price: "$62.00", was: null, tile: "bg-emerald-100" },
   { name: "Desk lamp", price: "$39.00", was: null, tile: "bg-violet-100" },
@@ -33,7 +33,7 @@ const PRODUCTS = [
 /** Decorative storefront that mirrors the real one: logo and name, a description, and a grid of priced products. */
 function StorefrontMockup() {
   return (
-    <div aria-hidden className="overflow-hidden rounded-xl border border-lp-border bg-white shadow-[0_30px_60px_-30px_rgba(23,43,66,0.35)]">
+    <div aria-hidden className="overflow-hidden rounded-xl border border-lp-border bg-white shadow-[0_30px_60px_-30px_rgba(18,40,31,0.35)]">
       <div className="flex items-center gap-3 border-b border-lp-border bg-lp-bg px-4 py-2.5">
         <div className="flex gap-1.5">
           {[0, 1, 2].map((i) => (

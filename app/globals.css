@@ -65,15 +65,41 @@
  * light/dark preference. Used as bg-lp-bg, text-lp-heading, border-lp-border ...
  */
 @theme {
-  --color-lp-bg: #f8fafc;
-  --color-lp-soft: #eef3f8;
+  --color-lp-bg: #f8f7f2;
+  --color-lp-soft: #eff2ea;
+  --color-lp-secondary: #dce8df;
   --color-lp-card: #ffffff;
-  --color-lp-primary: #234b72;
-  --color-lp-primary-hover: #1b3b5a;
-  --color-lp-heading: #172b42;
-  --color-lp-text: #64748b;
-  --color-lp-accent: #d9a45b;
-  --color-lp-border: #e5eaf0;
+  --color-lp-primary: #244c3c;
+  --color-lp-primary-hover: #1a3a2d;
+  --color-lp-deep: #12281f;
+  --color-lp-heading: #202a25;
+  --color-lp-text: #5a6860;
+  --color-lp-accent: #c7a77a;
+  --color-lp-accent-light: #e0c9a3;
+  --color-lp-border: #e3e2d8;
+}
+
+/*
+ * Landing typography: DM Sans for body copy, Manrope for every heading and display figure. Scoped to .lp-root so the
+ * dashboard and admin keep Inter.
+ */
+.lp-root {
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+}
+.lp-root :is(h1, h2, h3, h4, .lp-display) {
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.025em;
+}
+.lp-root ::selection {
+  background: var(--color-lp-accent);
+  color: var(--color-lp-deep);
+}
+/* Soft paper grain over the cream background, and a gold hairline used to underline eyebrows. */
+.lp-paper {
+  background-image: radial-gradient(60rem 28rem at 85% -10%, rgb(220 232 223 / 0.65), transparent 70%), radial-gradient(40rem 24rem at -5% 40%, rgb(199 167 122 / 0.12), transparent 70%);
+}
+.lp-gold-rule {
+  background: linear-gradient(90deg, var(--color-lp-accent), transparent);
 }
 
 @media (prefers-reduced-motion: no-preference) {

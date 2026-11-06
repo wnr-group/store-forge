@@ -19,7 +19,7 @@ const FAQS: FaqItem[] = [
 
 export function Faq() {
   return (
-    <Section id="faq" className="bg-lp-bg">
+    <Section id="faq" className="lp-paper bg-lp-bg">
       <Container>
         <div className="grid gap-12 lg:grid-cols-[2fr_3fr] lg:gap-20">
           <div className="lg:sticky lg:top-28 lg:self-start">

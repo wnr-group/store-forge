@@ -79,7 +79,7 @@ export function HeroCarousel() {
     <section ref={sectionRef} aria-roledescription="carousel" aria-label="Featured" className="relative">
       <h1 className="sr-only">StoreForge: build, manage and grow your online store</h1>
       <div
-        className="relative h-[calc(100svh-6.3125rem)] max-h-[58rem] min-h-[34rem] w-full overflow-hidden bg-[#0f1d2e]"
+        className="relative h-[calc(100svh-6.3125rem)] max-h-[58rem] min-h-[34rem] w-full overflow-hidden bg-[#12281f]"
         // Hovering never pauses the timer. It only holds while someone is tabbing through the controls (keyboard
         // focus), so a mouse click on a control does not stop the slide show either.
         onFocus={(e) => e.target.matches(":focus-visible") && setKeyboardFocus(true)}
@@ -115,17 +115,17 @@ export function HeroCarousel() {
                 style={{ objectPosition: s.image.position }}
                 className={cn("object-cover motion-safe:transition-transform motion-safe:duration-[9000ms] motion-safe:ease-out", active ? "scale-100" : "motion-safe:scale-110")}
               />
-              {/* Dark navy wash so white text always has strong contrast, strongest where the text sits. */}
-              <div className="absolute inset-0 bg-[#0f1d2e]/60 sm:bg-transparent sm:bg-gradient-to-r sm:from-[#0f1d2e]/85 sm:via-[#0f1d2e]/50 sm:via-55% sm:to-transparent" aria-hidden />
-              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0f1d2e]/80 to-transparent" aria-hidden />
+              {/* Deep green wash so white text always has strong contrast, strongest where the text sits. */}
+              <div className="absolute inset-0 bg-[#12281f]/60 sm:bg-transparent sm:bg-gradient-to-r sm:from-[#12281f]/85 sm:via-[#12281f]/50 sm:via-55% sm:to-transparent" aria-hidden />
+              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#12281f]/80 to-transparent" aria-hidden />
 
               <motion.div style={{ y: heroScroll.y, opacity: heroScroll.opacity }} className="relative mx-auto flex h-full w-full max-w-6xl items-center px-4 pb-32 sm:px-6 sm:pb-28">
                 <div className="lp-stagger max-w-2xl">
-                  <p style={vars(0)} className="inline-flex items-center gap-2 text-sm font-medium text-white/90">
-                    <span className="size-1.5 rounded-full bg-lp-accent" aria-hidden />
+                  <p style={vars(0)} className="inline-flex items-center gap-2.5 text-sm font-semibold tracking-wide text-lp-accent-light">
+                    <span className="h-px w-8 bg-lp-accent" aria-hidden />
                     {s.eyebrow}
                   </p>
-                  <h2 style={vars(1)} className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.5rem] lg:leading-[1.08]">
+                  <h2 style={vars(1)} className="mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-[3.75rem] lg:leading-[1.05]">
                     {Array.isArray(s.title)
                       ? s.title.map((part) => (
                           <span key={part} className="mr-[0.25em] inline-block">
@@ -138,7 +138,7 @@ export function HeroCarousel() {
                     {s.text}
                   </p>
                   <div style={vars(3)} className="mt-8">
-                    <a href={s.cta.href} className={lpButton("light", "h-12 px-7 text-[15px]")}>
+                    <a href={s.cta.href} className={lpButton("gold", "h-12 px-8 text-[15px]")}>
                       {s.cta.label} <ArrowRight className="size-4" aria-hidden />
                     </a>
                   </div>
@@ -162,14 +162,14 @@ export function HeroCarousel() {
                     aria-selected={active}
                     aria-label={`Banner ${i + 1}: ${s.eyebrow}`}
                     onClick={() => go(i)}
-                    className="group relative rounded-sm pt-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1d2e]"
+                    className="group relative rounded-sm pt-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#12281f]"
                   >
                     <span className="absolute inset-x-0 top-0 h-[3px] overflow-hidden rounded-full bg-white/30" aria-hidden>
                       {active ? (
                         <span
                           key={index}
                           data-run="true"
-                          className="lp-progress block h-full w-full bg-white"
+                          className="lp-progress block h-full w-full bg-lp-accent"
                           style={{ "--lp-dur": `${SLIDE_MS}ms`, animationPlayState: playing ? "running" : "paused" } as React.CSSProperties}
                           onAnimationEnd={() => go(index + 1)}
                         />

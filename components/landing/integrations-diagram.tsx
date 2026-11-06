@@ -44,7 +44,7 @@ export function IntegrationsDiagram({ nodes }: { nodes: readonly DiagramNode[] }
         })}
       </svg>
 
-      <motion.div variants={{ hidden: { opacity: 0, scale: 0.7 }, show: { opacity: 1, scale: 1, transition: { duration: 0.8, ease: EASE } } }} className="absolute top-1/2 left-1/2 grid w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center gap-1.5 rounded-3xl border border-lp-border bg-white py-4 shadow-[0_24px_48px_-24px_rgba(23,43,66,0.35)] sm:gap-2 sm:py-6">
+      <motion.div variants={{ hidden: { opacity: 0, scale: 0.7 }, show: { opacity: 1, scale: 1, transition: { duration: 0.8, ease: EASE } } }} className="absolute top-1/2 left-1/2 grid w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center gap-1.5 rounded-3xl border border-lp-border bg-white py-4 shadow-[0_24px_48px_-24px_rgba(18,40,31,0.35)] sm:gap-2 sm:py-6">
         <svg viewBox="0 0 32 32" aria-hidden className="size-9 sm:size-12">
           <rect width="32" height="32" rx="8" className="fill-lp-primary" />
           <rect x="8" y="9" width="16" height="3.5" rx="1.75" className="fill-white" />

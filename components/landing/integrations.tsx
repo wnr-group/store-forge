@@ -41,7 +41,7 @@ function CategoryCard({ item, index, className }: { item: Integration; index: nu
     <SlideIn as="li" x={56} delay={(index % 3) * 0.1} amount={0.15} className={cn("group", className)}>
       <article className="relative isolate flex h-full transform-gpu flex-col rounded-2xl border border-lp-border bg-white p-6 transition-[translate,border-color] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:-translate-y-1.5 group-hover:border-lp-primary/30 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
         {/* Shadow fades in on its own layer; animating box-shadow directly repaints every frame and looks choppy */}
-        <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 shadow-[0_24px_48px_-24px_rgba(23,43,66,0.3)] transition-opacity duration-700 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
+        <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 shadow-[0_24px_48px_-24px_rgba(18,40,31,0.3)] transition-opacity duration-700 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
         <span className="grid size-11 place-items-center rounded-xl border border-lp-border bg-lp-bg text-lp-primary">
           <Icon className="size-5" strokeWidth={1.75} aria-hidden />
         </span>
@@ -64,7 +64,7 @@ function CategoryCard({ item, index, className }: { item: Integration; index: nu
 
 export function Integrations() {
   return (
-    <Section id="integrations" className="bg-lp-bg py-24 sm:py-32">
+    <Section id="integrations" className="lp-paper bg-lp-bg py-24 sm:py-32">
       <Container>
         <div className="grid items-center gap-14 lg:grid-cols-[5fr_6fr] lg:gap-16">
           <SlideIn x={-48}>

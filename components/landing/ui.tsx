@@ -20,23 +20,29 @@ export function Section({ id, className, children }: { id?: string; className?: 
 export function SectionHeading({ eyebrow, title, children, align = "left", className, dark = false }: { eyebrow?: string; title: string; children?: React.ReactNode; align?: "left" | "center"; className?: string; dark?: boolean }) {
   return (
     <Reveal className={cn("max-w-2xl", align === "center" && "mx-auto text-center", className)}>
-      {eyebrow ? <p className={cn("text-sm font-medium", dark ? "text-lp-accent" : "text-lp-primary")}>{eyebrow}</p> : null}
-      <h2 className={cn("mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-4xl sm:leading-[1.15]", dark ? "text-white" : "text-lp-heading")}>{title}</h2>
+      {eyebrow ? (
+        <p className={cn("inline-flex items-center gap-3 text-sm font-semibold tracking-wide", dark ? "text-lp-accent-light" : "text-lp-primary", align === "center" && "justify-center")}>
+          <span aria-hidden className="lp-gold-rule h-px w-8" />
+          {eyebrow}
+        </p>
+      ) : null}
+      <h2 className={cn("mt-3 text-3xl font-extrabold tracking-tight text-balance sm:text-[2.6rem] sm:leading-[1.12]", dark ? "text-white" : "text-lp-heading")}>{title}</h2>
       {children ? <p className={cn("mt-4 text-base leading-7 text-pretty sm:text-lg sm:leading-8", dark ? "text-white/75" : "text-lp-text")}>{children}</p> : null}
     </Reveal>
   );
 }
 
-type Variant = "primary" | "secondary" | "light";
+type Variant = "primary" | "secondary" | "light" | "gold";
 const BUTTON: Record<Variant, string> = {
   primary: "bg-lp-primary text-white hover:bg-lp-primary-hover",
   secondary: "border border-lp-border bg-white text-lp-heading hover:bg-lp-soft",
   light: "bg-white text-lp-heading hover:bg-lp-soft",
+  gold: "bg-lp-accent text-lp-deep hover:bg-lp-accent-light",
 };
 /** Class names for landing buttons rendered as plain anchors. */
 export const lpButton = (variant: Variant = "primary", className?: string) =>
   cn(
-    "group/btn inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium whitespace-nowrap transition-[background-color,translate,box-shadow] duration-200 outline-none hover:-translate-y-px hover:shadow-md focus-visible:ring-2 focus-visible:ring-lp-primary focus-visible:ring-offset-2 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none",
+    "group/btn inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold whitespace-nowrap transition-[background-color,translate,box-shadow] duration-200 outline-none hover:-translate-y-px hover:shadow-md focus-visible:ring-2 focus-visible:ring-lp-primary focus-visible:ring-offset-2 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none",
     BUTTON[variant],
     className,
   );
@@ -49,9 +55,9 @@ export function BrandLogo({ className, light = false }: { className?: string; li
         <rect width="32" height="32" rx="8" className={light ? "fill-white" : "fill-lp-primary"} />
         <rect x="8" y="9" width="16" height="3.5" rx="1.75" className={light ? "fill-lp-primary" : "fill-white"} />
         <rect x="8" y="14.25" width="12" height="3.5" rx="1.75" className={light ? "fill-lp-primary" : "fill-white"} />
-        <rect x="8" y="19.5" width="8" height="3.5" rx="1.75" className={light ? "fill-lp-primary" : "fill-white"} />
+        <rect x="8" y="19.5" width="8" height="3.5" rx="1.75" className="fill-lp-accent" />
       </svg>
-      <span className={cn("text-[19px] leading-none font-semibold tracking-tight", light ? "text-white" : "text-lp-heading")}>{APP_NAME}</span>
+      <span className={cn("lp-display text-[19px] leading-none font-extrabold tracking-tight", light ? "text-white" : "text-lp-heading")}>{APP_NAME}</span>
     </span>
   );
 }

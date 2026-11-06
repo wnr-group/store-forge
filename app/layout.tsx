@@ -10,6 +10,9 @@ import "./globals.css";
 // Inter: the one UI family (body, headings, forms, tables). Geist Mono: figures, slugs and other meta.
 const inter = localFont({ src: "./fonts/inter-latin.woff2", variable: "--font-inter", weight: "100 900", display: "swap" });
 const geistMono = localFont({ src: "./fonts/geist-mono-latin.woff2", variable: "--font-geist-mono", weight: "100 900", display: "swap" });
+// Public landing page only: Manrope for display headings, DM Sans for body copy (see .lp-root in globals.css).
+const manrope = localFont({ src: "./fonts/manrope-latin.woff2", variable: "--font-manrope", weight: "200 800", display: "swap" });
+const dmSans = localFont({ src: "./fonts/dm-sans-latin.woff2", variable: "--font-dm-sans", weight: "100 1000", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "StoreForge - launch your online store", template: "%s | StoreForge" },
@@ -19,7 +22,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     // suppressHydrationWarning: the theme-init script below sets the `dark` class before React hydrates.
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${geistMono.variable} ${manrope.variable} ${dmSans.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         {/* beforeInteractive: Next injects it into the initial HTML and runs it before hydration, without React re-rendering a <script>. */}
         <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />

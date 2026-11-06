@@ -29,7 +29,7 @@ const Dot = ({ className }: { className?: string }) => <span aria-hidden classNa
 
 function Panel({ title, icon: Icon, children, className }: { title: string; icon: LucideIcon; children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-xl border border-lp-border bg-white p-4 shadow-[0_1px_2px_rgba(23,43,66,0.04)] sm:p-5", className)}>
+    <div className={cn("rounded-xl border border-lp-border bg-white p-4 shadow-[0_1px_2px_rgba(18,40,31,0.04)] sm:p-5", className)}>
       <div className="flex items-center gap-2.5">
         <span className="grid size-8 place-items-center rounded-lg bg-lp-soft text-lp-primary">
           <Icon className="size-4" strokeWidth={1.75} />

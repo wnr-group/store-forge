@@ -28,7 +28,7 @@ const SCATTERED = [
 const TAG = {
   green: "bg-emerald-50 text-emerald-700 ring-emerald-600/15",
   amber: "bg-amber-50 text-amber-700 ring-amber-600/15",
-  blue: "bg-sky-50 text-sky-700 ring-sky-600/15",
+  blue: "bg-lp-secondary text-lp-primary ring-lp-primary/15",
 } as const;
 
 /** A miniature, decorative store dashboard. Sample labels only. */
@@ -40,7 +40,7 @@ function DashboardMock() {
   ];
   const bars = [34, 48, 42, 60, 54, 76, 68];
   return (
-    <div aria-hidden className="overflow-hidden rounded-xl border border-lp-border bg-lp-bg shadow-[0_12px_32px_-16px_rgba(23,43,66,0.25)]">
+    <div aria-hidden className="overflow-hidden rounded-xl border border-lp-border bg-lp-bg shadow-[0_12px_32px_-16px_rgba(18,40,31,0.25)]">
       <div className="flex items-center gap-1.5 border-b border-lp-border bg-white px-3 py-2">
         {[0, 1, 2].map((i) => (
           <span key={i} className="size-2 rounded-full bg-lp-border" />
@@ -107,7 +107,7 @@ function DashboardMock() {
 
 export function ProblemSolution() {
   return (
-    <Section id="solutions" className="bg-lp-bg">
+    <Section id="solutions" className="lp-paper bg-lp-bg">
       <Container>
         <div className="max-w-2xl">
           <Fade as="p" className="text-sm font-medium tracking-wide text-lp-primary">THE PROBLEM &amp; THE SOLUTION</Fade>
@@ -162,7 +162,7 @@ export function ProblemSolution() {
 
           {/* Solution */}
           <SlideIn x={72} delay={0.1} className="h-full">
-            <div className="flex h-full flex-col rounded-2xl border border-lp-border bg-white p-5 shadow-[0_1px_2px_rgba(23,43,66,0.04)] sm:p-7">
+            <div className="flex h-full flex-col rounded-2xl border border-lp-border bg-white p-5 shadow-[0_1px_2px_rgba(18,40,31,0.04)] sm:p-7">
               <p className="text-sm font-semibold text-lp-primary">The StoreForge solution</p>
               <h3 className="mt-2 text-2xl font-semibold tracking-tight text-lp-heading sm:text-3xl">One platform. Complete control.</h3>
               <p className="mt-3 text-[15px] leading-7 text-lp-text">
