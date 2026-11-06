@@ -53,8 +53,8 @@ export function ScaleIn({ scale = 0.92, y = 18, ...rest }: Common & { scale?: nu
  * outer wrapper with useInView and animates an inner element instead.
  */
 
-/** Uncovers its content from left to right, like a curtain drawing back. */
-export function Wipe({ as = "div", delay = 0, amount = 0.2, duration = 1.1, className, children }: Common & { duration?: number }) {
+/** Uncovers its content like a curtain drawing back: from left to right, or (from="top") from top to bottom. */
+export function Wipe({ as = "div", delay = 0, amount = 0.2, duration = 1.1, from = "left", className, children }: Common & { duration?: number; from?: "left" | "top" }) {
   const still = useReducedMotion();
   const outer = useRef<HTMLElement>(null);
   const inner = useRef<HTMLDivElement>(null);
@@ -65,8 +65,8 @@ export function Wipe({ as = "div", delay = 0, amount = 0.2, duration = 1.1, clas
     <Outer ref={outer} data-reveal className={className}>
       <motion.div
         ref={inner}
-        initial={{ opacity: 0, clipPath: "inset(0 100% 0 0)" }}
-        animate={seen ? { opacity: 1, clipPath: "inset(0 0% 0 0)" } : undefined}
+        initial={{ opacity: 0, clipPath: from === "top" ? "inset(0 0 100% 0)" : "inset(0 100% 0 0)" }}
+        animate={seen ? { opacity: 1, clipPath: from === "top" ? "inset(0 0 0% 0)" : "inset(0 0% 0 0)" } : undefined}
         transition={{ duration, delay, ease: EASE }}
         // A clip-path left behind would cut off focus rings and shadows, so drop it once the reveal has finished.
         onAnimationComplete={() => {
