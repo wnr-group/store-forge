@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Features } from "@/components/landing/features";
 import { HeroCarousel } from "@/components/landing/hero-carousel";
 import { MotionProvider, ScrollProgress } from "@/components/landing/motion";
+import { ProblemSolution } from "@/components/landing/problem-solution";
 import { AnnouncementBar, SiteFooter, SiteHeader } from "@/components/landing/site-chrome";
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function LandingPage() {
         <main>
           <HeroCarousel />
           <Features />
+          <ProblemSolution />
         </main>
         <SiteFooter />
       </div>
