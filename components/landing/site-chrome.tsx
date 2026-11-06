@@ -1,3 +1,4 @@
+import { HeaderShell } from "./header-shell";
 import { MobileMenu } from "./mobile-menu";
 import { Reveal } from "./motion";
 import { BrandLogo, Container } from "./ui";
@@ -24,23 +25,27 @@ export function AnnouncementBar() {
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-lp-border bg-lp-bg">
-      <Container className="flex h-16 items-center justify-between gap-6">
-        <a href="#top" aria-label="StoreForge, back to top" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
+    <HeaderShell>
+      <Container className="grid h-(--nav-h) grid-cols-[1fr_auto] items-center gap-6 transition-[height] duration-300 motion-reduce:transition-none md:grid-cols-[1fr_auto_1fr]">
+        <a href="#top" aria-label="StoreForge, back to top" className="justify-self-start rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
           <BrandLogo />
         </a>
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Main" className="hidden items-center gap-1 rounded-full border border-lp-border/80 bg-white/70 p-1 shadow-[0_1px_2px_rgba(23,43,66,0.05)] md:flex">
           {NAV_LINKS.map((l) => (
-            <a key={l.href} href={l.href} className="rounded-md px-3 py-2 text-sm font-medium text-lp-text transition-colors hover:bg-lp-soft hover:text-lp-heading">
+            <a
+              key={l.href}
+              href={l.href}
+              className="rounded-full px-4 py-1.5 text-sm font-medium text-lp-text outline-none transition-colors duration-200 hover:bg-lp-soft hover:text-lp-heading focus-visible:ring-2 focus-visible:ring-lp-primary"
+            >
               {l.label}
             </a>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-self-end">
           <MobileMenu links={NAV_LINKS} />
         </div>
       </Container>
-    </header>
+    </HeaderShell>
   );
 }
 
