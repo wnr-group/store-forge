@@ -2,30 +2,28 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { KeyRound, PauseCircle, PlayCircle } from "lucide-react";
-import { resetOwnerPasswordAction, setCompanyStatusAction } from "@/app/(admin)/admin/actions";
+import { PauseCircle, PlayCircle, Trash2 } from "lucide-react";
+import { deleteCompanyAction, setCompanyStatusAction } from "@/app/(admin)/admin/actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { ResetPasswordDialog } from "@/components/shared/reset-password-dialog";
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/config/app";
 
-type Props = { tenantId: string; companyName: string; status: "active" | "suspended"; ownerLabel: string | null };
+type Props = { tenantId: string; companyName: string; status: "active" | "suspended" };
 
 /** Platform Admin controls for one organization. Authorisation is re-checked on the server by every action. */
-export function CompanyControls({ tenantId, companyName, status, ownerLabel }: Props) {
+export function CompanyControls({ tenantId, companyName, status }: Props) {
   const router = useRouter();
   const [confirm, setConfirm] = useState(false);
-  const [reset, setReset] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const suspending = status === "active";
 
   return (
     <div className="flex flex-wrap gap-2">
-      {ownerLabel ? (
-        <Button variant="outline" onClick={() => setReset(true)}>
-          <KeyRound aria-hidden /> Reset owner password
-        </Button>
-      ) : null}
-      <Button variant={suspending ? "destructive" : "default"} onClick={() => setConfirm(true)}>
+      <Button variant={suspending ? "outline" : "default"} onClick={() => setConfirm(true)}>
         {suspending ? <PauseCircle aria-hidden /> : <PlayCircle aria-hidden />} {suspending ? "Suspend organization" : "Reactivate organization"}
+      </Button>
+      <Button variant="destructive" onClick={() => setDeleting(true)}>
+        <Trash2 aria-hidden /> Delete organization
       </Button>
 
       <ConfirmDialog
@@ -45,15 +43,20 @@ export function CompanyControls({ tenantId, companyName, status, ownerLabel }: P
           return res;
         }}
       />
-      {ownerLabel ? (
-        <ResetPasswordDialog
-          key={reset ? "open" : "closed"}
-          open={reset}
-          onOpenChange={setReset}
-          subject={ownerLabel}
-          onSubmit={(password) => resetOwnerPasswordAction(tenantId, { password })}
-        />
-      ) : null}
+      <ConfirmDialog
+        open={deleting}
+        onOpenChange={setDeleting}
+        title={`Delete ${companyName}?`}
+        description="This permanently deletes the organization, its store, products, images, customers and orders, and the sign-ins of everyone who belongs only to it. It cannot be undone."
+        confirmLabel="Delete organization"
+        confirmPhrase={companyName}
+        successMessage="Organization deleted"
+        onConfirm={async () => {
+          const res = await deleteCompanyAction(tenantId);
+          if (res.ok) router.replace(ROUTES.adminCompanies);
+          return res;
+        }}
+      />
     </div>
   );
 }

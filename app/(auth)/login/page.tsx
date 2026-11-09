@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <AuthShell
       title={store ? `Sign in to ${store.name}` : "Sign in"}
       description="Sign in with the email and password you were given."
-      footer="Accounts are created for you by your StoreForge administrator or company owner. Forgot your password? Ask them to reset it."
+      footer="Accounts are created for you by your StoreForge administrator or company owner. Forgot your password? Ask your company owner to reset it."
     >
       {error === "callback" ? (
         <Alert variant="destructive">

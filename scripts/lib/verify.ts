@@ -69,6 +69,7 @@ const FUNCTIONS = {
   authenticatedOnly: [
     "public.platform_provision_tenant(uuid,text,text,text,text,text,text)",
     "public.platform_add_member(uuid,uuid,jsonb)",
+    "public.platform_delete_tenant(uuid)",
     "public.has_module_access(uuid,text,text)",
     "public.platform_list_tenants(uuid)",
     "public.platform_set_tenant_status(uuid,text)",
@@ -271,7 +272,7 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
     const rows = await admin<{ policyname: string; roles: string; cmd: string }>(
       "select policyname, roles::text as roles, cmd from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'products_objects_%' order by 1",
     );
-    eq(rows.map((r) => r.policyname), ["products_objects_delete", "products_objects_insert", "products_objects_select", "products_objects_update"], "storage policies");
+    eq(rows.map((r) => r.policyname), ["products_objects_delete", "products_objects_insert", "products_objects_platform_delete", "products_objects_platform_select", "products_objects_select", "products_objects_update"], "storage policies");
     assert(rows.every((r) => r.roles === "{authenticated}"), `storage policy roles: ${rows.map((r) => r.roles).join(",")}`);
     // No broader write policy may exist for anon/public on this bucket.
     const loose = await admin<{ policyname: string }>(

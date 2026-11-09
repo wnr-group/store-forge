@@ -14,6 +14,7 @@ const h = vi.hoisted(() => ({
   cookie: undefined as string | undefined,
   pg: null as unknown,
   adminCalls: [] as Array<{ fn: string; args: unknown }>,
+  storageCalls: [] as unknown[][],
   createUserError: null as null | { code: string; status: number; message: string },
 }));
 
@@ -43,6 +44,8 @@ async function privileged<T>(fn: (pg: PGlite) => Promise<T>): Promise<T> {
     await pg.exec(`set session authorization ${rows[0].su}`);
   }
 }
+
+vi.mock("@/lib/storage/server", () => ({ removeTenantObjects: (...args: unknown[]) => { h.storageCalls.push(args); return Promise.resolve(); } }));
 
 vi.mock("@/lib/supabase/admin", () => ({
   getAdminAuthClient: () => ({
@@ -76,7 +79,7 @@ vi.mock("@/lib/supabase/admin", () => ({
 }));
 
 import { dbSchema, type Database } from "@/lib/db";
-import { createCompany, listCompanies } from "@/services/platform.service";
+import { createCompany, deleteCompany, listCompanies } from "@/services/platform.service";
 import { createMember, listTeam, removeMember, resetMemberPassword, setMemberStatus, updateMember } from "@/services/team.service";
 
 let pg: PGlite;
@@ -314,5 +317,44 @@ describe("managing members (company Owner)", () => {
       await expect(as(user, () => resetMemberPassword(staff, "brand-new-pass-1"), tenantA)).rejects.toMatchObject({ code: "FORBIDDEN" });
     }
     expect(calls("updateUserById")).toHaveLength(0);
+  });
+});
+
+describe("deleteCompany (Platform Admin)", () => {
+  const perms = JSON.stringify({ products: "read", orders: "read", customers: "read", settings: "read" });
+
+  it("deletes the organization, the sign-ins of people who belong only to it, and its files; others keep their account", async () => {
+    const owner = (await as(admin, () => createCompany(company("doomed-shop", "doomed@owner.test")))).ownerId;
+    const tenant = (await q<{ id: string }>("select tenant_id id from memberships where user_id = $1", [owner]))[0].id;
+    const [{ id: only }] = await q<{ id: string }>("insert into auth.users (email) values ('only@doomed.test') returning id");
+    await q("insert into memberships (tenant_id, user_id, role, permissions) values ($1,$2,'admin',$3::jsonb), ($1,$4,'admin',$3::jsonb)", [tenant, only, perms, bob]);
+    await q("insert into products (tenant_id, name, slug, price_minor) values ($1,'Tee','tee',100)", [tenant]);
+    h.adminCalls.length = 0;
+    h.storageCalls.length = 0;
+
+    await as(admin, () => deleteCompany(tenant));
+
+    expect(await q("select 1 from tenants where id = $1", [tenant])).toHaveLength(0);
+    expect(await q("select 1 from products where tenant_id = $1", [tenant])).toHaveLength(0);
+    expect(await q("select 1 from memberships where tenant_id = $1", [tenant])).toHaveLength(0);
+    expect(calls("deleteUser").map((c) => (c.args as { id: string }).id).sort()).toEqual([owner, only].sort());
+    expect(await q("select 1 from auth.users where id = any($1::uuid[])", [[owner, only]])).toHaveLength(0);
+    // bob also owns another organization: still has an account and a membership there
+    expect(await q("select 1 from auth.users where id = $1", [bob])).toHaveLength(1);
+    expect(await q("select 1 from memberships where user_id = $1 and tenant_id = $2", [bob, tenantB])).toHaveLength(1);
+    expect(h.storageCalls).toEqual([[tenant]]);
+  });
+
+  it("is refused for everyone but a Platform Admin, and for unknown organizations, deleting nothing", async () => {
+    h.storageCalls.length = 0;
+    h.adminCalls.length = 0;
+    for (const user of [alice, manager, staff]) {
+      await expect(as(user, () => deleteCompany(tenantA))).rejects.toBeDefined();
+    }
+    await expect(as(null, () => deleteCompany(tenantA))).rejects.toBeDefined();
+    await expect(as(admin, () => deleteCompany(crypto.randomUUID()))).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(await q("select 1 from tenants where id = $1", [tenantA])).toHaveLength(1);
+    expect(calls("deleteUser")).toHaveLength(0);
+    expect(h.storageCalls).toHaveLength(0);
   });
 });

@@ -26,7 +26,7 @@ There is **no public sign-up**. Accounts are always created for you:
 
 1. A **Platform Admin** creates a company. This also creates the company's first store and the **Owner's** login.
 2. The **Owner** creates accounts for their own **Managers** and **Staff** (under *Team members*).
-3. Forgot your password? Ask the person who created your account to reset it.
+3. Forgot your password? Ask your company Owner to reset it. Owners change their own password under *Settings*; the StoreForge team cannot reset it for them.
 
 ---
 

@@ -1,12 +1,13 @@
 import "server-only";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
-import { deleteUserQuietly, createConfirmedUser, setUserPassword } from "@/lib/auth/provisioning";
+import { deleteUserQuietly, createConfirmedUser } from "@/lib/auth/provisioning";
 import { requirePlatformAdmin } from "@/lib/auth/platform";
 import { withAuthenticatedDb } from "@/lib/db/tenant-db";
 import { rowsOf } from "@/lib/db/user-context";
 import { errorChain } from "@/lib/db/errors";
 import { AppError } from "@/lib/errors";
+import { removeTenantObjects } from "@/lib/storage/server";
 import { listTeamRows, type TeamMemberRow } from "@/services/team.service";
 import type { CreateCompanyValues } from "@/lib/validations/company";
 import type { CreateMemberInput } from "@/lib/validations/team";
@@ -167,12 +168,29 @@ export async function setCompanyStatus(tenantId: string, status: "active" | "sus
   if (!found) throw new AppError("NOT_FOUND", "Organization not found.");
 }
 
-/** Admin-assisted password reset for a company's Owner. The existing password is never readable. */
-export async function resetOwnerPassword(tenantId: string, password: string): Promise<void> {
+/** The JSON array platform_delete_tenant() returns: users left with no membership anywhere. */
+const orphanedUsers = z.array(z.uuid());
+
+/**
+ * Deletes an organization for good: the tenant and everything under it (stores, catalog, customers, orders,
+ * memberships) in ONE database transaction, then - after that has committed - the Auth accounts of people who belonged
+ * to no other organization, then its stored files. Someone who also belongs to another organization keeps their account.
+ * The Platform Admin check runs first here and again inside the SQL function. Auth and file cleanup are best-effort and
+ * logged: the database is authoritative, so a failure there leaves an unused sign-in or file, never a half-deleted company.
+ */
+export async function deleteCompany(tenantId: string): Promise<void> {
   await requirePlatformAdmin();
-  const found = await getCompany(tenantId);
-  if (!found?.company.ownerId) throw new AppError("NOT_FOUND", "This organization has no owner account.");
-  await setUserPassword(found.company.ownerId, password);
+  let orphaned: string[];
+  try {
+    orphaned = await withAuthenticatedDb(async (tx) => {
+      const rows = rowsOf<{ orphans: unknown }>(await tx.execute(sql`select public.platform_delete_tenant(${tenantId}::uuid) as orphans`));
+      return orphanedUsers.parse(rows[0]?.orphans ?? []);
+    });
+  } catch (error) {
+    return mapProvisioningError(error);
+  }
+  await Promise.all(orphaned.map((id) => deleteUserQuietly(id)));
+  await removeTenantObjects(tenantId);
 }
 
 /**

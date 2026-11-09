@@ -4,11 +4,10 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { ROUTES } from "@/config/app";
 import { run } from "@/lib/actions/run";
-import { resetPasswordSchema } from "@/lib/validations/auth";
 import { companyStatusSchema, createCompanySchema } from "@/lib/validations/company";
 import { parseInput } from "@/lib/validations/parse";
 import { createMemberSchema } from "@/lib/validations/team";
-import { addCompanyMember, createCompany, resetOwnerPassword, setCompanyStatus } from "@/services/platform.service";
+import { addCompanyMember, createCompany, deleteCompany, setCompanyStatus } from "@/services/platform.service";
 
 // Every action below calls a platform.service function whose first statement is requirePlatformAdmin():
 // the admin check happens on the server, from the validated session, before any privileged work.
@@ -30,9 +29,10 @@ export async function setCompanyStatusAction(tenantId: unknown, status: unknown)
   });
 }
 
-export async function resetOwnerPasswordAction(tenantId: unknown, input: unknown) {
+export async function deleteCompanyAction(tenantId: unknown) {
   return run(async () => {
-    await resetOwnerPassword(parseInput(z.uuid(), tenantId), parseInput(resetPasswordSchema, input).password);
+    await deleteCompany(parseInput(z.uuid(), tenantId));
+    revalidatePath(ROUTES.admin, "layout");
   });
 }
 

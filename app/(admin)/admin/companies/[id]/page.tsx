@@ -39,12 +39,11 @@ export default async function CompanyDetailsPage({ params }: { params: Promise<{
         actions={<StatusBadge tone={c.status === "active" ? "active" : "warning"}>{c.status === "active" ? "Active" : "Suspended"}</StatusBadge>}
       />
       <div className="space-y-6">
-        <SectionCard title="Status" description="Suspending an organization blocks access for all of its users. Nothing is deleted.">
+        <SectionCard title="Status" description="Suspending an organization blocks access for all of its users and deletes nothing. Deleting removes it and its data for good.">
           <CompanyControls
             tenantId={c.id}
             companyName={c.name}
             status={c.status}
-            ownerLabel={c.ownerEmail ? `${c.ownerName ?? "the owner"} (${c.ownerEmail})` : null}
           />
         </SectionCard>
 
