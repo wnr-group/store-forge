@@ -10,7 +10,7 @@ import { ROUTES } from "@/config/app";
 import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
 import { listCompanies } from "@/services/platform.service";
 
-export const metadata: Metadata = { title: "Companies" };
+export const metadata: Metadata = { title: "Organizations" };
 
 const date = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
@@ -24,15 +24,15 @@ export default async function CompaniesPage() {
 
   return (
     <>
-      <PageHeader title="Companies" description="Every company on the platform." actions={companies.length ? create : null} />
+      <PageHeader title="Organizations" description="Every organization on the platform." actions={companies.length ? create : null} />
       {companies.length === 0 ? (
-        <EmptyState icon={Building2} title="No companies yet" description="Create a company together with its owner account." action={create} />
+        <EmptyState icon={Building2} title="No organizations yet" description="Create an organization together with its owner account." action={create} />
       ) : (
         <div className="overflow-x-auto rounded-lg border bg-card">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40">
-                <TableHead>Company</TableHead>
+                <TableHead>Organization</TableHead>
                 <TableHead className="hidden md:table-cell">Owner</TableHead>
                 <TableHead className="hidden lg:table-cell">Store</TableHead>
                 <TableHead className="text-right">Users</TableHead>

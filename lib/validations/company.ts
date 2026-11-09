@@ -14,11 +14,11 @@ export const storeSlugSchema = z
   .refine((s) => !(RESERVED_SLUGS as readonly string[]).includes(s), "This name is reserved");
 
 /**
- * Platform Admin -> "Create company". Everything is re-validated on the server; the browser
+ * Platform Admin -> "Create organization". Everything is re-validated on the server; the browser
  * never supplies a role, tenant id or user id (the Owner role is fixed by the provisioning function).
  */
 export const createCompanySchema = z.object({
-  companyName: requiredText("Company name", 80, 2),
+  companyName: requiredText("Organization name", 80, 2),
   storeName: requiredText("Store name", 80, 2),
   storeSlug: storeSlugSchema,
   storeDescription: optionalText("Store description", 500),

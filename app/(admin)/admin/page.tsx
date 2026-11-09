@@ -15,7 +15,7 @@ export default async function AdminOverviewPage() {
   const suspended = companies.filter((c) => c.status === "suspended").length;
   const accounts = companies.reduce((n, c) => n + c.memberCount, 0);
   const stats = [
-    { label: "Companies", value: companies.length, icon: Building2 },
+    { label: "Organizations", value: companies.length, icon: Building2 },
     { label: "Active", value: companies.length - suspended, icon: Building2 },
     { label: "Suspended", value: suspended, icon: PauseCircle },
     { label: "User accounts", value: accounts, icon: Users },
@@ -25,7 +25,7 @@ export default async function AdminOverviewPage() {
     <>
       <PageHeader
         title="Platform overview"
-        description="Companies using StoreForge. Only you can create companies and their owner accounts."
+        description="Organizations using StoreForge. Only you can create organizations and their owner accounts."
         actions={
           <Link href={ROUTES.adminNewCompany} className={buttonVariants()}>
             <PlusCircle aria-hidden /> Create organization
@@ -47,7 +47,7 @@ export default async function AdminOverviewPage() {
       </div>
       <SectionCard title="Recently created" className="mt-6">
         {companies.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No companies yet. Create the first one to onboard its owner.</p>
+          <p className="text-sm text-muted-foreground">No organizations yet. Create the first one to onboard its owner.</p>
         ) : (
           <ul className="divide-y">
             {companies.slice(0, 5).map((c) => (

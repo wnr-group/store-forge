@@ -68,7 +68,7 @@ export function mapProvisioningError(error: unknown): never {
   if (msg.includes("invalid_slug"))
     throw new AppError("VALIDATION", "That store address is not allowed.", { storeSlug: "Choose a different address" });
   if (msg.includes("invalid_input")) throw new AppError("VALIDATION", "Please check the details you entered.");
-  if (msg.includes("not_found")) throw new AppError("NOT_FOUND", "Company not found.");
+  if (msg.includes("not_found")) throw new AppError("NOT_FOUND", "Organization not found.");
   if (msg.includes("not_platform_admin")) throw new AppError("FORBIDDEN", "You do not have permission to do that.");
   throw error;
 }
@@ -164,14 +164,14 @@ export async function setCompanyStatus(tenantId: string, status: "active" | "sus
     const rows = rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.platform_set_tenant_status(${tenantId}::uuid, ${status}) as ok`));
     return rows[0]?.ok === true;
   });
-  if (!found) throw new AppError("NOT_FOUND", "Company not found.");
+  if (!found) throw new AppError("NOT_FOUND", "Organization not found.");
 }
 
 /** Admin-assisted password reset for a company's Owner. The existing password is never readable. */
 export async function resetOwnerPassword(tenantId: string, password: string): Promise<void> {
   await requirePlatformAdmin();
   const found = await getCompany(tenantId);
-  if (!found?.company.ownerId) throw new AppError("NOT_FOUND", "This company has no owner account.");
+  if (!found?.company.ownerId) throw new AppError("NOT_FOUND", "This organization has no owner account.");
   await setUserPassword(found.company.ownerId, password);
 }
 

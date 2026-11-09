@@ -25,7 +25,7 @@ export const OWNER_NAV_ITEMS: NavItem[] = [
 /** Platform Admin area: companies only - no merchant data. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: ROUTES.adminCompanies, label: "Companies", icon: Building2, exact: true, group: "Platform" },
+  { href: ROUTES.adminCompanies, label: "Organizations", icon: Building2, exact: true, group: "Platform" },
   { href: ROUTES.adminNewCompany, label: "Create organization", icon: PlusCircle, group: "Platform" },
 ];
 

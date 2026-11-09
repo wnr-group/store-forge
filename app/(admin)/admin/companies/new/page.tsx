@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Create organization" };
 export default function NewCompanyPage() {
   return (
     <>
-      <PageHeader title="Create organization" description="Creates the company, its first store and the owner's sign-in in one step." />
+      <PageHeader title="Create organization" description="Creates the organization, its first store and the owner's sign-in in one step." />
       <CreateCompanyForm />
     </>
   );

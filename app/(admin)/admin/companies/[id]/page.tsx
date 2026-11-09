@@ -11,7 +11,7 @@ import { ROLE_LABELS } from "@/lib/auth/permissions";
 import { storefrontUrl } from "@/lib/tenant/host";
 import { getCompany } from "@/services/platform.service";
 
-export const metadata: Metadata = { title: "Company details" };
+export const metadata: Metadata = { title: "Organization details" };
 
 const date = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
@@ -38,7 +38,7 @@ export default async function CompanyDetailsPage({ params }: { params: Promise<{
         actions={<StatusBadge tone={c.status === "active" ? "active" : "warning"}>{c.status === "active" ? "Active" : "Suspended"}</StatusBadge>}
       />
       <div className="space-y-6">
-        <SectionCard title="Status" description="Suspending a company blocks access for all of its users. Nothing is deleted.">
+        <SectionCard title="Status" description="Suspending an organization blocks access for all of its users. Nothing is deleted.">
           <CompanyControls
             tenantId={c.id}
             companyName={c.name}
@@ -49,7 +49,7 @@ export default async function CompanyDetailsPage({ params }: { params: Promise<{
 
         <SectionCard title="Details">
           <dl className="grid gap-4 sm:grid-cols-2">
-            <Detail label="Company" value={c.name} />
+            <Detail label="Organization" value={c.name} />
             <Detail label="Contact number" value={c.contactPhone} />
             <Detail label="Address" value={c.address} />
             <Detail label="Store" value={c.storeName ? `${c.storeName} (${c.storeSlug})` : null} />

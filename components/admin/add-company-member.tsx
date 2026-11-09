@@ -6,7 +6,7 @@ import { addCompanyMemberAction } from "@/app/(admin)/admin/actions";
 import { AddMemberDialog } from "@/components/team/team-manager";
 import { Button } from "@/components/ui/button";
 
-/** Platform Admin: add a Manager/Staff sign-in to one company. The server re-checks the admin on submit. */
+/** Platform Admin: add a Manager/Staff sign-in to one organization. The server re-checks the admin on submit. */
 export function AddCompanyMember({ tenantId, companyName }: { tenantId: string; companyName: string }) {
   const [open, setOpen] = useState(false);
   return (

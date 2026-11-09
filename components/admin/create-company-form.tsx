@@ -55,7 +55,7 @@ export function CreateCompanyForm() {
         fail(res);
         return;
       }
-      toast.success(`Company created. ${res.data?.ownerEmail ?? "The owner"} can now sign in.`);
+      toast.success(`Organization created. ${res.data?.ownerEmail ?? "The owner"} can now sign in.`);
       router.push(res.data ? `${ROUTES.adminCompanies}/${res.data.tenantId}` : ROUTES.adminCompanies);
     });
   };
@@ -71,9 +71,9 @@ export function CreateCompanyForm() {
     >
       {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
 
-      <SectionCard title="Company" description="The business that will use StoreForge.">
+      <SectionCard title="Organization" description="The business that will use StoreForge.">
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField id="cc-company" label="Company name" required error={errors.companyName}>
+          <FormField id="cc-company" label="Organization name" required error={errors.companyName}>
             <Input {...props("companyName", "cc-company")} aria-required autoComplete="off" autoFocus />
           </FormField>
           <FormField id="cc-phone" label="Contact number" optional error={errors.contactPhone}>
@@ -85,7 +85,7 @@ export function CreateCompanyForm() {
         </FormField>
       </SectionCard>
 
-      <SectionCard title="First store" description="Created together with the company.">
+      <SectionCard title="First store" description="Created together with the organization.">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField id="cc-store" label="Store name" required error={errors.storeName}>
             <Input {...props("storeName", "cc-store")} aria-required autoComplete="off" />

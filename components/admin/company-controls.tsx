@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 type Props = { tenantId: string; companyName: string; status: "active" | "suspended"; ownerLabel: string | null };
 
-/** Platform Admin controls for one company. Authorisation is re-checked on the server by every action. */
+/** Platform Admin controls for one organization. Authorisation is re-checked on the server by every action. */
 export function CompanyControls({ tenantId, companyName, status, ownerLabel }: Props) {
   const router = useRouter();
   const [confirm, setConfirm] = useState(false);
@@ -25,7 +25,7 @@ export function CompanyControls({ tenantId, companyName, status, ownerLabel }: P
         </Button>
       ) : null}
       <Button variant={suspending ? "destructive" : "default"} onClick={() => setConfirm(true)}>
-        {suspending ? <PauseCircle aria-hidden /> : <PlayCircle aria-hidden />} {suspending ? "Suspend company" : "Reactivate company"}
+        {suspending ? <PauseCircle aria-hidden /> : <PlayCircle aria-hidden />} {suspending ? "Suspend organization" : "Reactivate organization"}
       </Button>
 
       <ConfirmDialog
@@ -34,11 +34,11 @@ export function CompanyControls({ tenantId, companyName, status, ownerLabel }: P
         title={suspending ? `Suspend ${companyName}?` : `Reactivate ${companyName}?`}
         description={
           suspending
-            ? "Everyone in this company loses access immediately. Their data is kept and nothing is deleted."
-            : "Everyone in this company regains access with their existing accounts."
+            ? "Everyone in this organization loses access immediately. Their data is kept and nothing is deleted."
+            : "Everyone in this organization regains access with their existing accounts."
         }
         confirmLabel={suspending ? "Suspend" : "Reactivate"}
-        successMessage={suspending ? "Company suspended" : "Company reactivated"}
+        successMessage={suspending ? "Organization suspended" : "Organization reactivated"}
         onConfirm={async () => {
           const res = await setCompanyStatusAction(tenantId, suspending ? "suspended" : "active");
           if (res.ok) router.refresh();
