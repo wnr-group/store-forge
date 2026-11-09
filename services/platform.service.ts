@@ -9,6 +9,7 @@ import { errorChain } from "@/lib/db/errors";
 import { AppError } from "@/lib/errors";
 import { listTeamRows, type TeamMemberRow } from "@/services/team.service";
 import type { CreateCompanyValues } from "@/lib/validations/company";
+import type { CreateMemberInput } from "@/lib/validations/team";
 
 /**
  * Platform Admin operations. Every exported function starts with requirePlatformAdmin(), which asks
@@ -67,6 +68,7 @@ export function mapProvisioningError(error: unknown): never {
   if (msg.includes("invalid_slug"))
     throw new AppError("VALIDATION", "That store address is not allowed.", { storeSlug: "Choose a different address" });
   if (msg.includes("invalid_input")) throw new AppError("VALIDATION", "Please check the details you entered.");
+  if (msg.includes("not_found")) throw new AppError("NOT_FOUND", "Company not found.");
   if (msg.includes("not_platform_admin")) throw new AppError("FORBIDDEN", "You do not have permission to do that.");
   throw error;
 }
@@ -171,4 +173,22 @@ export async function resetOwnerPassword(tenantId: string, password: string): Pr
   const found = await getCompany(tenantId);
   if (!found?.company.ownerId) throw new AppError("NOT_FOUND", "This company has no owner account.");
   await setUserPassword(found.company.ownerId, password);
+}
+
+/**
+ * Platform Admin adds a Manager/Staff account to any company, the same account the Owner can create under
+ * Team members. The Auth user is created first; the membership is then written by platform_add_member(),
+ * which re-checks the Platform Admin and refuses the Owner role. If that fails the Auth user is deleted
+ * again, so no orphaned account (and no reserved e-mail) remains.
+ */
+export async function addCompanyMember(tenantId: string, v: CreateMemberInput) {
+  await requirePlatformAdmin();
+  const user = await createConfirmedUser({ email: v.email, password: v.password, fullName: v.fullName });
+  try {
+    await withAuthenticatedDb((tx) => tx.execute(sql`select public.platform_add_member(${tenantId}::uuid, ${user.id}::uuid, ${v.role})`));
+  } catch (error) {
+    await deleteUserQuietly(user.id);
+    return mapProvisioningError(error);
+  }
+  return { userId: user.id, email: user.email };
 }

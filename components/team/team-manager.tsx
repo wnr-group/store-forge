@@ -25,7 +25,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ASSIGNABLE_ROLES, ROLE_LABELS, type AssignableRole } from "@/lib/auth/permissions";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
-import { createMemberSchema, updateMemberSchema } from "@/lib/validations/team";
+import { createMemberSchema, updateMemberSchema, type CreateMemberInput } from "@/lib/validations/team";
 
 export type MemberRow = {
   userId: string;
@@ -44,7 +44,15 @@ const RoleSelect = (p: { id: string; value: string; onChange: (v: AssignableRole
   </NativeSelect>
 );
 
-function AddMemberDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+type AddMemberDialogProps = {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  /** Defaults to the Owner's own-tenant action; the Platform Admin passes one bound to a company. */
+  create?: (v: CreateMemberInput) => ReturnType<typeof createMemberAction>;
+  description?: string;
+};
+
+export function AddMemberDialog({ open, onOpenChange, create = createMemberAction, description = "Creates a sign-in for your company. No verification email is sent: share the email and initial password securely, and ask them to change it after first sign-in." }: AddMemberDialogProps) {
   const router = useRouter();
   const [v, setV] = useState({ fullName: "", email: "", password: "", role: "staff" as AssignableRole });
   const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
@@ -60,7 +68,7 @@ function AddMemberDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
   const submit = () => {
     if (!validate(createMemberSchema, v)) return;
     send(async () => {
-      const res = await createMemberAction(v);
+      const res = await create(v);
       if (!res.ok) {
         fail(res);
         return;
@@ -76,9 +84,7 @@ function AddMemberDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add team member</DialogTitle>
-          <DialogDescription>
-            Creates a sign-in for your company. No verification email is sent: share the email and initial password securely, and ask them to change it after first sign-in.
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <form noValidate className="space-y-3" onSubmit={(e) => { e.preventDefault(); submit(); }}>
           {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}

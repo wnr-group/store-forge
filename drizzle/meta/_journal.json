@@ -120,6 +120,13 @@
       "when": 1794218109809,
       "tag": "0016_template_engine_cutover",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794300000000,
+      "tag": "0017_platform_add_member",
+      "breakpoints": true
     }
   ]
 }

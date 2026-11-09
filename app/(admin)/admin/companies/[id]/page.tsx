@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { AddCompanyMember } from "@/components/admin/add-company-member";
 import { CompanyControls } from "@/components/admin/company-controls";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
@@ -58,7 +59,8 @@ export default async function CompanyDetailsPage({ params }: { params: Promise<{
           </dl>
         </SectionCard>
 
-        <SectionCard title="User accounts" description="Created by the owner under Team members. Passwords are never shown.">
+        <SectionCard title="User accounts" description="Created by the owner under Team members, or by you here. Passwords are never shown.">
+          <div className="mb-3"><AddCompanyMember tenantId={c.id} companyName={c.name} /></div>
           <div className="overflow-x-auto rounded-lg border">
             <Table>
               <TableHeader>
