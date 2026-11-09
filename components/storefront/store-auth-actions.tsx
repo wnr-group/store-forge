@@ -7,27 +7,28 @@ import { useSignedIn } from "@/lib/auth/use-signed-in";
 import { cn } from "@/lib/utils";
 
 /**
- * Sign-in links in a store's public header. On <store>.<root domain> /login and /dashboard are that store's own app
- * (sessions are per host), so plain relative links are right there and on /s/<slug>. Signed-in visitors only get
- * Dashboard; until the cookie has been checked, Log in keeps its space but stays invisible so nothing flashes or shifts.
+ * One sign-in button in a store's public header: "Log in" for a visitor who is not signed in to THIS address,
+ * "Dashboard" for one who is. Sessions are per host (<store>.<root domain> has its own sign-in), so being signed in
+ * as a Platform Admin on the main site does not count here. Until the cookie has been checked, the button keeps its
+ * space but stays invisible, so a signed-in visitor never sees Log in flash and nothing shifts.
  */
 export function StoreAuthActions() {
   const signedIn = useSignedIn();
-  return (
-    <div className="flex shrink-0 items-center gap-2">
-      {signedIn !== true ? (
-        <Link
-          href={ROUTES.login}
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }), signedIn === null && "invisible")}
-          aria-hidden={signedIn === null ? true : undefined}
-          tabIndex={signedIn === null ? -1 : undefined}
-        >
-          Log in
-        </Link>
-      ) : null}
-      <Link href={ROUTES.dashboard} className={buttonVariants({ size: "sm" })}>
+  if (signedIn === true) {
+    return (
+      <Link href={ROUTES.dashboard} className={cn(buttonVariants({ size: "sm" }), "shrink-0")}>
         Dashboard
       </Link>
-    </div>
+    );
+  }
+  return (
+    <Link
+      href={ROUTES.login}
+      className={cn(buttonVariants({ size: "sm" }), "shrink-0", signedIn === null && "invisible")}
+      aria-hidden={signedIn === null ? true : undefined}
+      tabIndex={signedIn === null ? -1 : undefined}
+    >
+      Log in
+    </Link>
   );
 }
