@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Team members" };
 export default async function TeamPage() {
   const { user, active } = await requireWorkspace();
   // Owner-only. The service and the database repeat this check; this is just the friendly redirect.
-  if (!canManageMembers(active.role)) redirect(ROUTES.dashboard);
+  if (!canManageMembers(active)) redirect(ROUTES.dashboard);
   const team = await listTeam();
 
   return (

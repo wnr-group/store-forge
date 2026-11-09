@@ -6,11 +6,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 import { isActive, NAV_SETS, type NavKey } from "./nav-config";
 
-export function SidebarNav({ navKey, collapsed = false, onNavigate }: { navKey: NavKey; collapsed?: boolean; onNavigate?: () => void }) {
+export function SidebarNav({ navKey, hidden = [], collapsed = false, onNavigate }: { navKey: NavKey; hidden?: string[]; collapsed?: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Main" className="flex flex-col gap-0.5">
-      {NAV_SETS[navKey].map((item, i, items) => {
+      {NAV_SETS[navKey].filter((item) => !hidden.includes(item.href)).map((item, i, items) => {
         const heading = item.group && item.group !== items[i - 1]?.group ? item.group : null;
         const active = isActive(pathname, item);
         const link = (

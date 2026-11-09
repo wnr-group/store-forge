@@ -13,6 +13,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { ROUTES, SIDEBAR_COOKIE } from "@/config/app";
 import { canViewDashboard, ROLE_LABELS } from "@/lib/auth/permissions";
+import { hiddenNavHrefs } from "@/components/dashboard/nav-config";
 import { AppError } from "@/lib/errors";
 import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
 import { requireWorkspace } from "@/lib/tenant/context";
@@ -22,7 +23,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // Server-side gate for every dashboard page: validated user, DB-verified
   // active tenant (else -> /onboarding), then a role check.
   const { user, active, store, tenants } = await requireWorkspace();
-  if (!canViewDashboard(active.role)) throw new AppError("FORBIDDEN", "You do not have access to this workspace.");
+  if (!canViewDashboard(active)) throw new AppError("FORBIDDEN", "You do not have access to this workspace.");
 
   const onStoreHost = Boolean(await getRequestStoreSlug());
   const name = (user.user_metadata?.full_name as string | undefined) ?? "";
@@ -44,6 +45,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <AppShell
       navKey={active.role === "owner" ? "owner" : "merchant"}
+      hiddenNav={hiddenNavHrefs(active)}
       homeHref={ROUTES.dashboard}
       defaultCollapsed={collapsed}
       switcher={{ full: <TenantSwitcher {...switcherProps} />, compact: <TenantSwitcher {...switcherProps} compact /> }}

@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ROUTES } from "@/config/app";
 import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
+import { canViewOrders } from "@/lib/auth/permissions";
 import { requireWorkspace } from "@/lib/tenant/context";
 import { getAnalytics } from "@/services/analytics.service";
 
@@ -25,7 +26,8 @@ export default async function DashboardPage() {
       </Card>
     );
   }
-  const data = await getAnalytics(30, store.timezone);
+  const showAnalytics = canViewOrders(active);
+  const data = showAnalytics ? await getAnalytics(30, store.timezone) : null;
   const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
   const storeUrl = storefrontUrl(store.slug, root);
 
@@ -48,13 +50,15 @@ export default async function DashboardPage() {
         actions={
           <>
             <StatusBadge tone={store.status === "active" ? "active" : "draft"}><span className="capitalize">{store.status}</span></StatusBadge>
-            <Link href={ROUTES.analytics} className={buttonVariants({ variant: "outline" })}>
-              <BarChart3 aria-hidden /> Analytics
-            </Link>
+            {showAnalytics ? (
+              <Link href={ROUTES.analytics} className={buttonVariants({ variant: "outline" })}>
+                <BarChart3 aria-hidden /> Analytics
+              </Link>
+            ) : null}
           </>
         }
       />
-      <AnalyticsView data={data} currency={store.currency} />
+      {data ? <AnalyticsView data={data} currency={store.currency} /> : null}
     </>
   );
 }

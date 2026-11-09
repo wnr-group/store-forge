@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { AddCompanyMember } from "@/components/admin/add-company-member";
+import { AccessSummary } from "@/components/team/access-summary";
 import { CompanyControls } from "@/components/admin/company-controls";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ROLE_LABELS } from "@/lib/auth/permissions";
+import { roleLabel } from "@/lib/auth/permissions";
 import { storefrontUrl } from "@/lib/tenant/host";
 import { getCompany } from "@/services/platform.service";
 
@@ -68,6 +69,7 @@ export default async function CompanyDetailsPage({ params }: { params: Promise<{
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead className="hidden md:table-cell">Access</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -76,7 +78,8 @@ export default async function CompanyDetailsPage({ params }: { params: Promise<{
                   <TableRow key={m.userId}>
                     <TableCell>{m.fullName ?? "—"}</TableCell>
                     <TableCell>{m.email}</TableCell>
-                    <TableCell>{ROLE_LABELS[m.role]}</TableCell>
+                    <TableCell>{roleLabel(m.role, m.permissions)}</TableCell>
+                    <TableCell className="hidden md:table-cell"><AccessSummary role={m.role} permissions={m.permissions} /></TableCell>
                     <TableCell>
                       <StatusBadge tone={m.status === "active" ? "active" : "draft"}>{m.status === "active" ? "Active" : "Deactivated"}</StatusBadge>
                     </TableCell>

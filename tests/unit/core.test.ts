@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assignableRoles, can, canManageMembers, canManageStore, canManageTenant, canViewDashboard, isRole, ROLE_LABELS } from "@/lib/auth/permissions";
+import { accessLevel, can, canDeleteCatalog, canManageCatalog, canManageCustomers, canManageMembers, canManageStore, canViewCatalog, canViewCustomers, canViewDashboard, canViewOrders, isRole, MEMBER_ROLE, presetOf, ROLE_LABELS, ROLE_PRESET_KEYS, ROLE_PRESETS, roleLabel, summarizePermissions } from "@/lib/auth/permissions";
 import { resolveActiveTenant } from "@/lib/tenant/resolve";
 import { safeNextPath } from "@/lib/utils/redirect";
 import { slugify } from "@/lib/utils/slug";
@@ -7,31 +7,69 @@ import { changePasswordSchema, loginSchema, resetPasswordSchema } from "@/lib/va
 import { createCompanySchema } from "@/lib/validations/company";
 import { createMemberSchema, updateMemberSchema } from "@/lib/validations/team";
 
-describe("RBAC", () => {
-  it("owner and admin (Manager) manage the store; staff only views; only the owner manages members", () => {
-    for (const role of ["owner", "admin"] as const) {
-      expect(canManageStore(role)).toBe(true);
-      expect(canManageTenant(role)).toBe(true);
+const member = (permissions: Record<string, string>) => ({ role: "admin" as const, permissions }) as Parameters<typeof can>[0];
+const owner = { role: "owner" as const, permissions: {} };
+const reader = member({ products: "read", orders: "read", customers: "read", settings: "read" });
+const writer = member({ products: "write", orders: "read", customers: "write", settings: "write" });
+
+describe("access", () => {
+  it("the owner can do everything; only the owner manages members and deletes stores/tenants", () => {
+    for (const p of ["store:manage", "tenant:manage", "members:manage", "store:delete", "tenant:delete", "catalog:manage", "customers:manage", "orders:view"] as const) {
+      expect(can(owner, p), p).toBe(true);
     }
-    expect(canManageMembers("owner")).toBe(true);
-    expect(canManageMembers("admin")).toBe(false);
-    expect(canViewDashboard("staff")).toBe(true);
-    expect(canManageStore("staff")).toBe(false);
-    expect(canManageTenant("staff")).toBe(false);
-    expect(canManageMembers("staff")).toBe(false);
+    for (const m of [reader, writer]) {
+      expect(canManageMembers(m)).toBe(false);
+      expect(can(m, "store:delete")).toBe(false);
+      expect(can(m, "tenant:delete")).toBe(false);
+      expect(canViewDashboard(m)).toBe(true);
+    }
   });
 
-  it("only owners can delete stores/tenants", () => {
-    expect(can("owner", "store:delete")).toBe(true);
-    expect(can("admin", "store:delete")).toBe(false);
-    expect(can("admin", "tenant:delete")).toBe(false);
+  it("read lets a member look but not change; write includes read", () => {
+    expect([canViewCatalog(reader), canManageCatalog(reader), canDeleteCatalog(reader)]).toEqual([true, false, false]);
+    expect([canViewCatalog(writer), canManageCatalog(writer), canDeleteCatalog(writer)]).toEqual([true, true, true]);
+    expect([canViewCustomers(reader), canManageCustomers(reader)]).toEqual([true, false]);
+    expect(canManageStore(reader)).toBe(false);
+    expect(canManageStore(writer)).toBe(true);
+    expect(canViewOrders(writer)).toBe(true);
   });
 
-  it("only the owner can assign roles, and never owner; the middle role is labelled Manager", () => {
-    expect(assignableRoles("owner")).toEqual(["admin", "staff"]);
-    expect(assignableRoles("admin")).toEqual([]);
-    expect(assignableRoles("staff")).toEqual([]);
-    expect(ROLE_LABELS.admin).toBe("Manager");
+  it("no access hides the module; a missing module counts as none, except store settings which stay readable", () => {
+    const none = member({ products: "none", orders: "none", customers: "none" });
+    expect([canViewCatalog(none), canViewOrders(none), canViewCustomers(none)]).toEqual([false, false, false]);
+    expect(accessLevel(none, "settings")).toBe("read");
+    expect(canManageStore(none)).toBe(false);
+    expect(canViewCatalog(member({}))).toBe(false);
+  });
+
+  it("summarises what a member can do", () => {
+    expect(summarizePermissions("owner", {})).toBe("Full access");
+    expect(summarizePermissions("admin", { products: "write", orders: "none", customers: "read", settings: "read" })).toBe(
+      "Products & inventory: Read & write · Customers: Read · Store settings: Read",
+    );
+  });
+
+  it("a role is a preset of access levels; levels that match no preset show as Custom", () => {
+    for (const key of ROLE_PRESET_KEYS) {
+      expect(presetOf(ROLE_PRESETS[key].permissions), key).toBe(key);
+      expect(roleLabel("admin", ROLE_PRESETS[key].permissions)).toBe(ROLE_PRESETS[key].label);
+    }
+    expect(presetOf({ ...ROLE_PRESETS.staff.permissions, customers: "read" })).toBe("custom");
+    expect(roleLabel("admin", { ...ROLE_PRESETS.staff.permissions, customers: "none" })).toBe("Custom");
+    expect(roleLabel("owner", {})).toBe("Owner");
+  });
+
+  it("presets never give more than the form allows, and old data maps onto them", () => {
+    for (const key of ROLE_PRESET_KEYS) expect(createMemberSchema.safeParse({ fullName: "Aa", email: "a@b.co", password: "initial-pass-1", permissions: ROLE_PRESETS[key].permissions }).success, key).toBe(true);
+    // migrated rows may carry orders:write; it counts as read, so a migrated manager still reads as Manager
+    expect(presetOf({ products: "write", orders: "write", customers: "write", settings: "write" })).toBe("manager");
+    expect(presetOf({})).toBe("custom");
+  });
+
+  it("members are stored with the member role and labelled Team member; the owner is never assignable", () => {
+    expect(MEMBER_ROLE).toBe("admin");
+    expect(ROLE_LABELS.admin).toBe("Team member");
+    expect(ROLE_LABELS.owner).toBe("Owner");
   });
 
   it("rejects unknown role strings", () => {
@@ -132,16 +170,30 @@ describe("company provisioning validation", () => {
 });
 
 describe("team member validation", () => {
-  const base = { fullName: "Sana Staff", email: "Sana@Acme.com", password: "initial-pass-1", role: "staff" };
+  const permissions = { products: "write", orders: "read", customers: "read", settings: "read" };
+  const base = { fullName: "Sana Staff", email: "Sana@Acme.com", password: "initial-pass-1", permissions };
+  const id = "3f2b1c9e-8a4d-4c1e-9f6a-2b7d5e8c1a40";
 
-  it("accepts manager (stored as admin) and staff only", () => {
+  it("accepts a level per module", () => {
     expect(createMemberSchema.safeParse(base).success).toBe(true);
-    expect(createMemberSchema.safeParse({ ...base, role: "admin" }).success).toBe(true);
+    expect(updateMemberSchema.safeParse({ userId: id, fullName: "Sana Staff", permissions }).success).toBe(true);
+    expect(createMemberSchema.safeParse({ ...base, permissions: { products: "none", orders: "none", customers: "none", settings: "read" } }).success).toBe(true);
   });
 
-  it.each(["owner", "platform_admin", "superuser", "", undefined])("rejects privileged or unknown role %s", (role) => {
-    expect(createMemberSchema.safeParse({ ...base, role }).success).toBe(false);
-    expect(updateMemberSchema.safeParse({ userId: "3f2b1c9e-8a4d-4c1e-9f6a-2b7d5e8c1a40", fullName: "Sana Staff", role }).success).toBe(false);
+  it.each([
+    ["an unknown level", { ...permissions, products: "admin" }],
+    ["write on orders (read-only for now)", { ...permissions, orders: "write" }],
+    ["none on store settings (always readable)", { ...permissions, settings: "none" }],
+    ["a missing module", { products: "read", orders: "read", customers: "read" }],
+    ["no permissions at all", undefined],
+  ])("rejects %s", (_label, p) => {
+    expect(createMemberSchema.safeParse({ ...base, permissions: p }).success).toBe(false);
+    expect(updateMemberSchema.safeParse({ userId: id, fullName: "Sana Staff", permissions: p }).success).toBe(false);
+  });
+
+  it.each(["owner", "platform_admin", "superuser"])("never lets the browser choose a role (%s is ignored)", (role) => {
+    const r = createMemberSchema.safeParse({ ...base, role });
+    expect(r.success && "role" in r.data).toBe(false);
   });
 
   it("does not accept a tenant id from the browser", () => {

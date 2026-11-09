@@ -19,12 +19,14 @@ type Props = {
   defaultCollapsed?: boolean;
   /** Which navigation to render, and where the logo links. */
   navKey: NavKey;
+  /** Nav hrefs to hide for this member (no access). */
+  hiddenNav?: string[];
   homeHref: string;
   children: React.ReactNode;
 };
 
 /** Responsive shell: collapsible sidebar on desktop, drawer below `lg`. Slots are server-rendered. */
-export function AppShell({ switcher, header, footer, defaultCollapsed = false, navKey, homeHref, children }: Props) {
+export function AppShell({ switcher, header, footer, defaultCollapsed = false, navKey, hiddenNav, homeHref, children }: Props) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [drawer, setDrawer] = useState(false);
 
@@ -49,7 +51,7 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
           </div>
           <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
             {collapsed ? switcher.compact : switcher.full}
-            <SidebarNav navKey={navKey} collapsed={collapsed} />
+            <SidebarNav navKey={navKey} hidden={hiddenNav} collapsed={collapsed} />
           </div>
           <div className="border-t border-sidebar-border p-2.5">{collapsed ? footer.compact : footer.full}</div>
           <Button
@@ -73,7 +75,7 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
             </div>
             <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
               {switcher.full}
-              <SidebarNav navKey={navKey} onNavigate={() => setDrawer(false)} />
+              <SidebarNav navKey={navKey} hidden={hiddenNav} onNavigate={() => setDrawer(false)} />
             </div>
             <div className="border-t border-sidebar-border p-2.5">{footer.full}</div>
           </SheetContent>

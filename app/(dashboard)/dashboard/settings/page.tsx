@@ -17,10 +17,10 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" description={`${active.tenant.name} · you are ${ROLE_LABELS[active.role].toLowerCase()}`} />
+      <PageHeader title="Settings" description={`${active.tenant.name} · you are ${active.role === "owner" ? "the owner" : "a team member"}`} />
       <div className="max-w-5xl divide-y">
         {store ? (
-          <StoreSettingsForm key={store.updatedAt.toISOString()} store={store} canEdit={canManageStore(active.role)} currencyLocked={locked} />
+          <StoreSettingsForm key={store.updatedAt.toISOString()} store={store} canEdit={canManageStore(active)} currencyLocked={locked} />
         ) : (
           <Card>
             <CardHeader>

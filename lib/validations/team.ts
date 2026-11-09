@@ -1,23 +1,34 @@
 import { z } from "zod";
-import { ASSIGNABLE_ROLES } from "@/lib/auth/permissions";
+import { MODULE_LABELS } from "@/lib/auth/permissions";
 import { passwordField } from "./auth";
 import { emailField, requiredText } from "./fields";
 
-/** Only the two team roles are accepted: `owner` (and anything else) fails validation here and again in RLS. */
-const teamRole = z.enum(ASSIGNABLE_ROLES, { error: "Choose Manager or Staff." });
+const level = <const L extends readonly [string, ...string[]]>(levels: L) => z.enum(levels, { error: "Choose an access level." });
+
+/**
+ * The Owner picks a level per module. Each module only accepts the levels the UI offers (orders are read-only for
+ * now, store settings are always at least readable); the database re-validates the stored object as well.
+ */
+export const permissionsSchema = z.object({
+  products: level(MODULE_LABELS.products.levels as ["none", "read", "write"]),
+  orders: level(MODULE_LABELS.orders.levels as ["none", "read"]),
+  customers: level(MODULE_LABELS.customers.levels as ["none", "read", "write"]),
+  settings: level(MODULE_LABELS.settings.levels as ["read", "write"]),
+});
 
 export const createMemberSchema = z.object({
   fullName: requiredText("Member name", 120, 2),
   email: emailField("Member email"),
   password: passwordField,
-  role: teamRole,
+  permissions: permissionsSchema,
 });
 
 export const updateMemberSchema = z.object({
   userId: z.uuid(),
   fullName: requiredText("Member name", 120, 2),
-  role: teamRole,
+  permissions: permissionsSchema,
 });
 
 export type CreateMemberInput = z.input<typeof createMemberSchema>;
 export type UpdateMemberInput = z.input<typeof updateMemberSchema>;
+export type PermissionsInput = z.input<typeof permissionsSchema>;

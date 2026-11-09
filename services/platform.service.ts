@@ -176,7 +176,7 @@ export async function resetOwnerPassword(tenantId: string, password: string): Pr
 }
 
 /**
- * Platform Admin adds a Manager/Staff account to any company, the same account the Owner can create under
+ * Platform Admin adds a team member account to any company, the same account the Owner can create under
  * Team members. The Auth user is created first; the membership is then written by platform_add_member(),
  * which re-checks the Platform Admin and refuses the Owner role. If that fails the Auth user is deleted
  * again, so no orphaned account (and no reserved e-mail) remains.
@@ -185,7 +185,7 @@ export async function addCompanyMember(tenantId: string, v: CreateMemberInput) {
   await requirePlatformAdmin();
   const user = await createConfirmedUser({ email: v.email, password: v.password, fullName: v.fullName });
   try {
-    await withAuthenticatedDb((tx) => tx.execute(sql`select public.platform_add_member(${tenantId}::uuid, ${user.id}::uuid, ${v.role})`));
+    await withAuthenticatedDb((tx) => tx.execute(sql`select public.platform_add_member(${tenantId}::uuid, ${user.id}::uuid, ${JSON.stringify(v.permissions)}::jsonb)`));
   } catch (error) {
     await deleteUserQuietly(user.id);
     return mapProvisioningError(error);

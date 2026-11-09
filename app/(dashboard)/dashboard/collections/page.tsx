@@ -9,15 +9,15 @@ import { buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/config/app";
 import { canManageCatalog } from "@/lib/auth/permissions";
 import { publicImageUrl } from "@/lib/storage/paths";
-import { requireWorkspace } from "@/lib/tenant/context";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { listCollections } from "@/services/collection.service";
 
 export const metadata: Metadata = { title: "Collections" };
 
 export default async function CollectionsPage() {
-  const { active } = await requireWorkspace();
+  const { active } = await requireWorkspaceCan("catalog:view");
   const rows = await listCollections();
-  const add = canManageCatalog(active.role) ? (
+  const add = canManageCatalog(active) ? (
     <Link href={`${ROUTES.collections}/new`} className={buttonVariants()}>
       <Plus aria-hidden /> Add collection
     </Link>

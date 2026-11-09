@@ -1,11 +1,12 @@
 import "server-only";
 import { asc, eq } from "drizzle-orm";
 import { isRole, type Role } from "@/lib/auth/permissions";
+import type { MemberPermissions } from "@/lib/db/schema/enums";
 import { memberships, tenants } from "@/lib/db/schema";
 import { withAuthenticatedDb, type DbTx } from "@/lib/db/tenant-db";
 
 export type TenantSummary = { id: string; name: string; slug: string };
-export type TenantMembership = { tenant: TenantSummary; role: Role; joinedAt: Date };
+export type TenantMembership = { tenant: TenantSummary; role: Role; permissions: MemberPermissions; joinedAt: Date };
 
 /**
  * Tenants the signed-in user belongs to, in ONE query (membership joined to
@@ -22,6 +23,7 @@ export async function listMembershipsInTx(tx: DbTx, userId: string): Promise<Ten
   const rows = await tx
     .select({
       role: memberships.role,
+      permissions: memberships.permissions,
       joinedAt: memberships.createdAt,
       tenant: { id: tenants.id, name: tenants.name, slug: tenants.slug },
     })

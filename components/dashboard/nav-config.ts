@@ -1,7 +1,22 @@
 import { BarChart3, Boxes, Building2, FolderTree, LayoutDashboard, Layers, Package, Palette, PlusCircle, Settings, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
+import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
 export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean; group?: string };
+
+/** Permission a member needs to see a nav item. Items not listed here are visible to everyone. */
+const NAV_PERMISSION: Record<string, Permission> = {
+  [ROUTES.products]: "catalog:view",
+  [ROUTES.categories]: "catalog:view",
+  [ROUTES.collections]: "catalog:view",
+  [ROUTES.inventory]: "catalog:view",
+  [ROUTES.customers]: "customers:view",
+  [ROUTES.analytics]: "orders:view",
+};
+
+/** hrefs the member may not open, for the sidebar to hide (the pages and the database check again). */
+export const hiddenNavHrefs = (actor: Actor): string[] =>
+  NAV_ITEMS.filter((i) => NAV_PERMISSION[i.href] && !can(actor, NAV_PERMISSION[i.href])).map((i) => i.href);
 
 /** Only list pages that exist - no placeholder navigation. */
 export const NAV_ITEMS: NavItem[] = [

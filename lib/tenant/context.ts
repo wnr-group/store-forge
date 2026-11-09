@@ -77,7 +77,7 @@ export async function requireTenantAccess(tenantId: string): Promise<TenantMembe
 /** Verifies membership AND that the role grants `permission`. */
 export async function requireTenantRole(tenantId: string, permission: Permission): Promise<TenantMembership> {
   const membership = await requireTenantAccess(tenantId);
-  if (!can(membership.role, permission)) {
+  if (!can(membership, permission)) {
     throw new AppError("FORBIDDEN", "You do not have permission to do that.");
   }
   return membership;
@@ -95,6 +95,13 @@ export const requireWorkspace = cache(async () => {
   const { store, memberships: tenants } = await loadWorkspaceData();
   return { user, active, store, tenants };
 });
+
+/** `requireWorkspace()` for a page that needs `permission` (e.g. "catalog:view"); members without it go back to the overview. */
+export async function requireWorkspaceCan(permission: Permission) {
+  const workspace = await requireWorkspace();
+  if (!can(workspace.active, permission)) redirect(ROUTES.dashboard);
+  return workspace;
+}
 
 /**
  * The active tenant (DB-verified membership), optionally requiring a permission.

@@ -9,7 +9,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/config/app";
 import { canDeleteCatalog, canManageCatalog } from "@/lib/auth/permissions";
-import { requireWorkspace } from "@/lib/tenant/context";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { productListQuerySchema } from "@/lib/validations/catalog";
 import { listCategories } from "@/services/category.service";
 import { listProducts } from "@/services/product.service";
@@ -19,10 +19,10 @@ export const metadata: Metadata = { title: "Products" };
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const raw = await searchParams;
   const query = productListQuerySchema.parse(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])));
-  const { active, store } = await requireWorkspace();
+  const { active, store } = await requireWorkspaceCan("catalog:view");
   const [result, categories] = await Promise.all([listProducts(query), listCategories()]);
   const currency = store?.currency ?? "INR";
-  const canManage = canManageCatalog(active.role);
+  const canManage = canManageCatalog(active);
   const filtered = Boolean(query.q) || query.status !== "all" || query.category !== "all" || query.stock !== "all";
 
   const addButton = canManage ? (
@@ -78,7 +78,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
             <EmptyState icon={SearchX} title="No products match" description="Try a different search or clear the filters." />
           ) : (
             <>
-              <ProductTable rows={result.items} currency={currency} canManage={canManage} canDelete={canDeleteCatalog(active.role)} />
+              <ProductTable rows={result.items} currency={currency} canManage={canManage} canDelete={canDeleteCatalog(active)} />
               <Pagination page={result.page} pageSize={result.pageSize} total={result.total} basePath={ROUTES.products} params={{ q: query.q, status: query.status, category: query.category, stock: query.stock, sort: raw.sort as string | undefined, dir: raw.dir as string | undefined }} />
             </>
           )}

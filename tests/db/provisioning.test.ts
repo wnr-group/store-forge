@@ -109,7 +109,7 @@ beforeAll(async () => {
   admin = await createPlatformAdmin(pg);
   tenantA = (await provision(pg, admin, alice, "alpha-shop")).tenant_id;
   tenantB = (await provision(pg, admin, bob, "beta-shop")).tenant_id;
-  await pg.query("insert into memberships (tenant_id, user_id, role) values ($1,$2,'admin'), ($1,$3,'staff')", [tenantA, manager, staff]);
+  await pg.query("insert into memberships (tenant_id, user_id, role, permissions) values ($1,$2,'admin','{\"products\":\"write\",\"orders\":\"write\",\"customers\":\"write\",\"settings\":\"write\"}'), ($1,$3,'staff','{\"products\":\"write\",\"orders\":\"read\",\"customers\":\"write\",\"settings\":\"read\"}')", [tenantA, manager, staff]);
 });
 afterAll(async () => pg.close());
 beforeEach(() => {
@@ -185,9 +185,12 @@ describe("createCompany (Platform Admin)", () => {
   });
 });
 
+const READ_ONLY = { products: "read", orders: "read", customers: "read", settings: "read" } as const;
+const FULL = { products: "write", orders: "read", customers: "write", settings: "write" } as const; // orders are read-only for now
+
 describe("createMember (company Owner)", () => {
   // Deliberately loosely typed: several tests send values the browser could send but the type forbids.
-  const input = (over: Record<string, unknown> = {}) => ({ fullName: "Nina New", email: "nina@alpha.test", password: "initial-pass-1", role: "staff", ...over }) as never;
+  const input = (over: Record<string, unknown> = {}) => ({ fullName: "Nina New", email: "nina@alpha.test", password: "initial-pass-1", permissions: READ_ONLY, ...over }) as never;
 
   it("creates a confirmed account and links it to the Owner's tenant with the chosen role", async () => {
     const res = await as(alice, () => createMember(input()), tenantA);
@@ -196,18 +199,28 @@ describe("createMember (company Owner)", () => {
       "select m.tenant_id, m.role, m.status, p.full_name from memberships m join profiles p on p.id = m.user_id where m.user_id = $1",
       [res.userId],
     );
-    expect(m).toEqual({ tenant_id: tenantA, role: "staff", status: "active", full_name: "Nina New" });
+    expect(m).toEqual({ tenant_id: tenantA, role: "admin", status: "active", full_name: "Nina New" });
     const team = await as(alice, () => listTeam(), tenantA);
     expect(team.map((t) => t.email)).toContain("nina@alpha.test");
   });
 
   it("can create a Manager", async () => {
-    const res = await as(alice, () => createMember(input({ email: "mia@alpha.test", fullName: "Mia Manager", role: "admin" })), tenantA);
+    const res = await as(alice, () => createMember(input({ email: "mia@alpha.test", fullName: "Mia Manager", permissions: FULL })), tenantA);
     expect((await q<{ role: string }>("select role from memberships where user_id = $1", [res.userId]))[0].role).toBe("admin");
   });
 
-  it.each(["owner", "platform_admin", "superadmin"])("refuses role %s from the browser", async (role) => {
-    await expect(as(alice, () => createMember(input({ email: `r-${role}@alpha.test`, role })), tenantA)).rejects.toMatchObject({ code: "VALIDATION" });
+  it.each(["owner", "platform_admin", "superadmin"])("ignores a role (%s) sent from the browser: members are never owners", async (role) => {
+    const res = await as(alice, () => createMember(input({ email: `r-${role}@alpha.test`, role })), tenantA);
+    expect((await q<{ role: string }>("select role from memberships where user_id = $1", [res.userId]))[0].role).toBe("admin");
+  });
+
+  it.each([
+    ["an unknown level", { ...READ_ONLY, products: "admin" }],
+    ["write on orders", { ...READ_ONLY, orders: "write" }],
+    ["no access level for a module", { products: "read", orders: "read", customers: "read" }],
+    ["no store settings access", { ...READ_ONLY, settings: "none" }],
+  ])("refuses permissions with %s", async (_label, permissions) => {
+    await expect(as(alice, () => createMember(input({ email: "bad-perm@alpha.test", permissions })), tenantA)).rejects.toMatchObject({ code: "VALIDATION" });
     expect(calls("createUser")).toHaveLength(0);
   });
 
@@ -258,10 +271,11 @@ describe("createMember (company Owner)", () => {
 
 describe("managing members (company Owner)", () => {
   it("edits name and role, deactivates and reactivates, and removes (deleting the orphaned account)", async () => {
-    const { userId } = await as(alice, () => createMember({ fullName: "Edd Edit", email: "edd@alpha.test", password: "initial-pass-1", role: "staff" }), tenantA);
+    const { userId } = await as(alice, () => createMember({ fullName: "Edd Edit", email: "edd@alpha.test", password: "initial-pass-1", permissions: READ_ONLY }), tenantA);
 
-    await as(alice, () => updateMember({ userId, fullName: "Edd Edited", role: "admin" }), tenantA);
+    await as(alice, () => updateMember({ userId, fullName: "Edd Edited", permissions: FULL }), tenantA);
     expect((await q("select m.role, p.full_name from memberships m join profiles p on p.id = m.user_id where m.user_id = $1", [userId]))[0]).toEqual({ role: "admin", full_name: "Edd Edited" });
+    expect((await q<{ permissions: unknown }>("select permissions from memberships where user_id = $1", [userId]))[0].permissions).toEqual(FULL);
     expect(calls("updateUserById").length).toBeGreaterThan(0);
 
     await as(alice, () => setMemberStatus(userId, "disabled"), tenantA);
@@ -283,7 +297,7 @@ describe("managing members (company Owner)", () => {
     const other = (await as(admin, () => createCompany(company("delta-shop", "dee@delta.test")))).ownerId;
     for (const target of [alice, other]) {
       await expect(as(alice, () => setMemberStatus(target, "disabled"), tenantA)).rejects.toMatchObject({ code: "NOT_FOUND" });
-      await expect(as(alice, () => updateMember({ userId: target, fullName: "Hacked", role: "staff" }), tenantA)).rejects.toMatchObject({ code: "NOT_FOUND" });
+      await expect(as(alice, () => updateMember({ userId: target, fullName: "Hacked", permissions: READ_ONLY }), tenantA)).rejects.toMatchObject({ code: "NOT_FOUND" });
       await expect(as(alice, () => resetMemberPassword(target, "brand-new-pass-1"), tenantA)).rejects.toMatchObject({ code: "NOT_FOUND" });
     }
     await expect(as(alice, () => removeMember(alice), tenantA)).rejects.toBeDefined();

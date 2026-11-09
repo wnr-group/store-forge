@@ -10,7 +10,7 @@ import { StatusBadge, type Tone } from "@/components/shared/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { canDeleteCustomers, canManageCustomers } from "@/lib/auth/permissions";
 import { formatMoney } from "@/lib/money";
-import { requireWorkspace } from "@/lib/tenant/context";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { getCustomer } from "@/services/customer.service";
 
 export const metadata: Metadata = { title: "Customer" };
@@ -21,7 +21,7 @@ const TONES: Record<string, Tone> = { paid: "active", fulfilled: "active", pendi
 export default async function CustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
-  const { active, store } = await requireWorkspace();
+  const { active, store } = await requireWorkspaceCan("customers:view");
   const data = await getCustomer(id);
   if (!data) notFound();
   const { customer: c, orders } = data;
@@ -32,7 +32,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
       <PageHeader
         title={c.fullName}
         description={`Customer since ${date.format(c.createdAt)}`}
-        actions={<CustomerDetailActions customer={{ id: c.id, fullName: c.fullName, email: c.email, phone: c.phone, notes: c.notes }} canManage={canManageCustomers(active.role)} canDelete={canDeleteCustomers(active.role)} />}
+        actions={<CustomerDetailActions customer={{ id: c.id, fullName: c.fullName, email: c.email, phone: c.phone, notes: c.notes }} canManage={canManageCustomers(active)} canDelete={canDeleteCustomers(active)} />}
       />
       <div className="grid gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
         <div className="space-y-4">

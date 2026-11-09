@@ -31,7 +31,7 @@ beforeAll(async () => {
   staff = await createUser(db, "staff@example.test");
   tenantA = (await onboard(db, alice, "alpha-shop")).tenant_id;
   tenantB = (await onboard(db, bob, "beta-shop")).tenant_id;
-  await q("insert into memberships (tenant_id, user_id, role) values ($1,$2,'admin'), ($1,$3,'staff')", [tenantA, admin, staff]);
+  await q("insert into memberships (tenant_id, user_id, role, permissions) values ($1,$2,'admin','{\"products\":\"write\",\"orders\":\"write\",\"customers\":\"write\",\"settings\":\"write\"}'), ($1,$3,'staff','{\"products\":\"write\",\"orders\":\"read\",\"customers\":\"write\",\"settings\":\"read\"}')", [tenantA, admin, staff]);
   [{ id: productA }] = await q<{ id: string }>(
     "insert into products (tenant_id, name, slug, price_minor) values ($1,'Tee','tee',1999) returning id",
     [tenantA],

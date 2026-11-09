@@ -33,6 +33,13 @@ const TABLES = [
   "templates", "template_versions", "template_assignments",
 ] as const;
 
+/** Restrictive per-module policies of 0011_member_permissions: reads are gated on every table except stores/tenants. */
+const PERMISSION_POLICIES = [
+  ...["categories", "collections", "collection_products", "products", "product_images", "product_options", "product_variants",
+    "inventory_adjustments", "customers", "orders", "order_items"].flatMap((t) => ["select", "insert", "update", "delete"].map((c) => `${t}_perm_${c}`)),
+  ...["stores", "tenants"].flatMap((t) => ["insert", "update", "delete"].map((c) => `${t}_perm_${c}`)),
+];
+
 const EXPECTED_POLICIES = [
   "categories_delete_admins", "categories_insert_editors", "categories_select_members",
   "categories_update_editors", "collection_products_delete_editors", "collection_products_insert_editors",
@@ -54,11 +61,15 @@ const EXPECTED_POLICIES = [
   "templates_select_members", "templates_insert_admins", "templates_update_admins", "templates_delete_never_published",
   "template_versions_select_members", "template_versions_insert_admins",
   "template_assignments_select_members", "template_assignments_insert_admins", "template_assignments_update_admins", "template_assignments_delete_admins",
+  ...PERMISSION_POLICIES,
+  "memberships_perm_insert", "memberships_perm_delete",
 ].sort();
 
 const FUNCTIONS = {
   authenticatedOnly: [
     "public.platform_provision_tenant(uuid,text,text,text,text,text,text)",
+    "public.platform_add_member(uuid,uuid,jsonb)",
+    "public.has_module_access(uuid,text,text)",
     "public.platform_list_tenants(uuid)",
     "public.platform_set_tenant_status(uuid,text)",
     "public.is_platform_admin()",

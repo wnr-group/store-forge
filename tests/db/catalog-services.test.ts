@@ -38,7 +38,8 @@ import { createProduct, deleteProducts, duplicateProduct, getProduct, listProduc
 let pg: PGlite;
 let alice: string; // owner A
 let bob: string; // owner B
-let staff: string; // staff in A
+let staff: string; // member of A with products/customers write
+let viewer: string; // member of A with read-only access
 let tenantA: string;
 let tenantB: string;
 
@@ -54,10 +55,11 @@ const q = (sql: string, params: unknown[] = []) => pg.query<Record<string, unkno
 beforeAll(async () => {
   pg = await createDb();
   h.orm = drizzle(pg, { schema: dbSchema }) as unknown as Database;
-  [alice, bob, staff] = await Promise.all(["alice", "bob", "sam"].map((n) => createUser(pg, `${n}@example.test`)));
+  [alice, bob, staff, viewer] = await Promise.all(["alice", "bob", "sam", "vic"].map((n) => createUser(pg, `${n}@example.test`)));
   tenantA = (await onboard(pg, alice, "alpha-shop")).tenant_id;
   tenantB = (await onboard(pg, bob, "beta-shop")).tenant_id;
-  await pg.query("insert into memberships (tenant_id, user_id, role) values ($1,$2,'staff')", [tenantA, staff]);
+  await pg.query("insert into memberships (tenant_id, user_id, role, permissions) values ($1,$2,'admin','{\"products\":\"write\",\"orders\":\"read\",\"customers\":\"write\",\"settings\":\"read\"}')", [tenantA, staff]);
+  await pg.query("insert into memberships (tenant_id, user_id, role, permissions) values ($1,$2,'admin','{\"products\":\"read\",\"orders\":\"read\",\"customers\":\"read\",\"settings\":\"read\"}')", [tenantA, viewer]);
 });
 beforeEach(() => {
   h.removed.length = 0;
@@ -194,11 +196,13 @@ describe("tenant isolation and roles (through the services)", () => {
     expect((await as(bob, () => listProducts(productListQuerySchema.parse({ q: "secret" })))).total).toBe(0);
   });
 
-  it("staff can create and edit but get FORBIDDEN when deleting", async () => {
+  it("write access creates, edits and deletes; read-only access can look but gets FORBIDDEN on every change", async () => {
     const { id } = await as(staff, () => createProduct(product({ name: "Staff made" }), "INR"));
     await as(staff, () => setProductsStatus([id], "active"));
-    expect(await fail(as(staff, () => deleteProducts([id])))).toBe("FORBIDDEN");
-    expect(await as(alice, () => deleteProducts([id]))).toBe(1);
+    expect((await as(viewer, () => getProduct(id)))?.product.name).toBe("Staff made");
+    expect(await fail(as(viewer, () => createProduct(product({ name: "Nope" }), "INR")))).toBe("FORBIDDEN");
+    expect(await fail(as(viewer, () => deleteProducts([id])))).toBe("FORBIDDEN");
+    expect(await as(staff, () => deleteProducts([id]))).toBe(1);
   });
 
   it("an image path outside the product's folder is never accepted", async () => {
@@ -268,7 +272,7 @@ describe("categories and collections", () => {
     const { id } = await as(alice, () => createProduct(product({ name: "Polo", categoryId: child.id }), "INR"));
     const rows = await as(alice, () => listCategories());
     expect(rows.find((r) => r.id === child.id)).toMatchObject({ parentName: "Apparel", productCount: 1 });
-    expect(await fail(as(staff, () => deleteCategory(child.id)))).toBe("FORBIDDEN");
+    expect(await fail(as(viewer, () => deleteCategory(child.id)))).toBe("FORBIDDEN");
     await as(alice, () => deleteCategory(child.id));
     expect((await as(alice, () => getProduct(id)))?.product.categoryId).toBeNull();
   });
@@ -321,7 +325,7 @@ describe("customers and analytics (real orders only)", () => {
     const detail = await as(alice, () => getCustomer(dana.id));
     expect(detail?.orders).toHaveLength(3);
     expect(await as(bob, () => getCustomer(dana.id))).toBeNull();
-    expect(await fail(as(staff, () => deleteCustomer(eli.id)))).toBe("FORBIDDEN");
+    expect(await fail(as(viewer, () => deleteCustomer(eli.id)))).toBe("FORBIDDEN");
 
     const a = await as(alice, () => getAnalytics(30, "Asia/Kolkata"));
     expect(a).toMatchObject({ hasOrders: true, totalSalesMinor: 150000, orders: 3, customers: 2, averageOrderMinor: 75000 });
