@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, jsonb, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { check, index, jsonb, pgTable, text, timestamp, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { authUsers } from "drizzle-orm/supabase";
 import { MEMBERSHIP_ROLES, MEMBERSHIP_STATUSES, type MemberPermissions } from "./enums";
 import { tenants } from "./tenants";
@@ -27,6 +27,8 @@ export const memberships = pgTable(
     check("memberships_permissions_check", sql`public.is_valid_member_permissions(${t.permissions})`),
     check("memberships_status_check", sql`${t.status} in ('active', 'disabled')`),
     index("memberships_user_id_idx").on(t.userId),
+    // At most one Owner per organization, so an ownership change can never leave two.
+    uniqueIndex("memberships_one_owner_idx").on(t.tenantId).where(sql`${t.role} = 'owner'`),
   ],
 ).enableRLS();
 

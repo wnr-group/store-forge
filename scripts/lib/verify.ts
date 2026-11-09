@@ -77,6 +77,13 @@ const FUNCTIONS = {
     "public.platform_record_audit(text,text,uuid,uuid,text,jsonb,jsonb)",
     "public.platform_list_audit(text,uuid,uuid,text,timestamptz,timestamptz,integer,integer)",
     "public.platform_audit_admins()",
+    "public.platform_update_tenant(uuid,text,text,text)",
+    "public.platform_get_tenant_store(uuid)",
+    "public.platform_update_store(uuid,uuid,text,text,text,text,text,text)",
+    "public.platform_set_store_status(uuid,uuid,text)",
+    "public.platform_set_member_status(uuid,uuid,text)",
+    "public.platform_remove_member(uuid,uuid)",
+    "public.platform_assign_owner(uuid,uuid,text)",
     "public.platform_set_tenant_status(uuid,text)",
     "public.is_platform_admin()",
     "public.list_tenant_team(uuid)",
@@ -625,6 +632,9 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_audit()`)), "an owner reading the audit log", /not_platform_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_tenants_page()`)), "an owner listing organizations", /not_platform_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_overview_stats()`)), "an owner reading the platform overview", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_update_tenant(${tenantA}::uuid, 'Renamed by owner', null, null)`)), "an owner editing their own organization through the admin function", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_assign_owner(${tenantA}::uuid, ${a}::uuid, 'active')`)), "an owner changing ownership through the admin function", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_remove_member(${tenantA}::uuid, ${a}::uuid)`)), "an owner using the admin member removal", /not_platform_admin/);
       await denied(
         withUserContext(app, a, (tx) => tx.execute(sql`insert into public.memberships (tenant_id, user_id, role) values (${tenantA}, ${p}, 'staff')`)),
         "an owner adding the Platform Admin to their team",

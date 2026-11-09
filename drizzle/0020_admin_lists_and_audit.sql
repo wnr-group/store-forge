@@ -1,4 +1,4 @@
--- Custom migration: Platform Admin phase 1.
+-- Custom migration: Platform Admin organization list, overview statistics and audit log.
 --   * platform_list_tenants_page(): search / filter / sort / paginate organizations in SQL.
 --   * platform_overview_stats(): the overview counts in SQL (no need to load every organization).
 --   * admin_audit_logs: append-only audit trail, written and read only through admin-only functions.

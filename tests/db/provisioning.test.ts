@@ -79,7 +79,22 @@ vi.mock("@/lib/supabase/admin", () => ({
 }));
 
 import { dbSchema, type Database } from "@/lib/db";
-import { addCompanyMember, createCompany, deleteCompany, getPlatformOverview, listCompaniesPage, setCompanyStatus } from "@/services/platform.service";
+import {
+  addCompanyMember,
+  createCompany,
+  deleteCompany,
+  getCompany,
+  getPlatformOverview,
+  listCompaniesPage,
+  recoverCompanyOwner,
+  removeCompanyMember,
+  setCompanyMemberStatus,
+  setCompanyStatus,
+  setCompanyStoreStatus,
+  transferCompanyOwnership,
+  updateCompany,
+  updateCompanyStore,
+} from "@/services/platform.service";
 import { createMember, listTeam, removeMember, resetMemberPassword, setMemberStatus, updateMember } from "@/services/team.service";
 
 let pg: PGlite;
@@ -432,5 +447,162 @@ describe("paged organization list and overview (service)", () => {
     expect([o.totalOrganizations, o.active, o.suspended]).toEqual([counts.total, counts.active, counts.suspended]);
     expect(o.recent.length).toBeLessThanOrEqual(5);
     await expect(as(alice, () => getPlatformOverview())).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+});
+
+describe("Platform Admin phase 2 (service): organization, store, team and ownership", () => {
+  type Row = { action: string; description: string; previous_data: Record<string, unknown> | null; new_data: Record<string, unknown> | null; entity_type: string };
+  const logFor = (orgId: string) =>
+    q<Row>("select action, description, previous_data, new_data, entity_type from admin_audit_logs where organization_id = $1 and action <> 'organization.created' order by created_at, id", [orgId]);
+  const newOrg = async (slug: string, email: string) => {
+    const res = await as(admin, () => createCompany(company(slug, email)));
+    return { tenantId: res.tenantId, ownerId: res.ownerId };
+  };
+  const addMember = async (tenantId: string, email: string) => {
+    const r = await as(admin, () => addCompanyMember(tenantId, { fullName: "Mem Ber", email, password: "initial-pass-1", permissions: READ_ONLY }));
+    return r.userId;
+  };
+
+  it("edits the organization, logs only the fields that changed, and logs nothing when nothing changed", async () => {
+    const { tenantId } = await newOrg("edit-org", "edit@owner.test");
+    await as(admin, () => updateCompany(tenantId, { companyName: "Gamma Renamed", contactPhone: "+91 98765 43210", address: null }));
+    await as(admin, () => updateCompany(tenantId, { companyName: "Gamma Renamed", contactPhone: "+91 98765 43210", address: null })); // no change
+    const rows = await logFor(tenantId);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ action: "organization.updated", previous_data: { name: "Gamma Trading", contactPhone: null }, new_data: { name: "Gamma Renamed", contactPhone: "+91 98765 43210" } });
+    expect(rows[0].new_data).not.toHaveProperty("address");
+    expect((await q<{ name: string }>("select name from tenants where id = $1", [tenantId]))[0].name).toBe("Gamma Renamed");
+    await expect(as(admin, () => updateCompany(crypto.randomUUID(), { companyName: "Ghost", contactPhone: null, address: null }))).rejects.toMatchObject({ code: "NOT_FOUND" });
+  });
+
+  it("edits the store, locks the currency once prices exist, and keeps store status apart from organization status", async () => {
+    const { tenantId } = await newOrg("edit-store", "store@owner.test");
+    const store = (await as(admin, () => getCompany(tenantId)))!.store!;
+    expect(store).toMatchObject({ name: "Gamma Store", currency: "INR", status: "active", hasMoneyData: false });
+    const edit = (over: Partial<Parameters<typeof updateCompanyStore>[1]> = {}) =>
+      updateCompanyStore(tenantId, { name: "Gamma Store", description: null, contactEmail: null, contactPhone: null, currency: "INR", timezone: "Asia/Kolkata", ...over });
+    await as(admin, () => edit({ name: "Gamma Shop", currency: "USD", timezone: "America/New_York", contactEmail: "hi@gamma.test" }));
+    expect((await q<Record<string, string>>("select name, currency, timezone, contact_email from stores where id = $1", [store.id]))[0]).toEqual({ name: "Gamma Shop", currency: "USD", timezone: "America/New_York", contact_email: "hi@gamma.test" });
+
+    await as(admin, () => setCompanyStoreStatus(tenantId, "suspended"));
+    expect((await q<{ status: string }>("select status from tenants where id = $1", [tenantId]))[0].status).toBe("active"); // organization untouched
+    await as(admin, () => setCompanyStoreStatus(tenantId, "suspended")); // unchanged: no entry
+    await as(admin, () => setCompanyStoreStatus(tenantId, "active"));
+
+    await q("insert into products (tenant_id, name, slug, price_minor) values ($1,'Tee','tee',100)", [tenantId]);
+    await expect(as(admin, () => edit({ name: "Gamma Shop", currency: "EUR", timezone: "America/New_York" }))).rejects.toMatchObject({ code: "VALIDATION", fieldErrors: { currency: expect.any(String) } });
+    await expect(as(admin, () => edit({ name: "Gamma Shop", timezone: "Mars/Olympus" }))).rejects.toMatchObject({ code: "VALIDATION" });
+
+    const actions = (await logFor(tenantId)).map((r) => r.action);
+    expect(actions).toEqual(["store.updated", "store.status_changed", "store.status_changed"]);
+    const statusRows = (await logFor(tenantId)).filter((r) => r.action === "store.status_changed");
+    expect(statusRows[0]).toMatchObject({ previous_data: { status: "active" }, new_data: { status: "suspended" } });
+  });
+
+  it("disables, reactivates and removes members, logs each with the e-mail, and never touches the owner", async () => {
+    const { tenantId, ownerId } = await newOrg("team-org", "team@owner.test");
+    const m1 = await addMember(tenantId, "one@team.test");
+    const m2 = await addMember(tenantId, "two@team.test");
+    await as(admin, () => setCompanyMemberStatus(tenantId, m1, "disabled"));
+    await as(admin, () => setCompanyMemberStatus(tenantId, m1, "disabled")); // unchanged
+    await as(admin, () => setCompanyMemberStatus(tenantId, m1, "active"));
+    h.adminCalls.length = 0;
+    await as(admin, () => removeCompanyMember(tenantId, m2));
+    expect(calls("deleteUser")).toEqual([{ fn: "deleteUser", args: { id: m2 } }]); // only organization they belonged to
+    expect(await q("select 1 from auth.users where id = $1", [m2])).toHaveLength(0);
+    for (const act of [() => setCompanyMemberStatus(tenantId, ownerId, "disabled"), () => removeCompanyMember(tenantId, ownerId)]) {
+      await expect(as(admin, act)).rejects.toMatchObject({ code: "VALIDATION" });
+    }
+    await expect(as(admin, () => removeCompanyMember(tenantId, crypto.randomUUID()))).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(await q("select 1 from memberships where tenant_id = $1 and user_id = $2 and role = 'owner'", [tenantId, ownerId])).toHaveLength(1);
+
+    const rows = (await logFor(tenantId)).filter((r) => r.entity_type === "team_member" && r.action !== "team_member.added");
+    expect(rows.map((r) => r.action)).toEqual(["team_member.disabled", "team_member.reactivated", "team_member.removed"]);
+    expect(rows[0].description).toBe("Disabled team member one@team.test");
+    expect(rows[2].previous_data).toMatchObject({ email: "two@team.test", fullName: "Mem Ber" });
+    expect(JSON.stringify(rows)).not.toMatch(/initial-pass|password/i);
+  });
+
+  it("keeps the sign-in of a removed member who still belongs to another organization", async () => {
+    const a = await newOrg("keep-a", "keep-a@owner.test");
+    const b = await newOrg("keep-b", "keep-b@owner.test");
+    const shared = await addMember(a.tenantId, "shared@team.test");
+    await q("insert into memberships (tenant_id, user_id, role, permissions) values ($1,$2,'admin',$3::jsonb)", [b.tenantId, shared, JSON.stringify(READ_ONLY)]);
+    h.adminCalls.length = 0;
+    await as(admin, () => removeCompanyMember(a.tenantId, shared));
+    expect(calls("deleteUser")).toHaveLength(0);
+    expect(await q("select 1 from auth.users where id = $1", [shared])).toHaveLength(1);
+  });
+
+  it("transfers ownership atomically and logs who handed it to whom", async () => {
+    const { tenantId, ownerId } = await newOrg("transfer-org", "old@owner.test");
+    const next = await addMember(tenantId, "next@team.test");
+    await as(admin, () => transferCompanyOwnership(tenantId, { userId: next, previousOwner: "disable" }));
+    const owners = await q<{ user_id: string }>("select user_id from memberships where tenant_id = $1 and role = 'owner'", [tenantId]);
+    expect(owners.map((o) => o.user_id)).toEqual([next]);
+    expect((await q<{ role: string; status: string }>("select role, status from memberships where tenant_id = $1 and user_id = $2", [tenantId, ownerId]))[0]).toEqual({ role: "admin", status: "disabled" });
+    const row = (await logFor(tenantId)).find((r) => r.action === "ownership.transferred")!;
+    expect(row.description).toBe('Transferred ownership of "Gamma Trading" from old@owner.test to next@team.test');
+    expect(row).toMatchObject({ previous_data: { ownerId, ownerEmail: "old@owner.test" }, new_data: { ownerId: next, ownerEmail: "next@team.test", mode: "transfer", previousOwnerStatus: "disabled" } });
+    // rejected cases leave everything as it is
+    await expect(as(admin, () => transferCompanyOwnership(tenantId, { userId: next, previousOwner: "keep" }))).rejects.toMatchObject({ code: "VALIDATION" }); // already owner
+    await expect(as(admin, () => transferCompanyOwnership(tenantId, { userId: ownerId, previousOwner: "keep" }))).rejects.toMatchObject({ code: "VALIDATION" }); // disabled, not eligible
+    await expect(as(admin, () => transferCompanyOwnership(tenantId, { userId: crypto.randomUUID(), previousOwner: "keep" }))).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect((await q("select 1 from memberships where tenant_id = $1 and role = 'owner'", [tenantId]))).toHaveLength(1);
+  });
+
+  it("recovers an organization with no owner by creating a new owner account, without logging the password", async () => {
+    const { tenantId, ownerId } = await newOrg("recover-org", "lost@owner.test");
+    await q("delete from memberships where tenant_id = $1 and user_id = $2", [tenantId, ownerId]); // the owner is gone
+    const res = await as(admin, () => recoverCompanyOwner(tenantId, { ownerName: "New Owner", ownerEmail: "new@owner.test", ownerPassword: "recover-pass-123", previousOwner: "keep" }));
+    expect(res.email).toBe("new@owner.test");
+    const owner = await q<{ email: string }>("select u.email from memberships m join auth.users u on u.id = m.user_id where m.tenant_id = $1 and m.role = 'owner'", [tenantId]);
+    expect(owner).toEqual([{ email: "new@owner.test" }]);
+    const row = (await logFor(tenantId)).find((r) => r.action === "ownership.transferred")!;
+    expect(row.description).toBe('Appointed new@owner.test as owner of "Gamma Trading" (no previous owner)');
+    expect(row.new_data).toMatchObject({ mode: "recovery", newAccount: true });
+    expect(JSON.stringify(row)).not.toMatch(/recover-pass|password/i);
+  });
+
+  it("deletes the new account again if the database step of a recovery fails, and refuses an unknown organization before creating one", async () => {
+    const { tenantId, ownerId } = await newOrg("recover-fail", "gone@owner.test");
+    await q("delete from memberships where tenant_id = $1 and user_id = $2", [tenantId, ownerId]);
+    await q("create function public.test_boom2() returns trigger language plpgsql as $$ begin raise exception 'boom'; end $$");
+    await q("create trigger test_boom2 before insert on public.memberships for each row execute function public.test_boom2()");
+    h.adminCalls.length = 0;
+    try {
+      await expect(as(admin, () => recoverCompanyOwner(tenantId, { ownerName: "Nope Owner", ownerEmail: "nope@owner.test", ownerPassword: "recover-pass-123", previousOwner: "keep" }))).rejects.toBeDefined();
+    } finally {
+      await q("drop trigger test_boom2 on public.memberships");
+      await q("drop function public.test_boom2()");
+    }
+    expect(calls("createUser")).toHaveLength(1);
+    expect(calls("deleteUser")).toHaveLength(1);
+    expect(await q("select 1 from auth.users where email = 'nope@owner.test'")).toHaveLength(0);
+    expect(await q("select 1 from memberships where tenant_id = $1 and role = 'owner'", [tenantId])).toHaveLength(0);
+
+    h.adminCalls.length = 0;
+    await expect(as(admin, () => recoverCompanyOwner(crypto.randomUUID(), { ownerName: "Ghost Owner", ownerEmail: "ghost@owner.test", ownerPassword: "recover-pass-123", previousOwner: "keep" }))).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(calls("createUser")).toHaveLength(0); // no account was created for an organization that does not exist
+  });
+
+  it("refuses every one of these for anyone who is not a Platform Admin, and logs nothing", async () => {
+    const before = (await q<{ n: number }>("select count(*)::int n from admin_audit_logs"))[0].n;
+    const uid = crypto.randomUUID();
+    const store = { name: "X Store", description: null, contactEmail: null, contactPhone: null, currency: "INR", timezone: "Asia/Kolkata" };
+    for (const user of [alice, manager, staff]) {
+      const attempts: Array<() => Promise<unknown>> = [
+        () => updateCompany(tenantA, { companyName: "Hacked", contactPhone: null, address: null }),
+        () => updateCompanyStore(tenantA, store),
+        () => setCompanyStoreStatus(tenantA, "suspended"),
+        () => setCompanyMemberStatus(tenantA, manager, "disabled"),
+        () => removeCompanyMember(tenantA, manager),
+        () => transferCompanyOwnership(tenantA, { userId: manager, previousOwner: "keep" }),
+        () => recoverCompanyOwner(tenantA, { ownerName: "Eve Evil", ownerEmail: "eve@x.test", ownerPassword: "recover-pass-123", previousOwner: "disable" }),
+      ];
+      for (const act of attempts) await expect(as(user, act), `${uid}`).rejects.toMatchObject({ code: "FORBIDDEN" });
+    }
+    expect((await q<{ n: number }>("select count(*)::int n from admin_audit_logs"))[0].n).toBe(before);
+    expect((await q<{ name: string }>("select name from tenants where id = $1", [tenantA]))[0].name).not.toBe("Hacked");
   });
 });

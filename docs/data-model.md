@@ -23,6 +23,7 @@ erDiagram
     AUTH_USERS ||--o{ MEMBERSHIPS : "belongs to tenants via"
     AUTH_USERS ||--o| PROFILES : has
     AUTH_USERS ||--o| PLATFORM_ADMINS : "can be"
+    AUTH_USERS ||--o{ ADMIN_AUDIT_LOGS : "admin actions (copied, no link)"
     CATEGORIES ||--o{ PRODUCTS : groups
     COLLECTIONS }o--o{ PRODUCTS : "COLLECTION_PRODUCTS"
     PRODUCTS ||--o{ PRODUCT_OPTIONS : has
@@ -42,6 +43,7 @@ erDiagram
 | `memberships` | Which user belongs to which tenant, and what they may do |
 | `profiles` | A user's display name and avatar |
 | `platform_admins` | The StoreForge staff who manage all organizations |
+| `admin_audit_logs` | A permanent record of what Platform Admins did |
 | `stores` | A tenant's online store (name, web address, currency) |
 | `categories` | Product categories, which can be nested |
 | `collections` | Hand-picked groups of products |
@@ -114,7 +116,7 @@ Every table has an `id` (uuid, generated automatically) unless noted. Timestamp 
 |---|---|---|
 | `tenant_id` | uuid | |
 | `user_id` | uuid | |
-| `role` | text | `owner` for the person who owns the tenant, `admin` for every team member. What a team member can do is set by `permissions`, not by the role |
+| `role` | text | `owner` for the person who owns the tenant (at most one per tenant), `admin` for every team member. What a team member can do is set by `permissions`, not by the role |
 | `status` | text | `active` or `disabled`. A disabled member has no access |
 | `permissions` | jsonb | What a team member may do, see section 5 |
 
@@ -125,6 +127,22 @@ Every table has an `id` (uuid, generated automatically) unless noted. Timestamp 
 | `id` | uuid | Same as the user's id in `auth.users` |
 | `full_name` | text | Optional |
 | `avatar_url` | text | Optional |
+
+**`admin_audit_logs`**: one row per action a Platform Admin takes. Rows can only be added, never changed or deleted, and nothing reads or writes the table directly.
+
+| Column | Type | Notes |
+|---|---|---|
+| `admin_user_id` | uuid | The admin who did it, taken from their session. Not linked, so the log outlives the account |
+| `admin_email` | text | Copied at the time of the action |
+| `action` | text | For example `organization.created` or `ownership.transferred` |
+| `entity_type` | text | `organization`, `store`, `team_member`, `platform_admin`, `support_note` or `platform_settings` |
+| `entity_id` | uuid | What the action was about. Optional |
+| `organization_id` | uuid | The organization involved. Not linked, so entries survive its deletion |
+| `organization_name` | text | Copied at the time of the action |
+| `description` | text | A short sentence, for example "Disabled team member a@b.com" |
+| `previous_data` | jsonb | What changed, before. Passwords and tokens are never stored |
+| `new_data` | jsonb | What changed, after |
+| `created_at` | timestamptz | When it happened |
 
 **`platform_admins`**: a person listed here manages all organizations. A platform admin can never also be a tenant member.
 

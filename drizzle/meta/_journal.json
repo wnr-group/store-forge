@@ -141,6 +141,20 @@
       "when": 1794300002000,
       "tag": "0019_platform_delete_tenant",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794300003000,
+      "tag": "0020_admin_lists_and_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794300004000,
+      "tag": "0021_admin_org_store_team",
+      "breakpoints": true
     }
   ]
 }

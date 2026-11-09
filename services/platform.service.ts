@@ -13,6 +13,7 @@ import type { OrgListQuery } from "@/lib/validations/admin-list";
 import { listTeamRows, type TeamMemberRow } from "@/services/team.service";
 import type { CreateCompanyValues } from "@/lib/validations/company";
 import type { CreateMemberInput } from "@/lib/validations/team";
+import type { recoverOwnerSchema, transferOwnershipSchema, updateCompanySchema, updateStoreSchema } from "@/lib/validations/admin-org";
 
 /**
  * Platform Admin operations. Every exported function starts with requirePlatformAdmin(), which asks
@@ -39,13 +40,13 @@ export type CompanySummary = {
   memberCount: number;
 };
 
-type CompanyRaw = {
+export type CompanyRaw = {
   id: string; name: string; slug: string; status: string; contact_phone: string | null; address: string | null;
   created_at: string | Date; store_id: string | null; store_name: string | null; store_slug: string | null;
   owner_id: string | null; owner_name: string | null; owner_email: string | null; member_count: string | number | bigint;
 };
 
-const toCompany = (r: CompanyRaw): CompanySummary => ({
+export const toCompany = (r: CompanyRaw): CompanySummary => ({
   id: r.id,
   name: r.name,
   slug: r.slug,
@@ -63,15 +64,21 @@ const toCompany = (r: CompanyRaw): CompanySummary => ({
 });
 
 /** Maps the SQL functions' RAISE codes to user-safe errors. Anything unrecognised is rethrown (logged, hidden). */
-export function mapProvisioningError(error: unknown): never {
+export function mapProvisioningError(error: unknown, notFound = "Organization not found."): never {
   if (error instanceof AppError) throw error;
   const msg = errorChain(error);
+  if (msg.includes("currency_locked"))
+    throw new AppError("VALIDATION", "Currency cannot be changed once the store has products or orders.", { currency: "Locked: prices already exist" });
+  if (msg.includes("cannot_change_owner")) throw new AppError("VALIDATION", "The owner cannot be disabled or removed. Transfer ownership first.");
+  if (msg.includes("already_owner")) throw new AppError("VALIDATION", "That person is already the owner.");
+  if (msg.includes("not_eligible"))
+    throw new AppError("VALIDATION", "Only an active team member of this organization, or a brand-new account, can become the owner.");
   if (msg.includes("slug_taken"))
     throw new AppError("CONFLICT", "That store address is already taken.", { storeSlug: "That address is already taken" });
   if (msg.includes("invalid_slug"))
     throw new AppError("VALIDATION", "That store address is not allowed.", { storeSlug: "Choose a different address" });
   if (msg.includes("invalid_input")) throw new AppError("VALIDATION", "Please check the details you entered.");
-  if (msg.includes("not_found")) throw new AppError("NOT_FOUND", "Organization not found.");
+  if (msg.includes("not_found")) throw new AppError("NOT_FOUND", notFound);
   if (msg.includes("not_platform_admin")) throw new AppError("FORBIDDEN", "You do not have permission to do that.");
   throw error;
 }
@@ -210,13 +217,55 @@ export async function getPlatformOverview(): Promise<PlatformOverview> {
   });
 }
 
-export async function getCompany(tenantId: string): Promise<{ company: CompanySummary; team: TeamMemberRow[] } | null> {
+export type StoreDetails = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  currency: string;
+  timezone: string;
+  status: "active" | "inactive" | "suspended";
+  contactEmail: string | null;
+  contactPhone: string | null;
+  /** True once products or orders exist: the currency can no longer change. */
+  hasMoneyData: boolean;
+};
+
+type StoreRaw = {
+  id: string; name: string; slug: string; description: string | null; currency: string; timezone: string; status: string;
+  contact_email: string | null; contact_phone: string | null; has_money_data: boolean;
+};
+
+const toStore = (r: StoreRaw): StoreDetails => ({
+  id: r.id,
+  name: r.name,
+  slug: r.slug,
+  description: r.description,
+  currency: r.currency,
+  timezone: r.timezone,
+  status: r.status === "suspended" ? "suspended" : r.status === "inactive" ? "inactive" : "active",
+  contactEmail: r.contact_email,
+  contactPhone: r.contact_phone,
+  hasMoneyData: r.has_money_data === true,
+});
+
+async function fetchStore(tx: DbTx, tenantId: string): Promise<StoreDetails | null> {
+  const [row] = rowsOf<StoreRaw>(await tx.execute(sql`select * from public.platform_get_tenant_store(${tenantId}::uuid)`));
+  return row ? toStore(row) : null;
+}
+
+async function fetchCompanyRow(tx: DbTx, tenantId: string): Promise<CompanyRaw | undefined> {
+  return rowsOf<CompanyRaw>(await tx.execute(sql`select * from public.platform_list_tenants(${tenantId}::uuid)`))[0];
+}
+
+/** Organization, its primary store and its team, in one transaction. */
+export async function getCompany(tenantId: string): Promise<{ company: CompanySummary; store: StoreDetails | null; team: TeamMemberRow[] } | null> {
   await requirePlatformAdmin();
   return withAuthenticatedDb(async (tx) => {
-    const [row] = rowsOf<CompanyRaw>(await tx.execute(sql`select * from public.platform_list_tenants(${tenantId}::uuid)`));
+    const row = await fetchCompanyRow(tx, tenantId);
     if (!row) return null;
-    const team = await listTeamRows(tx, tenantId);
-    return { company: toCompany(row), team };
+    const [store, team] = [await fetchStore(tx, tenantId), await listTeamRows(tx, tenantId)];
+    return { company: toCompany(row), store, team };
   });
 }
 
@@ -295,4 +344,237 @@ export async function addCompanyMember(tenantId: string, v: CreateMemberInput) {
     return mapProvisioningError(error);
   }
   return { userId: user.id, email: user.email };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Phase 2: edit organization and store, store status, team members, ownership.
+// Every function authorises the Platform Admin first, does its work and writes its audit entry in ONE transaction, and
+// maps the SQL functions' error codes to messages. Nothing here is reachable by an organization's own users.
+// ---------------------------------------------------------------------------------------------------------------------
+
+type CompanyEdit = z.output<typeof updateCompanySchema>;
+type StoreEdit = z.output<typeof updateStoreSchema>;
+type TransferInput = z.output<typeof transferOwnershipSchema>;
+type RecoverInput = z.output<typeof recoverOwnerSchema>;
+
+/** The fields that differ, with their before and after values, for the audit entry. */
+function diff<T extends Record<string, string | null>>(before: T, after: T) {
+  const keys = (Object.keys(after) as (keyof T & string)[]).filter((k) => (before[k] ?? null) !== (after[k] ?? null));
+  const pick = (o: T) => Object.fromEntries(keys.map((k) => [k, o[k] ?? null]));
+  return { keys, previous: pick(before), next: pick(after) };
+}
+
+/** Edits the organization's name, contact phone and address. Nothing is written (or logged) when nothing changed. */
+export async function updateCompany(tenantId: string, v: CompanyEdit): Promise<void> {
+  await requirePlatformAdmin();
+  try {
+    await withAuthenticatedDb(async (tx) => {
+      const before = await fetchCompanyRow(tx, tenantId);
+      if (!before) throw new AppError("NOT_FOUND", "Organization not found.");
+      const d = diff(
+        { name: before.name, contactPhone: before.contact_phone, address: before.address },
+        { name: v.companyName, contactPhone: v.contactPhone, address: v.address },
+      );
+      if (d.keys.length === 0) return;
+      const rows = rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.platform_update_tenant(${tenantId}::uuid, ${v.companyName}, ${v.contactPhone}, ${v.address}) as ok`));
+      if (rows[0]?.ok !== true) throw new AppError("NOT_FOUND", "Organization not found.");
+      await recordAudit(tx, {
+        action: "organization.updated",
+        entityType: "organization",
+        entityId: tenantId,
+        organizationId: tenantId,
+        description: `Updated organization "${before.name}": ${d.keys.join(", ")}`,
+        previous: d.previous,
+        next: d.next,
+      });
+    });
+  } catch (error) {
+    return mapProvisioningError(error);
+  }
+}
+
+/** Edits the primary store: name, description, contact details, currency and timezone (never the address or logo). */
+export async function updateCompanyStore(tenantId: string, v: StoreEdit): Promise<void> {
+  await requirePlatformAdmin();
+  try {
+    await withAuthenticatedDb(async (tx) => {
+      const store = await fetchStore(tx, tenantId);
+      if (!store) throw new AppError("NOT_FOUND", "This organization does not have a store.");
+      const d = diff(
+        { name: store.name, description: store.description, contactEmail: store.contactEmail, contactPhone: store.contactPhone, currency: store.currency, timezone: store.timezone },
+        { name: v.name, description: v.description, contactEmail: v.contactEmail, contactPhone: v.contactPhone, currency: v.currency, timezone: v.timezone },
+      );
+      if (d.keys.length === 0) return;
+      const rows = rowsOf<{ ok: boolean }>(
+        await tx.execute(sql`select public.platform_update_store(${tenantId}::uuid, ${store.id}::uuid, ${v.name}, ${v.description}, ${v.contactEmail}, ${v.contactPhone}, ${v.currency}, ${v.timezone}) as ok`),
+      );
+      if (rows[0]?.ok !== true) throw new AppError("NOT_FOUND", "This organization does not have a store.");
+      await recordAudit(tx, {
+        action: "store.updated",
+        entityType: "store",
+        entityId: store.id,
+        organizationId: tenantId,
+        description: `Updated store "${store.name}": ${d.keys.join(", ")}`,
+        previous: d.previous,
+        next: d.next,
+      });
+    });
+  } catch (error) {
+    return mapProvisioningError(error);
+  }
+}
+
+/** Activates, deactivates or suspends the store. The organization's own status is not touched. */
+export async function setCompanyStoreStatus(tenantId: string, status: StoreDetails["status"]): Promise<void> {
+  await requirePlatformAdmin();
+  try {
+    await withAuthenticatedDb(async (tx) => {
+      const store = await fetchStore(tx, tenantId);
+      if (!store) throw new AppError("NOT_FOUND", "This organization does not have a store.");
+      if (store.status === status) return;
+      const rows = rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.platform_set_store_status(${tenantId}::uuid, ${store.id}::uuid, ${status}) as ok`));
+      if (rows[0]?.ok !== true) throw new AppError("NOT_FOUND", "This organization does not have a store.");
+      await recordAudit(tx, {
+        action: "store.status_changed",
+        entityType: "store",
+        entityId: store.id,
+        organizationId: tenantId,
+        description: `Changed store "${store.name}" from ${store.status} to ${status}`,
+        previous: { status: store.status },
+        next: { status },
+      });
+    });
+  } catch (error) {
+    return mapProvisioningError(error);
+  }
+}
+
+const findMember = (team: TeamMemberRow[], userId: string) => {
+  const m = team.find((t) => t.userId === userId);
+  if (!m) throw new AppError("NOT_FOUND", "That team member was not found.");
+  return m;
+};
+
+/** Disables (no access, reversible) or reactivates a team member. The Owner cannot be disabled. */
+export async function setCompanyMemberStatus(tenantId: string, userId: string, status: "active" | "disabled"): Promise<void> {
+  await requirePlatformAdmin();
+  try {
+    await withAuthenticatedDb(async (tx) => {
+      const target = findMember(await listTeamRows(tx, tenantId), userId);
+      if (target.role === "owner") throw new AppError("VALIDATION", "The owner cannot be disabled or removed. Transfer ownership first.");
+      if (target.status === status) return;
+      const rows = rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.platform_set_member_status(${tenantId}::uuid, ${userId}::uuid, ${status}) as ok`));
+      if (rows[0]?.ok !== true) throw new AppError("NOT_FOUND", "That team member was not found.");
+      await recordAudit(tx, {
+        action: status === "disabled" ? "team_member.disabled" : "team_member.reactivated",
+        entityType: "team_member",
+        entityId: userId,
+        organizationId: tenantId,
+        description: `${status === "disabled" ? "Disabled" : "Reactivated"} team member ${target.email}`,
+        previous: { email: target.email, status: target.status },
+        next: { email: target.email, status },
+      });
+    });
+  } catch (error) {
+    return mapProvisioningError(error, "That team member was not found.");
+  }
+}
+
+/** Removes a team member. Their sign-in is deleted too when they belong to no other organization. The Owner cannot be removed. */
+export async function removeCompanyMember(tenantId: string, userId: string): Promise<void> {
+  await requirePlatformAdmin();
+  let orphaned = false;
+  try {
+    orphaned = await withAuthenticatedDb(async (tx) => {
+      const target = findMember(await listTeamRows(tx, tenantId), userId);
+      if (target.role === "owner") throw new AppError("VALIDATION", "The owner cannot be disabled or removed. Transfer ownership first.");
+      const rows = rowsOf<{ orphaned: boolean }>(await tx.execute(sql`select public.platform_remove_member(${tenantId}::uuid, ${userId}::uuid) as orphaned`));
+      await recordAudit(tx, {
+        action: "team_member.removed",
+        entityType: "team_member",
+        entityId: userId,
+        organizationId: tenantId,
+        description: `Removed team member ${target.email}`,
+        previous: { email: target.email, fullName: target.fullName, status: target.status, permissions: target.permissions },
+      });
+      return rows[0]?.orphaned === true;
+    });
+  } catch (error) {
+    return mapProvisioningError(error, "That team member was not found.");
+  }
+  if (orphaned) await deleteUserQuietly(userId); // after the commit; a failure is logged, never half-applied
+}
+
+type OwnerChange = { previous_owner_id: string | null; new_owner_id: string; created_membership: boolean };
+const ownerChange = z.object({ previous_owner_id: z.uuid().nullable(), new_owner_id: z.uuid(), created_membership: z.boolean() });
+
+/** The shared tail of a transfer and a recovery: one SQL call, then one audit entry, inside the caller's transaction. */
+async function assignOwner(
+  tx: DbTx,
+  tenantId: string,
+  newOwnerId: string,
+  previousOwner: "keep" | "disable",
+  mode: "transfer" | "recovery",
+  team: TeamMemberRow[],
+  companyName: string,
+  newOwnerEmail: string,
+) {
+  const rows = rowsOf<{ r: unknown }>(
+    await tx.execute(sql`select public.platform_assign_owner(${tenantId}::uuid, ${newOwnerId}::uuid, ${previousOwner === "disable" ? "disabled" : "active"}) as r`),
+  );
+  const change: OwnerChange = ownerChange.parse(rows[0]?.r);
+  const old = change.previous_owner_id ? team.find((t) => t.userId === change.previous_owner_id) : undefined;
+  const previousStatus = previousOwner === "disable" ? "disabled" : "active";
+  await recordAudit(tx, {
+    action: "ownership.transferred",
+    entityType: "team_member",
+    entityId: newOwnerId,
+    organizationId: tenantId,
+    description: old
+      ? `${mode === "recovery" ? "Recovered ownership of" : "Transferred ownership of"} "${companyName}" from ${old.email} to ${newOwnerEmail}`
+      : `Appointed ${newOwnerEmail} as owner of "${companyName}" (no previous owner)`,
+    previous: { ownerId: change.previous_owner_id, ownerEmail: old?.email ?? null },
+    next: { ownerId: newOwnerId, ownerEmail: newOwnerEmail, mode, previousOwnerStatus: old ? previousStatus : null, newAccount: change.created_membership },
+  });
+}
+
+/** Hands ownership to an existing, active team member. Atomic: the old owner becomes a team member, there is never no owner or two. */
+export async function transferCompanyOwnership(tenantId: string, v: TransferInput): Promise<void> {
+  await requirePlatformAdmin();
+  try {
+    await withAuthenticatedDb(async (tx) => {
+      const company = await fetchCompanyRow(tx, tenantId);
+      if (!company) throw new AppError("NOT_FOUND", "Organization not found.");
+      const team = await listTeamRows(tx, tenantId);
+      const target = findMember(team, v.userId);
+      if (target.role === "owner") throw new AppError("VALIDATION", "That person is already the owner.");
+      if (target.status !== "active") throw new AppError("VALIDATION", "Only an active team member can become the owner. Reactivate them first.");
+      await assignOwner(tx, tenantId, v.userId, v.previousOwner, "transfer", team, company.name, target.email);
+    });
+  } catch (error) {
+    return mapProvisioningError(error);
+  }
+}
+
+/**
+ * Owner recovery: creates a brand-new owner account and makes it the owner, for an organization whose owner is lost or
+ * missing. The Auth account is created first and deleted again if the database step fails, so no orphaned sign-in remains.
+ * The password is set once here, never stored by us, and never written to the audit log.
+ */
+export async function recoverCompanyOwner(tenantId: string, v: RecoverInput): Promise<{ email: string }> {
+  await requirePlatformAdmin();
+  const exists = await withAuthenticatedDb(async (tx) => Boolean(await fetchCompanyRow(tx, tenantId)));
+  if (!exists) throw new AppError("NOT_FOUND", "Organization not found.");
+  const owner = await createConfirmedUser({ email: v.ownerEmail, password: v.ownerPassword, fullName: v.ownerName });
+  try {
+    await withAuthenticatedDb(async (tx) => {
+      const company = await fetchCompanyRow(tx, tenantId);
+      if (!company) throw new AppError("NOT_FOUND", "Organization not found.");
+      await assignOwner(tx, tenantId, owner.id, v.previousOwner, "recovery", await listTeamRows(tx, tenantId), company.name, owner.email);
+    });
+  } catch (error) {
+    await deleteUserQuietly(owner.id);
+    return mapProvisioningError(error);
+  }
+  return { email: owner.email };
 }
