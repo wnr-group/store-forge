@@ -67,6 +67,12 @@ export const toCompany = (r: CompanyRaw): CompanySummary => ({
 export function mapProvisioningError(error: unknown, notFound = "Organization not found."): never {
   if (error instanceof AppError) throw error;
   const msg = errorChain(error);
+  if (msg.includes("not_super_admin")) throw new AppError("FORBIDDEN", "Only a super admin can do that.");
+  if (msg.includes("last_super_admin")) throw new AppError("VALIDATION", "There must always be at least one super admin.");
+  if (msg.includes("already_admin")) throw new AppError("CONFLICT", "That person is already a platform admin.");
+  if (msg.includes("member_cannot_be_platform_admin"))
+    throw new AppError("VALIDATION", "That account belongs to an organization, so it cannot also be a platform admin.");
+  if (msg.includes("not_note_author")) throw new AppError("FORBIDDEN", "You can only edit your own notes.");
   if (msg.includes("currency_locked"))
     throw new AppError("VALIDATION", "Currency cannot be changed once the store has products or orders.", { currency: "Locked: prices already exist" });
   if (msg.includes("cannot_change_owner")) throw new AppError("VALIDATION", "The owner cannot be disabled or removed. Transfer ownership first.");

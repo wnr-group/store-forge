@@ -6,6 +6,7 @@ import { ROUTES } from "@/config/app";
 import { run } from "@/lib/actions/run";
 import { companyStatusSchema, createCompanySchema } from "@/lib/validations/company";
 import { parseInput } from "@/lib/validations/parse";
+import { addPlatformAdminSchema, platformSettingsSchema, setPlatformAdminRoleSchema, supportNoteSchema } from "@/lib/validations/admin-platform";
 import { memberStatusSchema, recoverOwnerSchema, storeStatusSchema, transferOwnershipSchema, updateCompanySchema, updateStoreSchema } from "@/lib/validations/admin-org";
 import { createMemberSchema } from "@/lib/validations/team";
 import {
@@ -21,6 +22,9 @@ import {
   updateCompany,
   updateCompanyStore,
 } from "@/services/platform.service";
+import { addPlatformAdmin, removePlatformAdmin, setPlatformAdminRole } from "@/services/platform-team.service";
+import { addSupportNote, updateSupportNote } from "@/services/platform-support.service";
+import { updatePlatformSettings } from "@/services/platform-settings.service";
 
 // Every action below calls a platform.service function whose first statement is requirePlatformAdmin():
 // the admin check happens on the server, from the validated session, before any privileged work.
@@ -107,5 +111,52 @@ export async function recoverCompanyOwnerAction(tenantId: unknown, input: unknow
     const result = await recoverCompanyOwner(parseInput(z.uuid(), tenantId), parseInput(recoverOwnerSchema, input));
     revalidatePath(ROUTES.admin, "layout");
     return { email: result.email };
+  });
+}
+
+// Platform admins, support notes and settings. Managing admins and the settings are for super admins only: the service
+// refuses anyone else before doing anything, and the SQL functions check again.
+
+export async function addPlatformAdminAction(input: unknown) {
+  return run(async () => {
+    const result = await addPlatformAdmin(parseInput(addPlatformAdminSchema, input));
+    revalidatePath(ROUTES.admin, "layout");
+    return { email: result.email };
+  });
+}
+
+export async function setPlatformAdminRoleAction(input: unknown) {
+  return run(async () => {
+    const v = parseInput(setPlatformAdminRoleSchema, input);
+    await setPlatformAdminRole(v.userId, v.role);
+    revalidatePath(ROUTES.admin, "layout");
+  });
+}
+
+export async function removePlatformAdminAction(userId: unknown) {
+  return run(async () => {
+    await removePlatformAdmin(parseInput(z.uuid(), userId));
+    revalidatePath(ROUTES.admin, "layout");
+  });
+}
+
+export async function addSupportNoteAction(tenantId: unknown, input: unknown) {
+  return run(async () => {
+    await addSupportNote(parseInput(z.uuid(), tenantId), parseInput(supportNoteSchema, input).body);
+    revalidatePath(ROUTES.admin, "layout");
+  });
+}
+
+export async function updateSupportNoteAction(noteId: unknown, input: unknown) {
+  return run(async () => {
+    await updateSupportNote(parseInput(z.uuid(), noteId), parseInput(supportNoteSchema, input).body);
+    revalidatePath(ROUTES.admin, "layout");
+  });
+}
+
+export async function updatePlatformSettingsAction(input: unknown) {
+  return run(async () => {
+    await updatePlatformSettings(parseInput(platformSettingsSchema, input));
+    revalidatePath(ROUTES.admin, "layout");
   });
 }

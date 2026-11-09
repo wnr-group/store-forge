@@ -55,7 +55,8 @@ async function main() {
   const isLocal = ["localhost", "127.0.0.1", "::1"].includes(new URL(directUrl).hostname);
   const sql = postgres(directUrl, { max: 1, prepare: false, ssl: isLocal ? false : "require", connect_timeout: 15, onnotice: () => {} });
   try {
-    await sql`insert into public.platform_admins (user_id) values (${userId}) on conflict do nothing`;
+    // The bootstrap account is a super admin: it can add other admins and edit the platform settings.
+    await sql`insert into public.platform_admins (user_id, role) values (${userId}, 'super_admin') on conflict (user_id) do update set role = 'super_admin'`;
     console.log(`${email} is a Platform Admin. Sign in at /login; you will land on /admin.`);
   } catch (e) {
     // A tenant member cannot also be a Platform Admin (database trigger).

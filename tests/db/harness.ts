@@ -79,10 +79,10 @@ export async function asUser<T>(db: PGlite, userId: string | null, fn: () => Pro
 }
 
 /** Inserts a Platform Admin the way `npm run admin:create` does: privileged write, never through the API. */
-export async function createPlatformAdmin(db: PGlite, email = "platform.admin@example.test"): Promise<string> {
+export async function createPlatformAdmin(db: PGlite, email = "platform.admin@example.test", role: "super_admin" | "admin" = "super_admin"): Promise<string> {
   const existing = await db.query<{ id: string }>("select id from auth.users where email = $1", [email]);
   const id = existing.rows[0]?.id ?? (await createUser(db, email, "Platform Admin"));
-  await db.query("insert into platform_admins (user_id) values ($1) on conflict do nothing", [id]);
+  await db.query("insert into platform_admins (user_id, role) values ($1, $2) on conflict do nothing", [id, role]);
   return id;
 }
 

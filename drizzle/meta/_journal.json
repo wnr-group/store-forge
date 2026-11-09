@@ -155,6 +155,13 @@
       "when": 1794300004000,
       "tag": "0021_admin_org_store_team",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794300005000,
+      "tag": "0022_admin_team_usage_support_settings",
+      "breakpoints": true
     }
   ]
 }

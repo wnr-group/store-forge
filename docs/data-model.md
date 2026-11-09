@@ -23,6 +23,7 @@ erDiagram
     AUTH_USERS ||--o{ MEMBERSHIPS : "belongs to tenants via"
     AUTH_USERS ||--o| PROFILES : has
     AUTH_USERS ||--o| PLATFORM_ADMINS : "can be"
+    TENANTS ||--o{ ORGANIZATION_SUPPORT_NOTES : "internal notes about"
     AUTH_USERS ||--o{ ADMIN_AUDIT_LOGS : "admin actions (copied, no link)"
     CATEGORIES ||--o{ PRODUCTS : groups
     COLLECTIONS }o--o{ PRODUCTS : "COLLECTION_PRODUCTS"
@@ -44,6 +45,8 @@ erDiagram
 | `profiles` | A user's display name and avatar |
 | `platform_admins` | The StoreForge staff who manage all organizations |
 | `admin_audit_logs` | A permanent record of what Platform Admins did |
+| `organization_support_notes` | Internal notes the platform team keeps about an organization |
+| `platform_settings` | One row of platform-wide settings (name, defaults, reserved store addresses) |
 | `stores` | A tenant's online store (name, web address, currency) |
 | `categories` | Product categories, which can be nested |
 | `collections` | Hand-picked groups of products |
@@ -149,6 +152,28 @@ Every table has an `id` (uuid, generated automatically) unless noted. Timestamp 
 | Column | Type | Notes |
 |---|---|---|
 | `user_id` | uuid | Primary key |
+| `role` | text | `super_admin` can also add or remove admins and change the platform settings. `admin` can do everything else. There is always at least one super admin |
+| `created_by` | uuid | The admin who added them. Not linked, so it survives that admin's removal |
+
+**`organization_support_notes`**: private notes about an organization. Organizations can never see them, and only the author can edit a note.
+
+| Column | Type | Notes |
+|---|---|---|
+| `tenant_id` | uuid | The organization. Notes are deleted with it |
+| `author_id` | uuid | The admin who wrote it. Not linked |
+| `author_email` | text | Copied at the time |
+| `body` | text | Up to 2000 characters |
+
+**`platform_settings`**: exactly one row.
+
+| Column | Type | Notes |
+|---|---|---|
+| `platform_name` | text | Shown on the sign-in page and the "no workspace" page |
+| `support_email` | text | Optional. Shown with the name |
+| `default_currency` | text | Used for the store of each new organization |
+| `default_timezone` | text | Same |
+| `default_store_status` | text | `active` or `inactive`: how new stores start |
+| `reserved_subdomains` | text[] | Store addresses nobody can claim, added to the built-in list |
 
 **`stores`**
 

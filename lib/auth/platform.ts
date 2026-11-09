@@ -22,11 +22,33 @@ export const isPlatformAdmin = cache(async (): Promise<boolean> => {
   });
 });
 
+export type PlatformAdminLevel = "super_admin" | "admin";
+
+/** The signed-in admin's level, or null when they are not a Platform Admin. Always answered by the database. */
+export const getPlatformAdminLevel = cache(async (): Promise<PlatformAdminLevel | null> => {
+  if (!(await getCurrentUser())) return null;
+  return withAuthenticatedDb(async (tx) => {
+    const rows = rowsOf<{ r: string | null }>(await tx.execute(sql`select public.platform_admin_role() as r`));
+    const role = rows[0]?.r;
+    return role === "super_admin" || role === "admin" ? role : null;
+  });
+});
+
 /** For admin pages: redirects non-admins away (signed-out users to login). */
 export async function requirePlatformAdminPage() {
   const user = await getCurrentUser();
   if (!user) redirect(ROUTES.login);
   if (!(await isPlatformAdmin())) redirect(ROUTES.dashboard);
+  return user;
+}
+
+/**
+ * For actions only a super admin may take (managing other admins, editing the platform settings). The SQL functions behind
+ * them check again, so this is the friendly early refusal, not the only protection.
+ */
+export async function requireSuperAdmin() {
+  const user = await requirePlatformAdmin();
+  if ((await getPlatformAdminLevel()) !== "super_admin") throw new AppError("FORBIDDEN", "Only a super admin can do that.");
   return user;
 }
 

@@ -42,3 +42,28 @@ export const auditListQuerySchema = z.object({
   pageSize: pageSize.default(DEFAULT_ADMIN_PAGE_SIZE),
 });
 export type AuditListQuery = z.output<typeof auditListQuerySchema>;
+
+/** How far back "no recent activity" looks. */
+export const INACTIVE_DAY_OPTIONS = [30, 60, 90] as const;
+
+/** Usage & Analytics. The date range drives the "new organizations" chart; q / status / sort / page drive the per-organization table. */
+export const usageQuerySchema = z.object({
+  q: text(80),
+  status: z.enum(["all", "active", "suspended"]).catch("all").default("all"),
+  sort: z.enum(["created", "name"]).catch("created").default("created"),
+  dir: z.enum(["asc", "desc"]).catch("desc").default("desc"),
+  page: page.default(1),
+  pageSize: pageSize.default(DEFAULT_ADMIN_PAGE_SIZE),
+  from: dateOnly,
+  to: dateOnly,
+  inactive: z.coerce
+    .number()
+    .refine((n): n is (typeof INACTIVE_DAY_OPTIONS)[number] => (INACTIVE_DAY_OPTIONS as readonly number[]).includes(n))
+    .catch(30)
+    .default(30),
+});
+export type UsageQuery = z.output<typeof usageQuerySchema>;
+
+/** Support page: search the organization name or the note text. */
+export const supportListQuerySchema = z.object({ q: text(80), page: page.default(1), pageSize: pageSize.default(DEFAULT_ADMIN_PAGE_SIZE) });
+export type SupportListQuery = z.output<typeof supportListQuerySchema>;

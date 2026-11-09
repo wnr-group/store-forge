@@ -31,13 +31,13 @@ describe("service-role key isolation", () => {
     expect(users).toEqual(["lib/auth/provisioning.ts", "lib/supabase/admin.ts"]);
   });
 
-  it("only the two services call the provisioning helpers", () => {
+  it("only the three services that create or delete accounts call the provisioning helpers", () => {
     const users = files.filter((f) => /from "@\/lib\/auth\/provisioning"/.test(f.text)).map((f) => f.path).sort();
-    expect(users).toEqual(["services/platform.service.ts", "services/team.service.ts"]);
+    expect(users).toEqual(["services/platform-team.service.ts", "services/platform.service.ts", "services/team.service.ts"]);
   });
 
   it("the privileged modules are server-only", () => {
-    for (const path of ["lib/supabase/admin.ts", "lib/auth/provisioning.ts", "services/platform.service.ts", "services/team.service.ts", "lib/auth/platform.ts"]) {
+    for (const path of ["lib/supabase/admin.ts", "lib/auth/provisioning.ts", "services/platform.service.ts", "services/platform-team.service.ts", "services/team.service.ts", "lib/auth/platform.ts"]) {
       expect(files.find((f) => f.path === path)?.text, path).toMatch(/^import "server-only";/m);
     }
   });

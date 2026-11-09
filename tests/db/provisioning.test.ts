@@ -95,6 +95,10 @@ import {
   updateCompany,
   updateCompanyStore,
 } from "@/services/platform.service";
+import { addSupportNote, listSupportNotes, updateSupportNote } from "@/services/platform-support.service";
+import { addPlatformAdmin, listPlatformAdmins, removePlatformAdmin, setPlatformAdminRole } from "@/services/platform-team.service";
+import { getPlatformSettings, getPublicBranding, updatePlatformSettings } from "@/services/platform-settings.service";
+import { getNewOrganizationsSeries, getOrganizationUsage, getUsageSummary, listInactiveOrganizations, listOrganizationUsage } from "@/services/platform-usage.service";
 import { createMember, listTeam, removeMember, resetMemberPassword, setMemberStatus, updateMember } from "@/services/team.service";
 
 let pg: PGlite;
@@ -604,5 +608,163 @@ describe("Platform Admin phase 2 (service): organization, store, team and owners
     }
     expect((await q<{ n: number }>("select count(*)::int n from admin_audit_logs"))[0].n).toBe(before);
     expect((await q<{ name: string }>("select name from tenants where id = $1", [tenantA]))[0].name).not.toBe("Hacked");
+  });
+});
+
+describe("platform admins, support notes, settings and usage (service)", () => {
+  let limited: string; // a Platform Admin who is not a super admin
+  type AuditRow = { action: string; description: string; previous_data: Record<string, unknown> | null; new_data: Record<string, unknown> | null };
+  const lastAudit = async (action: string) =>
+    (await q<AuditRow>("select action, description, previous_data, new_data from admin_audit_logs where action = $1 order by created_at desc, id desc limit 1", [action]))[0];
+  const countAudit = async (action: string) => (await q<{ n: number }>("select count(*)::int n from admin_audit_logs where action = $1", [action]))[0].n;
+  const newAdmin = (email: string, role: "admin" | "super_admin" = "admin") => ({ fullName: "Some Admin", email, password: "initial-pass-1", role }) as const;
+  const adminId = async (email: string) => (await q<{ id: string }>("select id from auth.users where email = $1", [email]))[0]?.id;
+
+  beforeAll(async () => {
+    limited = await createPlatformAdmin(pg, "limited@platform.test", "admin");
+  });
+
+  it("lets any admin see the platform team, but nobody else", async () => {
+    const list = await as(limited, () => listPlatformAdmins());
+    expect(list.map((a) => a.email)).toEqual(expect.arrayContaining(["platform.admin@example.test", "limited@platform.test"]));
+    expect(list.find((a) => a.email === "limited@platform.test")).toMatchObject({ role: "admin" });
+    await expect(as(alice, () => listPlatformAdmins())).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(null, () => listPlatformAdmins())).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+  });
+
+  it("adds an admin as a super admin only, records who added them, and never logs the password", async () => {
+    const res = await as(admin, () => addPlatformAdmin(newAdmin("newadmin@platform.test")));
+    expect(res.email).toBe("newadmin@platform.test");
+    const id = await adminId("newadmin@platform.test");
+    expect(await q("select role, created_by from platform_admins where user_id = $1", [id])).toEqual([{ role: "admin", created_by: admin }]);
+    const row = await lastAudit("platform_admin.added");
+    expect(row).toMatchObject({ description: "Added platform admin newadmin@platform.test as admin", new_data: { email: "newadmin@platform.test", role: "admin" } });
+    expect(JSON.stringify(row)).not.toMatch(/initial-pass|password/i);
+
+    h.adminCalls.length = 0;
+    for (const user of [limited, alice]) await expect(as(user, () => addPlatformAdmin(newAdmin("blocked@platform.test")))).rejects.toMatchObject({ code: "FORBIDDEN" });
+    expect(calls("createUser")).toHaveLength(0); // refused before any account was created
+    expect(await adminId("blocked@platform.test")).toBeUndefined();
+  });
+
+  it("deletes the new account again if making them an admin fails", async () => {
+    await q("create function public.test_boom_admin() returns trigger language plpgsql as $$ begin raise exception 'boom'; end $$");
+    await q("create trigger test_boom_admin before insert on public.platform_admins for each row execute function public.test_boom_admin()");
+    h.adminCalls.length = 0;
+    try {
+      await expect(as(admin, () => addPlatformAdmin(newAdmin("boom@platform.test")))).rejects.toBeDefined();
+    } finally {
+      await q("drop trigger test_boom_admin on public.platform_admins");
+      await q("drop function public.test_boom_admin()");
+    }
+    expect(calls("createUser")).toHaveLength(1);
+    expect(calls("deleteUser")).toHaveLength(1);
+    expect(await adminId("boom@platform.test")).toBeUndefined();
+  });
+
+  it("changes a level with an entry, logs nothing when nothing changes, and never demotes the last super admin", async () => {
+    const id = (await adminId("newadmin@platform.test"))!;
+    await as(admin, () => setPlatformAdminRole(id, "super_admin"));
+    await as(admin, () => setPlatformAdminRole(id, "super_admin")); // unchanged
+    expect(await countAudit("platform_admin.role_changed")).toBe(1);
+    expect(await lastAudit("platform_admin.role_changed")).toMatchObject({ description: "Changed newadmin@platform.test from admin to super admin", previous_data: { role: "admin" }, new_data: { role: "super_admin" } });
+    await as(admin, () => setPlatformAdminRole(id, "admin"));
+    expect(await countAudit("platform_admin.role_changed")).toBe(2);
+    // `admin` is the only super admin now
+    await expect(as(admin, () => setPlatformAdminRole(admin, "admin"))).rejects.toMatchObject({ code: "VALIDATION", message: expect.stringMatching(/at least one super admin/) });
+    expect(await q("select role from platform_admins where user_id = $1", [admin])).toEqual([{ role: "super_admin" }]);
+    for (const user of [limited, alice]) await expect(as(user, () => setPlatformAdminRole(id, "super_admin"))).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(admin, () => setPlatformAdminRole(crypto.randomUUID(), "admin"))).rejects.toMatchObject({ code: "NOT_FOUND" });
+  });
+
+  it("removes an admin and their sign-in, protects the last super admin, and allows removing yourself when another remains", async () => {
+    await as(admin, () => addPlatformAdmin(newAdmin("temp@platform.test")));
+    const temp = (await adminId("temp@platform.test"))!;
+    h.adminCalls.length = 0;
+    await as(admin, () => removePlatformAdmin(temp));
+    expect(calls("deleteUser")).toEqual([{ fn: "deleteUser", args: { id: temp } }]);
+    expect(await q("select 1 from platform_admins where user_id = $1", [temp])).toHaveLength(0);
+    expect(await lastAudit("platform_admin.removed")).toMatchObject({ description: "Removed platform admin temp@platform.test (admin)", previous_data: { email: "temp@platform.test", role: "admin" } });
+
+    await expect(as(admin, () => removePlatformAdmin(admin))).rejects.toMatchObject({ code: "VALIDATION" }); // the last super admin
+    for (const user of [limited, alice]) await expect(as(user, () => removePlatformAdmin(temp))).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(admin, () => removePlatformAdmin(crypto.randomUUID()))).rejects.toMatchObject({ code: "NOT_FOUND" });
+
+    // two super admins: one may remove themselves, then the remaining one is protected again
+    const second = (await adminId("newadmin@platform.test"))!;
+    await as(admin, () => setPlatformAdminRole(second, "super_admin"));
+    await as(second, () => removePlatformAdmin(second));
+    expect(await q("select 1 from platform_admins where user_id = $1", [second])).toHaveLength(0);
+    await expect(as(admin, () => removePlatformAdmin(admin))).rejects.toMatchObject({ code: "VALIDATION" });
+    expect(await q("select role from platform_admins where user_id = $1", [admin])).toEqual([{ role: "super_admin" }]);
+  });
+
+  it("changes settings as a super admin only, logs what changed, and shows the public name without a session", async () => {
+    const base = { platformName: "StoreForge", supportEmail: null, defaultCurrency: "INR", defaultTimezone: "Asia/Kolkata", defaultStoreStatus: "active" as const, reservedSubdomains: [] as string[] };
+    const before = await countAudit("platform_settings.updated");
+    await as(admin, () => updatePlatformSettings({ ...base })); // nothing changed
+    expect(await countAudit("platform_settings.updated")).toBe(before);
+
+    await as(admin, () => updatePlatformSettings({ ...base, platformName: "Acme Commerce", supportEmail: "help@acme.test", reservedSubdomains: ["promo"] }));
+    const row = await lastAudit("platform_settings.updated");
+    expect(row.description).toBe("Updated platform settings: platformName, supportEmail, reservedSubdomains");
+    expect(row).toMatchObject({ previous_data: { platformName: "StoreForge", supportEmail: null, reservedSubdomains: [] }, new_data: { platformName: "Acme Commerce", supportEmail: "help@acme.test", reservedSubdomains: ["promo"] } });
+    expect(await as(null, () => getPublicBranding())).toEqual({ platformName: "Acme Commerce", supportEmail: "help@acme.test" });
+    expect((await as(limited, () => getPlatformSettings())).reservedSubdomains).toEqual(["promo"]); // any admin can read
+
+    for (const user of [limited, alice]) await expect(as(user, () => updatePlatformSettings({ ...base, platformName: "Hacked" }))).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(alice, () => getPlatformSettings())).rejects.toMatchObject({ code: "FORBIDDEN" });
+    expect((await as(admin, () => getPlatformSettings())).platformName).toBe("Acme Commerce");
+    await as(admin, () => updatePlatformSettings({ ...base })); // restore
+    expect(await as(null, () => getPublicBranding())).toEqual({ platformName: "StoreForge", supportEmail: null });
+  });
+
+  it("keeps support notes private, lets only the author edit, and logs the facts but never the text", async () => {
+    const { tenantId } = await as(admin, () => createCompany(company("notes-shop", "notes@owner.test")));
+    const original = "Customer asked about invoices; secret-token-123";
+    const revised = "Customer asked about invoices; resolved";
+    await as(admin, () => addSupportNote(tenantId, `  ${original}  `));
+    const mine = await as(admin, () => listSupportNotes({ tenantId, page: 1, pageSize: 10 }));
+    expect(mine.total).toBe(1);
+    expect(mine.notes[0]).toMatchObject({ body: original, authorEmail: "platform.admin@example.test", canEdit: true, edited: false });
+    const theirs = await as(limited, () => listSupportNotes({ tenantId, page: 1, pageSize: 10 }));
+    expect(theirs.notes[0].canEdit).toBe(false);
+    const noteId = mine.notes[0].id;
+
+    await expect(as(limited, () => updateSupportNote(noteId, "Hijacked"))).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await as(admin, () => updateSupportNote(noteId, revised));
+    await as(admin, () => updateSupportNote(noteId, revised)); // unchanged: no entry
+    expect((await as(admin, () => listSupportNotes({ tenantId, page: 1, pageSize: 10 }))).notes[0].body).toBe(revised);
+
+    const entries = await q<AuditRow>("select action, description, previous_data, new_data from admin_audit_logs where organization_id = $1 and action like 'support_note.%' order by created_at, id", [tenantId]);
+    expect(entries.map((e) => e.action)).toEqual(["support_note.created", "support_note.updated"]);
+    expect(entries[1]).toMatchObject({ description: "Edited a support note", previous_data: { length: original.length }, new_data: { length: revised.length } });
+    expect(JSON.stringify(entries)).not.toMatch(/secret-token|invoices/); // the text itself is never copied into the log
+
+    await expect(as(alice, () => addSupportNote(tenantId, "Owner trying to write"))).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(alice, () => listSupportNotes({ page: 1, pageSize: 10 }))).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(admin, () => addSupportNote(crypto.randomUUID(), "Ghost"))).rejects.toMatchObject({ code: "NOT_FOUND" });
+    // the notes never reach the organization's own view of the data
+    expect(await q("select 1 from admin_audit_logs where description ilike '%invoices%'")).toHaveLength(0);
+  });
+
+  it("reports usage as totals, clamps a page past the end, and refuses non-admins", async () => {
+    const usage = await as(admin, () => getOrganizationUsage(tenantA));
+    expect(usage).toMatchObject({ status: "active", storageBytes: null });
+    expect([typeof usage.products, typeof usage.customers, typeof usage.orders]).toEqual(["number", "number", "number"]);
+    const summary = await as(admin, () => getUsageSummary(30));
+    const total = (await q<{ n: number }>("select count(*)::int n from tenants"))[0].n;
+    expect(summary).toMatchObject({ totalOrganizations: total, storageTotalBytes: null });
+    expect(summary.active + summary.suspended).toBe(total);
+    const q1 = { q: "", status: "all", sort: "created", dir: "desc", page: 1, pageSize: 10, from: "", to: "", inactive: 30 } as const;
+    const first = await as(admin, () => listOrganizationUsage(q1));
+    const past = await as(admin, () => listOrganizationUsage({ ...q1, page: 999 }));
+    expect(past.page).toBe(Math.max(1, Math.ceil(first.total / 10)));
+    expect(past.rows.length).toBeGreaterThan(0);
+    const series = await as(admin, () => getNewOrganizationsSeries("", ""));
+    expect(series.total).toBe((await q<{ n: number }>("select count(*)::int n from tenants where created_at >= now() - interval '90 days'"))[0].n);
+    const attempts: Array<() => Promise<unknown>> = [() => getOrganizationUsage(tenantA), () => getUsageSummary(30), () => listOrganizationUsage(q1), () => listInactiveOrganizations(30), () => getNewOrganizationsSeries("", "")];
+    for (const act of attempts) await expect(as(alice, act)).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(admin, () => getOrganizationUsage(crypto.randomUUID()))).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
 });

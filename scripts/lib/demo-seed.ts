@@ -87,7 +87,7 @@ export async function seedDemoData(db: Db, userId: string, now = new Date(), tea
     const t = tx as unknown as Db;
 
     // 1. Provision the company as the demo Platform Admin (the only way tenants are created), then drop back to the owner role.
-    await t.execute(sql`insert into public.platform_admins (user_id) values (${DEMO_PLATFORM_ADMIN.id}::uuid) on conflict do nothing`);
+    await t.execute(sql`insert into public.platform_admins (user_id, role) values (${DEMO_PLATFORM_ADMIN.id}::uuid, 'super_admin') on conflict do nothing`);
     const claims = JSON.stringify({ sub: DEMO_PLATFORM_ADMIN.id, role: "authenticated" });
     await t.execute(sql`select set_config('request.jwt.claims', ${claims}, true), set_config('request.jwt.claim.sub', ${DEMO_PLATFORM_ADMIN.id}, true)`);
     await t.execute(sql.raw("set local role authenticated"));
