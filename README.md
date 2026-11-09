@@ -50,6 +50,15 @@ Money is stored as integer minor units in the store currency, so the currency is
 - The Supabase service-role key is read in exactly one module (`lib/supabase/admin.ts`) and used only for Admin Auth calls (create a confirmed user, set a password, delete a user). It is never used for database queries or Storage, and a test fails if that changes.
 - A suspended company or a deactivated membership loses all access at the database level, because every RLS policy goes through `is_tenant_member()` / `has_tenant_role()`, which now require both to be active.
 
+### Catalog vs. Assignment Ownership Model (Multi-Store Option A)
+
+The StoreForge multi-store template engine follows **Option A** for ownership:
+
+- **Products and collections are tenant-wide:** Every product and collection belongs directly to a company (tenant). They do not carry a `store_id`, and there are no membership or join tables linking products to stores.
+- **Templates and assignments are store-scoped:** Templates belong to a specific store (`tenant_id, store_id`). Template assignments link a store's template to a product or collection within the same company.
+- **Cross-store assignment boundaries:** A template belonging to Store 1 cannot be assigned in Store 2. Any cross-store or cross-tenant assignment attempt is rejected by the database trigger with an explicit error: `"template does not belong to this store"` (SQLSTATE `23503`, migration `0015`).
+- **Independent store layouts:** Multiple stores owned by the same company share the product catalog, but maintain independent template assignments and layout resolutions.
+
 ```
 app/          Routes: (auth)/login, (admin)/admin/* (Platform Admin), (dashboard)/dashboard/* (company workspace)
 components/   UI (ui/ = shadcn), dashboard/ shell, one folder per feature
@@ -236,7 +245,7 @@ Rules are defined in two places that must be kept in sync: `lib/auth/permissions
 **7. Store subdomains.** Each company's first store is served publicly at `<store-address>.<root domain>`: `http://urban.lvh.me:3000` locally (`lvh.me` and every subdomain of it resolve to 127.0.0.1, so no hosts-file edits) and `https://urban.store-forge.com` in production. Set `NEXT_PUBLIC_ROOT_DOMAIN` (`lvh.me:3000` locally, `store-forge.com` in production, no scheme) and restart the dev server.
 
 - The proxy (`proxy.ts`) rewrites a request for `<slug>.<root>` to the public page `app/s/[slug]`. It reads only the Host header, so the slug is a hint, not an identity.
-- The page shows the store name, logo, description and **active** products, read through one database function, `get_public_storefront()`. Anonymous visitors still have no table access; the function returns `null` (a 404) for unknown, reserved, inactive and suspended stores, and never returns costs, SKUs, stock, customers or orders. The page renders the store's selected template (`store_template_settings`) with its saved customization; a store with no settings uses the default `classic` template.
+- The storefront and template engine pages (`app/s/[slug]`, `/products/[slug]`, `/collections/[slug]`) are driven by published templates and read-only functions (`get_public_template_layout`, `get_public_product`, `get_public_collection`, `get_public_collections`, and `get_public_storefront`). Anonymous visitors have no direct table access; the functions return `null` (HTTP 404) for unknown, reserved, inactive and suspended stores, and never return costs, stock quantities, customers, or draft content. Public product responses expose SKUs for product and variant display (decisions D9, D12, R4; AC-SF-018). Unconfigured stores render the default `classic` template.
 - **Each store host has its own sign-in and dashboard.** `http://mart-com.lvh.me:3000/login` signs in on that host and `/dashboard` there is that store's dashboard. The proxy sets an internal `x-sf-store` header from the Host (it deletes any client-supplied copy first), and the workspace is then the company that owns that store: a user who is not a member of it gets "No workspace available", not their own company. Cookies are per host, so signing in on one store never signs you in on another or on the root domain. The storefront header has a **Store login** link.
 - `/admin` (Platform Admin) and the unauthenticated landing page exist **only on the root domain**; on a store host `/admin` is a 404.
 - Reserved names (`www`, `app`, `api`, `admin`, ...) are never treated as stores. The Platform Admin's company page shows each store's URL.

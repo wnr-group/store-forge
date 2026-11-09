@@ -20,6 +20,29 @@ const documentCheck = (name: string, col: unknown) =>
   );
 
 /**
+ * Store Forge Template Engine - Ownership Model (Multi-Store Option A, R6, AC-DB-021):
+ *
+ * 1. Catalog entities (Products & Collections) are TENANT-WIDE:
+ *    - Owned by the tenant (`tenant_id`), shared across all stores within that tenant.
+ *    - Products and collections do NOT carry a `store_id`, and there are no store-product
+ *      or store-collection membership tables.
+ *
+ * 2. Templates & Template Assignments are STORE-SCOPED:
+ *    - Owned by a specific store (`tenant_id`, `store_id`).
+ *    - A template belongs to exactly one store.
+ *    - An assignment maps a template in that store to a product or collection in the same tenant.
+ *
+ * 3. Assignment & Cross-Store Boundaries:
+ *    - Cross-store template assignment is strictly rejected: a template created in Store 1
+ *      cannot be assigned to a product in Store 2, even within the same tenant.
+ *    - Cross-tenant template assignment is strictly rejected.
+ *    - Both violations fail with an explicit SQLSTATE 23503 error:
+ *      "template does not belong to this store" (migration 0015, AC-DB-011).
+ *    - Within a multi-store tenant, each store independently assigns templates to the same shared
+ *      product (e.g., Store 1 uses Template A, Store 2 uses Template B for Product X).
+ */
+
+/**
  * One row per template: the mutable draft and a pointer to the published version (D3).
  * `status` is lifecycle only (active or archived); published or draft is derived from `published_version_id`
  * (see template_publication_state()). `revision` is bumped by a trigger whenever `draft` changes and cannot

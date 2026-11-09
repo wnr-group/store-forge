@@ -5,7 +5,9 @@ import { join } from "node:path";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { validateDocument } from "@/lib/templates/engine/validate";
 import { applyLegacyToPreset, type LegacyTemplateSettings } from "@/lib/templates/presets";
+import { getRegistry } from "@/lib/templates/registry/index";
 import { createDb, createUser, onboard } from "./harness";
 import { insertTemplate } from "./template-fixtures";
 
@@ -67,7 +69,7 @@ type TemplateRow = { id: string; store_id: string; kind: string; name: string; s
 type VersionRow = { template_id: string; version_number: number; source: string; published_by: string | null; rolled_back_from: string | null; document: unknown };
 
 describe("before 0013", () => {
-  it("has the template tables and the legacy rows, and no templates yet", async () => {
+  it("[AC-DB-014] has the template tables and the legacy rows, and no templates yet", async () => {
     expect((await q("select 1 from templates")).length).toBe(0);
     expect((await q("select 1 from store_template_settings")).length).toBe(5);
   });
@@ -81,7 +83,7 @@ describe("running 0013", () => {
     await runMigration();
   });
 
-  it("creates exactly one default homepage template per store with a legacy row, and nothing for stores without one", async () => {
+  it("[AC-DB-014] creates exactly one default homepage template per store with a legacy row, and nothing for stores without one", async () => {
     const rows = await q<TemplateRow>("select * from templates order by store_id");
     expect(rows.length).toBe(5);
     expect(new Set(rows.map((r) => r.store_id)).size).toBe(5);
@@ -90,7 +92,7 @@ describe("running 0013", () => {
     expect((await q("select 1 from template_versions v join templates t on t.id = v.template_id where t.store_id = $1", [stores["no-row"].store])).length).toBe(0);
   });
 
-  it("publishes version 1 with source 'migration' and no acting user, and the draft equals the published document", async () => {
+  it("[AC-DB-014] publishes version 1 with source 'migration' and no acting user, and the draft equals the published document", async () => {
     const versions = await q<VersionRow>("select * from template_versions order by template_id");
     expect(versions.length).toBe(5);
     for (const v of versions) expect(v).toMatchObject({ version_number: 1, source: "migration", published_by: null, rolled_back_from: null });
@@ -101,7 +103,7 @@ describe("running 0013", () => {
     for (const j of joined) expect(j).toEqual({ pointer_ok: true, same: true, state: "published" });
   });
 
-  it("drift: the SQL snapshot equals applyLegacyToPreset() for every store", async () => {
+  it("[AC-DB-014] drift: the SQL snapshot equals applyLegacyToPreset() for every store", async () => {
     for (const name of ["full-spot", "plain-classic", "accent-only", "unknown-key", "padded"]) {
       const [t] = await q<TemplateRow>("select * from templates where store_id = $1", [stores[name].store]);
       const expected = applyLegacyToPreset(legacy[name]);
@@ -110,7 +112,7 @@ describe("running 0013", () => {
     }
   });
 
-  it("preserves the legacy values: Spotlight hero, accent, trimmed text, image path; unknown keys render classic", async () => {
+  it("[AC-DB-014] preserves the legacy values: Spotlight hero, accent, trimmed text, image path; unknown keys render classic", async () => {
     const [full] = await q<{ draft: { layout: string; sections: Record<string, { type: string; settings: Record<string, unknown> }>; order: string[] } }>(
       "select draft from templates where store_id = $1", [stores["full-spot"].store],
     );
@@ -133,7 +135,7 @@ describe("running 0013", () => {
     expect(padded.draft.sections.hero.settings).toMatchObject({ heading: "Padded", subheading: "sub" });
   });
 
-  it("every migrated document is structurally valid: version 1, order matches sections, unique ids, within the size limit", async () => {
+  it("[AC-DB-014] every migrated document is structurally valid: version 1, order matches sections, unique ids, within the size limit", async () => {
     const docs = await q<{ draft: { schemaVersion: number; sections: Record<string, { type: string; blocks: object; block_order: unknown[] }>; order: string[] }; bytes: number }>(
       "select draft, octet_length(draft::text) as bytes from templates",
     );
@@ -149,16 +151,42 @@ describe("running 0013", () => {
     }
   });
 
-  // The shared Zod validator is a Phase 2 deliverable (D5, D6); this test is enabled there.
-  it.todo("every migrated document passes the shared Zod validator (Phase 2)");
+  it("[AC-ENG-018] [AC-ENG-016] every migrated document passes the shared Zod validator, validated as its owning tenant (Phase 2)", async () => {
+    const docs = await q<{ tenant_id: string; draft: unknown }>("select tenant_id, draft from templates");
+    const registry = getRegistry();
+    expect(docs.length).toBeGreaterThan(0);
+    for (const { tenant_id: tenantId, draft } of docs) {
+      const res = validateDocument("index", draft, registry, { tenantId });
+      expect(res.ok).toBe(true);
+      if (res.ok) {
+        expect(res.issues.filter((i) => i.level === "error")).toHaveLength(0);
+      }
+    }
+  });
 
-  it("leaves the legacy table and its data untouched", async () => {
+  it("[AC-ENG-016] a migrated document with an image path is rejected without a tenant and under another tenant", async () => {
+    const docs = await q<{ tenant_id: string; draft: unknown }>("select tenant_id, draft from templates");
+    const registry = getRegistry();
+    const withImage = docs.filter((d) => JSON.stringify(d.draft).includes('"path"'));
+    expect(withImage.length).toBeGreaterThan(0);
+    for (const { tenant_id: tenantId, draft } of withImage) {
+      const none = validateDocument("index", draft, registry);
+      expect(none.ok).toBe(false);
+      expect(none.issues.map((i) => i.code)).toContain("TENANT_REQUIRED");
+
+      const other = validateDocument("index", draft, registry, { tenantId: `${tenantId}-other` });
+      expect(other.ok).toBe(false);
+      expect(other.issues.map((i) => i.code)).toContain("CROSS_TENANT_PATH");
+    }
+  });
+
+  it("[AC-DB-014] leaves the legacy table and its data untouched", async () => {
     expect(await q("select * from store_template_settings order by store_id")).toEqual(before);
   });
 });
 
 describe("re-running 0013", () => {
-  it("creates no duplicate templates or versions, and changes nothing", async () => {
+  it("[AC-DB-015] creates no duplicate templates or versions, and changes nothing", async () => {
     const snapshot = async () => ({
       templates: await q("select id, store_id, name, draft, revision, published_version_id, updated_at from templates order by id"),
       versions: await q("select id, template_id, version_number, source, document, published_at from template_versions order by id"),
@@ -171,7 +199,7 @@ describe("re-running 0013", () => {
     expect(first.versions.length).toBe(5);
   });
 
-  it("skips a store that already has a default homepage template, even if its legacy row changes later", async () => {
+  it("[AC-DB-015] skips a store that already has a default homepage template, even if its legacy row changes later", async () => {
     const u = await createUser(db, "late@example.test");
     const p = await onboard(db, u, "late-shop");
     await insertTemplate(db, { tenantId: p.tenant_id, storeId: p.store_id, kind: "index", isDefault: true, name: "Mine" });
@@ -182,7 +210,7 @@ describe("re-running 0013", () => {
     expect((await q("select 1 from template_versions v join templates t on t.id = v.template_id where t.store_id = $1", [p.store_id])).length).toBe(0);
   });
 
-  it("a store with a legacy row but only a non-default homepage template still gets its migrated default", async () => {
+  it("[AC-DB-015] a store with a legacy row but only a non-default homepage template still gets its migrated default", async () => {
     const u = await createUser(db, "nondefault@example.test");
     const p = await onboard(db, u, "nondefault-shop");
     await insertTemplate(db, { tenantId: p.tenant_id, storeId: p.store_id, kind: "index", isDefault: false, name: "Extra" });
@@ -196,7 +224,7 @@ describe("re-running 0013", () => {
 });
 
 describe("the full migration chain", () => {
-  it("applies 0010 through 0014 on a fresh database with legacy-free data and keeps the V1 table", async () => {
+  it("[AC-DB-015] applies 0010 through 0015 on a fresh database with legacy-free data and keeps the V1 table", async () => {
     const fresh = await createDb();
     try {
       const [r] = (await fresh.query<{ templates: number; legacy: number }>(
@@ -208,7 +236,7 @@ describe("the full migration chain", () => {
     }
   });
 
-  it("the real Drizzle migrator applies 0013 and 0014 over a database that already has legacy rows (the deploy path)", async () => {
+  it("[AC-DB-015] the real Drizzle migrator applies 0013 and 0014 over a database that already has legacy rows (the deploy path)", async () => {
     const live = await createDb({ migrationsFolder: migrationsUpTo("0012_template_engine") });
     try {
       const u = await createUser(live, "deploy@example.test");

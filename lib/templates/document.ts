@@ -23,6 +23,16 @@ export type AssignmentResourceType = (typeof ASSIGNMENT_RESOURCE_TYPES)[number];
 
 export const DOCUMENT_SCHEMA_VERSION = 1;
 
+/** Formalized layout options (D3, R3): the only page chrome a document may name. There is no "default" layout (C-02). */
+export const LAYOUTS = ["classic", "spotlight"] as const;
+export type LayoutKey = (typeof LAYOUTS)[number];
+/** The layout a page document without one gets (migration, new templates): the first, `classic`. Defined once. */
+export const DEFAULT_LAYOUT: LayoutKey = LAYOUTS[0];
+
+export function isLayoutKey(value: unknown): value is LayoutKey {
+  return typeof value === "string" && (LAYOUTS as readonly string[]).includes(value);
+}
+
 /** A section or a block: one recursive shape (D6). `disabled` is omitted when false (D26). */
 export type ComponentNode = {
   type: string;
@@ -34,7 +44,7 @@ export type ComponentNode = {
 
 export type TemplateDocument = {
   schemaVersion: number;
-  /** Names the page chrome used when no shared group is published: "classic" or "spotlight" for the migrated presets. */
+  /** Names the page chrome used when no shared group is published: "classic" or "spotlight" (see LAYOUTS). */
   layout: string;
   sections: Record<string, ComponentNode>;
   order: string[];

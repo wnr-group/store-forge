@@ -42,7 +42,7 @@ const byId = (checks: Check[], id: string) => checks.find((c) => c.id === id);
 const failedIds = (checks: Check[]) => checks.filter((c) => c.status === "fail").map((c) => c.id);
 
 describe("db:verify on a correct database, over the real postgres-js driver", () => {
-  it("passes every check and cleans up after itself", async () => {
+  it("[AC-DB-018] passes every check and cleans up after itself", async () => {
     const pg = await createDb({ fullAuth: true });
     cleanups.push(() => pg.close());
     await pg.exec("set session authorization storeforge_app");

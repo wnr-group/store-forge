@@ -34,7 +34,7 @@ beforeAll(async () => {
 afterAll(async () => db.close());
 
 describe("schema", () => {
-  it("creates three RLS-enabled tables with the agreed policies", async () => {
+  it("[AC-DB-001] creates three RLS-enabled tables with the agreed policies", async () => {
     const rls = await q<{ relname: string; relrowsecurity: boolean }>(
       "select relname, relrowsecurity from pg_class where oid in ('public.templates'::regclass,'public.template_versions'::regclass,'public.template_assignments'::regclass) order by 1",
     );
@@ -53,7 +53,7 @@ describe("schema", () => {
     expect(policies.filter((p) => p.startsWith("template_versions_"))).toEqual(["template_versions_insert_admins", "template_versions_select_members"]);
   });
 
-  it("grants exactly the intended table and column privileges", async () => {
+  it("[AC-DB-001] [AC-DB-003] grants exactly the intended table and column privileges", async () => {
     const [r] = await q<Record<string, boolean>>(`select
       has_table_privilege('anon','public.templates','select') or has_table_privilege('anon','public.template_versions','select') or has_table_privilege('anon','public.template_assignments','select') as anon_any,
       has_table_privilege('authenticated','public.template_versions','update') as ver_update,
@@ -79,7 +79,7 @@ describe("schema", () => {
 });
 
 describe("document and name constraints", () => {
-  it("accepts a valid document and rejects malformed ones", async () => {
+  it("[AC-DB-006] accepts a valid document and rejects malformed ones", async () => {
     await clean();
     await mk("index");
     for (const bad of [[], "text", 5, { layout: "x" }, { schemaVersion: 0 }, { schemaVersion: "1" }, { schemaVersion: 1.5 }]) {
@@ -87,7 +87,7 @@ describe("document and name constraints", () => {
     }
   });
 
-  it("enforces the 256 KB document size in the database", async () => {
+  it("[AC-DB-006] enforces the 256 KB document size in the database", async () => {
     await clean();
     await mk("product", { draft: doc({ pad: "x".repeat(262_000) }) });
     expect(await failure(mk("product", { draft: doc({ pad: "x".repeat(262_144) }) }))).toContain("templates_draft_check");
@@ -96,7 +96,7 @@ describe("document and name constraints", () => {
     expect(await failure(publish(db, { tenantId: tenantA, storeId: storeA, templateId: id, document: doc({ pad: "x".repeat(262_144) }) }))).toContain("template_versions_document_check");
   });
 
-  it("rejects unknown kinds, bad names, bad status and bad revision", async () => {
+  it("[AC-DB-006] [AC-DB-007] rejects unknown kinds, bad names, bad status and bad revision", async () => {
     await clean();
     expect(await failure(mk("page"))).toContain("templates_kind_check");
     expect(await failure(mk("index", { name: "   " }))).toContain("templates_name_check");
@@ -107,7 +107,7 @@ describe("document and name constraints", () => {
 });
 
 describe("defaults and shared kinds", () => {
-  it("allows one default per page kind per store, and defaults must be active page templates", async () => {
+  it("[AC-DB-007] allows one default per page kind per store, and defaults must be active page templates", async () => {
     await clean();
     await mk("product", { isDefault: true });
     expect(await failure(mk("product", { isDefault: true }))).toContain("templates_one_default_idx");
@@ -119,7 +119,7 @@ describe("defaults and shared kinds", () => {
     await insertTemplate(db, { tenantId: tenantB, storeId: storeB, kind: "product", isDefault: true });
   });
 
-  it("allows one document per shared kind per store", async () => {
+  it("[AC-DB-007] allows one document per shared kind per store", async () => {
     await clean();
     for (const kind of ["theme_settings", "group_header", "group_footer", "group_announcement"]) {
       await mk(kind);
@@ -130,7 +130,7 @@ describe("defaults and shared kinds", () => {
 });
 
 describe("revision and updated_at", () => {
-  it("bumps revision exactly when the draft changes, and refreshes updated_at", async () => {
+  it("[AC-DB-002] bumps revision exactly when the draft changes, and refreshes updated_at", async () => {
     await clean();
     const id = await mk("product");
     const rev = async () => (await q<{ revision: number }>("select revision from templates where id = $1", [id]))[0].revision;
@@ -147,7 +147,7 @@ describe("revision and updated_at", () => {
     expect(t.moved).toBe(true);
   });
 
-  it("cannot be set by the app, even directly (column privilege) and optimistic updates detect staleness", async () => {
+  it("[AC-DB-002] cannot be set by the app, even directly (column privilege) and optimistic updates detect staleness", async () => {
     await clean();
     const id = await mk("product");
     expect(await failure(asUser(db, owner, () => q("update templates set revision = 99 where id = $1", [id])))).toContain("permission denied");
@@ -161,7 +161,7 @@ describe("revision and updated_at", () => {
 });
 
 describe("versions", () => {
-  it("numbers versions 1, 2, 3 per template, independently, and records the acting user", async () => {
+  it("[AC-DB-004] numbers versions 1, 2, 3 per template, independently, and records the acting user", async () => {
     await clean();
     const t1 = await mk("product");
     const t2 = await mk("product");
@@ -183,7 +183,7 @@ describe("versions", () => {
     expect(byManager.rows[0]).toEqual({ version_number: 4, published_by: manager });
   });
 
-  it("only rollbacks carry a source version, and it must belong to the same template", async () => {
+  it("[AC-DB-004] only rollbacks carry a source version, and it must belong to the same template", async () => {
     await clean();
     const t1 = await mk("product");
     const t2 = await mk("product");
@@ -196,7 +196,7 @@ describe("versions", () => {
     expect(await failure(publish(db, { tenantId: tenantA, storeId: storeA, templateId: t1, source: "other" }))).toContain("template_versions_source_check");
   });
 
-  it("the published pointer can only name a version of the same template", async () => {
+  it("[AC-DB-005] the published pointer can only name a version of the same template", async () => {
     await clean();
     const t1 = await mk("product");
     const t2 = await mk("product");
@@ -204,13 +204,13 @@ describe("versions", () => {
     expect(await failure(q("update templates set published_version_id = $2 where id = $1", [t1, foreign]))).toContain("templates_published_version_fk");
   });
 
-  it("a version cannot point at a template of another tenant or store", async () => {
+  it("[AC-DB-005] a version cannot point at a template of another tenant or store", async () => {
     await clean();
     const t1 = await mk("product");
     expect(await failure(q("insert into template_versions (tenant_id, store_id, template_id, document, source) values ($1,$2,$3,$4::jsonb,'publish')", [tenantB, storeB, t1, JSON.stringify(doc())]))).toContain("template_versions_template_fk");
   });
 
-  it("label is limited to 80 characters", async () => {
+  it("[AC-DB-004] label is limited to 80 characters", async () => {
     await clean();
     const t = await mk("product");
     expect(await failure(q("insert into template_versions (tenant_id, store_id, template_id, document, source, label) values ($1,$2,$3,$4::jsonb,'publish',$5)", [tenantA, storeA, t, JSON.stringify(doc()), "x".repeat(81)]))).toContain("template_versions_label_check");
@@ -218,7 +218,7 @@ describe("versions", () => {
 });
 
 describe("immutability (D3, D16)", () => {
-  it("no role can update or delete a version, and draft edits never touch history", async () => {
+  it("[AC-DB-003] no role can update or delete a version, and draft edits never touch history", async () => {
     await clean();
     const t = await mk("product");
     const v = await publish(db, { tenantId: tenantA, storeId: storeA, templateId: t });
@@ -231,7 +231,7 @@ describe("immutability (D3, D16)", () => {
     expect((await q<{ document: { order: string[] } }>("select document from template_versions where id = $1", [v]))[0].document.order).toEqual([]);
   });
 
-  it("a template that was ever published cannot be deleted by the app (archive it instead)", async () => {
+  it("[AC-DB-009] a template that was ever published cannot be deleted by the app (archive it instead)", async () => {
     await clean();
     const published = await mk("product");
     await publish(db, { tenantId: tenantA, storeId: storeA, templateId: published });
@@ -246,7 +246,7 @@ describe("immutability (D3, D16)", () => {
 describe("publication state (D3, D16)", () => {
   const state = async (id: string) => (await q<{ s: string }>("select public.template_publication_state($1) as s", [id]))[0].s;
 
-  it("moves draft > published > published_with_changes > draft (unpublish) and archived, without touching the other axis", async () => {
+  it("[AC-DB-019] moves draft > published > published_with_changes > draft (unpublish) and archived, without touching the other axis", async () => {
     await clean();
     const id = await mk("product", { draft: doc({ order: ["a"] }) });
     expect(await state(id)).toBe("draft");
@@ -273,7 +273,7 @@ describe("publication state (D3, D16)", () => {
     expect(await state("00000000-0000-0000-0000-000000000000")).toBeNull();
   });
 
-  it("a rollback publishes an older document and leaves the draft untouched", async () => {
+  it("[AC-DB-004] a rollback publishes an older document and leaves the draft untouched", async () => {
     await clean();
     const id = await mk("product", { draft: doc({ order: ["new"] }) });
     const v1 = await publish(db, { tenantId: tenantA, storeId: storeA, templateId: id, document: doc({ order: ["old"] }) });
@@ -291,7 +291,7 @@ describe("assignments: referential integrity (polymorphic)", () => {
   const assign = (templateId: string, target: { product?: string; collection?: string }, tenant = tenantA, store = storeA) =>
     q("insert into template_assignments (tenant_id, store_id, template_id, product_id, collection_id) values ($1,$2,$3,$4,$5)", [tenant, store, templateId, target.product ?? null, target.collection ?? null]);
 
-  it("links a product to a product template and a collection to a collection template, exactly one resource per row", async () => {
+  it("[AC-DB-008] links a product to a product template and a collection to a collection template, exactly one resource per row", async () => {
     await clean();
     const pt = await mk("product");
     const ct = await mk("collection");
@@ -303,7 +303,7 @@ describe("assignments: referential integrity (polymorphic)", () => {
     expect(await failure(assign(pt, {}))).toMatch(/template_assignments_(one_resource|kind_matches_resource)_check/);
   });
 
-  it("rejects a template of the wrong kind", async () => {
+  it("[AC-DB-008] rejects a template of the wrong kind", async () => {
     await clean();
     const pt = await mk("product");
     const ct = await mk("collection");
@@ -315,7 +315,7 @@ describe("assignments: referential integrity (polymorphic)", () => {
     expect(await failure(assign(theme, { collection: collectionA1 }))).toContain("template_assignments_kind_matches_resource_check");
   });
 
-  it("enforces tenant and store ownership of the resource and the template", async () => {
+  it("[AC-DB-008] [AC-DB-010] enforces tenant and store ownership of the resource and the template", async () => {
     await clean();
     const pt = await mk("product");
     const ptB = await insertTemplate(db, { tenantId: tenantB, storeId: storeB, kind: "product" });
@@ -323,18 +323,18 @@ describe("assignments: referential integrity (polymorphic)", () => {
     expect(await failure(assign(pt, { product: productB1 }))).toContain("template_assignments_product_fk");
     expect(await failure(assign(await mk("collection"), { collection: collectionB1 }))).toContain("template_assignments_collection_fk");
     // another tenant's template
-    expect(await failure(assign(ptB, { product: productA1 }))).toMatch(/null value|template_assignments_template_fk/);
+    expect(await failure(assign(ptB, { product: productA1 }))).toContain("template does not belong to this store");
     // claiming another tenant's ids for the store
-    expect(await failure(assign(pt, { product: productA1 }, tenantB, storeB))).toMatch(/template_assignments_product_fk|null value|template_assignments_template_fk/);
+    expect(await failure(assign(pt, { product: productA1 }, tenantB, storeB))).toContain("template does not belong to this store");
     // a second store of the same tenant: its template cannot be used for this store
     const [s2] = await q<{ id: string }>("insert into stores (tenant_id, name, slug) values ($1,'Second','second-store') returning id", [tenantA]);
     const ptS2 = await insertTemplate(db, { tenantId: tenantA, storeId: s2.id, kind: "product" });
-    expect(await failure(assign(ptS2, { product: productA1 }))).toMatch(/null value|template_assignments_template_fk/);
+    expect(await failure(assign(ptS2, { product: productA1 }))).toContain("template does not belong to this store");
     await assign(ptS2, { product: productA1 }, tenantA, s2.id); // but the same product may use it in that store
     expect((await q("select 1 from template_assignments")).length).toBe(1);
   });
 
-  it("allows one assignment per resource per store, and reassigning keeps the kind rule", async () => {
+  it("[AC-DB-008] allows one assignment per resource per store, and reassigning keeps the kind rule", async () => {
     await clean();
     const p1 = await mk("product");
     const p2 = await mk("product");
@@ -346,7 +346,7 @@ describe("assignments: referential integrity (polymorphic)", () => {
     expect(await failure(q("update template_assignments set template_id = $1 where product_id = $2", [c1, productA1]))).toContain("template_assignments_kind_matches_resource_check");
   });
 
-  it("deleting a product or collection deletes its assignment", async () => {
+  it("[AC-DB-008] deleting a product or collection deletes its assignment", async () => {
     await clean();
     const [extraProduct] = await q<{ id: string }>("insert into products (tenant_id, name, slug, price_minor, status) values ($1,'tmp','tmp',1,'active') returning id", [tenantA]);
     const [extraCollection] = await q<{ id: string }>("insert into collections (tenant_id, name, slug, status) values ($1,'tmp','tmp','active') returning id", [tenantA]);
@@ -357,7 +357,7 @@ describe("assignments: referential integrity (polymorphic)", () => {
     expect((await q("select 1 from template_assignments")).length).toBe(0);
   });
 
-  it("deleting a template is blocked while it has assignments; archiving keeps them", async () => {
+  it("[AC-DB-009] deleting a template is blocked while it has assignments; archiving keeps them", async () => {
     await clean();
     const pt = await mk("product");
     await assign(pt, { product: productA1 });
@@ -370,14 +370,14 @@ describe("assignments: referential integrity (polymorphic)", () => {
     await q("delete from templates where id = $1", [pt]);
   });
 
-  it("a template's kind cannot change while assignments depend on it", async () => {
+  it("[AC-DB-008] a template's kind cannot change while assignments depend on it", async () => {
     await clean();
     const pt = await mk("product");
     await assign(pt, { product: productA1 });
     expect(await failure(q("update templates set kind = 'collection' where id = $1", [pt]))).toContain("template_assignments_template_fk");
   });
 
-  it("deleting a store removes its templates, versions and assignments in one statement", async () => {
+  it("[AC-DB-001] deleting a store removes its templates, versions and assignments in one statement", async () => {
     const owner3 = await createUser(db, "gamma@example.test");
     const g = await onboard(db, owner3, "gamma-shop");
     const [pr] = await q<{ id: string }>("insert into products (tenant_id, name, slug, price_minor, status) values ($1,'gamma-prod','gamma-prod',1,'active') returning id", [g.tenant_id]);
@@ -397,7 +397,7 @@ describe("roles and RLS", () => {
       db.query("insert into templates (tenant_id, store_id, kind, name, draft) values ($1,$2,$3,'T',$4::jsonb) returning id", [tenant, store, kind, JSON.stringify(doc())]),
     );
 
-  it("Owner and Manager can create, edit, assign and publish; Staff can only read", async () => {
+  it("[AC-DB-013] Owner and Manager can create, edit, assign and publish; Staff can only read", async () => {
     await clean();
     for (const user of [owner, manager]) {
       const t = (await insertAs(user, tenantA, storeA)).rows[0] as { id: string };
@@ -412,7 +412,7 @@ describe("roles and RLS", () => {
     expect((await asUser(db, staff, () => db.query("select 1 from template_assignments"))).rows.length).toBe(2);
   });
 
-  it("Staff cannot insert, update, delete, publish or assign", async () => {
+  it("[AC-DB-013] Staff cannot insert, update, delete, publish or assign", async () => {
     await clean();
     const t = await mk("product");
     const v = await publish(db, { tenantId: tenantA, storeId: storeA, templateId: t });
@@ -425,7 +425,7 @@ describe("roles and RLS", () => {
     expect(v).toBeTruthy();
   });
 
-  it("anonymous callers have no table access", async () => {
+  it("[AC-DB-013] anonymous callers have no table access", async () => {
     await clean();
     await mk("product");
     for (const table of ["templates", "template_versions", "template_assignments"]) {
@@ -433,7 +433,7 @@ describe("roles and RLS", () => {
     }
   });
 
-  it("another tenant's Owner cannot read, write, publish or assign across tenants", async () => {
+  it("[AC-DB-010] another tenant's Owner cannot read, write, publish or assign across tenants", async () => {
     await clean();
     const t = await mk("product");
     const v = await publish(db, { tenantId: tenantA, storeId: storeA, templateId: t });
@@ -450,11 +450,11 @@ describe("roles and RLS", () => {
     expect(await failure(insertAs(ownerB, tenantB, storeA))).toMatch(/row-level security|templates_store_fk/);
     expect(await failure(asUser(db, ownerB, () => q("insert into template_versions (tenant_id, store_id, template_id, document, source) values ($1,$2,$3,$4::jsonb,'publish')", [tenantA, storeA, t, JSON.stringify(doc())])))).toContain("row-level security");
     expect(await failure(asUser(db, ownerB, () => q("insert into template_versions (tenant_id, store_id, template_id, document, source) values ($1,$2,$3,$4::jsonb,'publish')", [tenantB, storeB, t, JSON.stringify(doc())])))).toMatch(/row-level security|template_versions_template_fk/);
-    expect(await failure(asUser(db, ownerB, () => q("insert into template_assignments (tenant_id, store_id, template_id, product_id) values ($1,$2,$3,$4)", [tenantB, storeB, t, productB1])))).toMatch(/null value|row-level security|template_assignments_template_fk/);
+    expect(await failure(asUser(db, ownerB, () => q("insert into template_assignments (tenant_id, store_id, template_id, product_id) values ($1,$2,$3,$4)", [tenantB, storeB, t, productB1])))).toContain("template does not belong to this store");
     expect(v).toBeTruthy();
   });
 
-  it("identity columns cannot be changed by the app", async () => {
+  it("[AC-DB-013] identity columns cannot be changed by the app", async () => {
     await clean();
     const t = await mk("product");
     for (const col of ["tenant_id", "store_id", "kind"]) {
@@ -463,7 +463,7 @@ describe("roles and RLS", () => {
     expect(await failure(asUser(db, owner, () => q("update templates set created_at = now() where id = $1", [t])))).toContain("permission denied");
   });
 
-  it("a disabled membership or a suspended company loses write access", async () => {
+  it("[AC-DB-013] a disabled membership or a suspended company loses write access", async () => {
     await clean();
     await q("update memberships set status = 'disabled' where user_id = $1", [manager]);
     expect(await failure(insertAs(manager, tenantA, storeA))).toContain("row-level security");

@@ -1,13 +1,10 @@
-import { defineConfig } from "vitest/config";
-import path from "node:path";
+import { configDefaults, defineConfig } from "vitest/config";
+import { TIMING_TEST_FILES } from "./tests/timing-files";
+import { sharedAlias, sharedTimeouts } from "./vitest.shared";
 
 export default defineConfig({
   resolve: {
-    alias: {
-      "@": path.resolve(import.meta.dirname, "."),
-      // The real package throws outside the Next.js server runtime.
-      "server-only": path.resolve(import.meta.dirname, "tests/stubs/server-only.ts"),
-    },
+    alias: sharedAlias,
   },
   test: {
     environment: "node",
@@ -15,8 +12,8 @@ export default defineConfig({
     // workers so a typical dev machine is not starved of memory.
     maxWorkers: 3,
     include: ["tests/**/*.test.ts"],
-    testTimeout: 30_000,
-    hookTimeout: 60_000,
-    teardownTimeout: 60_000,
+    // Wall-clock budget files run serially via vitest.timing.config.mts.
+    exclude: [...configDefaults.exclude, ...TIMING_TEST_FILES],
+    ...sharedTimeouts,
   },
 });

@@ -1,4 +1,24 @@
-import { DOCUMENT_SCHEMA_VERSION, type ComponentNode, type TemplateDocument } from "./document";
+import type { TemplateDocument, TemplateKind } from "./document";
+
+import { classicPreset } from "./registry/presets/classic";
+import { spotlightPreset } from "./registry/presets/spotlight";
+import { productPreset } from "./registry/presets/product";
+import { collectionPreset } from "./registry/presets/collection";
+import { groupHeaderPreset } from "./registry/presets/group-header";
+import { groupFooterPreset } from "./registry/presets/group-footer";
+import { groupAnnouncementPreset } from "./registry/presets/group-announcement";
+import { themePreset } from "./registry/presets/theme";
+
+export {
+  classicPreset,
+  spotlightPreset,
+  productPreset,
+  collectionPreset,
+  groupHeaderPreset,
+  groupFooterPreset,
+  groupAnnouncementPreset,
+  themePreset,
+};
 
 /**
  * Code-defined homepage presets (D17). A preset is read-only; merchants get editable copies.
@@ -17,19 +37,15 @@ export type LegacyTemplateSettings = {
   heroImagePath: string | null;
 };
 
-const node = (type: string, settings: Record<string, unknown>): ComponentNode => ({ type, settings, blocks: {}, block_order: [] });
-
 export function isIndexPresetKey(key: unknown): key is IndexPresetKey {
   return typeof key === "string" && (INDEX_PRESET_KEYS as readonly string[]).includes(key);
 }
 
 export function indexPreset(key: IndexPresetKey): TemplateDocument {
-  return {
-    schemaVersion: DOCUMENT_SCHEMA_VERSION,
-    layout: key,
-    sections: { hero: node("hero", { variant: key }), products: node("product-grid", {}) },
-    order: ["hero", "products"],
-  };
+  if (key === "spotlight") {
+    return spotlightPreset;
+  }
+  return classicPreset;
 }
 
 const clean = (v: string | null | undefined) => {
@@ -62,4 +78,28 @@ export function applyLegacyToPreset(legacy: LegacyTemplateSettings): { name: str
       sections: { hero: { ...base.sections.hero, settings: hero }, products: { ...base.sections.products, settings: products } },
     },
   };
+}
+
+/**
+ * Returns the default preset document for a given template kind (D8, D17).
+ */
+export function getPresetDocument(kind: TemplateKind, key?: string): TemplateDocument | Record<string, unknown> {
+  switch (kind) {
+    case "index":
+      return key === "spotlight" ? spotlightPreset : classicPreset;
+    case "product":
+      return productPreset;
+    case "collection":
+      return collectionPreset;
+    case "group_header":
+      return groupHeaderPreset;
+    case "group_footer":
+      return groupFooterPreset;
+    case "group_announcement":
+      return groupAnnouncementPreset;
+    case "theme_settings":
+      return themePreset;
+    default:
+      return classicPreset;
+  }
 }

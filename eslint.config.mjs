@@ -12,6 +12,15 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated output (minified Playwright report bundles, traces, evidence logs), never source.
+    "artifacts/**",
+    "**/artifacts/**",
+    "test-results/**",
+    "**/test-results/**",
+    "playwright-report/**",
+    "**/playwright-report/**",
+    ".vitest/**",
+    "**/.vitest/**",
   ]),
 ]);
 

@@ -5,6 +5,7 @@ export * from "./profiles";
 export * from "./stores";
 export * from "./store-template-settings";
 export * from "./templates";
+export * from "./template-engine-cutover";
 export * from "./tenants";
 export * from "./catalog";
 export * from "./customers";

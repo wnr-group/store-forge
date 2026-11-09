@@ -72,7 +72,7 @@ beforeAll(async () => {
 afterAll(async () => db.close());
 
 describe("access", () => {
-  it("is executable by authenticated only, never by anon or public", async () => {
+  it("[AC-DB-016] is executable by authenticated only, never by anon or public", async () => {
     for (const fn of ["get_public_collections(text)", "get_public_collection(text,text)", "get_public_product(text,text)", "get_public_template_layout(text,text,text)"]) {
       const [r] = await q<{ anon: boolean; auth: boolean }>(`select has_function_privilege('anon','public.${fn}','execute') as anon, has_function_privilege('authenticated','public.${fn}','execute') as auth`);
       expect(r, fn).toEqual({ anon: false, auth: true });
@@ -312,7 +312,7 @@ describe("get_public_template_layout()", () => {
 });
 
 describe("get_public_storefront() is unchanged", () => {
-  it("still returns the V1 payload and ignores the new tables", async () => {
+  it("[AC-DB-017] still returns the V1 payload and ignores the new tables", async () => {
     const s = (await call<Record<string, unknown>>("public.get_public_storefront($1)", ["urban-nest"]))!;
     expect(Object.keys(s).sort()).toEqual(["currency", "description", "logo_path", "name", "products", "slug", "template"]);
     expect(s.template).toBeNull();
