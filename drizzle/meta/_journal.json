@@ -162,6 +162,20 @@
       "when": 1794300005000,
       "tag": "0022_admin_team_usage_support_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794300006000,
+      "tag": "0023_admin_rest_gate_and_rate_limits",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794300007000,
+      "tag": "0024_remove_support_notes_store_status_and_reserved_names",
+      "breakpoints": true
     }
   ]
 }

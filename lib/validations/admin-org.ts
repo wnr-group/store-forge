@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { STORE_STATUSES } from "@/lib/db/schema";
 import { passwordField } from "./auth";
 import { storeSettingsSchema } from "./catalog";
 import { emailField, optionalPhone, optionalText, requiredText } from "./fields";
@@ -21,8 +20,6 @@ export type UpdateCompanyInput = z.input<typeof updateCompanySchema>;
 export const updateStoreSchema = storeSettingsSchema.omit({ slug: true, logoPath: true });
 export type UpdateStoreInput = z.input<typeof updateStoreSchema>;
 
-/** Store status is independent of the organization's status. */
-export const storeStatusSchema = z.enum(STORE_STATUSES, { error: "Choose a store status." });
 
 export const memberStatusSchema = z.enum(["active", "disabled"], { error: "Choose a status." });
 

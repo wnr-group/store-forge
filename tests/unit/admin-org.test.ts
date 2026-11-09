@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { memberStatusSchema, recoverOwnerSchema, storeStatusSchema, transferOwnershipSchema, updateCompanySchema, updateStoreSchema } from "@/lib/validations/admin-org";
+import { memberStatusSchema, recoverOwnerSchema, transferOwnershipSchema, updateCompanySchema, updateStoreSchema } from "@/lib/validations/admin-org";
 
 const id = "3f2b1c9e-8a4d-4c1e-9f6a-2b7d5e8c1a40";
 
@@ -40,10 +40,8 @@ describe("edit store", () => {
   });
 });
 
-describe("statuses", () => {
-  it("allows only the store statuses the database has, and only active or disabled for members", () => {
-    for (const s of ["active", "inactive", "suspended"]) expect(storeStatusSchema.safeParse(s).success).toBe(true);
-    for (const s of ["deleted", "", null, undefined, "ACTIVE"]) expect(storeStatusSchema.safeParse(s).success, String(s)).toBe(false);
+describe("member status", () => {
+  it("allows only active or disabled for members", () => {
     for (const s of ["active", "disabled"]) expect(memberStatusSchema.safeParse(s).success).toBe(true);
     for (const s of ["removed", "suspended", "owner"]) expect(memberStatusSchema.safeParse(s).success, s).toBe(false);
   });

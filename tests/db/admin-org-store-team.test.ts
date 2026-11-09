@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { asUser, createDb, createPlatformAdmin, createUser, provision } from "./harness";
 
 /**
- * Platform Admin phase 2 (drizzle/0014): edit organization and store, store status, team member status and removal,
+ * Platform Admin organization and store editing, team member status and removal (drizzle/0014, with the removals in 0017),
  * and ownership change. Every function is called as an authenticated user, the way the app does.
  */
 let db: PGlite;
@@ -41,7 +41,6 @@ const updateStore = (user: string | null, over: Partial<Record<string, string | 
   const v = { name: "New Store", description: "A shop", email: "shop@example.test", phone: "+91 98765 43210", currency: "INR", tz: "Asia/Kolkata", ...over };
   return one<{ ok: boolean }>(user, "select public.platform_update_store($1,$2,$3,$4,$5,$6,$7,$8) as ok", [tenant, store, v.name, v.description, v.email, v.phone, v.currency, v.tz]);
 };
-const setStoreStatus = (user: string | null, status: string, tenant = tenantA, store = storeA) => one<{ ok: boolean }>(user, "select public.platform_set_store_status($1,$2,$3) as ok", [tenant, store, status]);
 const setMemberStatus = (user: string | null, target: string, status: string, tenant = tenantA) => one<{ ok: boolean }>(user, "select public.platform_set_member_status($1,$2,$3) as ok", [tenant, target, status]);
 const removeMember = (user: string | null, target: string, tenant = tenantA) => one<{ orphaned: boolean }>(user, "select public.platform_remove_member($1,$2) as orphaned", [tenant, target]);
 const assignOwner = (user: string | null, target: string, previous = "active", tenant = tenantA) =>
@@ -124,27 +123,6 @@ describe("store details and editing", () => {
     expect((await updateStore(admin, { name: "Cross tenant" }, tenantA, storeB)).ok).toBe(false);
     expect((await q<{ name: string }>("select name from stores where id=$1", [storeB]))[0].name).toBe("Beta Store");
     for (const user of [alice, mia, bob]) expect(await rejects(updateStore(user, { name: "Hacked" }))).toMatch(/not_platform_admin/);
-  });
-});
-
-describe("store status is separate from organization status", () => {
-  it("changes the store status without touching the organization, and the other way round", async () => {
-    for (const status of ["inactive", "suspended", "active"]) {
-      expect((await setStoreStatus(admin, status)).ok).toBe(true);
-      expect((await storeRow()).status).toBe(status);
-      expect((await tenantRow()).status).toBe("active");
-    }
-    await as(admin, () => q("select public.platform_set_tenant_status($1,'suspended')", [tenantA]));
-    expect((await tenantRow()).status).toBe("suspended");
-    expect((await storeRow()).status).toBe("active"); // suspending the organization did not touch the store
-    await as(admin, () => q("select public.platform_set_tenant_status($1,'active')", [tenantA]));
-  });
-
-  it("rejects unknown statuses, another organization's store and non-admins", async () => {
-    expect(await rejects(setStoreStatus(admin, "deleted"))).toMatch(/invalid_input/);
-    expect((await setStoreStatus(admin, "suspended", tenantA, storeB)).ok).toBe(false);
-    expect((await q<{ status: string }>("select status from stores where id=$1", [storeB]))[0].status).toBe("active");
-    for (const user of [alice, mia]) expect(await rejects(setStoreStatus(user, "suspended"))).toMatch(/not_platform_admin/);
   });
 });
 

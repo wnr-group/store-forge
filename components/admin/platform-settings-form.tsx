@@ -10,7 +10,6 @@ import { SectionCard } from "@/components/shared/section-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
-import { Textarea } from "@/components/ui/textarea";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { platformSettingsSchema } from "@/lib/validations/admin-platform";
 
@@ -20,10 +19,9 @@ export type SettingsView = {
   defaultCurrency: string;
   defaultTimezone: string;
   defaultStoreStatus: "active" | "inactive";
-  reservedSubdomains: string[];
 };
 
-type Props = { initial: SettingsView; builtIn: readonly string[]; canEdit: boolean; updatedLine: string | null };
+type Props = { initial: SettingsView; canEdit: boolean; updatedLine: string | null };
 
 // Intl.supportedValuesOf() differs between Node and the browser; the full lists are added only after hydration.
 const names = (kind: "currency" | "timeZone") => {
@@ -41,9 +39,9 @@ const subscribeNever = () => () => {};
 
 /**
  * Platform settings. Everyone with admin access can read them; only a super admin can change them (the server and database
- * both refuse anyone else). Reserved subdomains are added to the built-in list, which is shown read-only.
+ * both refuse anyone else).
  */
-export function PlatformSettingsForm({ initial, builtIn, canEdit, updatedLine }: Props) {
+export function PlatformSettingsForm({ initial, canEdit, updatedLine }: Props) {
   const router = useRouter();
   const start = {
     platformName: initial.platformName,
@@ -51,7 +49,6 @@ export function PlatformSettingsForm({ initial, builtIn, canEdit, updatedLine }:
     defaultCurrency: initial.defaultCurrency,
     defaultTimezone: initial.defaultTimezone,
     defaultStoreStatus: initial.defaultStoreStatus,
-    reservedSubdomains: initial.reservedSubdomains.join("\n"),
   };
   const [v, setV] = useState(start);
   const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
@@ -117,16 +114,6 @@ export function PlatformSettingsForm({ initial, builtIn, canEdit, updatedLine }:
               <option value="inactive">Inactive</option>
             </NativeSelect>
           </FormField>
-        </div>
-      </SectionCard>
-
-      <SectionCard title="Reserved store addresses" description="Names nobody can claim as a store address (the part before the platform domain). They are added to the built-in list below.">
-        <FormField id="ps-reserved" label="Additional reserved names" optional error={errors.reservedSubdomains} hint="One per line, or separated by commas. Lowercase letters, numbers and hyphens.">
-          <Textarea {...common("reservedSubdomains", "ps-reserved")} rows={5} spellCheck={false} />
-        </FormField>
-        <div>
-          <p className="text-xs font-medium text-muted-foreground">Built in (always reserved, cannot be removed)</p>
-          <p className="mt-1 text-xs leading-5 break-words text-muted-foreground">{builtIn.join(", ")}</p>
         </div>
       </SectionCard>
 

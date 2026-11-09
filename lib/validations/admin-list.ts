@@ -63,7 +63,3 @@ export const usageQuerySchema = z.object({
     .default(30),
 });
 export type UsageQuery = z.output<typeof usageQuerySchema>;
-
-/** Support page: search the organization name or the note text. */
-export const supportListQuerySchema = z.object({ q: text(80), page: page.default(1), pageSize: pageSize.default(DEFAULT_ADMIN_PAGE_SIZE) });
-export type SupportListQuery = z.output<typeof supportListQuerySchema>;

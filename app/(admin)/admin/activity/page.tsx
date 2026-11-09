@@ -8,7 +8,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROUTES } from "@/config/app";
-import { AUDIT_ACTION_LABELS, AUDIT_ACTIONS, type AuditAction } from "@/lib/admin/audit";
+import { AUDIT_ACTION_LABELS, AUDIT_ACTIONS, LEGACY_AUDIT_ACTION_LABELS, type AuditAction } from "@/lib/admin/audit";
 import { ADMIN_PAGE_SIZES, auditListQuerySchema } from "@/lib/validations/admin-list";
 import { listAuditAdmins, listAuditLogs, type AuditRow } from "@/services/admin-audit.service";
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Activity & Audit Logs" };
 
 const when = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
-const label = (action: string) => AUDIT_ACTION_LABELS[action as AuditAction] ?? action;
+const label = (action: string) => AUDIT_ACTION_LABELS[action as AuditAction] ?? LEGACY_AUDIT_ACTION_LABELS[action] ?? action;
 const tone = (action: string) =>
   action.endsWith(".removed") || action.endsWith(".suspended") || action.endsWith(".disabled")
     ? "warning"

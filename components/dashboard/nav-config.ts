@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, LifeBuoy, Package, Palette, PlusCircle, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, Package, Palette, PlusCircle, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -45,7 +45,6 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.adminTeam, label: "Platform Team", icon: ShieldCheck, group: "Platform" },
   { href: ROUTES.adminActivity, label: "Activity & Audit Logs", icon: ScrollText, group: "Platform" },
   { href: ROUTES.adminUsage, label: "Usage & Analytics", icon: BarChart3, group: "Platform" },
-  { href: ROUTES.adminSupport, label: "Support", icon: LifeBuoy, group: "Platform" },
   { href: ROUTES.adminSettings, label: "Platform Settings", icon: Settings, group: "Platform" },
   { href: ROUTES.adminAccount, label: "My Account", icon: KeyRound, group: "Account" },
 ];

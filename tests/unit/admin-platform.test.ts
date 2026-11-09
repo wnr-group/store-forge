@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { AUDIT_ACTIONS } from "@/lib/admin/audit";
+import { AUDIT_ACTIONS, LEGACY_AUDIT_ACTION_LABELS } from "@/lib/admin/audit";
 import { resolveSeriesRange } from "@/lib/admin/series";
 import { formatBytes } from "@/lib/utils/bytes";
-import { INACTIVE_DAY_OPTIONS, supportListQuerySchema, usageQuerySchema } from "@/lib/validations/admin-list";
-import { addPlatformAdminSchema, platformSettingsSchema, setPlatformAdminRoleSchema, supportNoteSchema } from "@/lib/validations/admin-platform";
+import { INACTIVE_DAY_OPTIONS, usageQuerySchema } from "@/lib/validations/admin-list";
+import { addPlatformAdminSchema, platformSettingsSchema, setPlatformAdminRoleSchema } from "@/lib/validations/admin-platform";
 
 const id = "3f2b1c9e-8a4d-4c1e-9f6a-2b7d5e8c1a40";
 
@@ -27,33 +27,11 @@ describe("platform admin schemas", () => {
   });
 });
 
-describe("support note schema", () => {
-  it("trims and limits the note", () => {
-    expect(supportNoteSchema.parse({ body: "  Called them back.  " })).toEqual({ body: "Called them back." });
-    for (const bad of [{ body: "" }, { body: "   " }, { body: "x".repeat(2001) }, {}]) expect(supportNoteSchema.safeParse(bad).success, JSON.stringify(bad).slice(0, 40)).toBe(false);
-    expect(supportNoteSchema.safeParse({ body: "x".repeat(2000) }).success).toBe(true);
-  });
-});
-
 describe("platform settings schema", () => {
-  const ok = { platformName: " Acme ", supportEmail: "", defaultCurrency: "usd", defaultTimezone: "Asia/Kolkata", defaultStoreStatus: "active", reservedSubdomains: "" };
+  const ok = { platformName: " Acme ", supportEmail: "", defaultCurrency: "usd", defaultTimezone: "Asia/Kolkata", defaultStoreStatus: "active" };
 
   it("normalises the values", () => {
-    expect(platformSettingsSchema.parse(ok)).toEqual({ platformName: "Acme", supportEmail: null, defaultCurrency: "USD", defaultTimezone: "Asia/Kolkata", defaultStoreStatus: "active", reservedSubdomains: [] });
-  });
-
-  it("turns a block of text into a clean, sorted, de-duplicated list of reserved names", () => {
-    const r = platformSettingsSchema.parse({ ...ok, reservedSubdomains: "Promo\n shop-now, promo ;  beta\n\n" });
-    expect(r.reservedSubdomains).toEqual(["beta", "promo", "shop-now"]);
-  });
-
-  it("names the reserved entries that could not be store addresses", () => {
-    const r = platformSettingsSchema.safeParse({ ...ok, reservedSubdomains: "good-one a x--y UPPER_case" });
-    expect(r.success).toBe(false);
-    const message = !r.success ? r.error.issues.map((i) => i.message).join(" ") : "";
-    expect(message).toMatch(/a, upper_case, x--y/); // sorted
-    expect(message).not.toMatch(/good-one/);
-    expect(platformSettingsSchema.safeParse({ ...ok, reservedSubdomains: Array.from({ length: 201 }, (_, i) => `name-${i}`).join(" ") }).success).toBe(false);
+    expect(platformSettingsSchema.parse(ok)).toEqual({ platformName: "Acme", supportEmail: null, defaultCurrency: "USD", defaultTimezone: "Asia/Kolkata", defaultStoreStatus: "active" });
   });
 
   it("rejects bad names, e-mails, currencies, timezones and store statuses", () => {
@@ -69,11 +47,6 @@ describe("usage query (from the URL)", () => {
     for (const d of INACTIVE_DAY_OPTIONS) expect(usageQuerySchema.parse({ inactive: String(d) }).inactive).toBe(d);
     for (const bad of ["7", "0", "abc", "-30", "3650"]) expect(usageQuerySchema.parse({ inactive: bad }).inactive, bad).toBe(30);
     expect(usageQuerySchema.parse({ from: "2026-01-01", to: "nope" })).toMatchObject({ from: "2026-01-01", to: "" });
-  });
-
-  it("support list: trims the search and pages", () => {
-    expect(supportListQuerySchema.parse({ q: "  acme ", page: "2", pageSize: "50" })).toEqual({ q: "acme", page: 2, pageSize: 50 });
-    expect(supportListQuerySchema.parse({ pageSize: "7" }).pageSize).toBe(20);
   });
 });
 
@@ -118,6 +91,13 @@ describe("byte sizes", () => {
 });
 
 describe("audit actions", () => {
+  it("keeps readable labels for removed actions whose old entries remain, and never offers them as filters", () => {
+    for (const legacy of ["support_note.created", "support_note.updated", "store.status_changed"]) {
+      expect(LEGACY_AUDIT_ACTION_LABELS[legacy], legacy).toMatch(/feature removed/);
+      expect(AUDIT_ACTIONS as readonly string[]).not.toContain(legacy);
+    }
+  });
+
   it("has a level-change action, and every action looks like entity.verb", () => {
     expect(AUDIT_ACTIONS).toContain("platform_admin.role_changed");
     for (const a of AUDIT_ACTIONS) expect(a, a).toMatch(/^[a-z_]+\.[a-z_]+$/);

@@ -10,5 +10,5 @@ export * from "./tenants";
 export * from "./catalog";
 export * from "./customers";
 export * from "./admin-audit";
-export * from "./admin-support";
 export * from "./platform-settings";
+export * from "./rate-limits";

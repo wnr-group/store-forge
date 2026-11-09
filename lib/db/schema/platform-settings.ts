@@ -6,8 +6,7 @@ import { boolean, check, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-c
  * read through get_platform_settings() (admins) or get_public_platform_settings() (name and support e-mail only),
  * written only by platform_update_settings() (super admins). Nothing secret belongs here.
  *
- * `reserved_subdomains` are ADDED to the built-in list in public.is_valid_store_slug(); the built-in names can never be
- * un-reserved. Defaults for currency, timezone and store status are applied when an organization is created.
+ * Defaults for currency, timezone and store status are applied when an organization is created.
  */
 export const platformSettings = pgTable(
   "platform_settings",
@@ -18,7 +17,6 @@ export const platformSettings = pgTable(
     defaultCurrency: text("default_currency").notNull().default("INR"),
     defaultTimezone: text("default_timezone").notNull().default("Asia/Kolkata"),
     defaultStoreStatus: text("default_store_status").notNull().default("active"),
-    reservedSubdomains: text("reserved_subdomains").array().notNull().default(sql`'{}'::text[]`),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     updatedBy: uuid("updated_by"),
   },
@@ -28,7 +26,6 @@ export const platformSettings = pgTable(
     check("platform_settings_support_email_check", sql`${t.supportEmail} is null or (char_length(${t.supportEmail}) <= 254 and position('@' in ${t.supportEmail}) > 1)`),
     check("platform_settings_currency_check", sql`${t.defaultCurrency} ~ '^[A-Z]{3}$'`),
     check("platform_settings_store_status_check", sql`${t.defaultStoreStatus} in ('active', 'inactive')`),
-    check("platform_settings_reserved_check", sql`cardinality(${t.reservedSubdomains}) <= 200 and public.is_valid_reserved_subdomains(${t.reservedSubdomains})`),
   ],
 ).enableRLS();
 

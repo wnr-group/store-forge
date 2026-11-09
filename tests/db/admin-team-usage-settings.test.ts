@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { asUser, createDb, createPlatformAdmin, createUser, onboard, provision } from "./harness";
 
 /**
- * Platform Admin management, usage analytics, support notes and platform settings (drizzle/0015).
+ * Platform Admin management, usage analytics and platform settings (drizzle/0015, with the removals in 0017).
  * Everything is called through the real SQL functions as an authenticated user, the way the app does.
  */
 let db: PGlite;
@@ -120,76 +120,6 @@ describe("platform admin levels", () => {
   });
 });
 
-describe("support notes", () => {
-  const add = (user: string | null, tenant: string, body: string) => one<{ id: string }>(user, "select public.platform_add_support_note($1,$2) as id", [tenant, body]);
-  const update = (user: string | null, id: string, body: string) => one<{ r: { tenant_id: string; previous_body: string } }>(user, "select public.platform_update_support_note($1,$2) as r", [id, body]);
-  type Note = { id: string; tenant_id: string; tenant_name: string; author_email: string; body: string; created_at: string; updated_at: string; total_count: string | number };
-  const list = (user: string | null, args: { tenant?: string | null; search?: string | null; limit?: number; offset?: number } = {}) =>
-    many<Note>(user, "select * from public.platform_list_support_notes($1,$2,$3,$4)", [args.tenant ?? null, args.search ?? null, args.limit ?? 20, args.offset ?? 0]);
-
-  it("adds a note with the author taken from the session, and lists it newest first", async () => {
-    const first = await add(boss, tenantA, "  Called about billing.  ");
-    await q("select pg_sleep(0.01)");
-    await add(helper, tenantA, "Second note");
-    const rows = await list(boss, { tenant: tenantA });
-    expect(rows.map((r) => r.body)).toEqual(["Second note", "Called about billing."]); // trimmed, newest first
-    expect(rows[1]).toMatchObject({ id: first.id, tenant_name: "Alpha Inc", author_email: "boss@example.test" });
-    expect(rows[0].author_email).toBe("helper@example.test");
-    expect(Number(rows[0].total_count)).toBe(2);
-  });
-
-  it("lets only the author edit a note, and returns the previous text for the audit entry", async () => {
-    const { id } = await add(boss, tenantB, "Original");
-    await q("select pg_sleep(0.01)");
-    const r = await update(boss, id, "Edited");
-    expect(r.r).toEqual({ tenant_id: tenantB, previous_body: "Original" });
-    const [row] = await list(boss, { tenant: tenantB });
-    expect(row.body).toBe("Edited");
-    expect(new Date(row.updated_at).getTime()).toBeGreaterThan(new Date(row.created_at).getTime());
-    expect(await rejects(update(helper, id, "Hijacked"))).toMatch(/not_note_author/);
-    expect(await rejects(update(second, id, "Hijacked by a super admin"))).toMatch(/not_note_author/);
-    expect((await list(boss, { tenant: tenantB }))[0].body).toBe("Edited");
-  });
-
-  it("rejects empty, over-long and misdirected notes", async () => {
-    expect(await rejects(add(boss, tenantA, "   "))).toMatch(/invalid_input/);
-    expect(await rejects(add(boss, tenantA, "x".repeat(2001)))).toMatch(/invalid_input/);
-    expect(await rejects(add(boss, crypto.randomUUID(), "Ghost org"))).toMatch(/not_found/);
-    expect(await rejects(update(boss, crypto.randomUUID(), "Ghost note"))).toMatch(/not_found/);
-    const { id } = await add(boss, tenantA, "Keep");
-    expect(await rejects(update(boss, id, ""))).toMatch(/invalid_input/);
-    expect((await list(boss, { tenant: tenantA })).find((n) => n.id === id)?.body).toBe("Keep");
-  });
-
-  it("searches the organization name and the note text, treating wildcards as plain characters, and pages", async () => {
-    await add(boss, tenantA, "Discount is 50% for the pilot");
-    expect((await list(boss, { search: "50%" })).map((n) => n.body)).toEqual(["Discount is 50% for the pilot"]);
-    expect((await list(boss, { search: "Beta Inc" })).every((n) => n.tenant_name === "Beta Inc")).toBe(true);
-    expect(await list(boss, { search: "zzz-no-match" })).toHaveLength(0);
-    const all = await list(boss, { limit: 100 });
-    const seen: string[] = [];
-    for (let offset = 0; offset < all.length; offset += 2) seen.push(...(await list(boss, { limit: 2, offset })).map((n) => n.id));
-    expect(new Set(seen).size).toBe(all.length);
-  });
-
-  it("is never visible to organizations: no direct access, no listing, no writing", async () => {
-    expect(await rejects(many(alice, "select * from organization_support_notes"))).toMatch(/permission denied/);
-    expect(await rejects(many(boss, "select * from organization_support_notes"))).toMatch(/permission denied/);
-    expect(await rejects(many(boss, "insert into organization_support_notes (tenant_id, author_id, author_email, body) values ($1,$2,'x','forged')", [tenantA, boss]))).toMatch(/permission denied/);
-    expect(await rejects(list(alice))).toMatch(/not_platform_admin/);
-    expect(await rejects(add(alice, tenantA, "Owner writing a note"))).toMatch(/not_platform_admin/);
-    expect(await rejects(update(alice, crypto.randomUUID(), "x"))).toMatch(/not_platform_admin/);
-  });
-
-  it("goes away with the organization it is about", async () => {
-    const t = (await onboard(db, await createUser(db, "short@example.test"), "short-lived")).tenant_id;
-    await add(boss, t, "Temporary");
-    expect((await q<{ n: number }>("select count(*)::int n from organization_support_notes where tenant_id=$1", [t]))[0].n).toBe(1);
-    await q("delete from tenants where id=$1", [t]);
-    expect((await q<{ n: number }>("select count(*)::int n from organization_support_notes where tenant_id=$1", [t]))[0].n).toBe(0);
-  });
-});
-
 describe("usage (aggregates only)", () => {
   type Usage = { products: string | number; customers: string | number; orders: string | number; storage_bytes: string | number | null; last_activity: string | null; created_at: string; status: string };
   const usage = (user: string | null, tenant: string) => one<Usage>(user, "select * from public.platform_tenant_usage($1)", [tenant]);
@@ -279,15 +209,15 @@ describe("usage (aggregates only)", () => {
 });
 
 describe("platform settings", () => {
-  type Settings = { platform_name: string; support_email: string | null; default_currency: string; default_timezone: string; default_store_status: string; reserved_subdomains: string[]; updated_by_email: string | null };
+  type Settings = { platform_name: string; support_email: string | null; default_currency: string; default_timezone: string; default_store_status: string; updated_by_email: string | null };
   const get = (user: string | null) => one<Settings>(user, "select * from public.get_platform_settings()");
-  const update = (user: string | null, over: Partial<{ name: string; email: string | null; currency: string; tz: string; status: string; reserved: string[] }> = {}) => {
-    const v = { name: "StoreForge", email: null as string | null, currency: "INR", tz: "Asia/Kolkata", status: "active", reserved: [] as string[], ...over };
-    return one<{ ok: boolean }>(user, "select public.platform_update_settings($1,$2,$3,$4,$5,$6::text[]) as ok", [v.name, v.email, v.currency, v.tz, v.status, v.reserved]);
+  const update = (user: string | null, over: Partial<{ name: string; email: string | null; currency: string; tz: string; status: string }> = {}) => {
+    const v = { name: "StoreForge", email: null as string | null, currency: "INR", tz: "Asia/Kolkata", status: "active", ...over };
+    return one<{ ok: boolean }>(user, "select public.platform_update_settings($1,$2,$3,$4,$5) as ok", [v.name, v.email, v.currency, v.tz, v.status]);
   };
 
   it("starts with the values that used to be hardcoded", async () => {
-    expect(await get(helper)).toMatchObject({ platform_name: "StoreForge", support_email: null, default_currency: "INR", default_timezone: "Asia/Kolkata", default_store_status: "active", reserved_subdomains: [] });
+    expect(await get(helper)).toMatchObject({ platform_name: "StoreForge", support_email: null, default_currency: "INR", default_timezone: "Asia/Kolkata", default_store_status: "active" });
     expect(await rejects(get(alice))).toMatch(/not_platform_admin/);
   });
 
@@ -297,15 +227,15 @@ describe("platform settings", () => {
   });
 
   it("is writable by a super admin only, and records who changed it", async () => {
-    expect((await update(boss, { name: "  Acme Commerce ", email: " help@acme.test ", currency: "usd", tz: "America/New_York", status: "inactive", reserved: ["Promo", " promo ", "shop-now", ""] })).ok).toBe(true);
-    expect(await get(boss)).toMatchObject({ platform_name: "Acme Commerce", support_email: "help@acme.test", default_currency: "USD", default_timezone: "America/New_York", default_store_status: "inactive", reserved_subdomains: ["promo", "shop-now"], updated_by_email: "boss@example.test" });
+    expect((await update(boss, { name: "  Acme Commerce ", email: " help@acme.test ", currency: "usd", tz: "America/New_York", status: "inactive" })).ok).toBe(true);
+    expect(await get(boss)).toMatchObject({ platform_name: "Acme Commerce", support_email: "help@acme.test", default_currency: "USD", default_timezone: "America/New_York", default_store_status: "inactive", updated_by_email: "boss@example.test" });
     for (const user of [helper, alice]) expect(await rejects(update(user, { name: "Hacked" }))).toMatch(/not_super_admin/);
     expect(await rejects(update(null, { name: "Hacked" }))).toMatch(/permission denied|not_super_admin/);
     expect((await get(boss)).platform_name).toBe("Acme Commerce");
   });
 
   it("rejects values it should not accept", async () => {
-    for (const over of [{ name: "A" }, { name: "x".repeat(61) }, { email: "not-an-email" }, { currency: "US" }, { currency: "" }, { tz: "Mars/Olympus" }, { status: "suspended" }, { reserved: ["a"] }, { reserved: ["bad slug"] }, { reserved: ["x--y"] }, { reserved: ["UPPER_case!"] }, { reserved: Array.from({ length: 201 }, (_, i) => `name-${i}`) }]) {
+    for (const over of [{ name: "A" }, { name: "x".repeat(61) }, { email: "not-an-email" }, { currency: "US" }, { currency: "" }, { tz: "Mars/Olympus" }, { status: "suspended" }]) {
       expect(await rejects(update(boss, over)), JSON.stringify(over).slice(0, 60)).toMatch(/invalid_input/);
     }
     expect((await get(boss)).platform_name).toBe("Acme Commerce");
@@ -318,17 +248,13 @@ describe("platform settings", () => {
     }
   });
 
-  it("reserves the admin-managed names on top of the built-in ones, and releases them again", async () => {
+  it("keeps the built-in reserved store addresses, and nothing else is reserved", async () => {
     const valid = (slug: string) => one<{ ok: boolean }>(alice, "select public.is_valid_store_slug($1) as ok", [slug]);
-    expect((await valid("promo")).ok).toBe(false); // from the settings above
-    expect((await valid("shop-now")).ok).toBe(false);
-    expect((await valid("admin")).ok).toBe(false); // built in
-    expect((await valid("fresh-name")).ok).toBe(true);
-    expect(await rejects(provision(db, boss, await createUser(db, "p@example.test"), "promo"))).toMatch(/invalid_slug/);
-    await update(boss, { name: "Acme Commerce", email: "help@acme.test", currency: "USD", tz: "America/New_York", status: "inactive", reserved: [] });
-    expect((await valid("promo")).ok).toBe(true);
-    expect((await valid("admin")).ok).toBe(false); // the built-in list can never shrink
-    await update(boss, { name: "Acme Commerce", email: "help@acme.test", currency: "USD", tz: "America/New_York", status: "inactive", reserved: ["promo"] });
+    for (const reserved of ["admin", "www", "api", "login", "dashboard", "storeforge"]) expect((await valid(reserved)).ok, reserved).toBe(false);
+    for (const free of ["promo", "shop-now", "fresh-name"]) expect((await valid(free)).ok, free).toBe(true);
+    expect(await rejects(provision(db, boss, await createUser(db, "p@example.test"), "admin"))).toMatch(/invalid_slug/);
+    // the settings no longer carry any list of reserved names
+    expect(Object.keys(await get(boss)).sort()).toEqual(["default_currency", "default_store_status", "default_timezone", "platform_name", "support_email", "updated_at", "updated_by_email"]);
   });
 
   it("starts new stores with the platform defaults, and leaves existing stores alone", async () => {

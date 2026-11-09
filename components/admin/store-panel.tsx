@@ -2,10 +2,9 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, PauseCircle, PlayCircle, Power } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { setCompanyStoreStatusAction, updateCompanyStoreAction } from "@/app/(admin)/admin/actions";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { updateCompanyStoreAction } from "@/app/(admin)/admin/actions";
 import { FormField } from "@/components/shared/form-field";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,7 @@ export type StoreView = {
   hasMoneyData: boolean;
 };
 
-type Props = { tenantId: string; store: StoreView; organizationStatus: "active" | "suspended"; storeUrl: string | null };
+type Props = { tenantId: string; store: StoreView; storeUrl: string | null };
 
 const STATUS_LABEL = { active: "Active", inactive: "Inactive", suspended: "Suspended" } as const;
 const STATUS_TONE = { active: "active", inactive: "draft", suspended: "warning" } as const;
@@ -46,57 +45,6 @@ let clientExtra: typeof NO_EXTRA | undefined;
 const getClientExtra = () => (clientExtra ??= { currencies: names("currency"), zones: names("timeZone") });
 const getServerExtra = () => NO_EXTRA;
 const subscribeNever = () => () => {};
-
-type Change = { status: Props["store"]["status"]; label: string; icon: typeof Power; description: string; variant: "default" | "outline" | "destructive" };
-
-/** What each status change does, in plain words. The organization's own status is never affected. */
-const changesFor = (current: StoreView["status"], orgStatus: Props["organizationStatus"]): Change[] => {
-  const note = `The organization stays ${orgStatus}; only the store changes.`;
-  const all: Change[] = [
-    { status: "active", label: "Activate store", icon: PlayCircle, variant: "default", description: `The storefront goes live again. ${note}` },
-    { status: "inactive", label: "Deactivate store", icon: Power, variant: "outline", description: `The storefront stops being shown, but nothing is deleted and the team can keep working. ${note}` },
-    { status: "suspended", label: "Suspend store", icon: PauseCircle, variant: "destructive", description: `The storefront is blocked as a platform action. Nothing is deleted. ${note}` },
-  ];
-  return all.filter((c) => c.status !== current);
-};
-
-function StoreStatusControl({ tenantId, store, organizationStatus }: Pick<Props, "tenantId" | "store" | "organizationStatus">) {
-  const router = useRouter();
-  const [pending, setPending] = useState<Change | null>(null);
-  return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-muted-foreground">Store status</span>
-        <StatusBadge tone={STATUS_TONE[store.status]}>{STATUS_LABEL[store.status]}</StatusBadge>
-        <span className="text-xs text-muted-foreground">
-          Organization: {organizationStatus === "active" ? "Active" : "Suspended"} (separate setting)
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {changesFor(store.status, organizationStatus).map((c) => (
-          <Button key={c.status} variant={c.variant} size="sm" onClick={() => setPending(c)}>
-            <c.icon aria-hidden /> {c.label}
-          </Button>
-        ))}
-      </div>
-      {pending ? (
-        <ConfirmDialog
-          open
-          onOpenChange={(o) => !o && setPending(null)}
-          title={`${pending.label}?`}
-          description={pending.description}
-          confirmLabel={pending.label}
-          successMessage="Store status updated"
-          onConfirm={async () => {
-            const res = await setCompanyStoreStatusAction(tenantId, pending.status);
-            if (res.ok) router.refresh();
-            return res;
-          }}
-        />
-      ) : null}
-    </div>
-  );
-}
 
 function EditStoreForm({ tenantId, store }: Pick<Props, "tenantId" | "store">) {
   const router = useRouter();
@@ -208,22 +156,27 @@ function EditStoreForm({ tenantId, store }: Pick<Props, "tenantId" | "store">) {
   );
 }
 
-/** Platform Admin: the organization's primary store. Status and details are separate actions with separate audit entries. */
-export function StorePanel({ tenantId, store, organizationStatus, storeUrl }: Props) {
+/** Platform Admin: the organization's primary store. Its details can be edited here; to take the store offline, suspend or delete the organization. */
+export function StorePanel({ tenantId, store, storeUrl }: Props) {
   return (
     <div className="space-y-5">
-      <div className="text-sm">
-        <span className="text-muted-foreground">Store address: </span>
-        {storeUrl ? (
-          <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
-            {storeUrl.replace(/^https?:\/\//, "")}
-          </a>
-        ) : (
-          <span>{store.slug}</span>
-        )}
-        <span className="text-muted-foreground"> (cannot be changed here)</span>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        <span>
+          <span className="text-muted-foreground">Store address: </span>
+          {storeUrl ? (
+            <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
+              {storeUrl.replace(/^https?:\/\//, "")}
+            </a>
+          ) : (
+            <span>{store.slug}</span>
+          )}
+          <span className="text-muted-foreground"> (cannot be changed here)</span>
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="text-muted-foreground">Store status:</span>
+          <StatusBadge tone={STATUS_TONE[store.status]}>{STATUS_LABEL[store.status]}</StatusBadge>
+        </span>
       </div>
-      <StoreStatusControl tenantId={tenantId} store={store} organizationStatus={organizationStatus} />
       <hr />
       <EditStoreForm key={`${store.name}|${store.description}|${store.contactEmail}|${store.contactPhone}|${store.currency}|${store.timezone}`} tenantId={tenantId} store={store} />
     </div>

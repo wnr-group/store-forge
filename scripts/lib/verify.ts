@@ -27,7 +27,7 @@ export type VerifyDeps = {
 };
 
 const TABLES = [
-  "profiles", "tenants", "memberships", "stores", "platform_admins", "admin_audit_logs", "organization_support_notes", "platform_settings",
+  "profiles", "tenants", "memberships", "stores", "platform_admins", "admin_audit_logs", "platform_settings", "rate_limits",
   "categories", "collections", "products", "product_images", "product_options", "product_variants",
   "collection_products", "inventory_adjustments", "customers", "orders", "order_items", "store_template_settings",
   "templates", "template_versions", "template_assignments",
@@ -80,28 +80,26 @@ const FUNCTIONS = {
     "public.platform_update_tenant(uuid,text,text,text)",
     "public.platform_get_tenant_store(uuid)",
     "public.platform_update_store(uuid,uuid,text,text,text,text,text,text)",
-    "public.platform_set_store_status(uuid,uuid,text)",
     "public.platform_set_member_status(uuid,uuid,text)",
     "public.platform_remove_member(uuid,uuid)",
     "public.platform_assign_owner(uuid,uuid,text)",
+    "public.rate_limit_admin(text,integer,integer)",
+    "public.rate_limit_login(text,text)",
+    "public.is_valid_member_permissions(jsonb)",
     "public.is_super_admin()",
     "public.platform_admin_role()",
     "public.platform_list_admins()",
     "public.platform_add_admin(uuid,text)",
     "public.platform_set_admin_role(uuid,text)",
     "public.platform_remove_admin(uuid)",
-    "public.platform_add_support_note(uuid,text)",
-    "public.platform_update_support_note(uuid,text)",
-    "public.platform_list_support_notes(uuid,text,integer,integer)",
     "public.platform_tenant_usage(uuid)",
     "public.platform_usage_page(text,text,text,integer,integer)",
     "public.platform_usage_summary(integer)",
     "public.platform_inactive_organizations(integer,integer,integer)",
     "public.platform_new_organizations_series(date,date,text)",
-    "public.is_valid_reserved_subdomains(text[])",
     "public.get_platform_settings()",
     "public.get_public_platform_settings()",
-    "public.platform_update_settings(text,text,text,text,text,text[])",
+    "public.platform_update_settings(text,text,text,text,text)",
     "public.platform_set_tenant_status(uuid,text)",
     "public.is_platform_admin()",
     "public.list_tenant_team(uuid)",
@@ -120,7 +118,7 @@ const FUNCTIONS = {
     "public.storage_path_tenant(text)",
     "public.can_write_storage_object(text)",
   ],
-  nobody: ["public.handle_new_user()", "public.block_platform_admin_membership()", "public.audit_redact(jsonb)", "public.admin_audit_logs_immutable()", "public.tenant_storage_bytes(uuid)", "public.tenant_has_activity_since(uuid,timestamptz)", "public.tenant_last_activity(uuid)"],
+  nobody: ["public.handle_new_user()", "public.block_platform_admin_membership()", "public.audit_redact(jsonb)", "public.admin_audit_logs_immutable()", "public.set_updated_at()", "public.tenant_storage_bytes(uuid)", "public.tenant_has_activity_since(uuid,timestamptz)", "public.tenant_last_activity(uuid)"],
 };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -344,6 +342,12 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       "select prosecdef as definer, prosrc as body from pg_proc where oid = 'public.platform_provision_tenant(uuid,text,text,text,text,text,text)'::regprocedure",
     );
     assert(r.definer && /is_platform_admin\(\)/.test(r.body), "platform_provision_tenant() must be SECURITY DEFINER and check is_platform_admin()");
+  });
+
+  await check("admin-rest-gate", "admin checks refuse the REST API's login role (admin powers exist only on the application's own connection)", async () => {
+    const rows = await admin<{ f: string; gated: boolean }>(`select p.proname as f, pg_get_functiondef(p.oid) like '%session_user <> ''authenticator''%' as gated
+      from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('is_platform_admin','is_super_admin','platform_admin_role') order by 1`);
+    eq(rows.map((r) => [r.f, r.gated]), [["is_platform_admin", true], ["is_super_admin", true], ["platform_admin_role", true]], "REST gate present in");
   });
 
   await check("platform-admins-private", "platform_admins is unreachable for anon, authenticated and storeforge_app (no grants, no policies)", async () => {
@@ -650,13 +654,13 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_audit()`)), "an owner reading the audit log", /not_platform_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_tenants_page()`)), "an owner listing organizations", /not_platform_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_overview_stats()`)), "an owner reading the platform overview", /not_platform_admin/);
-      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.organization_support_notes`)), "an owner reading support notes", /permission denied/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.rate_limit_admin('org.create', 10, 600)`)), "an owner using the admin rate limiter", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.rate_limits`)), "an owner reading the rate limit counters", /permission denied/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_settings`)), "an owner reading the platform settings table", /permission denied/);
-      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_support_notes()`)), "an owner listing support notes", /not_platform_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_usage_summary(30)`)), "an owner reading platform usage", /not_platform_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.get_platform_settings()`)), "an owner reading the admin settings", /not_platform_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_add_admin(${a}::uuid, 'super_admin')`)), "an owner making themselves a Platform Admin", /not_super_admin/);
-      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_update_settings('Evil', null, 'INR', 'UTC', 'active', '{}'::text[])`)), "an owner changing the platform settings", /not_super_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_update_settings('Evil', null, 'INR', 'UTC', 'active')`)), "an owner changing the platform settings", /not_super_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_update_tenant(${tenantA}::uuid, 'Renamed by owner', null, null)`)), "an owner editing their own organization through the admin function", /not_platform_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_assign_owner(${tenantA}::uuid, ${a}::uuid, 'active')`)), "an owner changing ownership through the admin function", /not_platform_admin/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_remove_member(${tenantA}::uuid, ${a}::uuid)`)), "an owner using the admin member removal", /not_platform_admin/);

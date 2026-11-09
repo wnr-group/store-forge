@@ -430,31 +430,6 @@ export async function updateCompanyStore(tenantId: string, v: StoreEdit): Promis
   }
 }
 
-/** Activates, deactivates or suspends the store. The organization's own status is not touched. */
-export async function setCompanyStoreStatus(tenantId: string, status: StoreDetails["status"]): Promise<void> {
-  await requirePlatformAdmin();
-  try {
-    await withAuthenticatedDb(async (tx) => {
-      const store = await fetchStore(tx, tenantId);
-      if (!store) throw new AppError("NOT_FOUND", "This organization does not have a store.");
-      if (store.status === status) return;
-      const rows = rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.platform_set_store_status(${tenantId}::uuid, ${store.id}::uuid, ${status}) as ok`));
-      if (rows[0]?.ok !== true) throw new AppError("NOT_FOUND", "This organization does not have a store.");
-      await recordAudit(tx, {
-        action: "store.status_changed",
-        entityType: "store",
-        entityId: store.id,
-        organizationId: tenantId,
-        description: `Changed store "${store.name}" from ${store.status} to ${status}`,
-        previous: { status: store.status },
-        next: { status },
-      });
-    });
-  } catch (error) {
-    return mapProvisioningError(error);
-  }
-}
-
 const findMember = (team: TeamMemberRow[], userId: string) => {
   const m = team.find((t) => t.userId === userId);
   if (!m) throw new AppError("NOT_FOUND", "That team member was not found.");

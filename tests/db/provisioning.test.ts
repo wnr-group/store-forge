@@ -90,12 +90,10 @@ import {
   removeCompanyMember,
   setCompanyMemberStatus,
   setCompanyStatus,
-  setCompanyStoreStatus,
   transferCompanyOwnership,
   updateCompany,
   updateCompanyStore,
 } from "@/services/platform.service";
-import { addSupportNote, listSupportNotes, updateSupportNote } from "@/services/platform-support.service";
 import { addPlatformAdmin, listPlatformAdmins, removePlatformAdmin, setPlatformAdminRole } from "@/services/platform-team.service";
 import { getPlatformSettings, getPublicBranding, updatePlatformSettings } from "@/services/platform-settings.service";
 import { getNewOrganizationsSeries, getOrganizationUsage, getUsageSummary, listInactiveOrganizations, listOrganizationUsage } from "@/services/platform-usage.service";
@@ -479,7 +477,7 @@ describe("Platform Admin phase 2 (service): organization, store, team and owners
     await expect(as(admin, () => updateCompany(crypto.randomUUID(), { companyName: "Ghost", contactPhone: null, address: null }))).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
 
-  it("edits the store, locks the currency once prices exist, and keeps store status apart from organization status", async () => {
+  it("edits the store and locks the currency once prices exist", async () => {
     const { tenantId } = await newOrg("edit-store", "store@owner.test");
     const store = (await as(admin, () => getCompany(tenantId)))!.store!;
     expect(store).toMatchObject({ name: "Gamma Store", currency: "INR", status: "active", hasMoneyData: false });
@@ -488,19 +486,11 @@ describe("Platform Admin phase 2 (service): organization, store, team and owners
     await as(admin, () => edit({ name: "Gamma Shop", currency: "USD", timezone: "America/New_York", contactEmail: "hi@gamma.test" }));
     expect((await q<Record<string, string>>("select name, currency, timezone, contact_email from stores where id = $1", [store.id]))[0]).toEqual({ name: "Gamma Shop", currency: "USD", timezone: "America/New_York", contact_email: "hi@gamma.test" });
 
-    await as(admin, () => setCompanyStoreStatus(tenantId, "suspended"));
-    expect((await q<{ status: string }>("select status from tenants where id = $1", [tenantId]))[0].status).toBe("active"); // organization untouched
-    await as(admin, () => setCompanyStoreStatus(tenantId, "suspended")); // unchanged: no entry
-    await as(admin, () => setCompanyStoreStatus(tenantId, "active"));
-
     await q("insert into products (tenant_id, name, slug, price_minor) values ($1,'Tee','tee',100)", [tenantId]);
     await expect(as(admin, () => edit({ name: "Gamma Shop", currency: "EUR", timezone: "America/New_York" }))).rejects.toMatchObject({ code: "VALIDATION", fieldErrors: { currency: expect.any(String) } });
     await expect(as(admin, () => edit({ name: "Gamma Shop", timezone: "Mars/Olympus" }))).rejects.toMatchObject({ code: "VALIDATION" });
 
-    const actions = (await logFor(tenantId)).map((r) => r.action);
-    expect(actions).toEqual(["store.updated", "store.status_changed", "store.status_changed"]);
-    const statusRows = (await logFor(tenantId)).filter((r) => r.action === "store.status_changed");
-    expect(statusRows[0]).toMatchObject({ previous_data: { status: "active" }, new_data: { status: "suspended" } });
+    expect((await logFor(tenantId)).map((r) => r.action)).toEqual(["store.updated"]); // the two refused edits wrote nothing
   });
 
   it("disables, reactivates and removes members, logs each with the e-mail, and never touches the owner", async () => {
@@ -598,7 +588,6 @@ describe("Platform Admin phase 2 (service): organization, store, team and owners
       const attempts: Array<() => Promise<unknown>> = [
         () => updateCompany(tenantA, { companyName: "Hacked", contactPhone: null, address: null }),
         () => updateCompanyStore(tenantA, store),
-        () => setCompanyStoreStatus(tenantA, "suspended"),
         () => setCompanyMemberStatus(tenantA, manager, "disabled"),
         () => removeCompanyMember(tenantA, manager),
         () => transferCompanyOwnership(tenantA, { userId: manager, previousOwner: "keep" }),
@@ -611,7 +600,7 @@ describe("Platform Admin phase 2 (service): organization, store, team and owners
   });
 });
 
-describe("platform admins, support notes, settings and usage (service)", () => {
+describe("platform admins, settings and usage (service)", () => {
   let limited: string; // a Platform Admin who is not a super admin
   type AuditRow = { action: string; description: string; previous_data: Record<string, unknown> | null; new_data: Record<string, unknown> | null };
   const lastAudit = async (action: string) =>
@@ -700,52 +689,23 @@ describe("platform admins, support notes, settings and usage (service)", () => {
   });
 
   it("changes settings as a super admin only, logs what changed, and shows the public name without a session", async () => {
-    const base = { platformName: "StoreForge", supportEmail: null, defaultCurrency: "INR", defaultTimezone: "Asia/Kolkata", defaultStoreStatus: "active" as const, reservedSubdomains: [] as string[] };
+    const base = { platformName: "StoreForge", supportEmail: null, defaultCurrency: "INR", defaultTimezone: "Asia/Kolkata", defaultStoreStatus: "active" as const };
     const before = await countAudit("platform_settings.updated");
     await as(admin, () => updatePlatformSettings({ ...base })); // nothing changed
     expect(await countAudit("platform_settings.updated")).toBe(before);
 
-    await as(admin, () => updatePlatformSettings({ ...base, platformName: "Acme Commerce", supportEmail: "help@acme.test", reservedSubdomains: ["promo"] }));
+    await as(admin, () => updatePlatformSettings({ ...base, platformName: "Acme Commerce", supportEmail: "help@acme.test" }));
     const row = await lastAudit("platform_settings.updated");
-    expect(row.description).toBe("Updated platform settings: platformName, supportEmail, reservedSubdomains");
-    expect(row).toMatchObject({ previous_data: { platformName: "StoreForge", supportEmail: null, reservedSubdomains: [] }, new_data: { platformName: "Acme Commerce", supportEmail: "help@acme.test", reservedSubdomains: ["promo"] } });
+    expect(row.description).toBe("Updated platform settings: platformName, supportEmail");
+    expect(row).toMatchObject({ previous_data: { platformName: "StoreForge", supportEmail: null }, new_data: { platformName: "Acme Commerce", supportEmail: "help@acme.test" } });
     expect(await as(null, () => getPublicBranding())).toEqual({ platformName: "Acme Commerce", supportEmail: "help@acme.test" });
-    expect((await as(limited, () => getPlatformSettings())).reservedSubdomains).toEqual(["promo"]); // any admin can read
+    expect((await as(limited, () => getPlatformSettings())).platformName).toBe("Acme Commerce"); // any admin can read
 
     for (const user of [limited, alice]) await expect(as(user, () => updatePlatformSettings({ ...base, platformName: "Hacked" }))).rejects.toMatchObject({ code: "FORBIDDEN" });
     await expect(as(alice, () => getPlatformSettings())).rejects.toMatchObject({ code: "FORBIDDEN" });
     expect((await as(admin, () => getPlatformSettings())).platformName).toBe("Acme Commerce");
     await as(admin, () => updatePlatformSettings({ ...base })); // restore
     expect(await as(null, () => getPublicBranding())).toEqual({ platformName: "StoreForge", supportEmail: null });
-  });
-
-  it("keeps support notes private, lets only the author edit, and logs the facts but never the text", async () => {
-    const { tenantId } = await as(admin, () => createCompany(company("notes-shop", "notes@owner.test")));
-    const original = "Customer asked about invoices; secret-token-123";
-    const revised = "Customer asked about invoices; resolved";
-    await as(admin, () => addSupportNote(tenantId, `  ${original}  `));
-    const mine = await as(admin, () => listSupportNotes({ tenantId, page: 1, pageSize: 10 }));
-    expect(mine.total).toBe(1);
-    expect(mine.notes[0]).toMatchObject({ body: original, authorEmail: "platform.admin@example.test", canEdit: true, edited: false });
-    const theirs = await as(limited, () => listSupportNotes({ tenantId, page: 1, pageSize: 10 }));
-    expect(theirs.notes[0].canEdit).toBe(false);
-    const noteId = mine.notes[0].id;
-
-    await expect(as(limited, () => updateSupportNote(noteId, "Hijacked"))).rejects.toMatchObject({ code: "FORBIDDEN" });
-    await as(admin, () => updateSupportNote(noteId, revised));
-    await as(admin, () => updateSupportNote(noteId, revised)); // unchanged: no entry
-    expect((await as(admin, () => listSupportNotes({ tenantId, page: 1, pageSize: 10 }))).notes[0].body).toBe(revised);
-
-    const entries = await q<AuditRow>("select action, description, previous_data, new_data from admin_audit_logs where organization_id = $1 and action like 'support_note.%' order by created_at, id", [tenantId]);
-    expect(entries.map((e) => e.action)).toEqual(["support_note.created", "support_note.updated"]);
-    expect(entries[1]).toMatchObject({ description: "Edited a support note", previous_data: { length: original.length }, new_data: { length: revised.length } });
-    expect(JSON.stringify(entries)).not.toMatch(/secret-token|invoices/); // the text itself is never copied into the log
-
-    await expect(as(alice, () => addSupportNote(tenantId, "Owner trying to write"))).rejects.toMatchObject({ code: "FORBIDDEN" });
-    await expect(as(alice, () => listSupportNotes({ page: 1, pageSize: 10 }))).rejects.toMatchObject({ code: "FORBIDDEN" });
-    await expect(as(admin, () => addSupportNote(crypto.randomUUID(), "Ghost"))).rejects.toMatchObject({ code: "NOT_FOUND" });
-    // the notes never reach the organization's own view of the data
-    expect(await q("select 1 from admin_audit_logs where description ilike '%invoices%'")).toHaveLength(0);
   });
 
   it("reports usage as totals, clamps a page past the end, and refuses non-admins", async () => {

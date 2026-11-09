@@ -1,3 +1,4 @@
+import { describeError, logEvent } from "@/lib/observability/log";
 import type { ActionResult } from "@/types/action";
 
 export type AppErrorCode =
@@ -37,6 +38,7 @@ export function toFailure(error: unknown): Extract<ActionResult, { ok: false }> 
   if (error instanceof AppError) {
     return { ok: false, error: error.message, code: error.code, fieldErrors: error.fieldErrors };
   }
-  console.error("[unhandled]", error);
+  // Logged without bound SQL parameters, tokens, connection strings or e-mail addresses (see lib/observability/log.ts).
+  logEvent("error", "unhandled", { error: describeError(error) });
   return { ok: false, error: GENERIC_MESSAGE, code: "UNKNOWN" };
 }

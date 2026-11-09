@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/shared/page-header";
 import { PlatformSettingsForm } from "@/components/admin/platform-settings-form";
-import { RESERVED_SLUGS } from "@/config/app";
 import { getPlatformAdminLevel } from "@/lib/auth/platform";
 import { getPlatformSettings } from "@/services/platform-settings.service";
 
@@ -19,7 +18,6 @@ export default async function PlatformSettingsPage() {
         // remount with fresh values after a save
         key={`${settings.updatedAt.getTime()}`}
         canEdit={level === "super_admin"}
-        builtIn={RESERVED_SLUGS}
         updatedLine={`Last changed ${when.format(settings.updatedAt)}${settings.updatedByEmail ? ` by ${settings.updatedByEmail}` : ""}.`}
         initial={{
           platformName: settings.platformName,
@@ -27,7 +25,6 @@ export default async function PlatformSettingsPage() {
           defaultCurrency: settings.defaultCurrency,
           defaultTimezone: settings.defaultTimezone,
           defaultStoreStatus: settings.defaultStoreStatus,
-          reservedSubdomains: settings.reservedSubdomains,
         }}
       />
     </>

@@ -22,8 +22,6 @@ export type PlatformSettingsView = {
   defaultCurrency: string;
   defaultTimezone: string;
   defaultStoreStatus: "active" | "inactive";
-  /** Added to the built-in reserved list; the built-in names can never be removed. */
-  reservedSubdomains: string[];
   updatedAt: Date;
   updatedByEmail: string | null;
 };
@@ -34,7 +32,6 @@ const raw = z.object({
   default_currency: z.string(),
   default_timezone: z.string(),
   default_store_status: z.enum(["active", "inactive"]),
-  reserved_subdomains: z.array(z.string()),
   updated_at: z.union([z.string(), z.date()]),
   updated_by_email: z.string().nullable(),
 });
@@ -45,7 +42,6 @@ const toView = (r: z.infer<typeof raw>): PlatformSettingsView => ({
   defaultCurrency: r.default_currency,
   defaultTimezone: r.default_timezone,
   defaultStoreStatus: r.default_store_status,
-  reservedSubdomains: r.reserved_subdomains,
   updatedAt: new Date(r.updated_at),
   updatedByEmail: r.updated_by_email,
 });
@@ -81,8 +77,6 @@ export const getPublicBranding = cache(async (): Promise<PublicBranding> => {
 
 type Next = z.output<typeof platformSettingsSchema>;
 
-const same = (a: string[], b: string[]) => a.length === b.length && a.every((v, i) => v === b[i]);
-
 /** Super admins only. Nothing is written (or logged) when nothing changed; the audit entry lists what did. */
 export async function updatePlatformSettings(v: Next): Promise<void> {
   await requireSuperAdmin();
@@ -103,10 +97,9 @@ export async function updatePlatformSettings(v: Next): Promise<void> {
       note("defaultCurrency", before.defaultCurrency, v.defaultCurrency);
       note("defaultTimezone", before.defaultTimezone, v.defaultTimezone);
       note("defaultStoreStatus", before.defaultStoreStatus, v.defaultStoreStatus);
-      note("reservedSubdomains", before.reservedSubdomains, v.reservedSubdomains, same(before.reservedSubdomains, v.reservedSubdomains));
       if (changed.length === 0) return;
       await tx.execute(sql`select public.platform_update_settings(
-        ${v.platformName}, ${v.supportEmail}, ${v.defaultCurrency}, ${v.defaultTimezone}, ${v.defaultStoreStatus}, ARRAY(SELECT jsonb_array_elements_text(${JSON.stringify(v.reservedSubdomains)}::jsonb)))`);
+        ${v.platformName}, ${v.supportEmail}, ${v.defaultCurrency}, ${v.defaultTimezone}, ${v.defaultStoreStatus})`);
       await recordAudit(tx, {
         action: "platform_settings.updated",
         entityType: "platform_settings",

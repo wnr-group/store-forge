@@ -32,7 +32,7 @@ export type AdminView = {
 const LEVELS = { super_admin: "Super admin", admin: "Admin" } as const;
 const LEVEL_HINT = {
   super_admin: "Can do everything, including adding and removing admins and editing the platform settings.",
-  admin: "Can manage organizations, stores, teams and support notes. Cannot manage other admins or the platform settings.",
+  admin: "Can manage organizations, stores and teams. Cannot manage other admins or the platform settings.",
 } as const;
 
 const when = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
