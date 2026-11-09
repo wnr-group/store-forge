@@ -4,14 +4,14 @@ import { Container, Section } from "./ui";
 
 /** Centralised category data. Add `image` to show a photo (a missing one shows "Image Coming Soon"). */
 const CATEGORIES: IndustryCategory[] = [
-  { name: "Electronics", text: "Gadgets, computers, smartphones and accessories.", image: "/landing/cat-electronics.webp", alt: "A laptop, smartphone, tablet, camera, headphones and smart speaker on a dark desk", position: "50% 50%" },
-  { name: "Fashion & Clothing", text: "Apparel, footwear and fashion accessories.", image: "/landing/cat-fashion.webp", alt: "A blazer, folded shirts, jeans, suede shoes and a straw hat laid out on white", position: "50% 45%" },
-  { name: "Medicine & Healthcare", text: "Pharmacy, wellness and healthcare products.", image: "/landing/cat-medicine.webp", alt: "Medicine bottles beside a miniature shopping cart filled with blister packs", position: "68% 50%" },
-  { name: "Beauty & Skincare", text: "Cosmetics, skincare and personal care.", image: "/landing/cat-beauty.webp", alt: "Skincare serums and creams displayed on white pedestals against a purple backdrop", position: "50% 55%" },
-  { name: "Groceries & Food", text: "Fresh produce, packaged food and daily essentials.", image: "/landing/cat-groceries.webp", alt: "Fresh vegetables, fruit, bread and packaged food arranged on a stone surface", position: "50% 50%" },
-  { name: "Home & Furniture", text: "Furniture, home decor and household products.", image: "/landing/cat-home.webp", alt: "An upholstered chair beside a wooden stool with a glass lamp, in front of a wood-slat wall", position: "32% 50%" },
-  { name: "Sports & Fitness", text: "Fitness equipment, sportswear and accessories.", image: "/landing/cat-sports.webp", alt: "Dumbbells, a foam block and a rolled yoga mat on a wooden floor", position: "55% 50%" },
-  { name: "Toys & Lifestyle", text: "Toys, games and lifestyle products.", image: "/landing/cat-toys.webp", alt: "A plush unicorn, puzzles, a play tent and wooden toys on a light blue backdrop", position: "50% 50%" },
+  { name: "Electronics", text: "Gadgets, computers, smartphones and accessories.", image: "/landing/industry-electronics.webp", alt: "A laptop, smartphone, tablet, camera, smartwatch, earbuds, headphones and smart speaker on a desk", position: "50% 50%" },
+  { name: "Fashion & Clothing", text: "Apparel, footwear and fashion accessories.", image: "/landing/industry-fashion.webp", alt: "A rack of hoodies and jackets beside a leather backpack, sneakers, a cap, sunglasses and folded knitwear", position: "58% 50%" },
+  { name: "Medicine & Healthcare", text: "Pharmacy, wellness and healthcare products.", image: "/landing/industry-medicine.webp", alt: "A first-aid kit, medicine bottles, tablets, a face mask, thermometer and stethoscope on a marble counter", position: "76% 50%" },
+  { name: "Beauty & Skincare", text: "Cosmetics, skincare and personal care.", image: "/landing/industry-beauty.webp", alt: "Makeup brushes, lipstick, serums, creams and bottles beside a rolled towel and a pink rose", position: "52% 50%" },
+  { name: "Groceries & Food", text: "Fresh produce, packaged food and daily essentials.", image: "/landing/industry-groceries.webp", alt: "A basket of fresh vegetables and fruit with bread, milk, eggs, pasta, lentils and oats", position: "50% 50%" },
+  { name: "Home & Furniture", text: "Furniture, home decor and household products.", image: "/landing/industry-home.webp", alt: "A living room with a sofa, armchair, wooden coffee table, wall art, shelves and cushions", position: "50% 50%" },
+  { name: "Sports & Fitness", text: "Fitness equipment, sportswear and accessories.", image: "/landing/industry-sports.webp", alt: "A yoga mat, dumbbells, running shoes, a water bottle, a training shirt and a gym bag", position: "50% 50%" },
+  { name: "Toys & Lifestyle", text: "Toys, games and lifestyle products.", image: "/landing/industry-toys.webp", alt: "A teddy bear, wooden blocks, a toy robot, a red toy car, a game controller, headphones and a backpack", position: "38% 50%" },
 ];
 
 export function Industries() {

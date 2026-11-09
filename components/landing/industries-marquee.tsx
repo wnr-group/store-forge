@@ -15,7 +15,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 function IndustryCard({ c, index }: { c: IndustryCategory; index: number }) {
   return (
     <article className="group relative aspect-[3/4] w-[17.5rem] shrink-0 overflow-hidden rounded-2xl border border-lp-border bg-lp-soft sm:w-80">
-      {c.image ? <CategoryImage src={c.image} alt={c.alt} sizes="(min-width: 640px) 320px, 280px" position={c.position} eager /> : <ImagePlaceholder />}
+      {c.image ? <CategoryImage src={c.image} alt={c.alt} sizes="(min-width: 640px) 760px, 660px" position={c.position} eager /> : <ImagePlaceholder />}
       {c.image ? <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/75 via-black/30 to-transparent" /> : null}
       <span className="absolute top-4 left-4 rounded-full bg-white px-3 py-1 text-xs font-medium text-lp-heading tabular-nums shadow-sm">{pad(index + 1)}</span>
       <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
