@@ -14,6 +14,7 @@ export const ROUTES = {
   adminCompanies: "/admin/companies",
   adminNewCompany: "/admin/companies/new",
   adminAccount: "/admin/account",
+  adminActivity: "/admin/activity",
   dashboard: "/dashboard",
   products: "/dashboard/products",
   categories: "/dashboard/categories",

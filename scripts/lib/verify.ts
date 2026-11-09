@@ -27,7 +27,7 @@ export type VerifyDeps = {
 };
 
 const TABLES = [
-  "profiles", "tenants", "memberships", "stores", "platform_admins",
+  "profiles", "tenants", "memberships", "stores", "platform_admins", "admin_audit_logs",
   "categories", "collections", "products", "product_images", "product_options", "product_variants",
   "collection_products", "inventory_adjustments", "customers", "orders", "order_items", "store_template_settings",
   "templates", "template_versions", "template_assignments",
@@ -72,6 +72,11 @@ const FUNCTIONS = {
     "public.platform_delete_tenant(uuid)",
     "public.has_module_access(uuid,text,text)",
     "public.platform_list_tenants(uuid)",
+    "public.platform_list_tenants_page(text,text,text,integer,integer)",
+    "public.platform_overview_stats()",
+    "public.platform_record_audit(text,text,uuid,uuid,text,jsonb,jsonb)",
+    "public.platform_list_audit(text,uuid,uuid,text,timestamptz,timestamptz,integer,integer)",
+    "public.platform_audit_admins()",
     "public.platform_set_tenant_status(uuid,text)",
     "public.is_platform_admin()",
     "public.list_tenant_team(uuid)",
@@ -90,7 +95,7 @@ const FUNCTIONS = {
     "public.storage_path_tenant(text)",
     "public.can_write_storage_object(text)",
   ],
-  nobody: ["public.handle_new_user()", "public.block_platform_admin_membership()"],
+  nobody: ["public.handle_new_user()", "public.block_platform_admin_membership()", "public.audit_redact(jsonb)", "public.admin_audit_logs_immutable()"],
 };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -615,6 +620,11 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`update public.tenants set status = 'active' where id = ${tenantA}`)), "an owner editing tenants.status", /permission denied/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_admins`)), "an owner reading platform_admins", /permission denied/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`insert into public.platform_admins (user_id) values (${a})`)), "an owner making themselves Platform Admin", /permission denied/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.admin_audit_logs`)), "an owner reading admin_audit_logs", /permission denied/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_record_audit('organization.updated', 'organization', null, null, 'forged entry')`)), "an owner writing an audit entry", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_audit()`)), "an owner reading the audit log", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_tenants_page()`)), "an owner listing organizations", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_overview_stats()`)), "an owner reading the platform overview", /not_platform_admin/);
       await denied(
         withUserContext(app, a, (tx) => tx.execute(sql`insert into public.memberships (tenant_id, user_id, role) values (${tenantA}, ${p}, 'staff')`)),
         "an owner adding the Platform Admin to their team",

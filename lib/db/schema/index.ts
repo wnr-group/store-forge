@@ -9,3 +9,4 @@ export * from "./template-engine-cutover";
 export * from "./tenants";
 export * from "./catalog";
 export * from "./customers";
+export * from "./admin-audit";

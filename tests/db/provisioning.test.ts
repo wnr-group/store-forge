@@ -79,7 +79,7 @@ vi.mock("@/lib/supabase/admin", () => ({
 }));
 
 import { dbSchema, type Database } from "@/lib/db";
-import { createCompany, deleteCompany, listCompanies } from "@/services/platform.service";
+import { addCompanyMember, createCompany, deleteCompany, getPlatformOverview, listCompaniesPage, setCompanyStatus } from "@/services/platform.service";
 import { createMember, listTeam, removeMember, resetMemberPassword, setMemberStatus, updateMember } from "@/services/team.service";
 
 let pg: PGlite;
@@ -98,6 +98,8 @@ const as = async <T>(user: string | null, fn: () => Promise<T>, cookie?: string)
 };
 const calls = (fn: string) => h.adminCalls.filter((c) => c.fn === fn);
 const q = <T = Record<string, unknown>>(sql: string, params: unknown[] = []) => privileged(async (p) => (await p.query<T>(sql, params)).rows);
+
+const ALL_ORGS = { q: "", status: "all", sort: "created", dir: "desc", page: 1, pageSize: 100 } as const;
 
 const company = (slug: string, email: string) => ({
   companyName: "Gamma Trading", storeName: "Gamma Store", storeSlug: slug, storeDescription: null, contactPhone: null, address: null,
@@ -182,9 +184,9 @@ describe("createCompany (Platform Admin)", () => {
   });
 
   it("lists companies for the admin only", async () => {
-    const list = await as(admin, () => listCompanies());
+    const list = (await as(admin, () => listCompaniesPage(ALL_ORGS))).items;
     expect(list.map((c) => c.storeSlug)).toEqual(expect.arrayContaining(["alpha-shop", "beta-shop", "gamma-shop"]));
-    await expect(as(alice, () => listCompanies())).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(alice, () => listCompaniesPage(ALL_ORGS))).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });
 
@@ -356,5 +358,79 @@ describe("deleteCompany (Platform Admin)", () => {
     expect(await q("select 1 from tenants where id = $1", [tenantA])).toHaveLength(1);
     expect(calls("deleteUser")).toHaveLength(0);
     expect(h.storageCalls).toHaveLength(0);
+  });
+});
+
+describe("audit trail for Platform Admin actions", () => {
+  type Row = { action: string; admin_user_id: string; organization_id: string | null; organization_name: string | null; description: string; previous_data: Record<string, unknown> | null; new_data: Record<string, unknown> | null };
+  const logFor = (orgId: string) => q<Row>("select action, admin_user_id, organization_id, organization_name, description, previous_data, new_data from admin_audit_logs where organization_id = $1 order by created_at, id", [orgId]);
+
+  it("records organization creation once, with the administrator, and no password", async () => {
+    const res = await as(admin, () => createCompany(company("audited-shop", "audited@owner.test")));
+    const rows = await logFor(res.tenantId);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ action: "organization.created", admin_user_id: admin, organization_name: "Gamma Trading" });
+    expect(rows[0].new_data).toMatchObject({ name: "Gamma Trading", storeSlug: "audited-shop", ownerEmail: "audited@owner.test" });
+    expect(JSON.stringify(rows[0])).not.toMatch(/initial-pass|password/i);
+  });
+
+  it("records suspension and reactivation with the status before and after, and nothing when nothing changed", async () => {
+    const { tenantId } = await as(admin, () => createCompany(company("status-shop", "status@owner.test")));
+    await as(admin, () => setCompanyStatus(tenantId, "suspended"));
+    await as(admin, () => setCompanyStatus(tenantId, "suspended")); // already suspended: no second entry
+    await as(admin, () => setCompanyStatus(tenantId, "active"));
+    const rows = (await logFor(tenantId)).filter((r) => r.action !== "organization.created");
+    expect(rows.map((r) => r.action)).toEqual(["organization.suspended", "organization.reactivated"]);
+    expect(rows[0]).toMatchObject({ previous_data: { status: "active" }, new_data: { status: "suspended" } });
+    expect(rows[1]).toMatchObject({ previous_data: { status: "suspended" }, new_data: { status: "active" } });
+  });
+
+  it("records an added team member with their permissions but never the password", async () => {
+    const { tenantId } = await as(admin, () => createCompany(company("member-shop", "member@owner.test")));
+    await as(admin, () =>
+      addCompanyMember(tenantId, { fullName: "Mia Member", email: "mia@member.test", password: "super-secret-pass-1", permissions: READ_ONLY }),
+    );
+    const row = (await logFor(tenantId)).find((r) => r.action === "team_member.added");
+    expect(row).toMatchObject({ description: "Added team member mia@member.test", new_data: { email: "mia@member.test", fullName: "Mia Member", permissions: READ_ONLY } });
+    expect(JSON.stringify(row)).not.toMatch(/super-secret|password/i);
+  });
+
+  it("writes nothing when the action fails, and ordinary users cannot act or log", async () => {
+    const before = (await q<{ n: number }>("select count(*)::int n from admin_audit_logs"))[0].n;
+    await expect(as(admin, () => setCompanyStatus(crypto.randomUUID(), "suspended"))).rejects.toMatchObject({ code: "NOT_FOUND" });
+    await expect(as(alice, () => setCompanyStatus(tenantA, "suspended"))).rejects.toBeDefined();
+    await expect(as(alice, () => addCompanyMember(tenantA, { fullName: "No Way", email: "noway@x.test", password: "initial-pass-1", permissions: READ_ONLY }))).rejects.toBeDefined();
+    expect((await q<{ n: number }>("select count(*)::int n from admin_audit_logs"))[0].n).toBe(before);
+    expect(await q("select 1 from tenants where id = $1 and status = 'active'", [tenantA])).toHaveLength(1);
+  });
+
+  it("deleting an organization is unchanged and does not touch the audit log", async () => {
+    const { tenantId } = await as(admin, () => createCompany(company("short-lived", "short@owner.test")));
+    const before = (await logFor(tenantId)).length;
+    await as(admin, () => deleteCompany(tenantId));
+    expect(await q("select 1 from tenants where id = $1", [tenantId])).toHaveLength(0);
+    expect((await logFor(tenantId)).length).toBe(before); // its earlier entries survive, none was added
+  });
+});
+
+describe("paged organization list and overview (service)", () => {
+  it("returns a page with the total, clamps a page past the end, and is admin-only", async () => {
+    const first = await as(admin, () => listCompaniesPage({ q: "", status: "all", sort: "created", dir: "desc", page: 1, pageSize: 10 }));
+    expect(first.items.length).toBeLessThanOrEqual(10);
+    expect(first.total).toBeGreaterThanOrEqual(first.items.length);
+    const past = await as(admin, () => listCompaniesPage({ q: "", status: "all", sort: "created", dir: "desc", page: 999, pageSize: 10 }));
+    expect(past.page).toBe(Math.max(1, Math.ceil(first.total / 10)));
+    expect(past.items.length).toBeGreaterThan(0);
+    const found = await as(admin, () => listCompaniesPage({ q: "member-shop", status: "all", sort: "name", dir: "asc", page: 1, pageSize: 10 }));
+    expect(found.items.map((c) => c.storeSlug)).toEqual(["member-shop"]);
+    await expect(as(alice, () => listCompaniesPage({ q: "", status: "all", sort: "created", dir: "desc", page: 1, pageSize: 10 }))).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("computes the overview counts in the database", async () => {
+    const o = await as(admin, () => getPlatformOverview());
+    const counts = (await q<{ total: number; active: number; suspended: number }>("select count(*)::int total, count(*) filter (where status='active')::int active, count(*) filter (where status='suspended')::int suspended from tenants"))[0];
+    expect([o.totalOrganizations, o.active, o.suspended]).toEqual([counts.total, counts.active, counts.suspended]);
+    expect(o.recent.length).toBeLessThanOrEqual(5);
+    await expect(as(alice, () => getPlatformOverview())).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });

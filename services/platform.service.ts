@@ -3,11 +3,13 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { deleteUserQuietly, createConfirmedUser } from "@/lib/auth/provisioning";
 import { requirePlatformAdmin } from "@/lib/auth/platform";
-import { withAuthenticatedDb } from "@/lib/db/tenant-db";
+import { withAuthenticatedDb, type DbTx } from "@/lib/db/tenant-db";
 import { rowsOf } from "@/lib/db/user-context";
 import { errorChain } from "@/lib/db/errors";
 import { AppError } from "@/lib/errors";
 import { removeTenantObjects } from "@/lib/storage/server";
+import { recordAudit } from "@/services/admin-audit.service";
+import type { OrgListQuery } from "@/lib/validations/admin-list";
 import { listTeamRows, type TeamMemberRow } from "@/services/team.service";
 import type { CreateCompanyValues } from "@/lib/validations/company";
 import type { CreateMemberInput } from "@/lib/validations/team";
@@ -81,7 +83,7 @@ const provisionResult = z.object({ tenant_id: z.uuid(), store_id: z.uuid(), stor
  * platform_provision_tenant(). The function itself re-checks that the caller is a Platform Admin.
  * Idempotent for the same owner and store slug, so it is safe to retry.
  */
-export async function createTenantRecords(ownerId: string, v: CreateCompanyValues) {
+export async function createTenantRecords(ownerId: string, v: CreateCompanyValues, ownerEmail?: string) {
   try {
     return await withAuthenticatedDb(async (tx) => {
       const rows = rowsOf<{ result: unknown }>(
@@ -89,7 +91,19 @@ export async function createTenantRecords(ownerId: string, v: CreateCompanyValue
           ${ownerId}::uuid, ${v.companyName}, ${v.storeName}, ${v.storeSlug},
           ${v.storeDescription}, ${v.contactPhone}, ${v.address}) as result`),
       );
-      return provisionResult.parse(rows[0]?.result);
+      const result = provisionResult.parse(rows[0]?.result);
+      // Logged in the same transaction. A retry of an already created company (created = false) adds no second entry.
+      if (result.created) {
+        await recordAudit(tx, {
+          action: "organization.created",
+          entityType: "organization",
+          entityId: result.tenant_id,
+          organizationId: result.tenant_id,
+          description: `Created organization "${v.companyName}" with store "${v.storeName}"`,
+          next: { name: v.companyName, storeName: v.storeName, storeSlug: result.store_slug, ownerEmail: ownerEmail ?? null },
+        });
+      }
+      return result;
     });
   } catch (error) {
     return mapProvisioningError(error);
@@ -125,14 +139,14 @@ export async function createCompany(v: CreateCompanyValues) {
 
   let records: Awaited<ReturnType<typeof createTenantRecords>>;
   try {
-    records = await createTenantRecords(owner.id, v);
+    records = await createTenantRecords(owner.id, v, owner.email);
   } catch (first) {
     if (first instanceof AppError) {
       await deleteUserQuietly(owner.id);
       throw first;
     }
     try {
-      records = await createTenantRecords(owner.id, v);
+      records = await createTenantRecords(owner.id, v, owner.email);
     } catch {
       const removed = await deleteUserQuietly(owner.id);
       console.error("[createCompany] provisioning failed", { ownerId: owner.id, authUserRemoved: removed, error: errorChain(first) });
@@ -142,11 +156,58 @@ export async function createCompany(v: CreateCompanyValues) {
   return { tenantId: records.tenant_id, storeId: records.store_id, ownerId: owner.id, ownerEmail: owner.email };
 }
 
-export async function listCompanies(): Promise<CompanySummary[]> {
-  await requirePlatformAdmin();
-  return withAuthenticatedDb(async (tx) =>
-    rowsOf<CompanyRaw>(await tx.execute(sql`select * from public.platform_list_tenants(null)`)).map(toCompany),
+export type CompanyPage = { items: CompanySummary[]; total: number; page: number; pageSize: number };
+
+type CompanyPageRaw = CompanyRaw & { total_count: string | number | bigint };
+
+type PageArgs = Pick<OrgListQuery, "q" | "status" | "sort" | "dir"> & { pageSize: number };
+
+const orgSort = (q: Pick<OrgListQuery, "sort" | "dir">) => `${q.sort}_${q.dir}`;
+
+async function fetchCompanyPage(tx: DbTx, q: PageArgs, page: number) {
+  return rowsOf<CompanyPageRaw>(
+    await tx.execute(sql`select * from public.platform_list_tenants_page(
+      ${q.q || null}, ${q.status === "all" ? null : q.status}, ${orgSort(q)}, ${q.pageSize}, ${(page - 1) * q.pageSize})`),
   );
+}
+
+/**
+ * One page of organizations. Search, status filter, sorting and paging all run in PostgreSQL
+ * (platform_list_tenants_page), so only `pageSize` rows ever leave the database.
+ */
+export async function listCompaniesPage(q: OrgListQuery): Promise<CompanyPage> {
+  await requirePlatformAdmin();
+  return withAuthenticatedDb(async (tx) => {
+    let page = q.page;
+    let raw = await fetchCompanyPage(tx, q, page);
+    if (raw.length === 0 && page > 1) {
+      // A page past the end (an old link, or rows were removed): show the last real page instead of an empty one.
+      const first = await fetchCompanyPage(tx, q, 1);
+      page = Math.max(1, Math.ceil(Number(first[0]?.total_count ?? 0) / q.pageSize));
+      raw = page === 1 ? first : await fetchCompanyPage(tx, q, page);
+    }
+    return { items: raw.map(toCompany), total: Number(raw[0]?.total_count ?? 0), page, pageSize: q.pageSize };
+  });
+}
+
+export type PlatformOverview = { totalOrganizations: number; active: number; suspended: number; totalUsers: number; recent: CompanySummary[] };
+
+/** The overview numbers, counted in SQL, plus the five newest organizations. Nothing is loaded just to be counted. */
+export async function getPlatformOverview(): Promise<PlatformOverview> {
+  await requirePlatformAdmin();
+  return withAuthenticatedDb(async (tx) => {
+    const [stats] = rowsOf<{ total_tenants: string | number; active_tenants: string | number; suspended_tenants: string | number; total_users: string | number }>(
+      await tx.execute(sql`select * from public.platform_overview_stats()`),
+    );
+    const recent = await fetchCompanyPage(tx, { q: "", status: "all", sort: "created", dir: "desc", pageSize: 5 }, 1);
+    return {
+      totalOrganizations: Number(stats?.total_tenants ?? 0),
+      active: Number(stats?.active_tenants ?? 0),
+      suspended: Number(stats?.suspended_tenants ?? 0),
+      totalUsers: Number(stats?.total_users ?? 0),
+      recent: recent.map(toCompany),
+    };
+  });
 }
 
 export async function getCompany(tenantId: string): Promise<{ company: CompanySummary; team: TeamMemberRow[] } | null> {
@@ -162,8 +223,22 @@ export async function getCompany(tenantId: string): Promise<{ company: CompanySu
 export async function setCompanyStatus(tenantId: string, status: "active" | "suspended"): Promise<void> {
   await requirePlatformAdmin();
   const found = await withAuthenticatedDb(async (tx) => {
+    const [before] = rowsOf<CompanyRaw>(await tx.execute(sql`select * from public.platform_list_tenants(${tenantId}::uuid)`));
+    if (!before) return false;
     const rows = rowsOf<{ ok: boolean }>(await tx.execute(sql`select public.platform_set_tenant_status(${tenantId}::uuid, ${status}) as ok`));
-    return rows[0]?.ok === true;
+    if (rows[0]?.ok !== true) return false;
+    if (before.status !== status) {
+      await recordAudit(tx, {
+        action: status === "suspended" ? "organization.suspended" : "organization.reactivated",
+        entityType: "organization",
+        entityId: tenantId,
+        organizationId: tenantId,
+        description: `${status === "suspended" ? "Suspended" : "Reactivated"} organization "${before.name}"`,
+        previous: { status: before.status },
+        next: { status },
+      });
+    }
+    return true;
   });
   if (!found) throw new AppError("NOT_FOUND", "Organization not found.");
 }
@@ -203,7 +278,18 @@ export async function addCompanyMember(tenantId: string, v: CreateMemberInput) {
   await requirePlatformAdmin();
   const user = await createConfirmedUser({ email: v.email, password: v.password, fullName: v.fullName });
   try {
-    await withAuthenticatedDb((tx) => tx.execute(sql`select public.platform_add_member(${tenantId}::uuid, ${user.id}::uuid, ${JSON.stringify(v.permissions)}::jsonb)`));
+    await withAuthenticatedDb(async (tx) => {
+      await tx.execute(sql`select public.platform_add_member(${tenantId}::uuid, ${user.id}::uuid, ${JSON.stringify(v.permissions)}::jsonb)`);
+      // Same transaction as the membership, so a member never exists without its log entry. No password is logged.
+      await recordAudit(tx, {
+        action: "team_member.added",
+        entityType: "team_member",
+        entityId: user.id,
+        organizationId: tenantId,
+        description: `Added team member ${user.email}`,
+        next: { email: user.email, fullName: v.fullName, permissions: v.permissions },
+      });
+    });
   } catch (error) {
     await deleteUserQuietly(user.id);
     return mapProvisioningError(error);

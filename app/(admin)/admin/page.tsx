@@ -6,19 +6,17 @@ import { SectionCard } from "@/components/shared/section-card";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ROUTES } from "@/config/app";
-import { listCompanies } from "@/services/platform.service";
+import { getPlatformOverview } from "@/services/platform.service";
 
 export const metadata: Metadata = { title: "Platform overview" };
 
 export default async function AdminOverviewPage() {
-  const companies = await listCompanies();
-  const suspended = companies.filter((c) => c.status === "suspended").length;
-  const accounts = companies.reduce((n, c) => n + c.memberCount, 0);
+  const overview = await getPlatformOverview();
   const stats = [
-    { label: "Organizations", value: companies.length, icon: Building2 },
-    { label: "Active", value: companies.length - suspended, icon: Building2 },
-    { label: "Suspended", value: suspended, icon: PauseCircle },
-    { label: "User accounts", value: accounts, icon: Users },
+    { label: "Organizations", value: overview.totalOrganizations, icon: Building2 },
+    { label: "Active", value: overview.active, icon: Building2 },
+    { label: "Suspended", value: overview.suspended, icon: PauseCircle },
+    { label: "User accounts", value: overview.totalUsers, icon: Users },
   ];
 
   return (
@@ -46,11 +44,11 @@ export default async function AdminOverviewPage() {
         ))}
       </div>
       <SectionCard title="Recently created" className="mt-6">
-        {companies.length === 0 ? (
+        {overview.recent.length === 0 ? (
           <p className="text-sm text-muted-foreground">No organizations yet. Create the first one to onboard its owner.</p>
         ) : (
           <ul className="divide-y">
-            {companies.slice(0, 5).map((c) => (
+            {overview.recent.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-3 py-2 text-sm">
                 <Link href={`${ROUTES.adminCompanies}/${c.id}`} className="font-medium hover:underline">{c.name}</Link>
                 <span className="truncate text-muted-foreground">{c.ownerEmail ?? "No owner"}</span>

@@ -8,13 +8,16 @@ import { NativeSelect } from "@/components/ui/native-select";
 
 export type FilterDef = { key: string; label: string; options: { value: string; label: string }[] };
 
-type Props = { searchPlaceholder: string; filters?: FilterDef[]; sortOptions?: { value: string; label: string }[] };
+/** A date picker bound to a query parameter holding a `YYYY-MM-DD` value. */
+export type DateFilterDef = { key: string; label: string };
+
+type Props = { searchPlaceholder: string; filters?: FilterDef[]; dateFilters?: DateFilterDef[]; sortOptions?: { value: string; label: string }[] };
 
 /**
  * URL-driven filters: every change rewrites the query string (resetting to page 1), and the
  * server component re-renders with the new results. Nothing is filtered in the browser.
  */
-export function ListFilters({ searchPlaceholder, filters = [], sortOptions }: Props) {
+export function ListFilters({ searchPlaceholder, filters = [], dateFilters = [], sortOptions }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -63,6 +66,12 @@ export function ListFilters({ searchPlaceholder, filters = [], sortOptions }: Pr
             ))}
           </NativeSelect>
         </div>
+      ))}
+      {dateFilters.map((f) => (
+        <label key={f.key} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <span>{f.label}</span>
+          <Input type="date" aria-label={f.label} value={params.get(f.key) ?? ""} onChange={(e) => push({ [f.key]: e.target.value })} className="w-auto" />
+        </label>
       ))}
       {sortOptions ? (
         <div className="w-auto min-w-36 sm:ml-auto">
