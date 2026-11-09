@@ -29,7 +29,8 @@ export type VerifyDeps = {
 const TABLES = [
   "profiles", "tenants", "memberships", "stores", "platform_admins",
   "categories", "collections", "products", "product_images", "product_options", "product_variants",
-  "collection_products", "inventory_adjustments", "customers", "orders", "order_items",
+  "collection_products", "inventory_adjustments", "customers", "orders", "order_items", "store_template_settings",
+  "templates", "template_versions", "template_assignments",
 ] as const;
 
 const EXPECTED_POLICIES = [
@@ -49,6 +50,10 @@ const EXPECTED_POLICIES = [
   "profiles_select_own", "profiles_update_own", "stores_delete_owner", "stores_insert_admins",
   "stores_select_members", "stores_update_admins", "tenants_delete_owner", "tenants_select_members",
   "tenants_update_admins",
+  "store_template_settings_insert_admins", "store_template_settings_select_members", "store_template_settings_update_admins",
+  "templates_select_members", "templates_insert_admins", "templates_update_admins", "templates_delete_never_published",
+  "template_versions_select_members", "template_versions_insert_admins",
+  "template_assignments_select_members", "template_assignments_insert_admins", "template_assignments_update_admins", "template_assignments_delete_admins",
 ].sort();
 
 const FUNCTIONS = {
@@ -61,6 +66,11 @@ const FUNCTIONS = {
     "public.update_team_member_name(uuid,uuid,text)",
     "public.remove_team_member(uuid,uuid)",
     "public.get_public_storefront(text)",
+    "public.get_public_collections(text)",
+    "public.get_public_collection(text,text)",
+    "public.get_public_product(text,text)",
+    "public.get_public_template_layout(text,text,text)",
+    "public.template_publication_state(uuid)",
     "public.is_store_slug_available(text)",
     "public.is_valid_store_slug(text)",
     "public.is_tenant_member(uuid)",
@@ -202,6 +212,39 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       upd_product_tenant: false, upd_variant_tenant: false, upd_customer_tenant: false,
       orders_write: false, order_items_write: false, ledger_rewrite: false, products_dml: true,
     }, "catalog privileges");
+  });
+
+  await check("template-settings-grants", "template settings: anon has no access, identity columns are immutable, nothing can be deleted", async () => {
+    const [r] = await admin<Record<string, boolean>>(`select
+      has_table_privilege('anon','public.store_template_settings','select,insert,update,delete') as anon_any,
+      has_table_privilege('authenticated','public.store_template_settings','select') as auth_select,
+      has_table_privilege('authenticated','public.store_template_settings','delete') as auth_delete,
+      has_column_privilege('authenticated','public.store_template_settings','tenant_id','update') as upd_tenant,
+      has_column_privilege('authenticated','public.store_template_settings','store_id','update') as upd_store,
+      has_column_privilege('authenticated','public.store_template_settings','updated_at','update') as upd_updated_at,
+      has_column_privilege('authenticated','public.store_template_settings','template_key','update') as upd_template_key`);
+    eq(r, {
+      anon_any: false, auth_select: true, auth_delete: false, upd_tenant: false, upd_store: false, upd_updated_at: false, upd_template_key: true,
+    }, "template settings privileges");
+  });
+
+  await check("template-engine-grants", "template engine: anon has no access, published history is immutable, identity and revision columns are not writable", async () => {
+    const [r] = await admin<Record<string, boolean>>(`select
+      has_table_privilege('anon','public.templates','select,insert,update,delete')
+        or has_table_privilege('anon','public.template_versions','select,insert,update,delete')
+        or has_table_privilege('anon','public.template_assignments','select,insert,update,delete') as anon_any,
+      has_table_privilege('authenticated','public.template_versions','update,delete') as versions_rewrite,
+      has_column_privilege('authenticated','public.templates','kind','update') as upd_kind,
+      has_column_privilege('authenticated','public.templates','tenant_id','update') as upd_tenant,
+      has_column_privilege('authenticated','public.templates','store_id','update') as upd_store,
+      has_column_privilege('authenticated','public.templates','revision','update') as upd_revision,
+      has_column_privilege('authenticated','public.template_versions','version_number','insert') as ins_version_number,
+      has_column_privilege('authenticated','public.template_assignments','template_kind','insert') as ins_template_kind,
+      has_column_privilege('authenticated','public.templates','draft','update') as upd_draft`);
+    eq(r, {
+      anon_any: false, versions_rewrite: false, upd_kind: false, upd_tenant: false, upd_store: false, upd_revision: false,
+      ins_version_number: false, ins_template_kind: false, upd_draft: true,
+    }, "template engine privileges");
   });
 
   await check("storage", "product-image bucket is public-read with tenant-restricted writes (Supabase Storage only)", async () => {

@@ -4,7 +4,16 @@ import { z } from "zod";
 import { getDatabase } from "@/lib/db";
 import { rowsOf, withPublicContext } from "@/lib/db/user-context";
 
-const storefrontSchema = z.object({
+const templateSchema = z.object({
+  key: z.string(),
+  accent_color: z.string().nullable(),
+  hero_heading: z.string().nullable(),
+  hero_subheading: z.string().nullable(),
+  hero_image_path: z.string().nullable(),
+});
+
+/** `template` is optional and nullable so a store with no settings, or a database not yet migrated, still renders the default. */
+export const storefrontSchema = z.object({
   name: z.string(),
   slug: z.string(),
   description: z.string().nullable(),
@@ -20,6 +29,7 @@ const storefrontSchema = z.object({
       image_path: z.string().nullable(),
     }),
   ),
+  template: templateSchema.nullish(),
 });
 
 export type PublicStorefront = z.infer<typeof storefrontSchema>;

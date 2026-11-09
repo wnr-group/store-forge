@@ -21,7 +21,7 @@ import { currencyDigits, parseMoney } from "@/lib/money";
 import { slugify } from "@/lib/utils/slug";
 import { PAGE_SIZE, type ProductListQuery, type ProductValues } from "@/lib/validations/catalog";
 import { productFolder } from "@/lib/storage/paths";
-import { verifyObjects, removeObjects } from "@/lib/storage/server";
+import { removeUnreferencedObjects, verifyObjectsUnderLock } from "@/services/storage-references.service";
 
 /** Stock the merchant can actually sell: variant total for products with variants, else the product quantity. */
 // NOTE: correlated subqueries use explicit "products"."id": Drizzle omits the table qualifier in
@@ -275,19 +275,20 @@ function productColumns(values: ProductValues, currency: string) {
   };
 }
 
-async function verifiedImages(tenantId: string, productId: string, values: ProductValues, alreadyStored: Set<string>) {
+/** Locks the new paths, THEN checks they exist, inside the save transaction (see verifyObjectsUnderLock). */
+async function verifiedImages(tx: DbTx, tenantId: string, productId: string, values: ProductValues, alreadyStored: Set<string>) {
   const fresh = values.images.map((i) => i.path).filter((p) => !alreadyStored.has(p));
-  const checked = await verifyObjects(productFolder(tenantId, productId), fresh);
+  const checked = await verifyObjectsUnderLock(tx, productFolder(tenantId, productId), fresh);
   return new Map(checked.map((c) => [c.path, { mimeType: c.mimeType, sizeBytes: c.sizeBytes }]));
 }
 
 export async function createProduct(values: ProductValues, currency: string): Promise<{ id: string }> {
   checkVariants(values);
   const { tenant } = await requireActiveTenant("catalog:manage");
-  // Storage is checked first; the DB transaction below either records everything or nothing.
-  const verified = await verifiedImages(tenant.id, values.id, values, new Set());
   return mapErrors(() =>
     withTenantDb({ tenantId: tenant.id, permission: "catalog:manage" }, async (tx, ctx) => {
+      // The transaction below either records everything or nothing; storage is checked inside it, after the path locks.
+      const verified = await verifiedImages(tx, tenant.id, values.id, values, new Set());
       await assertCategory(tx, ctx.tenantId, values.categoryId);
       const slug = values.slug ?? (await uniqueSlug(tx, ctx.tenantId, slugify(values.name)));
       await tx.insert(products).values({ id: values.id, tenantId: ctx.tenantId, slug, ...productColumns(values, currency) });
@@ -303,14 +304,12 @@ export async function createProduct(values: ProductValues, currency: string): Pr
 export async function updateProduct(values: ProductValues, currency: string): Promise<{ id: string }> {
   checkVariants(values);
   const { tenant } = await requireActiveTenant("catalog:manage");
-  const existing = await withTenantDb({ tenantId: tenant.id }, (tx, ctx) =>
-    tx.select({ path: productImages.storagePath }).from(productImages).where(and(eq(productImages.productId, values.id), eq(productImages.tenantId, ctx.tenantId))),
-  );
-  const verified = await verifiedImages(tenant.id, values.id, values, new Set(existing.map((e) => e.path)));
   const removedPaths = await mapErrors(() =>
     withTenantDb({ tenantId: tenant.id, permission: "catalog:manage" }, async (tx, ctx) => {
       const [current] = await tx.select({ id: products.id, slug: products.slug }).from(products).where(and(eq(products.id, values.id), eq(products.tenantId, ctx.tenantId)));
       if (!current) throw new AppError("NOT_FOUND", "That product no longer exists.");
+      const existing = await tx.select({ path: productImages.storagePath }).from(productImages).where(and(eq(productImages.productId, values.id), eq(productImages.tenantId, ctx.tenantId)));
+      const verified = await verifiedImages(tx, tenant.id, values.id, values, new Set(existing.map((e) => e.path)));
       await assertCategory(tx, ctx.tenantId, values.categoryId);
       const slug = values.slug ?? current.slug;
       await tx.update(products).set({ slug, ...productColumns(values, currency) }).where(and(eq(products.id, values.id), eq(products.tenantId, ctx.tenantId)));
@@ -322,20 +321,20 @@ export async function updateProduct(values: ProductValues, currency: string): Pr
     }),
   );
   // Only after the transaction committed: a rollback must never orphan DB rows from their files.
-  await removeObjects(removedPaths);
+  await removeUnreferencedObjects(tenant.id, removedPaths);
   return { id: values.id };
 }
 
 /** Deletes products (owner/admin) and then their image files. Returns how many were deleted. */
 export async function deleteProducts(ids: string[]): Promise<number> {
-  const { count, paths } = await withTenantDb({ permission: "catalog:delete" }, (tx, ctx) =>
+  const { count, paths, tenantId } = await withTenantDb({ permission: "catalog:delete" }, (tx, ctx) =>
     mapErrors(async () => {
       const imgs = await tx.select({ path: productImages.storagePath }).from(productImages).where(and(eq(productImages.tenantId, ctx.tenantId), inArray(productImages.productId, ids)));
       const deleted = await tx.delete(products).where(and(eq(products.tenantId, ctx.tenantId), inArray(products.id, ids))).returning({ id: products.id });
-      return { count: deleted.length, paths: deleted.length ? imgs.map((i) => i.path) : [] };
+      return { count: deleted.length, paths: deleted.length ? imgs.map((i) => i.path) : [], tenantId: ctx.tenantId };
     }),
   );
-  await removeObjects(paths);
+  await removeUnreferencedObjects(tenantId, paths);
   return count;
 }
 

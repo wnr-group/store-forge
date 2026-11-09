@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, FolderTree, LayoutDashboard, Layers, Package, PlusCircle, Settings, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, FolderTree, LayoutDashboard, Layers, Package, Palette, PlusCircle, Settings, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 
 export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean };
@@ -12,6 +12,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.inventory, label: "Inventory", icon: Boxes },
   { href: ROUTES.customers, label: "Customers", icon: Users },
   { href: ROUTES.analytics, label: "Analytics", icon: BarChart3 },
+  { href: ROUTES.templates, label: "Templates", icon: Palette },
   { href: ROUTES.settings, label: "Settings", icon: Settings },
 ];
 

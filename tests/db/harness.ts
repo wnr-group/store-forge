@@ -47,12 +47,12 @@ const FULL_AUTH_STUB = `
   create schema extensions;
 `;
 
-export async function createDb(opts: { fullAuth?: boolean } = {}): Promise<PGlite> {
+export async function createDb(opts: { fullAuth?: boolean; migrationsFolder?: string } = {}): Promise<PGlite> {
   const db = new PGlite({ extensions: { pgcrypto } });
   await db.exec(SUPABASE_STUB);
   if (opts.fullAuth) await db.exec(FULL_AUTH_STUB);
   // The real Drizzle migrator over the real ./drizzle folder (same mechanism as `drizzle-kit migrate`).
-  await migrate(drizzle(db), { migrationsFolder: join(process.cwd(), "drizzle") });
+  await migrate(drizzle(db), { migrationsFolder: opts.migrationsFolder ?? join(process.cwd(), "drizzle") });
   return db;
 }
 
