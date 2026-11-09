@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { AuthActions } from "./auth-actions";
 
 /** Below `md` the nav links collapse into this disclosure. It closes on Escape and when a link is chosen. */
 export function MobileMenu({ links }: { links: readonly { href: string; label: string }[] }) {
@@ -38,6 +39,7 @@ export function MobileMenu({ links }: { links: readonly { href: string; label: s
               </li>
             ))}
           </ul>
+          <AuthActions variant="menu" onNavigate={() => setOpen(false)} />
         </nav>
       ) : null}
     </div>

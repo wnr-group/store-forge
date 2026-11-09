@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HeaderShell } from "./header-shell";
 import { MobileMenu } from "./mobile-menu";
 import { Reveal } from "./motion";
+import { AuthActions } from "./auth-actions";
 import { BrandLogo, Container } from "./ui";
 
 /** In-page anchors only: every destination below exists. */
@@ -45,6 +46,9 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
+        <div className="hidden md:block">
+          <AuthActions variant="header" />
+        </div>
         <MobileMenu links={NAV_LINKS} />
       </Container>
     </HeaderShell>
