@@ -1,8 +1,8 @@
 "use client";
 
+import { StoreAccessLink } from "@/components/storefront/store-access-link";
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Store } from "lucide-react";
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import type { RenderContext, RenderMode, TemplateRendererProps } from "./types";
@@ -161,9 +161,7 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
                 )}
                 <span className="truncate text-sm font-semibold tracking-tight">{store.name}</span>
               </div>
-              <Link href="/login" className="shrink-0 text-right text-sm text-muted-foreground hover:text-foreground hover:underline sm:w-24">
-                Store login
-              </Link>
+              <StoreAccessLink className="shrink-0 text-right text-sm text-muted-foreground hover:text-foreground hover:underline sm:w-24" />
             </div>
           </header>
         ) : (
@@ -178,9 +176,7 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
                 </span>
               )}
               <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{classicHeading}</h1>
-              <Link href="/login" className="shrink-0 text-sm text-muted-foreground hover:text-foreground hover:underline">
-                Store login
-              </Link>
+              <StoreAccessLink className="shrink-0 text-sm text-muted-foreground hover:text-foreground hover:underline" />
             </div>
           </header>
         )}

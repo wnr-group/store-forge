@@ -22,7 +22,7 @@ import { withAuthenticatedDb } from "@/lib/db/tenant-db";
 import { rowsOf, withPublicContext, withUserContext } from "@/lib/db/user-context";
 import { getPublicStorefront } from "@/services/storefront.service";
 import { listStores } from "@/services/store.service";
-import { createTenantRecords, listCompanies } from "@/services/platform.service";
+import { createTenantRecords, listCompaniesPage } from "@/services/platform.service";
 import { listMembershipsForUser } from "@/services/tenant.service";
 import type { CreateCompanyValues } from "@/lib/validations/company";
 
@@ -79,6 +79,8 @@ afterAll(async () => {
   await server?.stop();
   await pg?.close();
 });
+
+const ALL_ORGS = { q: "", status: "all", sort: "created", dir: "desc", page: 1, pageSize: 100 } as const;
 
 describe("postgres-js connection", () => {
   it("connects as storeforge_app (not a bypass role) and the env guard accepts the URL", async () => {
@@ -191,11 +193,11 @@ describe("services over the real driver", () => {
   });
 
   it("lists companies only for the Platform Admin", async () => {
-    const list = await as(platformAdmin, () => listCompanies());
+    const list = (await as(platformAdmin, () => listCompaniesPage(ALL_ORGS))).items;
     expect(list.map((c) => c.storeSlug)).toEqual(expect.arrayContaining(["alpha-shop", "beta-shop", "carol-store"]));
     expect(list.find((c) => c.storeSlug === "alpha-shop")).toMatchObject({ status: "active", memberCount: 1 });
-    await expect(as(alice, () => listCompanies())).rejects.toMatchObject({ code: "FORBIDDEN" });
-    await expect(as(null, () => listCompanies())).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+    await expect(as(alice, () => listCompaniesPage(ALL_ORGS))).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(as(null, () => listCompaniesPage(ALL_ORGS))).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
   });
 
   it("serves the public storefront with no session, through the real driver and the app role", async () => {

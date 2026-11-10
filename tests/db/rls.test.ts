@@ -199,8 +199,8 @@ describe("role-based policies and privilege escalation", () => {
     dave = await createUser(db, "dave@example.test");
     erin = await createUser(db, "erin@example.test");
     await asUser(db, alice, async () => {
-      await db.query("insert into memberships (tenant_id,user_id,role) values ($1,$2,'staff')", [tenantA, dave]);
-      await db.query("insert into memberships (tenant_id,user_id,role) values ($1,$2,'admin')", [tenantA, erin]);
+      await db.query("insert into memberships (tenant_id,user_id,role,permissions) values ($1,$2,'staff','{\"products\":\"write\",\"orders\":\"read\",\"customers\":\"write\",\"settings\":\"read\"}')", [tenantA, dave]);
+      await db.query("insert into memberships (tenant_id,user_id,role,permissions) values ($1,$2,'admin','{\"products\":\"write\",\"orders\":\"write\",\"customers\":\"write\",\"settings\":\"write\"}')", [tenantA, erin]);
     });
   });
 
@@ -234,16 +234,18 @@ describe("role-based policies and privilege escalation", () => {
     });
   });
 
-  it("admin cannot add admins/owners, only staff", async () => {
+  it("only the owner adds members: admin-role members cannot add anyone, at any role", async () => {
     const frank = await createUser(db, "frank@example.test");
     await asUser(db, erin, async () => {
-      for (const role of ["owner", "admin"]) {
+      for (const role of ["owner", "admin", "staff"]) {
         await expect(
           db.query("insert into memberships (tenant_id,user_id,role) values ($1,$2,$3)", [tenantA, frank, role]),
         ).rejects.toThrow();
       }
+    });
+    await asUser(db, alice, async () => {
       await expect(
-        db.query("insert into memberships (tenant_id,user_id,role) values ($1,$2,'staff')", [tenantA, frank]),
+        db.query("insert into memberships (tenant_id,user_id,role,permissions) values ($1,$2,'admin','{\"products\":\"read\"}')", [tenantA, frank]),
       ).resolves.toBeDefined();
     });
   });

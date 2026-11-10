@@ -1,10 +1,11 @@
 import "server-only";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { createConfirmedUser, deleteUserQuietly, setUserFullName, setUserPassword } from "@/lib/auth/provisioning";
-import { memberships } from "@/lib/db/schema";
+import { memberships, type MemberPermissions } from "@/lib/db/schema";
 import { errorChain, mapErrors } from "@/lib/db/errors";
 import { rowsOf } from "@/lib/db/user-context";
 import { AppError } from "@/lib/errors";
+import { MEMBER_ROLE } from "@/lib/auth/permissions";
 import { requireActiveTenant, withTenantDb } from "@/lib/tenant/context";
 import type { CreateMemberInput, UpdateMemberInput } from "@/lib/validations/team";
 import { createMemberSchema, updateMemberSchema } from "@/lib/validations/team";
@@ -28,11 +29,12 @@ export type TeamMemberRow = {
   role: "owner" | "admin" | "staff";
   status: "active" | "disabled";
   joinedAt: Date;
+  permissions: MemberPermissions;
 };
 
 type Tx = Parameters<Parameters<typeof withAuthenticatedDb>[0]>[0];
 
-type TeamRaw = { user_id: string; full_name: string | null; email: string; role: string; status: string; joined_at: string | Date };
+type TeamRaw = { user_id: string; full_name: string | null; email: string; role: string; status: string; joined_at: string | Date; permissions: MemberPermissions | null };
 
 /** Shared by the platform company page and the Owner's Team page (the SQL function authorises both). */
 export async function listTeamRows(tx: Tx, tenantId: string): Promise<TeamMemberRow[]> {
@@ -44,6 +46,7 @@ export async function listTeamRows(tx: Tx, tenantId: string): Promise<TeamMember
     role: r.role as TeamMemberRow["role"],
     status: r.status === "disabled" ? "disabled" : "active",
     joinedAt: new Date(r.joined_at),
+    permissions: r.permissions ?? {},
   }));
 }
 
@@ -53,7 +56,7 @@ export async function listTeam(): Promise<TeamMemberRow[]> {
 }
 
 /**
- * Creates a Manager/Staff account and links it to the Owner's tenant. If the membership insert fails
+ * Creates a team member account and links it to the Owner's tenant. If the membership insert fails
  * the freshly created Auth user is deleted again, so no orphaned account (and no reserved e-mail) remains.
  */
 export async function createMember(input: CreateMemberInput) {
@@ -64,7 +67,7 @@ export async function createMember(input: CreateMemberInput) {
   try {
     await mapErrors(() =>
       withTenantDb({ tenantId: tenant.id, permission: "members:manage" }, (tx, ctx) =>
-        tx.insert(memberships).values({ tenantId: ctx.tenantId, userId: user.id, role: v.role }),
+        tx.insert(memberships).values({ tenantId: ctx.tenantId, userId: user.id, role: MEMBER_ROLE, permissions: v.permissions }),
       ),
     );
   } catch (e) {
@@ -84,7 +87,7 @@ function mapTeamError(error: unknown): never {
   throw error;
 }
 
-/** Edit name and role of a Manager/Staff member (never the Owner, never yourself - enforced by RLS and the SQL function). */
+/** Edit name and permissions of a team member (never the Owner, never yourself - enforced by RLS and the SQL function). */
 export async function updateMember(input: UpdateMemberInput): Promise<void> {
   const v = parseInput(updateMemberSchema, input);
   const { tenant } = await requireActiveTenant("members:manage");
@@ -93,7 +96,7 @@ export async function updateMember(input: UpdateMemberInput): Promise<void> {
       withTenantDb({ tenantId: tenant.id, permission: "members:manage" }, async (tx, ctx) => {
         const updated = await tx
           .update(memberships)
-          .set({ role: v.role })
+          .set({ permissions: v.permissions })
           .where(and(eq(memberships.tenantId, ctx.tenantId), eq(memberships.userId, v.userId), ne(memberships.role, "owner"), ne(memberships.userId, ctx.userId)))
           .returning({ id: memberships.id });
         if (updated.length !== 1) throw new AppError("NOT_FOUND", "That team member was not found.");

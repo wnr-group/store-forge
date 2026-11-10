@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { ROUTES } from "@/config/app";
 import { toFailure } from "@/lib/errors";
+import { logEvent } from "@/lib/observability/log";
+import { enforceLoginRateLimit } from "@/lib/security/rate-limit";
 import { safeNextPath } from "@/lib/utils/redirect";
 import { changePasswordSchema, loginSchema } from "@/lib/validations/auth";
 import { parseInput } from "@/lib/validations/parse";
@@ -14,10 +16,16 @@ import type { ActionResult } from "@/types/action";
 
 export async function loginAction(input: unknown, next?: string): Promise<ActionResult> {
   try {
-    await authService.signIn(parseInput(loginSchema, input));
+    const values = parseInput(loginSchema, input);
+    await enforceLoginRateLimit(values.email); // before the password is checked: too many attempts from one place are refused
+    await authService.signIn(values);
   } catch (e) {
-    return toFailure(e);
+    const failure = toFailure(e);
+    // The outcome only: never the e-mail address or the password.
+    logEvent("warn", "login", { outcome: "failed", code: failure.code });
+    return failure;
   }
+  logEvent("info", "login", { outcome: "ok" });
   redirect(safeNextPath(next));
 }
 

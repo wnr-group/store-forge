@@ -1,32 +1,52 @@
-import { BarChart3, Boxes, Building2, FolderTree, LayoutDashboard, Layers, Package, Palette, PlusCircle, Settings, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, Package, Palette, PlusCircle, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
+import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
-export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean };
+export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean; group?: string };
+
+/** Permission a member needs to see a nav item. Items not listed here are visible to everyone. */
+const NAV_PERMISSION: Record<string, Permission> = {
+  [ROUTES.products]: "catalog:view",
+  [ROUTES.categories]: "catalog:view",
+  [ROUTES.collections]: "catalog:view",
+  [ROUTES.inventory]: "catalog:view",
+  [ROUTES.customers]: "customers:view",
+  [ROUTES.analytics]: "orders:view",
+};
+
+/** hrefs the member may not open, for the sidebar to hide (the pages and the database check again). */
+export const hiddenNavHrefs = (actor: Actor): string[] =>
+  NAV_ITEMS.filter((i) => NAV_PERMISSION[i.href] && !can(actor, NAV_PERMISSION[i.href])).map((i) => i.href);
 
 /** Only list pages that exist - no placeholder navigation. */
 export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.dashboard, label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: ROUTES.products, label: "Products", icon: Package },
-  { href: ROUTES.categories, label: "Categories", icon: FolderTree },
-  { href: ROUTES.collections, label: "Collections", icon: Layers },
-  { href: ROUTES.inventory, label: "Inventory", icon: Boxes },
-  { href: ROUTES.customers, label: "Customers", icon: Users },
-  { href: ROUTES.analytics, label: "Analytics", icon: BarChart3 },
-  { href: ROUTES.templates, label: "Templates", icon: Palette },
-  { href: ROUTES.settings, label: "Settings", icon: Settings },
+  { href: ROUTES.products, label: "Products", icon: Package, group: "Catalog" },
+  { href: ROUTES.categories, label: "Categories", icon: FolderTree, group: "Catalog" },
+  { href: ROUTES.collections, label: "Collections", icon: Layers, group: "Catalog" },
+  { href: ROUTES.inventory, label: "Inventory", icon: Boxes, group: "Catalog" },
+  { href: ROUTES.customers, label: "Customers", icon: Users, group: "Insights" },
+  { href: ROUTES.analytics, label: "Analytics", icon: BarChart3, group: "Insights" },
+  { href: ROUTES.templates, label: "Templates", icon: Palette, group: "Workspace" },
+  { href: ROUTES.settings, label: "Settings", icon: Settings, group: "Workspace" },
 ];
 
 export const OWNER_NAV_ITEMS: NavItem[] = [
   ...NAV_ITEMS.slice(0, -1),
-  { href: ROUTES.team, label: "Team members", icon: UserCog },
+  { href: ROUTES.team, label: "Team members", icon: UserCog, group: "Workspace" },
   NAV_ITEMS[NAV_ITEMS.length - 1],
 ];
 
 /** Platform Admin area: companies only - no merchant data. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: ROUTES.adminCompanies, label: "Companies", icon: Building2, exact: true },
-  { href: ROUTES.adminNewCompany, label: "Create company", icon: PlusCircle },
+  { href: ROUTES.adminCompanies, label: "Organizations", icon: Building2, exact: true, group: "Platform" },
+  { href: ROUTES.adminNewCompany, label: "Create organization", icon: PlusCircle, group: "Platform" },
+  { href: ROUTES.adminTeam, label: "Platform Team", icon: ShieldCheck, group: "Platform" },
+  { href: ROUTES.adminActivity, label: "Activity & Audit Logs", icon: ScrollText, group: "Platform" },
+  { href: ROUTES.adminUsage, label: "Usage & Analytics", icon: BarChart3, group: "Platform" },
+  { href: ROUTES.adminSettings, label: "Settings", icon: Settings, group: "Platform" },
+  { href: ROUTES.adminAccount, label: "My Account", icon: KeyRound, group: "Account" },
 ];
 
 /** Serializable key: icon components cannot cross the server -> client boundary. */

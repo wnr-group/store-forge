@@ -32,7 +32,7 @@ export function UserMenu({ name, email, role, compact = false, children }: Props
       <DropdownMenuTrigger
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "h-auto w-full justify-start gap-2.5 px-1.5 py-1.5 text-white hover:bg-sidebar-accent hover:text-white aria-expanded:bg-sidebar-accent aria-expanded:text-white",
+          "h-auto w-full justify-start gap-2.5 px-1.5 py-1.5 text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent aria-expanded:text-sidebar-accent-foreground",
           compact && "justify-center px-0",
         )}
         aria-label="Account menu"

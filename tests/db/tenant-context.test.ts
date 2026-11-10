@@ -81,7 +81,7 @@ beforeAll(async () => {
   tenantB = b.tenant_id;
   storeB = b.store_id;
   tenantD = (await onboard(pg, dave, "delta-shop")).tenant_id;
-  await pg.query("insert into memberships (tenant_id, user_id, role) values ($1,$2,'staff'),($1,$3,'admin')", [tenantA, dave, erin]);
+  await pg.query("insert into memberships (tenant_id, user_id, role, permissions) values ($1,$2,'staff','{\"products\":\"write\",\"orders\":\"read\",\"customers\":\"write\",\"settings\":\"read\"}'),($1,$3,'admin','{\"products\":\"write\",\"orders\":\"write\",\"customers\":\"write\",\"settings\":\"write\"}')", [tenantA, dave, erin]);
 });
 afterAll(async () => pg.close());
 beforeEach(() => {

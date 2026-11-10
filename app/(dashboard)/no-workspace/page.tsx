@@ -7,21 +7,30 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/config/app";
 import { requireUser } from "@/lib/auth/session";
 import { isPlatformAdmin } from "@/lib/auth/platform";
-import { getUserTenants } from "@/lib/tenant/context";
+import { getActiveTenant } from "@/lib/tenant/context";
+import { getRequestStoreSlug } from "@/lib/tenant/request";
+import { getPublicBranding } from "@/services/platform-settings.service";
 
 export const metadata: Metadata = { title: "No workspace" };
 
 /** Signed in, but not a member of any active company. Accounts are provisioned; nobody can self-onboard. */
 export default async function NoWorkspacePage() {
-  await requireUser();
+  const user = await requireUser();
   if (await isPlatformAdmin()) redirect(ROUTES.admin);
-  if ((await getUserTenants()).length > 0) redirect(ROUTES.dashboard);
+  if (await getActiveTenant()) redirect(ROUTES.dashboard);
+
+  // On <store>.<root>/ a signed-in session for another account lands here too (cookies are per host).
+  const storeSlug = await getRequestStoreSlug();
+  const brand = await getPublicBranding();
+  const description = storeSlug
+    ? `You are signed in as ${user.email ?? "this account"}, which is not a member of ${storeSlug}. Sign out, then sign in with an account that belongs to this store.`
+    : `Your account is not linked to an active company. It may have been deactivated or the company suspended. Please contact your ${brand.platformName} administrator or company owner${brand.supportEmail ? ` (${brand.supportEmail})` : ""}.`;
 
   return (
     <AuthShell
       icon={<Building2 className="size-5" aria-hidden />}
       title="No workspace available"
-      description="Your account is not linked to an active company. It may have been deactivated or the company suspended. Please contact your StoreForge administrator or company owner."
+      description={description}
     >
       <form action={logoutAction}>
         <Button type="submit" variant="outline" className="w-full">Sign out</Button>

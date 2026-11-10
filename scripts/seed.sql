@@ -56,14 +56,14 @@ insert into public.tenants (id, name, slug, created_by) values
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Beta Wares Pvt Ltd', 'beta-wares', '22222222-2222-2222-2222-222222222222')
 on conflict (id) do nothing;
 
-insert into public.memberships (tenant_id, user_id, role) values
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'owner'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '22222222-2222-2222-2222-222222222222', 'owner'),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '22222222-2222-2222-2222-222222222222', 'staff')
+insert into public.memberships (tenant_id, user_id, role, permissions) values
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'owner', '{}'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '22222222-2222-2222-2222-222222222222', 'owner', '{}'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '22222222-2222-2222-2222-222222222222', 'staff', '{"products":"write","orders":"read","customers":"write","settings":"read"}')
 on conflict (tenant_id, user_id) do nothing;
 
-insert into public.platform_admins (user_id) values
-  ('44444444-4444-4444-4444-444444444444')
+insert into public.platform_admins (user_id, role) values
+  ('44444444-4444-4444-4444-444444444444', 'super_admin')
 on conflict do nothing;
 
 insert into public.stores (tenant_id, name, slug, description) values

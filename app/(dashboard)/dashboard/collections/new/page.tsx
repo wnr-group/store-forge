@@ -4,14 +4,14 @@ import { CollectionForm } from "@/components/collections/collection-form";
 import { PageHeader } from "@/components/shared/page-header";
 import { ROUTES } from "@/config/app";
 import { canManageCatalog } from "@/lib/auth/permissions";
-import { requireWorkspace } from "@/lib/tenant/context";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { listProductOptions } from "@/services/collection.service";
 
 export const metadata: Metadata = { title: "New collection" };
 
 export default async function NewCollectionPage() {
-  const { active } = await requireWorkspace();
-  if (!canManageCatalog(active.role)) redirect(ROUTES.collections);
+  const { active } = await requireWorkspaceCan("catalog:view");
+  if (!canManageCatalog(active)) redirect(ROUTES.collections);
   return (
     <>
       <PageHeader title="New collection" />

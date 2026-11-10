@@ -9,15 +9,15 @@ import { buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/config/app";
 import { canManageCatalog } from "@/lib/auth/permissions";
 import { publicImageUrl } from "@/lib/storage/paths";
-import { requireWorkspace } from "@/lib/tenant/context";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { listCollections } from "@/services/collection.service";
 
 export const metadata: Metadata = { title: "Collections" };
 
 export default async function CollectionsPage() {
-  const { active } = await requireWorkspace();
+  const { active } = await requireWorkspaceCan("catalog:view");
   const rows = await listCollections();
-  const add = canManageCatalog(active.role) ? (
+  const add = canManageCatalog(active) ? (
     <Link href={`${ROUTES.collections}/new`} className={buttonVariants()}>
       <Plus aria-hidden /> Add collection
     </Link>
@@ -34,7 +34,7 @@ export default async function CollectionsPage() {
             const src = publicImageUrl(c.imagePath);
             return (
               <li key={c.id}>
-                <Link href={`${ROUTES.collections}/${c.id}`} className="group block overflow-hidden rounded-xl border bg-card transition-shadow outline-none hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring">
+                <Link href={`${ROUTES.collections}/${c.id}`} className="group block overflow-hidden rounded-lg border bg-card transition-shadow outline-none hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring">
                   <div className="relative flex aspect-[16/9] items-center justify-center bg-muted text-muted-foreground">
                     {src ? <Image src={src} alt="" fill sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 100vw" className="object-cover" /> : <ImageIcon className="size-6" aria-hidden />}
                   </div>

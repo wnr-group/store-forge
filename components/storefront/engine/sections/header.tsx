@@ -1,3 +1,4 @@
+import { StoreAccessLink } from "@/components/storefront/store-access-link";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -71,12 +72,7 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
         ) : null}
 
         {/* Store Login */}
-        <Link
-          href="/login"
-          className="shrink-0 text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors"
-        >
-          Store login
-        </Link>
+        <StoreAccessLink className="shrink-0 text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors" />
       </div>
     </header>
   );

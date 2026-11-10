@@ -19,12 +19,16 @@ type Props = {
   defaultCollapsed?: boolean;
   /** Which navigation to render, and where the logo links. */
   navKey: NavKey;
+  /** Nav hrefs to hide for this member (no access). */
+  hiddenNav?: string[];
   homeHref: string;
+  /** Platform name shown next to the logo. */
+  brandName?: string;
   children: React.ReactNode;
 };
 
 /** Responsive shell: collapsible sidebar on desktop, drawer below `lg`. Slots are server-rendered. */
-export function AppShell({ switcher, header, footer, defaultCollapsed = false, navKey, homeHref, children }: Props) {
+export function AppShell({ switcher, header, footer, defaultCollapsed = false, navKey, hiddenNav, homeHref, brandName, children }: Props) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [drawer, setDrawer] = useState(false);
 
@@ -40,16 +44,16 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
       <div className="flex min-h-dvh bg-background">
         <aside
           className={cn(
-            "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-200 lg:flex",
-            collapsed ? "w-[3.75rem]" : "w-60",
+            "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-150 ease-out lg:flex",
+            collapsed ? "w-[4rem]" : "w-64",
           )}
         >
-          <div className={cn("flex h-14 items-center border-b border-sidebar-border px-3", collapsed && "justify-center px-0")}>
-            {collapsed ? <Logo href={homeHref} className="text-white [&>span:last-child]:hidden" /> : <Logo href={homeHref} className="text-white" />}
+          <div className={cn("flex h-12 items-center border-b border-sidebar-border px-3", collapsed && "justify-center px-0")}>
+            {collapsed ? <Logo href={homeHref} name={brandName} className="[&>span:last-child]:hidden" /> : <Logo href={homeHref} name={brandName} />}
           </div>
           <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
             {collapsed ? switcher.compact : switcher.full}
-            <SidebarNav navKey={navKey} collapsed={collapsed} />
+            <SidebarNav navKey={navKey} hidden={hiddenNav} collapsed={collapsed} />
           </div>
           <div className="border-t border-sidebar-border p-2.5">{collapsed ? footer.compact : footer.full}</div>
           <Button
@@ -58,7 +62,7 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
             onClick={toggle}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-expanded={!collapsed}
-            className="absolute -right-3.5 top-[3.9rem] z-10 size-7 rounded-full border bg-card text-foreground shadow-xs hover:bg-accent"
+            className="absolute -right-3.5 top-[2.65rem] z-10 size-6 rounded-md border bg-card text-muted-foreground shadow-xs hover:bg-muted hover:text-foreground [&_svg]:size-3.5"
           >
             {collapsed ? <PanelLeftOpen aria-hidden /> : <PanelLeftClose aria-hidden />}
           </Button>
@@ -68,25 +72,25 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
           <SheetContent side="left" showCloseButton={false} className="w-72 gap-0 border-sidebar-border bg-sidebar p-0 text-sidebar-foreground sm:max-w-72">
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <SheetDescription className="sr-only">Main dashboard navigation</SheetDescription>
-            <div className="flex h-14 items-center border-b border-sidebar-border px-3">
-              <Logo href={homeHref} className="text-white" />
+            <div className="flex h-12 items-center border-b border-sidebar-border px-3">
+              <Logo href={homeHref} name={brandName} />
             </div>
             <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
               {switcher.full}
-              <SidebarNav navKey={navKey} onNavigate={() => setDrawer(false)} />
+              <SidebarNav navKey={navKey} hidden={hiddenNav} onNavigate={() => setDrawer(false)} />
             </div>
             <div className="border-t border-sidebar-border p-2.5">{footer.full}</div>
           </SheetContent>
         </Sheet>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/85 px-3 backdrop-blur sm:px-5">
+          <header className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b bg-card px-3 sm:px-5">
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setDrawer(true)} aria-label="Open navigation">
               <Menu aria-hidden />
             </Button>
             {header}
           </header>
-          <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6">
+          <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-3 py-5 sm:px-6">
             {children}
           </main>
         </div>

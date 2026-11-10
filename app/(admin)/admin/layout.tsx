@@ -1,3 +1,4 @@
+import { getPublicBranding } from "@/services/platform-settings.service";
 import Link from "next/link";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/dashboard/app-shell";
@@ -25,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     </DropdownMenuItem>
   );
   const badge = (compact: boolean) => (
-    <div className="flex h-10 items-center justify-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent px-2.5 text-sm font-medium text-white">
+    <div className="flex h-10 items-center justify-center gap-2 rounded-lg border border-sidebar-border bg-card px-2.5 text-sm font-medium text-sidebar-accent-foreground">
       <ShieldCheck className="size-4 shrink-0" aria-hidden />
       {compact ? <span className="sr-only">Platform Admin</span> : <span className="flex-1 truncate">Platform Admin</span>}
     </div>
@@ -36,6 +37,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       navKey="admin"
       homeHref={ROUTES.admin}
       defaultCollapsed={collapsed}
+      brandName={(await getPublicBranding()).platformName}
       switcher={{ full: badge(false), compact: badge(true) }}
       footer={{
         full: <UserMenu name={name} email={email} role="Platform Admin">{accountLink}</UserMenu>,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { AnalyticsView } from "@/components/analytics/analytics-view";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ROUTES } from "@/config/app";
 import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
+import { canViewOrders } from "@/lib/auth/permissions";
 import { requireWorkspace } from "@/lib/tenant/context";
 import { getAnalytics } from "@/services/analytics.service";
 
@@ -25,7 +26,8 @@ export default async function DashboardPage() {
       </Card>
     );
   }
-  const data = await getAnalytics(30, store.timezone);
+  const showAnalytics = canViewOrders(active);
+  const data = showAnalytics ? await getAnalytics(30, store.timezone) : null;
   const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
   const storeUrl = storefrontUrl(store.slug, root);
 
@@ -48,18 +50,15 @@ export default async function DashboardPage() {
         actions={
           <>
             <StatusBadge tone={store.status === "active" ? "active" : "draft"}><span className="capitalize">{store.status}</span></StatusBadge>
-            {storeUrl ? (
-              <a href={storeUrl} target="_blank" rel="noopener noreferrer" className={buttonVariants()}>
-                View store <ExternalLink aria-hidden />
-              </a>
+            {showAnalytics ? (
+              <Link href={ROUTES.analytics} className={buttonVariants({ variant: "outline" })}>
+                <BarChart3 aria-hidden /> Analytics
+              </Link>
             ) : null}
-            <Link href={ROUTES.analytics} className={buttonVariants({ variant: "outline" })}>
-              Analytics <ExternalLink className="opacity-60" aria-hidden />
-            </Link>
           </>
         }
       />
-      <AnalyticsView data={data} currency={store.currency} />
+      {data ? <AnalyticsView data={data} currency={store.currency} /> : null}
     </>
   );
 }

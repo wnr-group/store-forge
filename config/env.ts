@@ -76,6 +76,15 @@ export function getServiceRoleKey(): string {
   return key;
 }
 
+/**
+ * Secret that keys the sign-in rate-limit hashes, so an address or e-mail cannot be recomputed from what is stored. Server-only.
+ * Uses RATE_LIMIT_SECRET when set, else the service-role key (which never leaves the server), else a fixed development value.
+ * Set RATE_LIMIT_SECRET (any long random string) in production.
+ */
+export function getRateLimitSecret(): string {
+  return process.env.RATE_LIMIT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "storeforge-development-rate-limit-secret";
+}
+
 let cachedServer: ServerEnv | undefined;
 
 export function getServerEnv(): ServerEnv {

@@ -15,7 +15,7 @@ export type Tone = keyof typeof TONES;
 /** Status pill. Colour is never the only signal: the label always states the status. */
 export function StatusBadge({ tone, children, className }: { tone: Tone; children: React.ReactNode; className?: string }) {
   return (
-    <Badge variant="outline" className={cn("h-5 gap-1.5 rounded-full px-2 text-[11px] font-medium", TONES[tone], className)}>
+    <Badge variant="outline" className={cn("h-5 gap-1.5 rounded-md px-2 text-[11px] font-medium", TONES[tone], className)}>
       <span className="size-1.5 rounded-full bg-current" aria-hidden />
       {children}
     </Badge>

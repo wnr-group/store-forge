@@ -35,9 +35,11 @@ const dateFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short
 
 function Thumb({ path, name }: { path: string | null; name: string }) {
   const src = publicImageUrl(path);
+  // A failed load (storage hiccup, deleted file) falls back to the placeholder instead of a broken-image glyph.
+  const [failed, setFailed] = useState(false);
   return (
     <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted text-muted-foreground">
-      {src ? <Image src={src} alt={name} fill sizes="40px" className="object-cover" /> : <ImageIcon className="size-4" aria-hidden />}
+      {src && !failed ? <Image src={src} alt={name} fill sizes="40px" className="object-cover" onError={() => setFailed(true)} /> : <ImageIcon className="size-4" aria-hidden />}
     </span>
   );
 }
@@ -111,7 +113,7 @@ export function ProductTable({ rows, currency, canManage, canDelete }: Props) {
       ) : null}
 
       {/* Desktop / tablet: table */}
-      <div className="hidden overflow-hidden rounded-xl border bg-card md:block">
+      <div className="hidden overflow-hidden rounded-lg border bg-card md:block">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
@@ -165,7 +167,7 @@ export function ProductTable({ rows, currency, canManage, canDelete }: Props) {
       {/* Mobile: cards */}
       <ul className="space-y-2 md:hidden">
         {rows.map((r) => (
-          <li key={r.id} className="flex items-start gap-3 rounded-xl border bg-card p-3">
+          <li key={r.id} className="flex items-start gap-3 rounded-lg border bg-card p-3">
             {canManage ? <Checkbox className="mt-1" checked={selected.has(r.id)} onCheckedChange={(c) => toggle(r.id, c === true)} aria-label={`Select ${r.name}`} /> : null}
             <Link href={`${ROUTES.products}/${r.id}`} className="flex min-w-0 flex-1 items-start gap-3">
               <Thumb path={r.imagePath} name={r.name} />

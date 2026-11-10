@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { saveProfileAction } from "@/app/(dashboard)/dashboard/settings/actions";
 import { FormField } from "@/components/shared/form-field";
-import { SectionCard } from "@/components/shared/section-card";
+import { SettingsSection } from "@/components/shared/settings-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
@@ -39,7 +39,15 @@ export function ProfileForm({ fullName, email, role }: { fullName: string; email
         submit();
       }}
     >
-      <SectionCard title="Your account" description="Visible to you and your teammates.">
+      <SettingsSection
+        title="Your account"
+        description="Visible to you and your teammates."
+        footer={
+          <Button type="submit" disabled={pending || name.trim() === fullName}>
+            {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Saving…" : "Save profile"}
+          </Button>
+        }
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField id="pf-name" label="Full name" required error={error}>
             <Input id="pf-name" value={name} onChange={(e) => { setName(e.target.value); clear("fullName"); }} onBlur={() => validateField(profileSchema, { fullName: name }, "fullName")} disabled={pending} aria-invalid={Boolean(error)} aria-describedby="pf-name-msg" aria-required autoComplete="name" />
@@ -49,12 +57,7 @@ export function ProfileForm({ fullName, email, role }: { fullName: string; email
           </FormField>
         </div>
         {formError && !error ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
-        <div className="flex justify-end">
-          <Button type="submit" disabled={pending || name.trim() === fullName}>
-            {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Saving…" : "Save profile"}
-          </Button>
-        </div>
-      </SectionCard>
+      </SettingsSection>
     </form>
   );
 }

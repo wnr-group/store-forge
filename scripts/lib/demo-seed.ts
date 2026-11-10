@@ -17,6 +17,9 @@ import { buildDemoPlan, DEMO_STORE, DEMO_TENANT_NAME } from "./demo-data";
 
 type Db = PgDatabase<PgQueryResultHKT, Record<string, unknown>>;
 /** Dummy logins for LOCAL/DEV projects only. The password is public; never use these anywhere real. */
+const DEMO_MANAGER_PERMISSIONS = { products: "write", orders: "write", customers: "write", settings: "write" };
+const DEMO_STAFF_PERMISSIONS = { products: "write", orders: "read", customers: "write", settings: "read" };
+
 export const DEMO_PASSWORD = "Demo1234";
 export const DEMO_USERS = [
   { id: "d0000000-0000-4000-8000-000000000001", email: "owner@demo.test", name: "Olivia Owner", role: "owner" },
@@ -84,7 +87,7 @@ export async function seedDemoData(db: Db, userId: string, now = new Date(), tea
     const t = tx as unknown as Db;
 
     // 1. Provision the company as the demo Platform Admin (the only way tenants are created), then drop back to the owner role.
-    await t.execute(sql`insert into public.platform_admins (user_id) values (${DEMO_PLATFORM_ADMIN.id}::uuid) on conflict do nothing`);
+    await t.execute(sql`insert into public.platform_admins (user_id, role) values (${DEMO_PLATFORM_ADMIN.id}::uuid, 'super_admin') on conflict do nothing`);
     const claims = JSON.stringify({ sub: DEMO_PLATFORM_ADMIN.id, role: "authenticated" });
     await t.execute(sql`select set_config('request.jwt.claims', ${claims}, true), set_config('request.jwt.claim.sub', ${DEMO_PLATFORM_ADMIN.id}, true)`);
     await t.execute(sql.raw("set local role authenticated"));
@@ -103,7 +106,9 @@ export async function seedDemoData(db: Db, userId: string, now = new Date(), tea
     if (owner.length !== 1) throw new Error("Demo tenant ownership check failed; nothing was written.");
 
     for (const m of team) {
-      await t.execute(sql`insert into public.memberships (tenant_id, user_id, role) values (${tenantId}, ${m.userId}::uuid, ${m.role}) on conflict (tenant_id, user_id) do nothing`);
+      // Demo team presets: the manager can change everything, the staff member everything but orders and settings.
+      const permissions = m.role === "admin" ? DEMO_MANAGER_PERMISSIONS : DEMO_STAFF_PERMISSIONS;
+      await t.execute(sql`insert into public.memberships (tenant_id, user_id, role, permissions) values (${tenantId}, ${m.userId}::uuid, ${m.role}, ${JSON.stringify(permissions)}::jsonb) on conflict (tenant_id, user_id) do nothing`);
     }
 
     const plan = buildDemoPlan(tenantId, userId, now);

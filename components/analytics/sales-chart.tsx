@@ -15,7 +15,7 @@ export function SalesChart({ data, currency, metric, height = 260 }: Props) {
   const rows = data.map((p) => ({ ...p, label: label(p.day), value: metric === "sales" ? p.salesMinor : p.orders }));
   const total = rows.reduce((s, r) => s + r.value, 0);
   const summary = `${metric === "sales" ? "Daily sales" : "Daily orders"} over ${rows.length} days, ${metric === "sales" ? formatMoney(total, currency) : total} in total.`;
-  const axis = { stroke: "var(--muted-foreground)", fontSize: 11, tickLine: false, axisLine: false } as const;
+  const axis = { stroke: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-geist-mono)", tickLine: false, axisLine: false } as const;
   const tooltip = (
     <Tooltip
       cursor={{ stroke: "var(--border)" }}
@@ -23,7 +23,7 @@ export function SalesChart({ data, currency, metric, height = 260 }: Props) {
         if (!active || !payload?.length) return null;
         const p = payload[0].payload as (typeof rows)[number];
         return (
-          <div className="rounded-lg border bg-popover px-3 py-2 text-xs shadow-md">
+          <div className="rounded-lg border bg-popover px-3 py-2 text-xs shadow-sm">
             <p className="font-medium">{p.label}</p>
             <p className="tabular-nums text-muted-foreground">{formatMoney(p.salesMinor, currency)} · {p.orders} order{p.orders === 1 ? "" : "s"}</p>
           </div>
@@ -39,15 +39,15 @@ export function SalesChart({ data, currency, metric, height = 260 }: Props) {
           <AreaChart data={rows} margin={{ top: 6, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="sf-sales" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.28} />
-                <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.14} />
+                <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.02} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis dataKey="label" {...axis} interval="preserveStartEnd" minTickGap={28} />
             <YAxis {...axis} width={52} tickFormatter={(v: number) => formatMoneyCompact(v, currency)} />
             {tooltip}
-            <Area type="monotone" dataKey="value" stroke="var(--chart-1)" strokeWidth={2} fill="url(#sf-sales)" isAnimationActive={false} />
+            <Area type="monotone" dataKey="value" stroke="var(--chart-1)" strokeWidth={1.5} fill="url(#sf-sales)" isAnimationActive={false} />
           </AreaChart>
         ) : (
           <BarChart data={rows} margin={{ top: 6, right: 4, left: 0, bottom: 0 }}>

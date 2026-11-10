@@ -4,15 +4,15 @@ import { ProductForm } from "@/components/products/product-form";
 import { PageHeader } from "@/components/shared/page-header";
 import { ROUTES } from "@/config/app";
 import { canManageCatalog } from "@/lib/auth/permissions";
-import { requireWorkspace } from "@/lib/tenant/context";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { listCategories } from "@/services/category.service";
 import { listCollections } from "@/services/collection.service";
 
 export const metadata: Metadata = { title: "New product" };
 
 export default async function NewProductPage() {
-  const { active, store } = await requireWorkspace();
-  if (!canManageCatalog(active.role)) redirect(ROUTES.products);
+  const { active, store } = await requireWorkspaceCan("catalog:view");
+  if (!canManageCatalog(active)) redirect(ROUTES.products);
   const [categories, collections] = await Promise.all([listCategories(), listCollections()]);
   return (
     <>

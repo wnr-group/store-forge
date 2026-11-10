@@ -27,11 +27,18 @@ export type VerifyDeps = {
 };
 
 const TABLES = [
-  "profiles", "tenants", "memberships", "stores", "platform_admins",
+  "profiles", "tenants", "memberships", "stores", "platform_admins", "admin_audit_logs", "platform_settings", "rate_limits",
   "categories", "collections", "products", "product_images", "product_options", "product_variants",
   "collection_products", "inventory_adjustments", "customers", "orders", "order_items", "store_template_settings",
   "templates", "template_versions", "template_assignments",
 ] as const;
+
+/** Restrictive per-module policies of 0018_member_permissions: reads are gated on every table except stores/tenants. */
+const PERMISSION_POLICIES = [
+  ...["categories", "collections", "collection_products", "products", "product_images", "product_options", "product_variants",
+    "inventory_adjustments", "customers", "orders", "order_items"].flatMap((t) => ["select", "insert", "update", "delete"].map((c) => `${t}_perm_${c}`)),
+  ...["stores", "tenants"].flatMap((t) => ["insert", "update", "delete"].map((c) => `${t}_perm_${c}`)),
+];
 
 const EXPECTED_POLICIES = [
   "categories_delete_admins", "categories_insert_editors", "categories_select_members",
@@ -54,12 +61,45 @@ const EXPECTED_POLICIES = [
   "templates_select_members", "templates_insert_admins", "templates_update_admins", "templates_delete_never_published",
   "template_versions_select_members", "template_versions_insert_admins",
   "template_assignments_select_members", "template_assignments_insert_admins", "template_assignments_update_admins", "template_assignments_delete_admins",
+  ...PERMISSION_POLICIES,
+  "memberships_perm_insert", "memberships_perm_delete",
 ].sort();
 
 const FUNCTIONS = {
   authenticatedOnly: [
     "public.platform_provision_tenant(uuid,text,text,text,text,text,text)",
+    "public.platform_add_member(uuid,uuid,jsonb)",
+    "public.platform_delete_tenant(uuid)",
+    "public.has_module_access(uuid,text,text)",
     "public.platform_list_tenants(uuid)",
+    "public.platform_list_tenants_page(text,text,text,integer,integer)",
+    "public.platform_overview_stats()",
+    "public.platform_record_audit(text,text,uuid,uuid,text,jsonb,jsonb)",
+    "public.platform_list_audit(text,uuid,uuid,text,timestamptz,timestamptz,integer,integer)",
+    "public.platform_audit_admins()",
+    "public.platform_update_tenant(uuid,text,text,text)",
+    "public.platform_get_tenant_store(uuid)",
+    "public.platform_update_store(uuid,uuid,text,text,text,text,text,text)",
+    "public.platform_set_member_status(uuid,uuid,text)",
+    "public.platform_remove_member(uuid,uuid)",
+    "public.platform_assign_owner(uuid,uuid,text)",
+    "public.rate_limit_admin(text,integer,integer)",
+    "public.rate_limit_login(text,text)",
+    "public.is_valid_member_permissions(jsonb)",
+    "public.is_super_admin()",
+    "public.platform_admin_role()",
+    "public.platform_list_admins()",
+    "public.platform_add_admin(uuid,text)",
+    "public.platform_set_admin_role(uuid,text)",
+    "public.platform_remove_admin(uuid)",
+    "public.platform_tenant_usage(uuid)",
+    "public.platform_usage_page(text,text,text,integer,integer)",
+    "public.platform_usage_summary(integer)",
+    "public.platform_inactive_organizations(integer,integer,integer)",
+    "public.platform_new_organizations_series(date,date,text)",
+    "public.get_platform_settings()",
+    "public.get_public_platform_settings()",
+    "public.platform_update_settings(text,text,text,text,text)",
     "public.platform_set_tenant_status(uuid,text)",
     "public.is_platform_admin()",
     "public.list_tenant_team(uuid)",
@@ -78,7 +118,7 @@ const FUNCTIONS = {
     "public.storage_path_tenant(text)",
     "public.can_write_storage_object(text)",
   ],
-  nobody: ["public.handle_new_user()", "public.block_platform_admin_membership()"],
+  nobody: ["public.handle_new_user()", "public.block_platform_admin_membership()", "public.audit_redact(jsonb)", "public.admin_audit_logs_immutable()", "public.set_updated_at()", "public.tenant_storage_bytes(uuid)", "public.tenant_has_activity_since(uuid,timestamptz)", "public.tenant_last_activity(uuid)"],
 };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -260,7 +300,7 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
     const rows = await admin<{ policyname: string; roles: string; cmd: string }>(
       "select policyname, roles::text as roles, cmd from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'products_objects_%' order by 1",
     );
-    eq(rows.map((r) => r.policyname), ["products_objects_delete", "products_objects_insert", "products_objects_select", "products_objects_update"], "storage policies");
+    eq(rows.map((r) => r.policyname), ["products_objects_delete", "products_objects_insert", "products_objects_platform_delete", "products_objects_platform_select", "products_objects_select", "products_objects_update"], "storage policies");
     assert(rows.every((r) => r.roles === "{authenticated}"), `storage policy roles: ${rows.map((r) => r.roles).join(",")}`);
     // No broader write policy may exist for anon/public on this bucket.
     const loose = await admin<{ policyname: string }>(
@@ -302,6 +342,12 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       "select prosecdef as definer, prosrc as body from pg_proc where oid = 'public.platform_provision_tenant(uuid,text,text,text,text,text,text)'::regprocedure",
     );
     assert(r.definer && /is_platform_admin\(\)/.test(r.body), "platform_provision_tenant() must be SECURITY DEFINER and check is_platform_admin()");
+  });
+
+  await check("admin-rest-gate", "admin checks refuse the REST API's login role (admin powers exist only on the application's own connection)", async () => {
+    const rows = await admin<{ f: string; gated: boolean }>(`select p.proname as f, pg_get_functiondef(p.oid) like '%session_user <> ''authenticator''%' as gated
+      from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('is_platform_admin','is_super_admin','platform_admin_role') order by 1`);
+    eq(rows.map((r) => [r.f, r.gated]), [["is_platform_admin", true], ["is_super_admin", true], ["platform_admin_role", true]], "REST gate present in");
   });
 
   await check("platform-admins-private", "platform_admins is unreachable for anon, authenticated and storeforge_app (no grants, no policies)", async () => {
@@ -397,7 +443,7 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
             '', now(), '{"provider":"email","providers":["email"]}'::jsonb, ${lit(JSON.stringify({ full_name: `DB Verify ${label}` }))}::jsonb, now(), now(), '', '', '', '')`);
       }
       [a, b, p] = users;
-      await admin(`insert into public.platform_admins (user_id) values (${lit(p)})`);
+      await admin(`insert into public.platform_admins (user_id, role) values (${lit(p)}, 'super_admin')`);
       const profiles = await admin<{ id: string }>(`select id from public.profiles where id in (${users.map(lit).join(",")})`);
       eq(profiles.length, 3, "profiles created by trigger");
     });
@@ -603,6 +649,21 @@ export async function runVerification(deps: VerifyDeps): Promise<Check[]> {
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`update public.tenants set status = 'active' where id = ${tenantA}`)), "an owner editing tenants.status", /permission denied/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_admins`)), "an owner reading platform_admins", /permission denied/);
       await denied(withUserContext(app, a, (tx) => tx.execute(sql`insert into public.platform_admins (user_id) values (${a})`)), "an owner making themselves Platform Admin", /permission denied/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.admin_audit_logs`)), "an owner reading admin_audit_logs", /permission denied/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_record_audit('organization.updated', 'organization', null, null, 'forged entry')`)), "an owner writing an audit entry", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_audit()`)), "an owner reading the audit log", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_list_tenants_page()`)), "an owner listing organizations", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_overview_stats()`)), "an owner reading the platform overview", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.rate_limit_admin('org.create', 10, 600)`)), "an owner using the admin rate limiter", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.rate_limits`)), "an owner reading the rate limit counters", /permission denied/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_settings`)), "an owner reading the platform settings table", /permission denied/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.platform_usage_summary(30)`)), "an owner reading platform usage", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select * from public.get_platform_settings()`)), "an owner reading the admin settings", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_add_admin(${a}::uuid, 'super_admin')`)), "an owner making themselves a Platform Admin", /not_super_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_update_settings('Evil', null, 'INR', 'UTC', 'active')`)), "an owner changing the platform settings", /not_super_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_update_tenant(${tenantA}::uuid, 'Renamed by owner', null, null)`)), "an owner editing their own organization through the admin function", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_assign_owner(${tenantA}::uuid, ${a}::uuid, 'active')`)), "an owner changing ownership through the admin function", /not_platform_admin/);
+      await denied(withUserContext(app, a, (tx) => tx.execute(sql`select public.platform_remove_member(${tenantA}::uuid, ${a}::uuid)`)), "an owner using the admin member removal", /not_platform_admin/);
       await denied(
         withUserContext(app, a, (tx) => tx.execute(sql`insert into public.memberships (tenant_id, user_id, role) values (${tenantA}, ${p}, 'staff')`)),
         "an owner adding the Platform Admin to their team",

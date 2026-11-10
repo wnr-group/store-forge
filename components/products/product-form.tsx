@@ -20,6 +20,7 @@ import { ROUTES } from "@/config/app";
 import { minorToInput } from "@/lib/money";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { cn } from "@/lib/utils";
+import { uuid } from "@/lib/utils/uuid";
 import { MAX_IMAGES_PER_PRODUCT, productInputSchema } from "@/lib/validations/catalog";
 import type { ProductDetail } from "@/services/product.service";
 import { ImageUploader, type ImageItem } from "./image-uploader";
@@ -94,7 +95,7 @@ function toValues(currency: string, d?: ProductDetail): Values {
 
 export function ProductForm({ mode, currency, categories, collections, initial, canDelete }: Props) {
   const router = useRouter();
-  const [productId] = useState(() => initial?.product.id ?? crypto.randomUUID());
+  const [productId] = useState(() => initial?.product.id ?? uuid());
   const defaults = useMemo(() => toValues(currency, initial), [currency, initial]);
   const { register, control, setValue, getValues } = useForm<Values>({ defaultValues: defaults });
   const { errors, formError, setFormError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
@@ -330,7 +331,7 @@ export function ProductForm({ mode, currency, categories, collections, initial, 
         </div>
       </div>
 
-      <div className="sticky bottom-0 z-20 -mx-3 mt-6 border-t bg-background/90 backdrop-blur sm:-mx-6">
+      <div className="sticky bottom-0 z-20 -mx-3 mt-6 border-t bg-background sm:-mx-6">
         <div className="flex items-center justify-end gap-2 px-3 py-3 sm:px-6">
           {uploading ? <span className="mr-auto text-xs text-muted-foreground">Waiting for uploads to finish…</span> : null}
           <Link href={ROUTES.products} className={cn(buttonVariants({ variant: "outline" }), "h-9")}>

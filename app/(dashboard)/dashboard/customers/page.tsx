@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ROUTES } from "@/config/app";
 import { canManageCustomers } from "@/lib/auth/permissions";
 import { formatMoney } from "@/lib/money";
-import { requireWorkspace } from "@/lib/tenant/context";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { customerListQuerySchema } from "@/lib/validations/catalog";
 import { listCustomers } from "@/services/customer.service";
 
@@ -21,10 +21,10 @@ const date = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", 
 export default async function CustomersPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const raw = await searchParams;
   const query = customerListQuerySchema.parse(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])));
-  const { active, store } = await requireWorkspace();
+  const { active, store } = await requireWorkspaceCan("customers:view");
   const result = await listCustomers(query);
   const currency = store?.currency ?? "INR";
-  const add = canManageCustomers(active.role) ? <AddCustomerButton /> : null;
+  const add = canManageCustomers(active) ? <AddCustomerButton /> : null;
 
   return (
     <>
@@ -47,7 +47,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             <EmptyState icon={SearchX} title="No customers match" description="Try a different name, email or phone number." />
           ) : (
             <>
-              <div className="overflow-x-auto rounded-xl border bg-card">
+              <div className="overflow-x-auto rounded-lg border bg-card">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/40 hover:bg-muted/40">

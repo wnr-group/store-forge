@@ -25,6 +25,7 @@ export const tenants = pgTable(
     check("tenants_contact_phone_check", sql`${t.contactPhone} is null or char_length(${t.contactPhone}) between 4 and 32`),
     check("tenants_address_check", sql`${t.address} is null or char_length(${t.address}) <= 300`),
     index("tenants_created_by_idx").on(t.createdBy),
+    index("tenants_created_idx").on(t.createdAt.desc(), t.id),
   ],
 ).enableRLS();
 

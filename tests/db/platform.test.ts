@@ -33,7 +33,7 @@ beforeAll(async () => {
   tenantB = (await provision(db, admin, bob, "beta-shop")).tenant_id;
   // Owner adds their team through the same RLS-protected INSERT the app uses.
   await as(alice, async () => {
-    await db.query("insert into memberships (tenant_id, user_id, role) values ($1,$2,'admin'), ($1,$3,'staff')", [tenantA, manager, staff]);
+    await db.query("insert into memberships (tenant_id, user_id, role, permissions) values ($1,$2,'admin','{\"products\":\"write\",\"orders\":\"write\",\"customers\":\"write\",\"settings\":\"write\"}'), ($1,$3,'staff','{\"products\":\"write\",\"orders\":\"read\",\"customers\":\"write\",\"settings\":\"read\"}')", [tenantA, manager, staff]);
   });
   productA = (await q<{ id: string }>("insert into products (tenant_id, name, slug, price_minor) values ($1,'A Product','a-product',100) returning id", [tenantA]))[0].id;
   productB = (await q<{ id: string }>("insert into products (tenant_id, name, slug, price_minor) values ($1,'B Product','b-product',100) returning id", [tenantB]))[0].id;

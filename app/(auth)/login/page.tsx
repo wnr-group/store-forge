@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { notFound } from "next/navigation";
 import { getRequestStoreSlug } from "@/lib/tenant/request";
 import { safeNextPath } from "@/lib/utils/redirect";
+import { getPublicBranding } from "@/services/platform-settings.service";
 import { getPublicStorefront } from "@/services/storefront.service";
 
 export const metadata: Metadata = { title: "Sign in" };
@@ -14,13 +15,13 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { next, error } = await searchParams;
   // <store>.<root>/login: only for a store that exists and is live (unknown / suspended -> 404).
   const slug = await getRequestStoreSlug();
-  const store = slug ? await getPublicStorefront(slug) : null;
+  const [store, brand] = await Promise.all([slug ? getPublicStorefront(slug) : Promise.resolve(null), getPublicBranding()]);
   if (slug && !store) notFound();
   return (
     <AuthShell
-      title={store ? `Sign in to ${store.name}` : "Welcome back"}
+      title={store ? `Sign in to ${store.name}` : "Sign in"}
       description="Sign in with the email and password you were given."
-      footer="Accounts are created for you by your StoreForge administrator or company owner. Forgot your password? Ask them to reset it."
+      footer={`Accounts are created for you by your ${brand.platformName} administrator or company owner. Forgot your password? Ask your company owner to reset it.${brand.supportEmail ? ` Need help? Contact ${brand.supportEmail}.` : ""}`}
     >
       {error === "callback" ? (
         <Alert variant="destructive">

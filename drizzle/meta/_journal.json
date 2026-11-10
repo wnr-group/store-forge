@@ -120,6 +120,62 @@
       "when": 1794218109809,
       "tag": "0016_template_engine_cutover",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794300000000,
+      "tag": "0017_platform_add_member",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794300001000,
+      "tag": "0018_member_permissions",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794300002000,
+      "tag": "0019_platform_delete_tenant",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794300003000,
+      "tag": "0020_admin_lists_and_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794300004000,
+      "tag": "0021_admin_org_store_team",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794300005000,
+      "tag": "0022_admin_team_usage_support_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794300006000,
+      "tag": "0023_admin_rest_gate_and_rate_limits",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794300007000,
+      "tag": "0024_remove_support_notes_store_status_and_reserved_names",
+      "breakpoints": true
     }
   ]
 }

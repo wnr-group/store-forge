@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { changePasswordAction } from "@/app/(auth)/actions";
 import { FormField } from "@/components/shared/form-field";
 import { PasswordInput } from "@/components/shared/password-input";
-import { SectionCard } from "@/components/shared/section-card";
+import { SettingsSection } from "@/components/shared/settings-section";
 import { Button } from "@/components/ui/button";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { changePasswordSchema } from "@/lib/validations/auth";
@@ -47,9 +47,17 @@ export function ChangePasswordForm() {
         submit();
       }}
     >
-      <SectionCard title="Change password" description="If you were given an initial password, change it now. Nobody can view your password, including administrators.">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField id="cp-current" label="Current password" required error={errors.currentPassword} className="sm:col-span-2">
+      <SettingsSection
+        title="Change password"
+        description="If you were given an initial password, change it now. Nobody can view your password, including administrators."
+        footer={
+          <Button type="submit" disabled={pending}>
+            {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Saving…" : "Change password"}
+          </Button>
+        }
+      >
+        <div className="grid max-w-sm gap-4">
+          <FormField id="cp-current" label="Current password" required error={errors.currentPassword}>
             <PasswordInput {...props("currentPassword", "cp-current")} aria-required autoComplete="current-password" />
           </FormField>
           <FormField id="cp-new" label="New password" required error={errors.password} hint="At least 8 characters with a letter and a number.">
@@ -60,12 +68,7 @@ export function ChangePasswordForm() {
           </FormField>
         </div>
         {formError && Object.keys(errors).length === 0 ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
-        <div className="flex justify-end">
-          <Button type="submit" disabled={pending}>
-            {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Saving…" : "Change password"}
-          </Button>
-        </div>
-      </SectionCard>
+      </SettingsSection>
     </form>
   );
 }

@@ -36,7 +36,7 @@ export default async function TemplatesPage() {
   return (
     <>
       <PageHeader title="Templates" description="Choose how your public storefront looks and customize it. Changes go live when you save." />
-      <TemplatesWorkspace key={saved?.updatedAt ?? "none"} saved={saved} storefront={storefront} canEdit={canManageStore(active.role)} />
+      <TemplatesWorkspace key={saved?.updatedAt ?? "none"} saved={saved} storefront={storefront} canEdit={canManageStore(active)} />
     </>
   );
 }

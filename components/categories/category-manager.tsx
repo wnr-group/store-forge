@@ -86,7 +86,7 @@ export function CategoryManager({ rows, canManage, canDelete }: { rows: Category
       ) : (
         <>
           {add ? <div className="mb-4 flex justify-end">{add}</div> : null}
-          <div className="overflow-hidden rounded-xl border bg-card">
+          <div className="overflow-hidden rounded-lg border bg-card">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/40 hover:bg-muted/40">

@@ -25,6 +25,9 @@ const SUPABASE_STUB = `
   $$;
   create role anon nologin;
   create role authenticated nologin;
+  -- PostgREST (the public REST API) logs in as this role and then switches to anon/authenticated.
+  create role authenticator nologin;
+  grant authenticated to authenticator;
   create role service_role nologin bypassrls;
   grant usage on schema public, auth to anon, authenticated, service_role;
   grant execute on function auth.uid() to anon, authenticated, service_role;
@@ -79,10 +82,10 @@ export async function asUser<T>(db: PGlite, userId: string | null, fn: () => Pro
 }
 
 /** Inserts a Platform Admin the way `npm run admin:create` does: privileged write, never through the API. */
-export async function createPlatformAdmin(db: PGlite, email = "platform.admin@example.test"): Promise<string> {
+export async function createPlatformAdmin(db: PGlite, email = "platform.admin@example.test", role: "super_admin" | "admin" = "super_admin"): Promise<string> {
   const existing = await db.query<{ id: string }>("select id from auth.users where email = $1", [email]);
   const id = existing.rows[0]?.id ?? (await createUser(db, email, "Platform Admin"));
-  await db.query("insert into platform_admins (user_id) values ($1) on conflict do nothing", [id]);
+  await db.query("insert into platform_admins (user_id, role) values ($1, $2) on conflict do nothing", [id, role]);
   return id;
 }
 
@@ -121,6 +124,26 @@ export async function onboard(
  * PGlite's RESET SESSION AUTHORIZATION doesn't return to the superuser, so the
  * original user is restored explicitly.
  */
+/**
+ * Run `fn` the way Supabase's REST API would: logged in as `authenticator`, then switched to `authenticated` with the user's
+ * token claims. session_user stays `authenticator` through the role switch, which is how the database tells this path apart
+ * from the application's own connection.
+ */
+export async function asRestApi<T>(db: PGlite, userId: string, fn: () => Promise<T>): Promise<T> {
+  const claims = JSON.stringify({ sub: userId, role: "authenticated" });
+  await db.exec("set session authorization authenticator");
+  try {
+    await db.query("select set_config('request.jwt.claims', $1, false)", [claims]);
+    await db.exec("set role authenticated");
+    return await fn();
+  } finally {
+    await db.exec("rollback").catch(() => {});
+    await db.exec("reset role").catch(() => {});
+    await db.exec("set session authorization postgres");
+    await db.query("select set_config('request.jwt.claims', '', false)");
+  }
+}
+
 export async function asAppConnection<T>(db: PGlite, fn: () => Promise<T>): Promise<T> {
   await db.exec("set session authorization storeforge_app");
   try {

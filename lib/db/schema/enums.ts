@@ -6,6 +6,20 @@
 export const MEMBERSHIP_ROLES = ["owner", "admin", "staff"] as const;
 export type MembershipRole = (typeof MEMBERSHIP_ROLES)[number];
 
+/**
+ * Modules an Owner can grant to a team member, with the level each one takes. `write` always includes `read`.
+ * The database enforces this with restrictive RLS policies calling has_module_access() (0018_member_permissions).
+ */
+export const MODULES = ["products", "orders", "customers", "settings"] as const;
+export type Module = (typeof MODULES)[number];
+export const ACCESS_LEVELS = ["none", "read", "write"] as const;
+export type AccessLevel = (typeof ACCESS_LEVELS)[number];
+export type MemberPermissions = Partial<Record<Module, AccessLevel>>;
+
+/** Platform staff levels. Only a super admin can manage other admins and the platform settings; the last one can never be removed. */
+export const PLATFORM_ADMIN_ROLES = ["super_admin", "admin"] as const;
+export type PlatformAdminRole = (typeof PLATFORM_ADMIN_ROLES)[number];
+
 /** A deactivated membership keeps its row but grants no access (enforced by is_tenant_member / has_tenant_role). */
 export const MEMBERSHIP_STATUSES = ["active", "disabled"] as const;
 export type MembershipStatus = (typeof MEMBERSHIP_STATUSES)[number];

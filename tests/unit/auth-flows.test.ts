@@ -19,6 +19,9 @@ const redirect = vi.fn((url: string) => {
 vi.mock("next/navigation", () => ({ redirect: (u: string) => redirect(u) }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: vi.fn(), set: vi.fn(), getAll: () => [] }) }));
+// The real limiter needs the database; its behaviour is tested in tests/db/admin-hardening.test.ts and tests/e2e/admin-workflows.test.ts.
+const limiter = vi.fn<(email: string) => Promise<void>>();
+vi.mock("@/lib/security/rate-limit", () => ({ enforceLoginRateLimit: (email: string) => limiter(email) }));
 
 import * as authActions from "@/app/(auth)/actions";
 import { changePasswordAction, loginAction, logoutAction } from "@/app/(auth)/actions";
@@ -30,6 +33,8 @@ beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "a".repeat(30));
   vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
   for (const fn of [...Object.values(auth), redirect]) fn.mockReset();
+  limiter.mockReset();
+  limiter.mockResolvedValue(undefined);
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -58,6 +63,28 @@ describe("login / logout (provisioned accounts, no email verification step)", ()
     auth.signInWithPassword.mockResolvedValue({ error: null });
     expect(await redirected(loginAction({ email: "A@B.co", password: "x" }))).toBe("/dashboard");
     expect(auth.signInWithPassword).toHaveBeenCalledWith({ email: "a@b.co", password: "x" });
+  });
+
+  it("counts the attempt against the rate limit BEFORE the password is checked, using the normalised e-mail", async () => {
+    const order: string[] = [];
+    limiter.mockImplementation(async (email: string) => void order.push(`limit:${email}`));
+    auth.signInWithPassword.mockImplementation(async () => (order.push("password"), { error: null }));
+    await redirected(loginAction({ email: " A@B.co ", password: "x" }));
+    expect(order).toEqual(["limit:a@b.co", "password"]);
+  });
+
+  it("refuses without checking the password when the rate limit is exceeded, and says how long to wait", async () => {
+    const { AppError } = await import("@/lib/errors");
+    limiter.mockRejectedValue(new AppError("RATE_LIMITED", "Too many requests. Please wait about 9 minutes and try again."));
+    const result = await loginAction({ email: "a@b.co", password: "right-password-1" });
+    expect(result).toMatchObject({ ok: false, code: "RATE_LIMITED", error: "Too many requests. Please wait about 9 minutes and try again." });
+    expect(auth.signInWithPassword).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it("does not count an attempt whose form is invalid", async () => {
+    expect(await loginAction({ email: "not-an-email", password: "" })).toMatchObject({ ok: false, code: "VALIDATION" });
+    expect(limiter).not.toHaveBeenCalled();
   });
 
   it("honours a safe next path but not an external one", async () => {

@@ -33,7 +33,7 @@ export function CommandSearch() {
       <Button
         variant="outline"
         onClick={() => setOpen(true)}
-        className="h-8 w-8 justify-center px-0 text-muted-foreground sm:w-56 sm:justify-start sm:px-2.5"
+        className="h-9 w-9 justify-center px-0 text-muted-foreground sm:w-56 sm:justify-start sm:px-2.5"
         aria-label="Search"
       >
         <Search aria-hidden />

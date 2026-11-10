@@ -75,3 +75,36 @@ export async function removeObjects(paths: string[]): Promise<void> {
     console.error("[storage] remove", e);
   }
 }
+
+/**
+ * Removes EVERY object under `{tenantId}/` (product media, collection images, the store logo) when an organization is
+ * deleted. Storage lists one folder level at a time, so this walks the folders. Runs with the caller's own session: the
+ * Platform Admin storage policies (0012) allow listing and deleting in the products bucket. Best-effort like
+ * removeObjects: a failure leaves unreferenced files, never a dangling DB reference, and is logged.
+ */
+export async function removeTenantObjects(tenantId: string): Promise<void> {
+  try {
+    const bucket = (await createClient()).storage.from(PRODUCT_BUCKET);
+    const files: string[] = [];
+    const walk = async (prefix: string, depth: number): Promise<void> => {
+      if (depth > 4) return;
+      for (let offset = 0; ; offset += 1000) {
+        const { data, error } = await bucket.list(prefix, { limit: 1000, offset });
+        if (error) throw error;
+        for (const entry of data ?? []) {
+          // Folders come back without an id; files have one.
+          if (entry.id) files.push(`${prefix}/${entry.name}`);
+          else await walk(`${prefix}/${entry.name}`, depth + 1);
+        }
+        if (!data || data.length < 1000) break;
+      }
+    };
+    await walk(tenantId, 0);
+    for (let i = 0; i < files.length; i += 100) {
+      const { error } = await bucket.remove(files.slice(i, i + 100));
+      if (error) console.error("[storage] remove tenant objects", error.message);
+    }
+  } catch (e) {
+    console.error("[storage] remove tenant objects", e);
+  }
+}

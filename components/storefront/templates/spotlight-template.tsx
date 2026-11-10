@@ -1,5 +1,5 @@
+import { StoreAccessLink } from "@/components/storefront/store-access-link";
 import Image from "next/image";
-import Link from "next/link";
 import { Store } from "lucide-react";
 import { publicImageUrl } from "@/lib/storage/paths";
 import type { TemplateProps } from "@/lib/templates/types";
@@ -25,9 +25,7 @@ export function SpotlightTemplate({ store, settings }: TemplateProps) {
             )}
             <span className="truncate text-sm font-semibold tracking-tight">{store.name}</span>
           </div>
-          <Link href="/login" className="shrink-0 text-right text-sm text-muted-foreground hover:text-foreground hover:underline sm:w-24">
-            Store login
-          </Link>
+          <StoreAccessLink className="shrink-0 text-right text-sm text-muted-foreground hover:text-foreground hover:underline sm:w-24" />
         </div>
       </header>
 

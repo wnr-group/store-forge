@@ -9,14 +9,14 @@ import { ROUTES } from "@/config/app";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { RANGES, type Analytics } from "@/services/analytics.service";
-import { SalesChart } from "./sales-chart";
+import { SalesChart } from "./sales-chart-lazy";
 
 const dateTime = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 const TONES: Record<string, Tone> = { paid: "active", fulfilled: "active", pending: "warning", cancelled: "draft", refunded: "danger" };
 
 function Stat({ label, value, hint, delta }: { label: string; value: string; hint?: string; delta?: number | null }) {
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-lg border bg-card p-4">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p className="mt-1.5 text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
       <p className="mt-1 flex min-h-4 items-center gap-1 text-xs text-muted-foreground">
@@ -99,7 +99,7 @@ export function AnalyticsView({ data, currency, detailed = false }: Props) {
               {data.bestSellers.map((b, i) => (
                 <li key={`${b.name}-${i}`} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                   <span className="flex min-w-0 items-center gap-3">
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium tabular-nums">{i + 1}</span>
+                    <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted font-mono text-xs tabular-nums">{i + 1}</span>
                     <span className="truncate font-medium">{b.name}</span>
                   </span>
                   <span className="shrink-0 text-right tabular-nums">

@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Pagination } from "@/components/shared/pagination";
 import { ROUTES } from "@/config/app";
 import { canManageCatalog } from "@/lib/auth/permissions";
-import { requireWorkspace } from "@/lib/tenant/context";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { listAdjustments, listInventory } from "@/services/inventory.service";
 
 export const metadata: Metadata = { title: "Inventory" };
@@ -24,7 +24,7 @@ const when = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", 
 export default async function InventoryPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const raw = await searchParams;
   const query = querySchema.parse(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])));
-  const { active } = await requireWorkspace();
+  const { active } = await requireWorkspaceCan("catalog:view");
   const [result, history] = await Promise.all([listInventory(query), listAdjustments(10)]);
   const filtered = Boolean(query.q) || query.stock !== "all";
 
@@ -55,7 +55,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
             <EmptyState icon={SearchX} title="No matching items" description="Try a different search or stock level." />
           ) : (
             <>
-              <InventoryTable rows={result.items} canAdjust={canManageCatalog(active.role)} />
+              <InventoryTable rows={result.items} canAdjust={canManageCatalog(active)} />
               <Pagination page={result.page} pageSize={result.pageSize} total={result.total} basePath={ROUTES.inventory} params={{ q: query.q, stock: query.stock }} />
             </>
           )}
@@ -65,7 +65,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
       {history.length > 0 ? (
         <section aria-labelledby="history" className="mt-10">
           <h2 id="history" className="mb-3 text-sm font-semibold">Recent adjustments</h2>
-          <ul className="divide-y rounded-xl border bg-card text-sm">
+          <ul className="divide-y rounded-lg border bg-card text-sm">
             {history.map((h) => (
               <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
                 <span className="min-w-0">
