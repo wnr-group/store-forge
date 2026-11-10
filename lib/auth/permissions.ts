@@ -2,7 +2,7 @@
  * Central access definition. UI and server code ask `can(actor, permission)`;
  * nobody hardcodes role names at call sites. The database enforces the same
  * rules independently through RLS (drizzle/0002 role policies plus the restrictive
- * per-module policies of drizzle/0011_member_permissions) - keep the two in sync.
+ * per-module policies of drizzle/0018_member_permissions) - keep the two in sync.
  */
 import { MEMBERSHIP_ROLES, MODULES, type AccessLevel, type MemberPermissions, type MembershipRole, type Module } from "@/lib/db/schema/enums";
 

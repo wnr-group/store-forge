@@ -8,7 +8,7 @@ export type MembershipRole = (typeof MEMBERSHIP_ROLES)[number];
 
 /**
  * Modules an Owner can grant to a team member, with the level each one takes. `write` always includes `read`.
- * The database enforces this with restrictive RLS policies calling has_module_access() (0011_member_permissions).
+ * The database enforces this with restrictive RLS policies calling has_module_access() (0018_member_permissions).
  */
 export const MODULES = ["products", "orders", "customers", "settings"] as const;
 export type Module = (typeof MODULES)[number];

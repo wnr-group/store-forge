@@ -24,7 +24,7 @@ What was reviewed, what was found, what was fixed and what is left. It covers th
 
 **Evidence.** A call to `/rest/v1/rpc/platform_list_tenants_page` with the anon key returned `permission denied for function`. That means the function is in the API's schema, so it is exposed. `pg_stat_activity` showed live sessions for the login role `authenticator`, which is what the REST service uses. The app uses `storeforge_app`.
 
-**Fix** (`0016_admin_rest_gate_and_rate_limits`). Every admin function begins with `is_platform_admin()` or `is_super_admin()`. Both now also require `session_user <> 'authenticator'`. `session_user` is not changed by `SET ROLE`, so a caller cannot fake it. One change closes the REST route for all admin functions, including the admin Storage policies, and organization owners and members are unaffected.
+**Fix** (`0023_admin_rest_gate_and_rate_limits`). Every admin function begins with `is_platform_admin()` or `is_super_admin()`. Both now also require `session_user <> 'authenticator'`. `session_user` is not changed by `SET ROLE`, so a caller cannot fake it. One change closes the REST route for all admin functions, including the admin Storage policies, and organization owners and members are unaffected.
 
 **Verified by** `admin-hardening.test.ts` (a real super admin is refused on the REST path and accepted on the application's connection) and `security-audit.test.ts` (every admin function is refused for owners, anonymous visitors and REST).
 

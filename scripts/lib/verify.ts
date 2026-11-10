@@ -33,7 +33,7 @@ const TABLES = [
   "templates", "template_versions", "template_assignments",
 ] as const;
 
-/** Restrictive per-module policies of 0011_member_permissions: reads are gated on every table except stores/tenants. */
+/** Restrictive per-module policies of 0018_member_permissions: reads are gated on every table except stores/tenants. */
 const PERMISSION_POLICIES = [
   ...["categories", "collections", "collection_products", "products", "product_images", "product_options", "product_variants",
     "inventory_adjustments", "customers", "orders", "order_items"].flatMap((t) => ["select", "insert", "update", "delete"].map((c) => `${t}_perm_${c}`)),

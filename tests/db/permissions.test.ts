@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { asUser, createDb, createPlatformAdmin, createUser, onboard } from "./harness";
 
 /**
- * Per-module permissions an Owner grants and revokes (drizzle/0011_member_permissions).
+ * Per-module permissions an Owner grants and revokes (drizzle/0018_member_permissions).
  * Members are stored with role 'admin'; the permissions alone decide what they can read and write.
  */
 let db: PGlite;
