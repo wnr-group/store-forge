@@ -1,3 +1,4 @@
+import { getPublicBranding } from "@/services/platform-settings.service";
 import Link from "next/link";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/dashboard/app-shell";
@@ -36,6 +37,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       navKey="admin"
       homeHref={ROUTES.admin}
       defaultCollapsed={collapsed}
+      brandName={(await getPublicBranding()).platformName}
       switcher={{ full: badge(false), compact: badge(true) }}
       footer={{
         full: <UserMenu name={name} email={email} role="Platform Admin">{accountLink}</UserMenu>,

@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import "server-only";
 import { cache } from "react";
 import { sql } from "drizzle-orm";
@@ -63,12 +64,23 @@ const DEFAULT_BRANDING: PublicBranding = { platformName: "StoreForge", supportEm
  * The platform name and support contact, for pages anyone can open (sign-in, "no workspace"). Needs no session. If the
  * database cannot be reached the defaults are used, so a settings problem can never stop someone from signing in.
  */
-export const getPublicBranding = cache(async (): Promise<PublicBranding> => {
-  try {
+export const BRANDING_TAG = "platform-branding";
+
+/** Cached across requests so the name in every page header and title costs no query; updatePlatformSettingsAction expires the tag. Throws on failure so a fallback is never cached. */
+const fetchPublicBranding = unstable_cache(
+  async (): Promise<PublicBranding> => {
     const row = await withPublicContext(getDatabase(), async (tx) =>
       rowsOf<{ platform_name: string; support_email: string | null }>(await tx.execute(sql`select * from public.get_public_platform_settings()`))[0],
     );
     return row ? { platformName: row.platform_name, supportEmail: row.support_email } : DEFAULT_BRANDING;
+  },
+  ["public-platform-branding"],
+  { tags: [BRANDING_TAG], revalidate: 300 },
+);
+
+export const getPublicBranding = cache(async (): Promise<PublicBranding> => {
+  try {
+    return await fetchPublicBranding();
   } catch (error) {
     console.error("[platform-settings] public branding unavailable, using defaults", error instanceof Error ? error.message : error);
     return DEFAULT_BRANDING;

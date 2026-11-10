@@ -1,3 +1,4 @@
+import { getPublicBranding } from "@/services/platform-settings.service";
 import Link from "next/link";
 import { HeaderShell } from "./header-shell";
 import { MobileMenu } from "./mobile-menu";
@@ -14,13 +15,14 @@ export const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ] as const;
 
-export function AnnouncementBar() {
+export async function AnnouncementBar() {
+  const { platformName } = await getPublicBranding();
   return (
     <div className="bg-lp-deep text-white">
       <Container className="flex min-h-9 items-center justify-center py-2 text-center text-[13px]">
         <p className="text-pretty">
           <span className="mr-2 inline-block size-1.5 rounded-full bg-lp-accent align-middle" aria-hidden />
-          <span className="font-semibold">Introducing StoreForge</span>
+          <span className="font-semibold">Introducing {platformName}</span>
           <span className="hidden text-white/80 sm:inline"> — everything you need to build and grow your online store.</span>
         </p>
       </Container>
@@ -28,12 +30,13 @@ export function AnnouncementBar() {
   );
 }
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const { platformName } = await getPublicBranding();
   return (
     <HeaderShell>
       <Container className="flex h-(--nav-h) items-center justify-between gap-6 transition-[height] duration-300 motion-reduce:transition-none">
-        <Link href="/" aria-label="StoreForge, home" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
-          <BrandLogo />
+        <Link href="/" aria-label={`${platformName}, home`} className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
+          <BrandLogo name={platformName} />
         </Link>
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((l) => (
@@ -87,16 +90,17 @@ const FOOTER_COLUMNS = [
   },
 ] as const;
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const { platformName } = await getPublicBranding();
   return (
     <footer className="relative bg-lp-deep text-white">
       <span aria-hidden className="lp-gold-rule absolute inset-x-0 top-0 h-px" />
       <Container className="py-14">
         <Reveal y={20} className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))]">
           <div className="max-w-sm">
-            <BrandLogo light />
+            <BrandLogo light name={platformName} />
             <p className="mt-4 text-sm leading-6 text-white/65">
-              StoreForge is a commerce platform for online sellers. Each company gets its own catalog, inventory, customers, team and a public storefront on its own subdomain.
+              {platformName} is a commerce platform for online sellers. Each company gets its own catalog, inventory, customers, team and a public storefront on its own subdomain.
             </p>
           </div>
           {FOOTER_COLUMNS.map((col) => (
@@ -115,7 +119,7 @@ export function SiteFooter() {
           ))}
         </Reveal>
         <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} StoreForge. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {platformName}. All rights reserved.</p>
           <p>
             Powered by{" "}
             <a href="https://www.wnradvisory.com/" target="_blank" rel="noopener noreferrer" className="font-medium text-white underline-offset-4 hover:underline">

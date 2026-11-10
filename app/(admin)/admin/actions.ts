@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { ROUTES } from "@/config/app";
 import { run } from "@/lib/actions/run";
@@ -23,7 +23,7 @@ import {
   updateCompanyStore,
 } from "@/services/platform.service";
 import { addPlatformAdmin, removePlatformAdmin, setPlatformAdminRole } from "@/services/platform-team.service";
-import { updatePlatformSettings } from "@/services/platform-settings.service";
+import { BRANDING_TAG, updatePlatformSettings } from "@/services/platform-settings.service";
 
 // Every action below calls a service function whose first statement authorises the Platform Admin from the validated session,
 // before any privileged work. Hiding the UI is never the protection. Each action also:
@@ -145,6 +145,8 @@ export async function removePlatformAdminAction(userId: unknown) {
 export async function updatePlatformSettingsAction(input: unknown) {
   return guarded("settings.update", "admin.settings.update", async () => {
     await updatePlatformSettings(parseInput(platformSettingsSchema, input));
+    updateTag(BRANDING_TAG);
+    revalidatePath("/", "layout");
     revalidatePath(ROUTES.admin, "layout");
   });
 }

@@ -1,3 +1,4 @@
+import { getPublicBranding } from "@/services/platform-settings.service";
 import Link from "next/link";
 import { Logo } from "@/components/shared/logo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +11,10 @@ type Props = {
   icon?: React.ReactNode;
 };
 
-export function AuthShell({ title, description, children, footer, icon }: Props) {
+export async function AuthShell({ title, description, children, footer, icon }: Props) {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-background px-4 py-10">
-      <Logo className="mb-6" />
+      <Logo className="mb-6" name={(await getPublicBranding()).platformName} />
       <Card className="w-full max-w-md">
         <CardHeader>
           {icon ? (

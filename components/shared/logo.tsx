@@ -8,11 +8,11 @@ function LogoMark({ className }: { className?: string }) {
   return <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className={cn("h-6 w-auto shrink-0", className)} />;
 }
 
-export function Logo({ className, href = "/" }: { className?: string; href?: string }) {
+export function Logo({ className, href = "/", name = APP_NAME }: { className?: string; href?: string; name?: string }) {
   return (
     <Link href={href} className={cn("inline-flex items-center gap-2 font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md", className)}>
       <LogoMark />
-      <span className="text-lg">{APP_NAME}</span>
+      <span className="text-lg">{name}</span>
     </Link>
   );
 }

@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import Script from "next/script";
 import { ThemedToaster } from "@/components/shared/themed-toaster";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/script";
+import { getPublicBranding } from "@/services/platform-settings.service";
 import "./globals.css";
 
 // Self-hosted variable fonts (latin subset, app/fonts): no Google Fonts request at dev, build or run time, so the
@@ -14,10 +15,14 @@ const geistMono = localFont({ src: "./fonts/geist-mono-latin.woff2", variable: "
 const manrope = localFont({ src: "./fonts/manrope-latin.woff2", variable: "--font-manrope", weight: "200 800", display: "swap" });
 const dmSans = localFont({ src: "./fonts/dm-sans-latin.woff2", variable: "--font-dm-sans", weight: "100 1000", display: "swap" });
 
-export const metadata: Metadata = {
-  title: { default: "StoreForge - launch your online store", template: "%s | StoreForge" },
-  description: "StoreForge lets merchants create and run their own online store on a secure, multi-tenant platform.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { platformName } = await getPublicBranding();
+  return {
+    title: { default: `${platformName} - launch your online store`, template: `%s | ${platformName}` },
+    description: `${platformName} lets merchants create and run their own online store on a secure, multi-tenant platform.`,
+    applicationName: platformName,
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
