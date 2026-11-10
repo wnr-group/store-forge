@@ -45,7 +45,7 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.adminTeam, label: "Platform Team", icon: ShieldCheck, group: "Platform" },
   { href: ROUTES.adminActivity, label: "Activity & Audit Logs", icon: ScrollText, group: "Platform" },
   { href: ROUTES.adminUsage, label: "Usage & Analytics", icon: BarChart3, group: "Platform" },
-  { href: ROUTES.adminSettings, label: "Platform Settings", icon: Settings, group: "Platform" },
+  { href: ROUTES.adminSettings, label: "Settings", icon: Settings, group: "Platform" },
   { href: ROUTES.adminAccount, label: "My Account", icon: KeyRound, group: "Account" },
 ];
 

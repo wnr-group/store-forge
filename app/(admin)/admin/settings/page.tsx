@@ -4,7 +4,7 @@ import { PlatformSettingsForm } from "@/components/admin/platform-settings-form"
 import { getPlatformAdminLevel } from "@/lib/auth/platform";
 import { getPlatformSettings } from "@/services/platform-settings.service";
 
-export const metadata: Metadata = { title: "Platform Settings" };
+export const metadata: Metadata = { title: "Settings" };
 
 const when = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
@@ -13,7 +13,7 @@ export default async function PlatformSettingsPage() {
 
   return (
     <>
-      <PageHeader title="Platform Settings" description="Values that apply across the whole platform. Changes are recorded in the audit log." />
+      <PageHeader title="Settings" description="Values that apply across the whole platform. Changes are recorded in the audit log." />
       <PlatformSettingsForm
         // remount with fresh values after a save
         key={`${settings.updatedAt.getTime()}`}

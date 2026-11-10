@@ -1,6 +1,6 @@
 import { LoadingShell, SkeletonHeader, SkeletonSection, SkeletonFields } from "@/components/shared/skeletons";
 
-/** Platform Settings: one card of platform-wide defaults with a save button. */
+/** Settings: one card of platform-wide defaults with a save button. */
 export default function Loading() {
   return (
     <LoadingShell>
