@@ -2,6 +2,7 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getPublicEnv } from "@/config/env";
+import { authApiEnabled } from "@/lib/auth/nest-api";
 
 /**
  * Per-request, cookie-backed Supabase client used for AUTHENTICATION ONLY
@@ -20,7 +21,17 @@ export async function createClient() {
       getAll: () => cookieStore.getAll(),
       setAll(cookiesToSet) {
         try {
-          for (const { name, value, options } of cookiesToSet) cookieStore.set(name, value, options);
+          // When the API owns the session, whatever this client writes (a metadata update, a token refresh) must keep the
+          // cookie hardened: supabase-js defaults to httpOnly:false, which would let page scripts read the tokens again.
+          const hardened = authApiEnabled();
+          for (const { name, value, options } of cookiesToSet)
+            cookieStore.set(
+              name,
+              value,
+              hardened
+                ? { ...options, domain: undefined, path: "/", httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" }
+                : options,
+            );
         } catch {
           // Called from a Server Component, where cookies are read-only.
           // The proxy refreshes the session, so this is safe to ignore.
