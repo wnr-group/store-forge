@@ -1,5 +1,5 @@
+import { StoreAccessLink } from "@/components/storefront/store-access-link";
 import Image from "next/image";
-import Link from "next/link";
 import { Store } from "lucide-react";
 import { publicImageUrl } from "@/lib/storage/paths";
 import type { TemplateProps } from "@/lib/templates/types";
@@ -20,9 +20,7 @@ export function ClassicTemplate({ store, settings }: TemplateProps) {
             </span>
           )}
           <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{settings.heading}</h1>
-          <Link href="/login" className="shrink-0 text-sm text-muted-foreground hover:text-foreground hover:underline">
-            Store login
-          </Link>
+          <StoreAccessLink className="shrink-0 text-sm text-muted-foreground hover:text-foreground hover:underline" />
         </div>
       </header>
 
