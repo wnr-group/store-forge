@@ -30,10 +30,11 @@ export function LoginForm({ next }: { next?: string }) {
   });
 
   return (
-    <form method="post" onSubmit={onSubmit} noValidate className="space-y-3">
+    <form method="post" onSubmit={onSubmit} noValidate className="space-y-1">
       <FormError message={formError} />
       <FormField required id="email" label="Email" error={errors.email?.message}>
         <Input
+          className="h-9 rounded-lg px-3 text-sm"
           id="email"
           type="email"
           autoComplete="email"
@@ -47,12 +48,13 @@ export function LoginForm({ next }: { next?: string }) {
         <PasswordInput
           id="password"
           autoComplete="current-password"
+          className="h-9 rounded-lg px-3 text-sm"
           aria-invalid={!!errors.password}
           aria-describedby="password-msg"
           {...register("password")}
         />
       </FormField>
-      <SubmitButton pending={pending} pendingText="Signing in…">
+      <SubmitButton pending={pending} pendingText="Signing in…" className="mt-2 h-10 w-full rounded-full font-semibold">
         Sign in
       </SubmitButton>
     </form>

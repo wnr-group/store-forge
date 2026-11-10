@@ -9,7 +9,12 @@ import { safeNextPath } from "@/lib/utils/redirect";
 import { getPublicBranding } from "@/services/platform-settings.service";
 import { getPublicStorefront } from "@/services/storefront.service";
 
-export const metadata: Metadata = { title: "Sign in" };
+// On a tenant host the tab names the store, not the platform (absolute skips the root "%s | Platform" template).
+export async function generateMetadata(): Promise<Metadata> {
+  const slug = await getRequestStoreSlug();
+  const store = slug ? await getPublicStorefront(slug) : null;
+  return { title: store ? { absolute: `Sign in | ${store.name}` } : "Sign in" };
+}
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; error?: string }> }) {
   const { next, error } = await searchParams;
@@ -19,9 +24,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   if (slug && !store) notFound();
   return (
     <AuthShell
+      brandName={store?.name}
       title={store ? `Sign in to ${store.name}` : "Sign in"}
       description="Sign in with the email and password you were given."
-      footer={`Accounts are created for you by your ${brand.platformName} administrator or company owner. Forgot your password? Ask your company owner to reset it.${brand.supportEmail ? ` Need help? Contact ${brand.supportEmail}.` : ""}`}
+      footer={brand.supportEmail ? `Need help? Contact ${brand.supportEmail}.` : undefined}
     >
       {error === "callback" ? (
         <Alert variant="destructive">
