@@ -23,13 +23,6 @@ const redirect = vi.fn((url: string) => {
   throw Object.assign(new Error("NEXT_REDIRECT"), { url });
 });
 vi.mock("next/navigation", () => ({ redirect: (u: string) => redirect(u) }));
-const legacyLimiter = vi.fn();
-vi.mock("@/lib/security/rate-limit", () => ({ enforceLoginRateLimit: (e: string) => legacyLimiter(e), requestAddress: async () => "203.0.113.9" }));
-// The legacy Supabase client must never be used in API mode; fail loudly if it is.
-const supabase = vi.fn(async () => {
-  throw new Error("the Supabase client must not be used in API mode");
-});
-vi.mock("@/lib/supabase/server", () => ({ createClient: () => supabase() }));
 
 const SECRET = "s".repeat(40);
 const enc = (o: object) => `base64-${Buffer.from(JSON.stringify(o)).toString("base64url")}`;
@@ -72,15 +65,13 @@ beforeEach(() => {
   jar.clear();
   seen = [];
   redirect.mockClear();
-  legacyLimiter.mockReset();
-  supabase.mockClear();
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
 const redirected = async (p: Promise<unknown>) => p.then(() => null, (e: { url?: string }) => e.url ?? null);
 
 describe("configuration", () => {
-  it("is off without AUTH_API_URL (the previous direct-to-Supabase behaviour) and on with it", async () => {
+  it("is off without AUTH_API_URL and on with it", async () => {
     const { getAuthApiConfig } = await import("@/lib/auth/nest-api");
     expect(getAuthApiConfig({})).toBeNull();
     expect(getAuthApiConfig({ AUTH_API_URL: "http://api.test/api/v1/", AUTH_BFF_SECRET: SECRET })).toEqual({ url: "http://api.test/api/v1", secret: SECRET });
@@ -126,8 +117,6 @@ describe("login", () => {
     expect(seen[0].headers["x-forwarded-for"]).toBe("203.0.113.9");
     expect(jar.get(NAME)!.options).toMatchObject({ httpOnly: true, sameSite: "lax", path: "/" });
     expect(jar.get("sf_signed_in")!.options).not.toHaveProperty("httpOnly");
-    expect(supabase).not.toHaveBeenCalled(); // this app no longer talks to Supabase Auth for sign-in
-    expect(legacyLimiter).not.toHaveBeenCalled(); // the API counts the attempt (once)
   });
 
   it("honours a safe next path but not an external one", async () => {
@@ -209,7 +198,6 @@ describe("session check (getCurrentUser)", () => {
     expect(user).toEqual({ id: "u1", email: "a@b.co", user_metadata: { full_name: "Ann Admin" } });
     expect(seen[0]).toMatchObject({ method: "GET", path: "/api/v1/auth/session" });
     expect(seen[0].headers.authorization).toMatch(/^Bearer h\./);
-    expect(supabase).not.toHaveBeenCalled();
   });
 
   it("is null without a cookie (no API call) and null when the API rejects the token", async () => {
@@ -320,24 +308,31 @@ describe("proxy: session refresh and optimistic route gating", () => {
   });
 });
 
-describe("cookie hardening of the Supabase client", () => {
-  it("the cookies this app's own Supabase client writes stay HttpOnly in API mode", async () => {
-    vi.resetModules();
-    const writes: Array<{ name: string; options: Record<string, unknown> }> = [];
-    vi.doMock("next/headers", () => ({
-      cookies: async () => ({ getAll: () => [], set: (name: string, _v: string, options: Record<string, unknown>) => void writes.push({ name, options }) }),
-    }));
-    const captured: { setAll?: (c: Array<{ name: string; value: string; options: Record<string, unknown> }>) => void } = {};
-    vi.doMock("@supabase/ssr", () => ({
-      createServerClient: (_u: string, _k: string, o: { cookies: typeof captured }) => ((captured.setAll = o.cookies.setAll), {}),
-    }));
-    // The real module (the file-level mock replaces it for every other test).
-    const { createClient } = await vi.importActual<typeof import("@/lib/supabase/server")>("@/lib/supabase/server");
-    await createClient();
-    captured.setAll!([{ name: NAME, value: "v", options: { httpOnly: false, sameSite: "none", domain: ".example.com", path: "/x", maxAge: 5 } }]);
-    expect(writes[0].options).toMatchObject({ httpOnly: true, sameSite: "lax", path: "/", maxAge: 5 });
-    expect(writes[0].options.domain).toBeUndefined();
-    vi.doUnmock("@supabase/ssr");
-    vi.doUnmock("next/headers");
+describe("reading the session cookie without @supabase/ssr", () => {
+  const key = "sb-proj-auth-token";
+  const session = { access_token: "tok", refresh_token: "ref", expires_at: 1234 };
+  const jar = (cookies: { name: string; value: string }[]) => ({ getAll: () => cookies });
+
+  it("reads a whole, base64url-encoded cookie, including non-ASCII text", async () => {
+    const { readStoredSession } = await import("@/lib/auth/nest-api");
+    const value = enc({ ...session, user: { name: "Zoë 日本" } });
+    expect(await readStoredSession(jar([{ name: key, value }]))).toEqual({ accessToken: "tok", refreshToken: "ref", expiresAt: 1234 });
+  });
+
+  it("joins numbered chunks in order, and reads a plain JSON cookie", async () => {
+    const { readStoredSession } = await import("@/lib/auth/nest-api");
+    const value = enc(session);
+    const cut = Math.floor(value.length / 2);
+    const chunks = [`${key}.1`, `${key}.0`].map((name, i) => ({ name, value: i === 0 ? value.slice(cut) : value.slice(0, cut) }));
+    expect((await readStoredSession(jar(chunks)))?.accessToken).toBe("tok");
+    expect((await readStoredSession(jar([{ name: key, value: JSON.stringify(session) }])))?.refreshToken).toBe("ref");
+  });
+
+  it("treats a missing, corrupt or token-less cookie as no session", async () => {
+    const { readStoredSession } = await import("@/lib/auth/nest-api");
+    expect(await readStoredSession(jar([]))).toBeNull();
+    expect(await readStoredSession(jar([{ name: key, value: "base64-@@@" }]))).toBeNull();
+    expect(await readStoredSession(jar([{ name: key, value: "base64-AAAA" }]))).toBeNull();
+    expect(await readStoredSession(jar([{ name: key, value: enc({ refresh_token: "r" }) }]))).toBeNull();
   });
 });

@@ -20,7 +20,7 @@ import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { cn } from "@/lib/utils";
 import { uuid } from "@/lib/utils/uuid";
 import { collectionInputSchema } from "@/lib/validations/catalog";
-import type { Collection } from "@/lib/db/schema";
+import type { Collection } from "@/lib/domain/entities";
 
 type Props = {
   mode: "create" | "edit";

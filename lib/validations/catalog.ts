@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { COLLECTION_STATUSES, INVENTORY_REASONS, PRODUCT_STATUSES } from "@/lib/db/schema/enums";
+import { COLLECTION_STATUSES, INVENTORY_REASONS, PRODUCT_STATUSES } from "@/lib/domain/enums";
 import {
   emailField,
   isSupportedCurrency,

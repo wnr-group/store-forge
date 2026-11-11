@@ -1,24 +1,24 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const getClaims = vi.fn();
-vi.mock("@supabase/ssr", () => ({
-  createServerClient: () => ({ auth: { getClaims } }),
-}));
-
 import { updateSession } from "@/lib/supabase/middleware";
 import { proxy } from "@/proxy";
 
-const req = (path: string) => new NextRequest(`http://localhost:3000${path}`);
-const signedIn = () => getClaims.mockResolvedValue({ data: { claims: { sub: "user-1" } }, error: null });
-const signedOut = () => getClaims.mockResolvedValue({ data: null, error: null });
+// Signed in = a session cookie whose access token is still valid (the API sets it; the proxy decides without a network call).
+const b64 = (o: object) => Buffer.from(JSON.stringify(o)).toString("base64url");
+const exp = () => Math.floor(Date.now() / 1000) + 3600;
+const SESSION = `sb-example-auth-token=base64-${b64({ access_token: `h.${b64({ exp: exp(), sub: "u1" })}.s`, refresh_token: "RT", expires_at: exp() })}`;
+let cookie: string | undefined;
+const req = (path: string) => new NextRequest(`http://localhost:3000${path}`, { headers: cookie ? { cookie } : {} });
+const signedIn = () => void (cookie = SESSION);
+const signedOut = () => void (cookie = undefined);
 const location = (res: Response) => res.headers.get("location");
 
 beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "a".repeat(30));
   vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
-  getClaims.mockReset();
+  cookie = undefined;
 });
 
 describe("proxy route protection (unauthenticated)", () => {
@@ -59,7 +59,6 @@ describe("tenant subdomains (proxy)", () => {
   it("rewrites <store>.<root> to the public storefront without touching the session", async () => {
     const res = await proxy(withHost("urban.lvh.me:3000"));
     expect(res.headers.get("x-middleware-rewrite")).toContain("/s/urban");
-    expect(getClaims).not.toHaveBeenCalled();
   });
 
   it("serves only /login, /dashboard and /no-workspace as the app on a store host; /admin is storefront-only (404)", async () => {
@@ -75,7 +74,6 @@ describe("tenant subdomains (proxy)", () => {
     const res = await proxy(req);
     expect(res.headers.get("x-middleware-rewrite")).toBeNull();
     expect(req.headers.get("x-sf-store")).toBe("mart-com");
-    expect(getClaims).toHaveBeenCalled();
   });
 
   it("protects /dashboard on a store host: signed-out visitors go to that host's /login", async () => {

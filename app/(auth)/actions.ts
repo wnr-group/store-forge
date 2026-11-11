@@ -4,8 +4,6 @@ import { redirect } from "next/navigation";
 import { ROUTES } from "@/config/app";
 import { toFailure } from "@/lib/errors";
 import { logEvent } from "@/lib/observability/log";
-import { authApiEnabled } from "@/lib/auth/nest-api";
-import { enforceLoginRateLimit } from "@/lib/security/rate-limit";
 import { safeNextPath } from "@/lib/utils/redirect";
 import { changePasswordSchema, loginSchema } from "@/lib/validations/auth";
 import { parseInput } from "@/lib/validations/parse";
@@ -18,9 +16,7 @@ import type { ActionResult } from "@/types/action";
 export async function loginAction(input: unknown, next?: string): Promise<ActionResult> {
   try {
     const values = parseInput(loginSchema, input);
-    // Before the password is checked: too many attempts from one place are refused. With the StoreForge API configured the
-    // API counts the attempt itself (same database function, same limits), so it is not counted twice.
-    if (!authApiEnabled()) await enforceLoginRateLimit(values.email);
+    // The API rate limits the attempt itself (same limits as before) before it checks the password.
     await authService.signIn(values);
   } catch (e) {
     const failure = toFailure(e);

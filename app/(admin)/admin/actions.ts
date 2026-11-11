@@ -4,7 +4,6 @@ import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { ROUTES } from "@/config/app";
 import { run } from "@/lib/actions/run";
-import { enforceAdminRateLimit, type AdminRateBucket } from "@/lib/security/rate-limit";
 import { companyStatusSchema, createCompanySchema } from "@/lib/validations/company";
 import { parseInput } from "@/lib/validations/parse";
 import { addPlatformAdminSchema, platformSettingsSchema, setPlatformAdminRoleSchema } from "@/lib/validations/admin-platform";
@@ -27,19 +26,15 @@ import { BRANDING_TAG, updatePlatformSettings } from "@/services/platform-settin
 
 // Every action below calls a service function whose first statement authorises the Platform Admin from the validated session,
 // before any privileged work. Hiding the UI is never the protection. Each action also:
-//   * counts against a per-admin rate limit FIRST (lib/security/rate-limit.ts), which refuses non-admins early as well, and
+//   * is rate limited per admin by the StoreForge API (the bucket named in each call below is the API's `rate_limit_admin` bucket), and
 //   * is logged as one structured event with its operation name, outcome and duration (never its input).
 // The organization id is always validated as a UUID and no role, status or owner id is trusted from the browser beyond what its
 // schema allows.
 
-const guarded = <T>(bucket: AdminRateBucket, operation: string, fn: () => Promise<T>) =>
-  run(
-    async () => {
-      await enforceAdminRateLimit(bucket);
-      return fn();
-    },
-    { operation },
-  );
+/** The API's per-admin rate-limit buckets (applied by the API on the matching mutating route). */
+type AdminRateBucket = "org.create" | "org.delete" | "org.edit" | "team.manage" | "ownership.change" | "admin.manage" | "settings.update";
+
+const guarded = <T>(_bucket: AdminRateBucket, operation: string, fn: () => Promise<T>) => run(fn, { operation });
 
 export async function createCompanyAction(input: unknown) {
   return guarded("org.create", "admin.org.create", async () => {

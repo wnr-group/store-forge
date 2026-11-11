@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, ImagePlus, Loader2, Star, Trash2, TriangleAlert } from "lucide-react";
 import { requestUploadsAction } from "@/app/(dashboard)/dashboard/uploads/actions";
-import { discardUploadsAction } from "@/app/(dashboard)/dashboard/uploads/discard";
 import { Button } from "@/components/ui/button";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
@@ -80,7 +79,6 @@ export function ImageUploader({ value, onChange, scope, ownerId, max, disabled, 
     if (!files.length) return;
 
     const items: ImageItem[] = files.map((f) => ({ key: uuid(), path: null, altText: null, preview: URL.createObjectURL(f), progress: 0, status: "uploading", saved: false }));
-    if (single && value.some((v) => v.path && !v.saved)) void discardUploadsAction(value.flatMap((v) => (v.path && !v.saved ? [v.path] : [])));
     onChange((prev) => (single ? items : [...prev, ...items]));
 
     const res = await requestUploadsAction({ scope, ownerId, files: files.map((f) => ({ type: f.type, size: f.size })) });
@@ -104,8 +102,8 @@ export function ImageUploader({ value, onChange, scope, ownerId, max, disabled, 
   const remove = (item: ImageItem) => {
     onChange((prev) => prev.filter((i) => i.key !== item.key));
     if (item.preview) URL.revokeObjectURL(item.preview);
-    // Unsaved uploads are not referenced by the database: delete the file now. Saved ones are removed by the server on save.
-    if (item.path && !item.saved) void discardUploadsAction([item.path]);
+    // A file that was uploaded but never saved stays in the bucket (see docs/NEXTJS_ARCHITECTURE_CLEANUP.md); files that were
+    // saved are removed by the API when the record is saved.
   };
 
   const move = (index: number, to: number) =>

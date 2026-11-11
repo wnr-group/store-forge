@@ -1,5 +1,4 @@
 import "server-only";
-import { combineChunks, stringFromBase64URL } from "@supabase/ssr";
 import { AppError } from "@/lib/errors";
 import { logEvent } from "@/lib/observability/log";
 
@@ -11,13 +10,12 @@ import { logEvent } from "@/lib/observability/log";
  * authentication and the cookies stay host-scoped, one set per store host), and copies the API's `Set-Cookie` headers onto
  * its own response. The browser therefore only ever sees HttpOnly cookies on this app's own host.
  *
- * Switching is by configuration: when `AUTH_API_URL` is unset the app keeps using Supabase directly (the previous
- * behaviour), so the rollout can be reverted by removing one variable.
+ * `AUTH_API_URL` and `AUTH_BFF_SECRET` are required: there is no direct-to-Supabase sign-in any more.
  */
 
 export type AuthApiConfig = { url: string; secret: string };
 
-/** `null` when the API is not configured (legacy direct-to-Supabase mode). Throws if it is half configured. */
+/** `null` when `AUTH_API_URL` is unset (callers then fail with a clear error). Throws if it is half configured. */
 export function getAuthApiConfig(env: Record<string, string | undefined> = process.env): AuthApiConfig | null {
   const url = env.AUTH_API_URL?.trim().replace(/\/+$/, "");
   const secret = env.AUTH_BFF_SECRET?.trim();
@@ -139,15 +137,37 @@ export const isSessionCookieName = (name: string) => SESSION_COOKIE.test(name);
 
 export type CookieReader = { getAll(): { name: string; value: string }[] };
 
+/** Base64url -> UTF-8 text, with Web APIs only (this also runs in the proxy). Whitespace and `=` are ignored. Throws on anything else invalid. */
+function stringFromBase64URL(input: string): string {
+  const b64 = input.replace(/[\s=]/g, "").replace(/-/g, "+").replace(/_/g, "/");
+  if (b64.length % 4 === 1 || /[^A-Za-z0-9+/]/.test(b64)) throw new Error("Invalid base64url");
+  const binary = atob(b64.padEnd(Math.ceil(b64.length / 4) * 4, "="));
+  return new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(binary, (c) => c.charCodeAt(0)));
+}
+
+/** The cookie value, or its numbered chunks (`key.0`, `key.1`, ...) joined, as the API writes a large session. */
+function combineChunks(key: string, cookies: { name: string; value: string }[]): string | null {
+  const get = (name: string) => cookies.find((c) => c.name === name)?.value || null;
+  const whole = get(key);
+  if (whole) return whole;
+  const parts: string[] = [];
+  for (let i = 0; ; i++) {
+    const chunk = get(`${key}.${i}`);
+    if (!chunk) break;
+    parts.push(chunk);
+  }
+  return parts.length ? parts.join("") : null;
+}
+
 export type StoredSession = { accessToken: string; refreshToken: string | null; expiresAt: number | null };
 
-/** Reads (without verifying) the session `@supabase/ssr` stored: `sb-<ref>-auth-token`, possibly chunked, `base64-` encoded. */
+/** Reads (without verifying) the session cookie the API sets (the format `@supabase/ssr` writes on the API side): `sb-<ref>-auth-token`, possibly chunked, `base64-` encoded. */
 export async function readStoredSession(cookies: CookieReader): Promise<StoredSession | null> {
   const all = cookies.getAll();
   const base = all.map((c) => c.name).find((name) => /^sb-.+-auth-token$/.test(name) || /^sb-.+-auth-token\.0$/.test(name));
   if (!base) return null;
   const key = base.replace(/\.0$/, "");
-  const raw = await combineChunks(key, async (name) => all.find((c) => c.name === name)?.value ?? null);
+  const raw = combineChunks(key, all);
   if (!raw) return null;
   try {
     const json = raw.startsWith("base64-") ? stringFromBase64URL(raw.slice("base64-".length)) : raw;

@@ -33,21 +33,20 @@ Money is stored as integer minor units in the store currency, so the currency is
 - **Framework:** Next.js 16 (App Router), React 19, TypeScript
 - **UI:** Tailwind CSS 4, shadcn/ui, Base UI, Recharts, Lucide icons
 - **Forms and validation:** React Hook Form, Zod
-- **Auth:** Supabase Auth (`@supabase/ssr`) for sign-in; the Admin Auth API (server-side only) to provision accounts
-- **Database:** Supabase PostgreSQL with Drizzle ORM and `postgres-js`
-- **File storage:** Supabase Storage
-- **Testing:** Vitest, with PGlite for database tests (no Docker needed)
+- **API:** the StoreForge API (NestJS, repository `store-forge-api`) owns business logic, authorization, tenant isolation and all database access (Drizzle ORM and Supabase PostgreSQL live there)
+- **Auth:** Supabase Auth, reached through the StoreForge API; this app only relays its HttpOnly session cookies
+- **File storage:** Supabase Storage (signed uploads, `@supabase/ssr`)
+- **Testing:** Vitest
 
 ## 4. Architecture
 
-- **Supabase Auth** manages users, passwords and sessions.
-- **Drizzle ORM** handles all application data. The app connects through the Supabase transaction pooler as a limited role, `storeforge_app`.
-- **RLS is the real security boundary.** For each request the app opens a transaction, sets the user's identity and switches to the `authenticated` role, so RLS policies apply. Everything resets when the transaction ends.
-- `storeforge_app` cannot bypass RLS or switch to `postgres`, `anon` or `service_role`. The app refuses to start if `DATABASE_URL` uses `postgres`.
-- App-level checks (`requireTenantAccess`, `requireTenantRole`) deliberately duplicate RLS.
+- **Next.js -> StoreForge API -> Supabase PostgreSQL.** This app has no database client, no SQL, no Drizzle and no migrations. Every business operation goes through the API client in `lib/api`, using the signed-in user's access token and the active organization.
+- **Authentication** goes through the API (`/auth/login`, `/auth/logout`, `/auth/refresh`, `/auth/session`, `/auth/change-password`). The session lives in HttpOnly cookies set by the API and relayed by `services/auth.service.ts` and `proxy.ts`. State-changing calls carry the shared `AUTH_BFF_SECRET`, so the API accepts them from this server without a browser `Origin`.
+- **RLS and tenant isolation are enforced by the API and the database.** The app-level checks (`requireTenantAccess`, `requireTenantRole`) are the friendly early refusal, not the only protection.
+- **Storage** uses the signed-in user's own Supabase session to create signed upload URLs. Uploaded files that are never saved against a record stay in the bucket (see `docs/NEXTJS_ARCHITECTURE_CLEANUP.md`).
 - Companies are created only by the `platform_provision_tenant()` database function, which requires the caller to be in the private `platform_admins` table. The old self-service `create_tenant_with_store()` no longer exists.
 - **Platform Admin is not a tenant role.** It is a separate table that the API cannot read or write. A Platform Admin can never also be a tenant member (database trigger), and a tenant Owner is never a Platform Admin.
-- The Supabase service-role key is read in exactly one module (`lib/supabase/admin.ts`) and used only for Admin Auth calls (create a confirmed user, set a password, delete a user). It is never used for database queries or Storage, and a test fails if that changes.
+- This app no longer creates or deletes Auth accounts: the StoreForge API does, with its own service-role key. Here the key is read only by `npm run admin:create` and, when `RATE_LIMIT_SECRET` is empty, by the direct-mode sign-in rate limiter. It is never used for database queries or Storage, and a test fails if that changes.
 - A suspended company or a deactivated membership loses all access at the database level, because every RLS policy goes through `is_tenant_member()` / `has_tenant_role()`, which now require both to be active.
 
 ### Catalog vs. Assignment Ownership Model (Multi-Store Option A)
@@ -63,15 +62,13 @@ The StoreForge multi-store template engine follows **Option A** for ownership:
 app/          Routes: (auth)/login, (admin)/admin/* (Platform Admin), (dashboard)/dashboard/* (company workspace)
 components/   UI (ui/ = shadcn), dashboard/ shell, one folder per feature
 config/       Environment validation and constants
-lib/          db/ (schema, RLS-aware client), auth/, tenant/, storage/, validations/, money
+lib/          api/ (API client), auth/, domain/ (row types, enums), tenant/, storage/, validations/, money
 services/     One service per area (product, category, collection, inventory, customer, analytics, store, profile, platform, team)
-drizzle/      SQL migrations (source of truth for the database)
-scripts/      db:verify and db:seed
-tests/        db/, integration/, unit/
+tests/        unit/ (and e2e/)
 proxy.ts      Session refresh and route protection
 ```
 
-**Migrations:** the Drizzle schema defines tables, columns and indexes. Policies, functions, triggers, grants and roles live in custom SQL migrations. Never edit an applied migration; add a new one. Create one with `npx drizzle-kit generate --custom --name=<name>` and separate statements with `--> statement-breakpoint`.
+**Database schema and migrations** live in the `store-forge-api` repository (`src/database/migrations`, `npm run db:migrate`). They are not part of this app.
 
 **Storage:** migration `0006` creates the public-read `products` bucket. Paths are `{tenant_id}/{product_id}/{file}`, `{tenant_id}/collections/{id}/{file}` and `{tenant_id}/store/{file}` (the store logo and the template hero image), and policies check tenant membership from the first path segment.
 
@@ -125,83 +122,24 @@ Copy-Item .env.example .env.local   # Windows PowerShell
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Auth | Anon key from step 1 |
 | `NEXT_PUBLIC_APP_URL` | Public origin of the app | `http://localhost:3000` (your production URL when deployed) |
 | `NEXT_PUBLIC_ROOT_DOMAIN` | Tenant subdomains (`<store>.<root>`) | `lvh.me:3000` locally; `store-forge.com` in production. Empty disables subdomain routing |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Server only.** Admin Auth API for provisioning accounts (never database queries) | `service_role` key from Project Settings → API |
-| `DIRECT_URL` | Migrations, seed, verify only | `postgres` user. Direct connection `db.<ref>.supabase.co:5432`, or the **session pooler** (port 5432) if your network has no IPv6 |
-| `DATABASE_URL` | The running app | **Transaction pooler** (port 6543), user `storeforge_app.<project-ref>` |
+| `AUTH_API_URL` | **Server only.** Base URL of the StoreForge API (required) | `http://localhost:4000/api/v1` locally |
+| `AUTH_BFF_SECRET` | **Server only.** Shared secret, 32+ characters, the same value as `AUTH_BFF_SECRET` in the API | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 
-Find the connection strings in Supabase → Connect. Notes:
+Notes:
 
-- Percent-encode special characters in passwords (for example `@` becomes `%40`).
-- Never prefix database variables or the service-role key with `NEXT_PUBLIC_`; they must stay server-only.
-- The service-role key bypasses RLS. Keep it out of git, chat and logs, rotate it if it leaks, and only set it where the server runs (for example as a Vercel server-side Environment Variable).
-- Don't fill in the `storeforge_app` password in `DATABASE_URL` yet. You set it in the next section.
+- Never prefix `AUTH_API_URL` or `AUTH_BFF_SECRET` with `NEXT_PUBLIC_`; they must stay server-only. The browser never calls the API.
+- This app holds no database credentials and no service-role key.
 
 ## 7. Database Setup
 
-**Step 1. Apply migrations.** This creates the tables, RLS policies, functions, storage bucket and the `storeforge_app` role.
-
-```bash
-npm run db:migrate
-```
-
-If it fails on `GRANT authenticated TO storeforge_app`, run that one statement in the Supabase SQL Editor as the project owner, then run `npm run db:migrate` again.
-
-**Step 2. Set the app role's password.** The migration creates `storeforge_app` without a password. In the Supabase SQL Editor run:
-
-```sql
-ALTER ROLE storeforge_app WITH PASSWORD '<long random password>';
-```
-
-Put that password into `DATABASE_URL` in `.env.local`.
-
-**Step 3. Verify isolation.**
-
-```bash
-npm run db:verify                  # full check; temporary test users are cleaned up
-npm run db:verify -- --read-only   # connection and catalog checks only
-```
-
-Only the message `ALL CHECKS PASSED` means the setup is correct. Re-run it after any migration, policy or grant change.
-
-**Step 4. Create the first Platform Admin.** This is the only way to create one; there is no web flow, API or policy that can promote a user, so nobody can make themselves an admin. Run it from a trusted machine. The password is read from the environment, not from the command line, so it does not end up in shell history:
-
-```bash
-PLATFORM_ADMIN_PASSWORD='<at least 12 characters>' npm run admin:create -- --email you@yourcompany.com --name "Your Name"
-# PowerShell: $env:PLATFORM_ADMIN_PASSWORD='<password>'; npm run admin:create -- --email you@yourcompany.com --name "Your Name"
-```
-
-It uses `SUPABASE_SERVICE_ROLE_KEY` to create a confirmed Auth user and `DIRECT_URL` to add it to `platform_admins`. If the email already has an Auth account it is promoted instead (unless that account is already a company member: use a separate account). Sign in at `/login`; Platform Admins land on `/admin`. Change the password afterwards under **Change password** in the account menu.
-
-**Step 5 (optional). Seed demo data.** For development projects only. It creates demo users with a publicly known password, so never run it against production.
-
-```bash
-npm run db:seed -- --confirm-dev
-```
-
-**Step 6 (optional). Seed a demo store.** `npm run db:seed:demo` creates one dedicated demo store, **Urban Nest** (slug `urban-nest-demo`), with 26 products (57 variants), 8 categories, 6 collections, 28 customers, 46 orders over the last 90 days and an inventory ledger, plus four dummy logins (a company Owner, Manager and Staff, and a Platform Admin). **Local/dev projects only: the passwords are public, so never run it against a real project.** It refuses to run when `NODE_ENV` or `VERCEL_ENV` is `production`, needs `SEED_DEMO_DATA=true`, and is safe to re-run (existing rows are skipped).
-
-```bash
-SEED_DEMO_DATA=true npm run db:seed:demo
-# PowerShell: $env:SEED_DEMO_DATA='true'; npm run db:seed:demo
-```
-
-| Role | URL | Email | Password |
-|---|---|---|---|
-| Owner (runs the demo store) | http://localhost:3000/login | owner@demo.test | Demo1234 |
-| Manager (`admin` role) | http://localhost:3000/login | admin@demo.test | Demo1234 |
-| Staff | http://localhost:3000/login | staff@demo.test | Demo1234 |
-| Platform Admin (lands on `/admin`) | http://localhost:3000/login | platform@demo.test | Demo1234 |
-
-To make an existing confirmed user the owner instead, set `SEED_DEMO_USER_EMAIL=you@example.com`; the dummy logins are then not created.
+The database is set up from the **`store-forge-api`** repository, not from this app: apply the migrations (`npm run db:migrate`), verify the schema (`npm run db:verify-schema`), create the first Platform Admin (`npm run admin:create`) and, for development projects only, seed demo data (`npm run db:seed:demo`). See that repository's README. Then start the API and point `AUTH_API_URL` / `AUTH_BFF_SECRET` here at it.
 
 **Troubleshooting**
 
 | Problem | Fix |
 |---|---|
-| App refuses to start | `DATABASE_URL` is using `postgres`. Use `storeforge_app.<project-ref>` on port 6543 |
-| `db:migrate` can't connect | Your network may lack IPv6. Use the session pooler (port 5432) in `DIRECT_URL` |
-| Authentication or password errors | Check that special characters in the password are percent-encoded |
-| `Missing or invalid environment variable: SUPABASE_SERVICE_ROLE_KEY` when creating a company | Add the server-side key to `.env.local` (or the host's environment) and restart |
+| Login shows "Something went wrong" | The API answered an unexpected status. Check that `AUTH_API_URL` is reachable and that `AUTH_BFF_SECRET` is the same value in this app and in the API (a mismatch gives `CSRF_ORIGIN_REQUIRED`, 403) |
+| "The StoreForge API is not configured" | Set `AUTH_API_URL` and `AUTH_BFF_SECRET` in `.env.local` and restart |
 | A user signs in and sees "No workspace available" | Their membership is deactivated or their company is suspended. A Platform Admin or the Owner can reactivate it |
 | A user forgot their password | There is no email recovery. The Owner resets a member's password (Team members → Reset password); a Platform Admin resets an Owner's (company page) |
 
@@ -216,13 +154,13 @@ To make an existing confirmed user the owner instead, set `SEED_DEMO_USER_EMAIL=
 
 The middle role is stored as `admin` because the RLS policies reference it, and it is shown as **Manager** everywhere in the UI so it is never confused with the StoreForge Platform Admin.
 
-Rules are defined in two places that must be kept in sync: `lib/auth/permissions.ts` (app) and the RLS migrations in `drizzle/` (database). Roles are never taken from the browser: a member's role comes from their membership row, and the Owner role can only be created by company provisioning.
+Rules are defined in two places that must be kept in sync: `lib/auth/permissions.ts` (app) and the RLS migrations in the `store-forge-api` repository (database). Roles are never taken from the browser: a member's role comes from their membership row, and the Owner role can only be created by company provisioning.
 
 ## 9. Accounts and Workflows
 
 **Public registration is disabled.** There is no sign-up, email verification or "forgot password" page, and those routes and actions are removed (not just hidden). Unauthenticated visitors can only see the landing page and `/login`. A user who nevertheless obtained an Auth account has no workspace and no way to create one.
 
-**1. Platform Admin account.** Created once with `npm run admin:create` (section 7, step 4). Sign in at `/login`.
+**1. Platform Admin account.** Created once with `npm run admin:create` in the `store-forge-api` repository (section 7). Sign in at `/login`.
 
 **2. Creating a company** (Platform Admin → Companies → Create company). Enter the company name, store name and store address, optional contact number, address and description, and the Owner's name, email and **initial password**. On submit the server:
 
@@ -251,7 +189,7 @@ Rules are defined in two places that must be kept in sync: `lib/auth/permissions
 - Reserved names (`www`, `app`, `api`, `admin`, ...) are never treated as stores. The Platform Admin's company page shows each store's URL.
 - Production DNS: add a wildcard record `*.store-forge.com` pointing at Vercel and add both `store-forge.com` and `*.store-forge.com` to the Vercel project (a wildcard domain needs Vercel nameservers or a DNS challenge). Requires migration 0009.
 
-**Deployment (Vercel).** Set these as Environment Variables for Production: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL` (the production origin), `NEXT_PUBLIC_ROOT_DOMAIN` (`store-forge.com`), `DATABASE_URL` (transaction pooler, `storeforge_app`) and `SUPABASE_SERVICE_ROLE_KEY` (server only, never `NEXT_PUBLIC_`). `DIRECT_URL` is only for running migrations and `admin:create` from a trusted machine or CI and is not needed at runtime. Run `npm run db:migrate` and `npm run db:verify` before the first deploy, turn off public sign-ups in Supabase, and create the Platform Admin.
+**Deployment (Vercel).** Set these as Environment Variables for Production: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL` (the production origin), `NEXT_PUBLIC_ROOT_DOMAIN` (`store-forge.com`), `AUTH_API_URL` and `AUTH_BFF_SECRET` (server only, never `NEXT_PUBLIC_`). Deploy and migrate the StoreForge API first, turn off public sign-ups in Supabase, and create the Platform Admin from the API repository.
 
 ## 10. Commands
 
@@ -262,11 +200,4 @@ Rules are defined in two places that must be kept in sync: `lib/auth/permissions
 | `npm run start` | Run the production build |
 | `npm run typecheck` | Type-check with TypeScript |
 | `npm run lint` | Lint with ESLint |
-| `npm test` | Run all tests with Vitest (no Docker or external services needed) |
-| `npm run db:generate` | Generate a migration from schema changes |
-| `npm run db:migrate` | Apply pending migrations (uses `DIRECT_URL`) |
-| `npm run db:check` | Check migration history |
-| `npm run db:verify` | Verify roles, RLS and isolation on the real database |
-| `npm run db:seed` | Seed development data (`-- --confirm-dev` required) |
-| `npm run db:seed:demo` | Seed the Urban Nest demo store and Owner/Manager/Staff/Platform Admin logins (see Database Setup) |
-| `npm run admin:create` | Create (or promote) a Platform Admin: `-- --email you@example.com`, password from `PLATFORM_ADMIN_PASSWORD` |
+| `npm test` | Run all tests with Vitest (no database, Docker or API needed) |

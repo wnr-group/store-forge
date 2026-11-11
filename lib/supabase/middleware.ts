@@ -1,8 +1,6 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { GUEST_ONLY_ROUTES, PROTECTED_PREFIXES, ROUTES } from "@/config/app";
-import { getPublicEnv } from "@/config/env";
-import { applySetCookies, authApi, authApiEnabled, isSessionCookieName, readStoredSession, SIGNED_IN_MARKER, unverifiedExpiry } from "@/lib/auth/nest-api";
+import { applySetCookies, authApi, isSessionCookieName, readStoredSession, SIGNED_IN_MARKER, unverifiedExpiry } from "@/lib/auth/nest-api";
 import { safeNextPath } from "@/lib/utils/redirect";
 
 /** `request.cookies` only takes (name, value): the cookie attributes matter for the browser response, not for this request. */
@@ -20,35 +18,14 @@ const REFRESH_MARGIN_SECONDS = 60;
  * Used by proxy.ts (Next.js 16's replacement for middleware.ts).
  * Refreshes the Supabase session cookies and performs OPTIMISTIC route gating.
  * This is a UX/latency convenience only: every protected page, action and
- * query re-validates the user server-side, and RLS is the real boundary.
+ * query re-validates the user server-side, and the API is the real boundary.
  *
- * With `AUTH_API_URL` set the StoreForge API does the refreshing (POST /auth/refresh, which rotates the refresh token);
- * otherwise this talks to Supabase directly, as before.
+ * The StoreForge API does the refreshing (POST /auth/refresh, which rotates the refresh token).
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   let isSignedIn: boolean;
-
-  if (authApiEnabled()) {
-    ({ response, isSignedIn } = await sessionViaApi(request, response));
-  } else {
-    const env = getPublicEnv();
-    const supabase = createServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll(cookiesToSet, headers) {
-          for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
-          response = NextResponse.next({ request });
-          for (const { name, value, options } of cookiesToSet) response.cookies.set(name, value, options);
-          for (const [key, value] of Object.entries(headers ?? {})) response.headers.set(key, value);
-        },
-      },
-    });
-
-    // getClaims() verifies the JWT signature (and refreshes an expired session).
-    const { data } = await supabase.auth.getClaims();
-    isSignedIn = Boolean(data?.claims?.sub);
-  }
+  ({ response, isSignedIn } = await sessionViaApi(request, response));
 
   const { pathname, search } = request.nextUrl;
 

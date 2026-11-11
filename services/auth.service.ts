@@ -1,33 +1,19 @@
 import "server-only";
-import type { AuthError } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import { getCurrentUser } from "@/lib/auth/session";
-import { applySetCookies, authApi, authApiEnabled, isSessionCookieName, readStoredSession, SIGNED_IN_MARKER } from "@/lib/auth/nest-api";
+import { applySetCookies, authApi, isSessionCookieName, readStoredSession, SIGNED_IN_MARKER } from "@/lib/auth/nest-api";
 import { AppError } from "@/lib/errors";
 import { logEvent } from "@/lib/observability/log";
-import { requestAddress } from "@/lib/security/rate-limit";
-import { createClient } from "@/lib/supabase/server";
+import { requestAddress } from "@/lib/security/request-address";
 import type { LoginInput } from "@/lib/validations/auth";
 
 /**
  * Sign-in / sign-out / password change for PROVISIONED accounts. There is deliberately no sign-up,
  * e-mail verification or e-mail based recovery here: accounts are created by a Platform Admin or a
- * company Owner (lib/auth/provisioning.ts) and passwords are reset by them (admin-assisted).
+ * company Owner (by the StoreForge API) and passwords are reset by them (admin-assisted).
  *
- * Two interchangeable backends with identical behaviour and messages:
- *  - StoreForge API (NestJS) when `AUTH_API_URL` is set: the API checks the credentials with Supabase Auth, rate limits
- *    the attempt and returns the session as HttpOnly cookies, which are relayed to the browser from here;
- *  - Supabase directly (previous behaviour) when it is not.
+ * Everything goes through the StoreForge API (NestJS): it checks the credentials with Supabase Auth, rate limits the attempt
+ * and returns the session as HttpOnly cookies, which are relayed to the browser from here.
  */
-
-function mapAuthError(error: AuthError): AppError {
-  if (error.status === 429 || error.code === "over_request_rate_limit")
-    return new AppError("RATE_LIMITED", "Too many attempts. Please wait a moment and try again.");
-  if (error.code === "weak_password") return new AppError("VALIDATION", "That password is too weak. Try a longer one.");
-  if (error.code === "same_password")
-    return new AppError("VALIDATION", "Choose a password different from your current one.");
-  throw error; // unexpected -> logged + generic message
-}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // StoreForge API
@@ -82,52 +68,13 @@ async function changePasswordViaApi(currentPassword: string, newPassword: string
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-// Direct to Supabase (previous behaviour, used while AUTH_API_URL is unset)
-// ---------------------------------------------------------------------------------------------------------------------
-
-async function signInDirect(input: LoginInput) {
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email: input.email, password: input.password });
-  if (error) {
-    if (error.code === "invalid_credentials")
-      throw new AppError("UNAUTHENTICATED", "Incorrect email or password.");
-    // Provisioned accounts are created confirmed; this only happens if one was created some other way.
-    if (error.code === "email_not_confirmed")
-      throw new AppError("UNAUTHENTICATED", "This account is not active yet. Please contact your administrator.");
-    throw mapAuthError(error);
-  }
-}
-
-async function signOutDirect() {
-  const supabase = await createClient();
-  // Revokes the session server-side and clears the auth cookies.
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
-}
-
-async function changePasswordDirect(currentPassword: string, newPassword: string) {
-  const user = await getCurrentUser();
-  if (!user?.email) throw new AppError("UNAUTHENTICATED", "Your session has expired. Please sign in again.");
-
-  const supabase = await createClient();
-  const { error: verifyError } = await supabase.auth.signInWithPassword({ email: user.email, password: currentPassword });
-  if (verifyError) {
-    if (verifyError.code === "invalid_credentials")
-      throw new AppError("VALIDATION", "Your current password is incorrect.", { currentPassword: "Incorrect password" });
-    throw mapAuthError(verifyError);
-  }
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
-  if (error) throw mapAuthError(error);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
 
 export async function signIn(input: LoginInput) {
-  return authApiEnabled() ? signInViaApi(input) : signInDirect(input);
+  return signInViaApi(input);
 }
 
 export async function signOut() {
-  return authApiEnabled() ? signOutViaApi() : signOutDirect();
+  return signOutViaApi();
 }
 
 /**
@@ -135,5 +82,5 @@ export async function signOut() {
  * session alone cannot lock the real user out. Existing passwords are never readable or returned.
  */
 export async function changePassword(currentPassword: string, newPassword: string) {
-  return authApiEnabled() ? changePasswordViaApi(currentPassword, newPassword) : changePasswordDirect(currentPassword, newPassword);
+  return changePasswordViaApi(currentPassword, newPassword);
 }

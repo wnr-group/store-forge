@@ -1,5 +1,5 @@
 import { accessEntries, LEVEL_LABELS } from "@/lib/auth/permissions";
-import type { MemberPermissions, MembershipRole } from "@/lib/db/schema/enums";
+import type { MemberPermissions, MembershipRole } from "@/lib/domain/enums";
 
 /** A member's access as a short list, one module per line. Table cells do not wrap, so this sets its own width. */
 export function AccessSummary({ role, permissions }: { role: MembershipRole; permissions: MemberPermissions }) {

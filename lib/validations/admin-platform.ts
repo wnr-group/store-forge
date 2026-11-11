@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PLATFORM_ADMIN_ROLES } from "@/lib/db/schema";
+import { PLATFORM_ADMIN_ROLES } from "@/lib/domain/enums";
 import { passwordField } from "./auth";
 import { emailField, isSupportedCurrency, isValidTimeZone, optionalEmail, requiredText } from "./fields";
 

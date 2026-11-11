@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { roleLabel } from "@/lib/auth/permissions";
-import type { MemberPermissions, MembershipRole } from "@/lib/db/schema";
+import type { MemberPermissions, MembershipRole } from "@/lib/domain/enums";
 
 export type AdminMember = {
   userId: string;

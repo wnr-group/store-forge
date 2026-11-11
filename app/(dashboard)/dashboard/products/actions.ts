@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { ROUTES } from "@/config/app";
 import { run } from "@/lib/actions/run";
-import { requireWorkspace } from "@/lib/tenant/context";
 import { idsSchema, productInputSchema, productStatusSchema } from "@/lib/validations/catalog";
 import { parseInput } from "@/lib/validations/parse";
 import { createProduct, deleteProducts, duplicateProduct, setProductsStatus, updateProduct } from "@/services/product.service";
@@ -15,16 +14,10 @@ const refresh = () => {
   revalidatePath(ROUTES.inventory);
 };
 
-/** The store currency always comes from the database, never from the form. */
-async function currency() {
-  const { store } = await requireWorkspace();
-  return store?.currency ?? "INR";
-}
-
 export async function createProductAction(input: unknown) {
   return run(async () => {
     const values = parseInput(productInputSchema, input);
-    const result = await createProduct(values, await currency());
+    const result = await createProduct(values);
     refresh();
     return result;
   });
@@ -33,7 +26,7 @@ export async function createProductAction(input: unknown) {
 export async function updateProductAction(input: unknown) {
   return run(async () => {
     const values = parseInput(productInputSchema, input);
-    const result = await updateProduct(values, await currency());
+    const result = await updateProduct(values);
     refresh();
     revalidatePath(`${ROUTES.products}/${values.id}`);
     return result;

@@ -1,5 +1,3 @@
-import type { AdminAuditEntityType } from "@/lib/db/schema";
-
 /**
  * Every action a Platform Admin can leave in the audit log, with the label shown on the Activity page.
  * The database only checks the shape (`entity.verb`); this list is the single source of truth for what the app records.
@@ -48,15 +46,4 @@ export const LEGACY_AUDIT_ACTION_LABELS: Record<string, string> = {
   "support_note.created": "Support note added (feature removed)",
   "support_note.updated": "Support note edited (feature removed)",
   "store.status_changed": "Store status changed (feature removed)",
-};
-
-export type AuditEntry = {
-  action: AuditAction;
-  entityType: AdminAuditEntityType;
-  entityId?: string | null;
-  organizationId?: string | null;
-  description: string;
-  /** Plain facts about the change. Never put credentials here (the database strips obvious ones as a second line of defence). */
-  previous?: Record<string, unknown> | null;
-  next?: Record<string, unknown> | null;
 };

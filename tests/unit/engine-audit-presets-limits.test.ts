@@ -108,7 +108,6 @@ describe("All limits and quotas live in one central config [AC-ENG-019]", () => 
     }
   };
   collect(ROOT);
-  files.push(join(__dirname, "../../lib/db/schema/templates.ts"));
   const codeOf = (file: string) =>
     readFileSync(file, "utf8")
       .split("\n")

@@ -22,8 +22,6 @@ const nextConfig: NextConfig = {
       ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/products/**" }]
       : [],
   },
-  // Database driver: load from node_modules at runtime instead of bundling it.
-  serverExternalPackages: ["postgres"],
   turbopack: {
     rules: {
       "*.css": {

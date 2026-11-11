@@ -27,7 +27,7 @@ export default async function DashboardPage() {
     );
   }
   const showAnalytics = canViewOrders(active);
-  const data = showAnalytics ? await getAnalytics(30, store.timezone) : null;
+  const data = showAnalytics ? await getAnalytics(30) : null;
   const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
   const storeUrl = storefrontUrl(store.slug, root);
 

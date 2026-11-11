@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LEVEL_LABELS, MODULE_LABELS, presetOf, ROLE_PRESET_KEYS, ROLE_PRESETS, roleLabel } from "@/lib/auth/permissions";
-import { MODULES, type AccessLevel, type MemberPermissions } from "@/lib/db/schema/enums";
+import { MODULES, type AccessLevel, type MemberPermissions } from "@/lib/domain/enums";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { createMemberSchema, updateMemberSchema, type CreateMemberInput, type PermissionsInput } from "@/lib/validations/team";
 

@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { run } from "@/lib/actions/run";
 import { AppError, toFailure } from "@/lib/errors";
 import { describeError, logEvent, sanitizeText } from "@/lib/observability/log";
-import { ADMIN_RATE_LIMITS, loginSubjects, waitText } from "@/lib/security/rate-limit";
 
 const JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dBjftJeZ4CVPmB92K27uhbUJU1p1r_wW1gFWFOEjXk";
 
@@ -136,40 +135,5 @@ describe("run and toFailure", () => {
     const redirect = Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/login;307;" });
     expect(() => toFailure(redirect)).toThrow(redirect);
     expect(out).toHaveLength(0);
-  });
-});
-
-describe("rate limit helpers", () => {
-  it("states how long to wait in plain words", () => {
-    expect(waitText(1)).toBe("1 second");
-    expect(waitText(45)).toBe("45 seconds");
-    expect(waitText(89)).toBe("89 seconds");
-    expect(waitText(90)).toBe("2 minutes");
-    expect(waitText(600)).toBe("10 minutes");
-    expect(waitText(0)).toBe("1 second");
-  });
-
-  it("derives keyed hashes: stable, different per address and e-mail, case-insensitive, and never the raw values", () => {
-    const a = loginSubjects("203.0.113.5", "Pat@Example.TEST");
-    expect(a).toEqual(loginSubjects(" 203.0.113.5 ", "pat@example.test"));
-    expect(a.email).toMatch(/^[0-9a-f]{64}$/);
-    expect(a.ip).toMatch(/^[0-9a-f]{64}$/);
-    expect(a.email).not.toBe(a.ip);
-    expect(loginSubjects("203.0.113.6", "pat@example.test").email).not.toBe(a.email);
-    expect(loginSubjects("203.0.113.5", "other@example.test").email).not.toBe(a.email);
-    expect(loginSubjects("203.0.113.6", "other@example.test").ip).not.toBe(a.ip);
-    expect(loginSubjects("203.0.113.5", "other@example.test").ip).toBe(a.ip); // the address counter ignores the e-mail
-    expect(JSON.stringify(a)).not.toMatch(/203\.0\.113|pat@example/i);
-  });
-
-  it("limits the sensitive operations, deletion included, to sensible numbers", () => {
-    for (const [bucket, { limit, windowSeconds }] of Object.entries(ADMIN_RATE_LIMITS)) {
-      expect(limit, bucket).toBeGreaterThanOrEqual(1);
-      expect(limit, bucket).toBeLessThanOrEqual(100);
-      expect(windowSeconds, bucket).toBe(600);
-      expect(bucket).toMatch(/^[a-z_.]{1,40}$/); // what the database accepts
-    }
-    expect(ADMIN_RATE_LIMITS["org.delete"].limit).toBeLessThanOrEqual(ADMIN_RATE_LIMITS["org.create"].limit);
-    expect(ADMIN_RATE_LIMITS["ownership.change"].limit).toBeLessThanOrEqual(10);
   });
 });

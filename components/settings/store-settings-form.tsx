@@ -15,7 +15,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { storeSettingsSchema } from "@/lib/validations/catalog";
-import type { Store } from "@/lib/db/schema";
+import type { Store } from "@/lib/domain/entities";
 
 type Props = { store: Store; canEdit: boolean; currencyLocked: boolean };
 

@@ -1,8 +1,7 @@
 import "server-only";
-import { sql } from "drizzle-orm";
 import { z } from "zod";
-import { getDatabase } from "@/lib/db";
-import { rowsOf, withPublicContext } from "@/lib/db/user-context";
+import { getStorefrontApi } from "@/lib/api/endpoints/public-api";
+import { AppError } from "@/lib/errors";
 
 const templateSchema = z.object({
   key: z.string(),
@@ -35,14 +34,31 @@ export const storefrontSchema = z.object({
 export type PublicStorefront = z.infer<typeof storefrontSchema>;
 
 /**
- * Public data for <slug>.<root domain>. No session is involved and none is trusted: the slug comes
- * from the Host header, and the database function returns only public fields of an active store in an
- * active company, or null (unknown, inactive and suspended stores look identical).
+ * Public data for <slug>.<root domain>, from `GET /public/storefronts/:slug` of the StoreForge API. No session is involved
+ * and none is trusted: the slug comes from the Host header, and the API returns only public fields of an active store in
+ * an active company. Unknown, inactive and suspended stores all answer 404, which is "no store".
  */
 export async function getPublicStorefront(slug: string): Promise<PublicStorefront | null> {
-  const row = await withPublicContext(getDatabase(), async (tx) =>
-    rowsOf<{ s: unknown }>(await tx.execute(sql`select public.get_public_storefront(${slug}) as s`))[0]?.s,
-  );
-  if (row === null || row === undefined) return null;
-  return storefrontSchema.parse(typeof row === "string" ? JSON.parse(row) : row);
+  try {
+    const s = await getStorefrontApi(slug);
+    return storefrontSchema.parse({
+      name: s.name,
+      slug: s.slug,
+      description: s.description,
+      logo_path: s.logoPath,
+      currency: s.currency,
+      products: s.products.map((p) => ({
+        name: p.name,
+        slug: p.slug,
+        short_description: p.shortDescription,
+        price_minor: p.priceMinor,
+        compare_at_price_minor: p.compareAtPriceMinor,
+        image_path: p.imagePath,
+      })),
+      template: s.template,
+    });
+  } catch (error) {
+    if (error instanceof AppError && error.code === "NOT_FOUND") return null;
+    throw error;
+  }
 }

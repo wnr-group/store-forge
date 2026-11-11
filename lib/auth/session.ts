@@ -3,11 +3,10 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ROUTES } from "@/config/app";
-import { authApi, authApiEnabled, readStoredSession } from "@/lib/auth/nest-api";
+import { authApi, readStoredSession } from "@/lib/auth/nest-api";
 import { logEvent } from "@/lib/observability/log";
-import { createClient } from "@/lib/supabase/server";
 
-/** What the app needs to know about the signed-in user. A Supabase `User` satisfies it, so both modes return the same shape. */
+/** What the app needs to know about the signed-in user. */
 export type SessionUser = { id: string; email?: string; user_metadata: { full_name?: string } };
 
 /**
@@ -32,15 +31,8 @@ async function currentUserFromApi(): Promise<SessionUser | null> {
 
 /**
  * The authenticated user, validated server-side, NOT read from the unverified cookie session. Memoised per request.
- * Through the StoreForge API when `AUTH_API_URL` is set, otherwise by the Supabase Auth server (`getUser()`).
  */
-export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
-  if (authApiEnabled()) return currentUserFromApi();
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) return null;
-  return data.user;
-});
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => currentUserFromApi());
 
 /** For pages/actions: redirects to login (e.g. on an expired session). */
 export async function requireUser() {

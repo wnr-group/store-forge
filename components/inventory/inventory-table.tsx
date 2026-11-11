@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROUTES } from "@/config/app";
-import { INVENTORY_REASONS } from "@/lib/db/schema/enums";
+import { INVENTORY_REASONS } from "@/lib/domain/enums";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { inventoryAdjustSchema } from "@/lib/validations/catalog";
 import type { InventoryRow } from "@/services/inventory.service";
