@@ -2,12 +2,14 @@
 
 What was reviewed, what was found, what was fixed and what is left. It covers the database functions and tables behind the Platform Admin area, how they can be reached, rate limiting, logging and the tests that keep them safe.
 
+> **Scope note.** This review was done when this app still accessed the database directly. The database, its migrations, the admin rate limiter and the database checks now belong to the `store-forge-api` repository. The findings and recommendations still apply to the database; the test and script names below refer to the earlier setup and are no longer in this repository.
+
 ## How it was reviewed
 
-- **Catalog audit.** `tests/db/security-audit.test.ts` reads the real schema and checks every function and table it finds. A new function or table is covered without anyone adding it to a list.
+- **Catalog audit.** `tests/db/security-audit.test.ts` read the real schema and checked every function and table it found, so a new function or table was covered without anyone adding it to a list.
 - **Live checks.** The public REST API of the Supabase project was probed with the public (anon) key, and the database roles and sessions were inspected.
-- **Workflow tests.** `tests/e2e/admin-workflows.test.ts` drives the real server actions end to end, including refusals.
-- **Verification script.** `npm run db:verify` repeats the main checks on the real database.
+- **Workflow tests.** `tests/e2e/admin-workflows.test.ts` drove the real server actions end to end, including refusals.
+- **Verification script.** `npm run db:verify` repeated the main checks on the real database.
 
 ## Findings
 
@@ -72,8 +74,4 @@ The subject of an admin limit is always the signed-in admin, taken from the sess
 
 ## Running the checks
 
-```
-npm run db:verify                       # the real database
-npx vitest run tests/db/security-audit.test.ts tests/db/admin-hardening.test.ts
-npx vitest run tests/e2e
-```
+The database checks (`db:verify`, the security audit and admin hardening tests) are no longer part of this repository. Run the equivalents in `store-forge-api`.

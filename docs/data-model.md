@@ -1,6 +1,6 @@
 # StoreForge Data Model
 
-The PostgreSQL database behind StoreForge. The schema is defined in `lib/db/schema/` and created by the migrations in `drizzle/`.
+The PostgreSQL database behind StoreForge. The schema and migrations are owned by the `store-forge-api` repository (see its `docs/DATABASE_SCHEMA.md`); this app does not access the database directly.
 
 ## Read this first
 
