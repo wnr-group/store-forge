@@ -4,9 +4,9 @@
 
 StoreForge is a multi-tenant e-commerce SaaS foundation. It is **admin-controlled**: there is no public sign-up. A StoreForge **Platform Admin** creates each company (tenant), its first store and its Owner account. The Owner then creates Manager and Staff accounts for their own company. Every company's data is isolated from every other company's by PostgreSQL Row Level Security (RLS), so one company can never see another's data.
 
-**What is built:** provisioned accounts and sign-in, the Platform Admin area, company provisioning, team management, tenant isolation, role-based access and the merchant dashboard.
+**What is built:** provisioned accounts and sign-in, the Platform Admin area, company provisioning, team management, tenant isolation, role-based access, the merchant dashboard and a public storefront page for each store.
 
-**What is not built yet:** checkout, order creation, payments and public storefronts. Orders are read-only in the dashboard, so analytics and customer totals stay empty until a checkout service writes orders.
+**What is not built yet:** checkout, order creation, payments and template customization (`/dashboard/templates` shows "Coming soon"). The public storefront is a single page per store. Orders are read-only in the dashboard, so analytics and customer totals stay empty until a checkout service writes orders.
 
 ## 2. Features
 
@@ -63,7 +63,7 @@ proxy.ts      Session refresh and route protection
 
 **Database schema and migrations** live in the `store-forge-api` repository (`src/database/migrations`, `npm run db:migrate`). They are not part of this app.
 
-**Storage:** migration `0006` creates the public-read `products` bucket. Paths are `{tenant_id}/{product_id}/{file}`, `{tenant_id}/collections/{id}/{file}` and `{tenant_id}/store/{file}` (the store logo and the template hero image), and policies check tenant membership from the first path segment.
+**Storage:** images live in the public-read `products` bucket, created by the database setup in `store-forge-api`. Paths are `{tenant_id}/{product_id}/{file}`, `{tenant_id}/collections/{id}/{file}` and `{tenant_id}/store/{file}` (the store logo), and policies check tenant membership from the first path segment.
 
 ## 5. Installation
 
@@ -176,11 +176,11 @@ Rules are defined in two places that must be kept in sync: `lib/auth/permissions
 **7. Store subdomains.** Each company's first store is served publicly at `<store-address>.<root domain>`: `http://urban.lvh.me:3000` locally (`lvh.me` and every subdomain of it resolve to 127.0.0.1, so no hosts-file edits) and `https://urban.store-forge.com` in production. Set `NEXT_PUBLIC_ROOT_DOMAIN` (`lvh.me:3000` locally, `store-forge.com` in production, no scheme) and restart the dev server.
 
 - The proxy (`proxy.ts`) rewrites a request for `<slug>.<root>` to the public page `app/s/[slug]`. It reads only the Host header, so the slug is a hint, not an identity.
-- The public storefront pages (`app/s/[slug]`, `/products/[slug]`, `/collections/[slug]`) read anonymous, read-only data from the API (`GET /public/storefronts/:slug`). Unknown, reserved, inactive and suspended stores return 404, and responses never include costs, stock quantities, customers or draft content. Template customization is not available yet (`/dashboard/templates` shows "Coming soon").
+- The public storefront page (`app/s/[slug]`) reads anonymous, read-only data from the API (`GET /public/storefronts/:slug`). Unknown, reserved, inactive and suspended stores return 404, and responses never include costs, stock quantities, customers or draft content. Template customization is not available yet (`/dashboard/templates` shows "Coming soon").
 - **Each store host has its own sign-in and dashboard.** `http://mart-com.lvh.me:3000/login` signs in on that host and `/dashboard` there is that store's dashboard. The proxy sets an internal `x-sf-store` header from the Host (it deletes any client-supplied copy first), and the workspace is then the company that owns that store: a user who is not a member of it gets "No workspace available", not their own company. Cookies are per host, so signing in on one store never signs you in on another or on the root domain. The storefront header has a **Store login** link.
 - `/admin` (Platform Admin) and the unauthenticated landing page exist **only on the root domain**; on a store host `/admin` is a 404.
 - Reserved names (`www`, `app`, `api`, `admin`, ...) are never treated as stores. The Platform Admin's company page shows each store's URL.
-- Production DNS: add a wildcard record `*.store-forge.com` pointing at Vercel and add both `store-forge.com` and `*.store-forge.com` to the Vercel project (a wildcard domain needs Vercel nameservers or a DNS challenge). Requires migration 0009.
+- Production DNS: add a wildcard record `*.store-forge.com` pointing at Vercel and add both `store-forge.com` and `*.store-forge.com` to the Vercel project (a wildcard domain needs Vercel nameservers or a DNS challenge).
 
 **Deployment (Vercel).** Set these as Environment Variables for Production: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL` (the production origin), `NEXT_PUBLIC_ROOT_DOMAIN` (`store-forge.com`), `API_BASE_URL` and `AUTH_BFF_SECRET` (server only, never `NEXT_PUBLIC_`). Deploy and migrate the StoreForge API first, turn off public sign-ups in Supabase, and create the Platform Admin from the API repository.
 
