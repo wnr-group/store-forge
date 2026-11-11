@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { z } from "zod";
 import { getStorefrontApi } from "@/lib/api/endpoints/public-api";
 import { AppError } from "@/lib/errors";
@@ -36,9 +37,10 @@ export type PublicStorefront = z.infer<typeof storefrontSchema>;
 /**
  * Public data for <slug>.<root domain>, from `GET /public/storefronts/:slug` of the StoreForge API. No session is involved
  * and none is trusted: the slug comes from the Host header, and the API returns only public fields of an active store in
- * an active company. Unknown, inactive and suspended stores all answer 404, which is "no store".
+ * an active company. Unknown, inactive and suspended stores all answer 404, which is "no store". Memoized per request:
+ * generateMetadata and the page both ask for the same store, which should cost one API call, not two.
  */
-export async function getPublicStorefront(slug: string): Promise<PublicStorefront | null> {
+export const getPublicStorefront = cache(async (slug: string): Promise<PublicStorefront | null> => {
   try {
     const s = await getStorefrontApi(slug);
     return storefrontSchema.parse({
@@ -61,4 +63,4 @@ export async function getPublicStorefront(slug: string): Promise<PublicStorefron
     if (error instanceof AppError && error.code === "NOT_FOUND") return null;
     throw error;
   }
-}
+});
