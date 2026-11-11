@@ -102,7 +102,12 @@ describe("Set-Cookie relay", () => {
 });
 
 describe("login", () => {
-  const loginBody = { success: true, data: { id: "u1", email: "a@b.co", memberships: [] } };
+  const member = { organizationId: "o1", role: "owner" };
+  const loginAs = (platformAdminLevel: string | null, memberships: object[]) => ({
+    success: true,
+    data: { id: "u1", email: "a@b.co", platformAdminLevel, memberships },
+  });
+  const loginBody = loginAs(null, [member]);
   const cookies = [`${NAME}=${encodeURIComponent("v").replace("%", "")}; Max-Age=34560000; Path=/; HttpOnly; SameSite=Lax`, "sf_signed_in=1; Max-Age=34560000; Path=/; SameSite=Lax"];
 
   it("sends the credentials, visitor address and shared secret to the API, relays its HttpOnly cookies and redirects", async () => {
@@ -112,7 +117,7 @@ describe("login", () => {
 
     expect(seen).toHaveLength(1);
     expect(seen[0]).toMatchObject({ method: "POST", path: "/api/v1/auth/login" });
-    expect(JSON.parse(seen[0].body)).toEqual({ email: "a@b.co", password: "pw", includeProfile: false });
+    expect(JSON.parse(seen[0].body)).toEqual({ email: "a@b.co", password: "pw", includeProfile: true });
     expect(seen[0].headers["x-internal-auth"]).toBe(SECRET);
     expect(seen[0].headers["x-forwarded-for"]).toBe("203.0.113.9");
     expect(jar.get(NAME)!.options).toMatchObject({ httpOnly: true, sameSite: "lax", path: "/" });
@@ -124,6 +129,43 @@ describe("login", () => {
     const { loginAction } = await import("@/app/(auth)/actions");
     expect(await redirected(loginAction({ email: "a@b.co", password: "x" }, "/dashboard/products"))).toBe("/dashboard/products");
     expect(await redirected(loginAction({ email: "a@b.co", password: "x" }, "https://evil.com"))).toBe("/dashboard");
+  });
+
+  it("only asks the API for the profile when there is no specific destination", async () => {
+    handler = (_req, res) => reply(res, 200, loginBody, cookies);
+    const { loginAction } = await import("@/app/(auth)/actions");
+    await redirected(loginAction({ email: "a@b.co", password: "x" }, "/dashboard/products"));
+    await redirected(loginAction({ email: "a@b.co", password: "x" }));
+    expect(seen.map((s) => JSON.parse(s.body).includeProfile)).toEqual([false, true]);
+  });
+
+  describe("landing page without a next path", () => {
+    const land = async (body: object, next?: string) => {
+      handler = (_req, res) => reply(res, 200, body, cookies);
+      const { loginAction } = await import("@/app/(auth)/actions");
+      return redirected(loginAction({ email: "a@b.co", password: "x" }, next));
+    };
+
+    it("sends a Platform Admin without a workspace straight to /admin", async () => {
+      expect(await land(loginAs("super_admin", []))).toBe("/admin");
+      expect(await land(loginAs("admin", []), "/dashboard")).toBe("/admin"); // the proxy's default next
+    });
+
+    it("sends an organization user to the dashboard", async () => {
+      expect(await land(loginAs(null, [member]))).toBe("/dashboard");
+    });
+
+    it("keeps a Platform Admin who also belongs to an organization on that dashboard, as /dashboard always did", async () => {
+      expect(await land(loginAs("admin", [member]))).toBe("/dashboard");
+    });
+
+    it("falls back to /dashboard (which still redirects admins itself) when the API gives no identity", async () => {
+      expect(await land({ success: true, data: { id: "u1", email: "a@b.co" } })).toBe("/dashboard");
+    });
+
+    it("an explicit next path wins, even for a Platform Admin", async () => {
+      expect(await land(loginAs("admin", []), "/admin/companies")).toBe("/admin/companies");
+    });
   });
 
   it("keeps the existing wording for bad credentials and sets no cookie", async () => {

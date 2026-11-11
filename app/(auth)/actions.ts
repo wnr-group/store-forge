@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { ROUTES } from "@/config/app";
+import { defaultHomePath } from "@/lib/auth/home";
 import { toFailure } from "@/lib/errors";
 import { logEvent } from "@/lib/observability/log";
 import { safeNextPath } from "@/lib/utils/redirect";
@@ -14,10 +15,16 @@ import type { ActionResult } from "@/types/action";
 // There is intentionally no register / verify-email / forgot-password action: accounts are provisioned.
 
 export async function loginAction(input: unknown, next?: string): Promise<ActionResult> {
+  let destination: string;
   try {
     const values = parseInput(loginSchema, input);
     // The API rate limits the attempt itself (same limits as before) before it checks the password.
-    await authService.signIn(values);
+    // An explicit `next` wins; otherwise the API's answer picks the landing page, so nobody bounces through /dashboard.
+    // `/dashboard` is what the proxy puts in `next` for a signed-out visitor, i.e. still "no specific destination".
+    const requested = safeNextPath(next, "");
+    const target = requested === ROUTES.dashboard ? "" : requested;
+    const identity = await authService.signIn(values, !target);
+    destination = target || defaultHomePath(identity);
   } catch (e) {
     const failure = toFailure(e);
     // The outcome only: never the e-mail address or the password.
@@ -25,7 +32,7 @@ export async function loginAction(input: unknown, next?: string): Promise<Action
     return failure;
   }
   logEvent("info", "login", { outcome: "ok" });
-  redirect(safeNextPath(next));
+  redirect(destination);
 }
 
 export async function logoutAction(): Promise<void> {

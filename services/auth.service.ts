@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { applySetCookies, authApi, isSessionCookieName, readStoredSession, SIGNED_IN_MARKER } from "@/lib/auth/nest-api";
+import { identityFromLogin, type SignInIdentity } from "@/lib/auth/home";
 import { AppError } from "@/lib/errors";
 import { logEvent } from "@/lib/observability/log";
 import { requestAddress } from "@/lib/security/request-address";
@@ -38,10 +39,13 @@ function mapApiFailure(status: number, message: string | undefined, error: ApiEr
   throw new Error(`auth api answered ${status}`); // unexpected -> logged + generic message
 }
 
-async function signInViaApi(input: LoginInput) {
-  const result = await authApi("/auth/login", { method: "POST", json: { email: input.email, password: input.password, includeProfile: false }, clientIp: await requestAddress() });
+async function signInViaApi(input: LoginInput, needsIdentity: boolean): Promise<SignInIdentity | null> {
+  // The profile costs the API a database transaction, so it is only requested when the caller must pick a destination.
+  const json = { email: input.email, password: input.password, includeProfile: needsIdentity };
+  const result = await authApi("/auth/login", { method: "POST", json, clientIp: await requestAddress() });
   if (!result.ok) mapApiFailure(result.status, result.body?.message, result.body?.error);
   applySetCookies(await cookies(), result.setCookies);
+  return needsIdentity ? identityFromLogin(result.body?.data) : null;
 }
 
 async function signOutViaApi() {
@@ -69,8 +73,9 @@ async function changePasswordViaApi(currentPassword: string, newPassword: string
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export async function signIn(input: LoginInput) {
-  return signInViaApi(input);
+/** `needsIdentity`: the caller has no destination yet, so also return who signed in (for `defaultHomePath`). */
+export async function signIn(input: LoginInput, needsIdentity = false) {
+  return signInViaApi(input, needsIdentity);
 }
 
 export async function signOut() {
