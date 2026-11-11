@@ -35,7 +35,7 @@ Money is stored as integer minor units in the store currency, so the currency is
 - **Forms and validation:** React Hook Form, Zod
 - **API:** the StoreForge API (NestJS, repository `store-forge-api`) owns business logic, authorization, tenant isolation and all database access (Drizzle ORM and Supabase PostgreSQL live there)
 - **Auth:** Supabase Auth, reached through the StoreForge API; this app only relays its HttpOnly session cookies
-- **File storage:** Supabase Storage (signed uploads, `@supabase/ssr`)
+- **File storage:** Supabase Storage (signed uploads from the API)
 - **Testing:** Vitest
 
 ## 4. Architecture
@@ -43,20 +43,13 @@ Money is stored as integer minor units in the store currency, so the currency is
 - **Next.js -> StoreForge API -> Supabase PostgreSQL.** This app has no database client, no SQL, no Drizzle and no migrations. Every business operation goes through the API client in `lib/api`, using the signed-in user's access token and the active organization.
 - **Authentication** goes through the API (`/auth/login`, `/auth/logout`, `/auth/refresh`, `/auth/session`, `/auth/change-password`). The session lives in HttpOnly cookies set by the API and relayed by `services/auth.service.ts` and `proxy.ts`. State-changing calls carry the shared `AUTH_BFF_SECRET`, so the API accepts them from this server without a browser `Origin`.
 - **RLS and tenant isolation are enforced by the API and the database.** The app-level checks (`requireTenantAccess`, `requireTenantRole`) are the friendly early refusal, not the only protection.
-- **Storage** uses the signed-in user's own Supabase session to create signed upload URLs. Uploaded files that are never saved against a record stay in the bucket (see `docs/architecture.md`).
+- **Storage.** The browser uploads images straight to Supabase Storage using one-time signed URLs from the API (`POST /uploads/signed-urls`). The API derives the tenant folder from the verified organization. See `docs/architecture.md`.
 - Companies are created only by the `platform_provision_tenant()` database function, which requires the caller to be in the private `platform_admins` table. The old self-service `create_tenant_with_store()` no longer exists.
 - **Platform Admin is not a tenant role.** It is a separate table that the API cannot read or write. A Platform Admin can never also be a tenant member (database trigger), and a tenant Owner is never a Platform Admin.
-- This app no longer creates or deletes Auth accounts: the StoreForge API does, with its own service-role key. Here the key is read only by `npm run admin:create` and, when `RATE_LIMIT_SECRET` is empty, by the direct-mode sign-in rate limiter. It is never used for database queries or Storage, and a test fails if that changes.
+- This app creates and deletes no Auth accounts and holds no service-role key: the StoreForge API does that. It also runs no database queries.
 - A suspended company or a deactivated membership loses all access at the database level, because every RLS policy goes through `is_tenant_member()` / `has_tenant_role()`, which now require both to be active.
 
-### Catalog vs. Assignment Ownership Model (Multi-Store Option A)
-
-The StoreForge multi-store template engine follows **Option A** for ownership:
-
-- **Products and collections are tenant-wide:** Every product and collection belongs directly to a company (tenant). They do not carry a `store_id`, and there are no membership or join tables linking products to stores.
-- **Templates and assignments are store-scoped:** Templates belong to a specific store (`tenant_id, store_id`). Template assignments link a store's template to a product or collection within the same company.
-- **Cross-store assignment boundaries:** A template belonging to Store 1 cannot be assigned in Store 2. Any cross-store or cross-tenant assignment attempt is rejected by the database trigger with an explicit error: `"template does not belong to this store"` (SQLSTATE `23503`, migration `0015`).
-- **Independent store layouts:** Multiple stores owned by the same company share the product catalog, but maintain independent template assignments and layout resolutions.
+- **Products and collections are tenant-wide.** They belong to a company, not to a single store, so a company's stores share one catalog.
 
 ```
 app/          Routes: (auth)/login, (admin)/admin/* (Platform Admin), (dashboard)/dashboard/* (company workspace)
@@ -183,7 +176,7 @@ Rules are defined in two places that must be kept in sync: `lib/auth/permissions
 **7. Store subdomains.** Each company's first store is served publicly at `<store-address>.<root domain>`: `http://urban.lvh.me:3000` locally (`lvh.me` and every subdomain of it resolve to 127.0.0.1, so no hosts-file edits) and `https://urban.store-forge.com` in production. Set `NEXT_PUBLIC_ROOT_DOMAIN` (`lvh.me:3000` locally, `store-forge.com` in production, no scheme) and restart the dev server.
 
 - The proxy (`proxy.ts`) rewrites a request for `<slug>.<root>` to the public page `app/s/[slug]`. It reads only the Host header, so the slug is a hint, not an identity.
-- The storefront and template engine pages (`app/s/[slug]`, `/products/[slug]`, `/collections/[slug]`) are driven by published templates and read-only functions (`get_public_template_layout`, `get_public_product`, `get_public_collection`, `get_public_collections`, and `get_public_storefront`). Anonymous visitors have no direct table access; the functions return `null` (HTTP 404) for unknown, reserved, inactive and suspended stores, and never return costs, stock quantities, customers, or draft content. Public product responses expose SKUs for product and variant display (decisions D9, D12, R4; AC-SF-018). Unconfigured stores render the default `classic` template.
+- The public storefront pages (`app/s/[slug]`, `/products/[slug]`, `/collections/[slug]`) read anonymous, read-only data from the API (`GET /public/storefronts/:slug`). Unknown, reserved, inactive and suspended stores return 404, and responses never include costs, stock quantities, customers or draft content. Template customization is not available yet (`/dashboard/templates` shows "Coming soon").
 - **Each store host has its own sign-in and dashboard.** `http://mart-com.lvh.me:3000/login` signs in on that host and `/dashboard` there is that store's dashboard. The proxy sets an internal `x-sf-store` header from the Host (it deletes any client-supplied copy first), and the workspace is then the company that owns that store: a user who is not a member of it gets "No workspace available", not their own company. Cookies are per host, so signing in on one store never signs you in on another or on the root domain. The storefront header has a **Store login** link.
 - `/admin` (Platform Admin) and the unauthenticated landing page exist **only on the root domain**; on a store host `/admin` is a 404.
 - Reserved names (`www`, `app`, `api`, `admin`, ...) are never treated as stores. The Platform Admin's company page shows each store's URL.
