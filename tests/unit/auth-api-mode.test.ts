@@ -112,7 +112,7 @@ describe("login", () => {
 
     expect(seen).toHaveLength(1);
     expect(seen[0]).toMatchObject({ method: "POST", path: "/api/v1/auth/login" });
-    expect(JSON.parse(seen[0].body)).toEqual({ email: "a@b.co", password: "pw" });
+    expect(JSON.parse(seen[0].body)).toEqual({ email: "a@b.co", password: "pw", includeProfile: false });
     expect(seen[0].headers["x-internal-auth"]).toBe(SECRET);
     expect(seen[0].headers["x-forwarded-for"]).toBe("203.0.113.9");
     expect(jar.get(NAME)!.options).toMatchObject({ httpOnly: true, sameSite: "lax", path: "/" });

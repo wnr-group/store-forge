@@ -39,7 +39,7 @@ function mapApiFailure(status: number, message: string | undefined, error: ApiEr
 }
 
 async function signInViaApi(input: LoginInput) {
-  const result = await authApi("/auth/login", { method: "POST", json: { email: input.email, password: input.password }, clientIp: await requestAddress() });
+  const result = await authApi("/auth/login", { method: "POST", json: { email: input.email, password: input.password, includeProfile: false }, clientIp: await requestAddress() });
   if (!result.ok) mapApiFailure(result.status, result.body?.message, result.body?.error);
   applySetCookies(await cookies(), result.setCookies);
 }
