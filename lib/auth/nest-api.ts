@@ -10,19 +10,19 @@ import { logEvent } from "@/lib/observability/log";
  * authentication and the cookies stay host-scoped, one set per store host), and copies the API's `Set-Cookie` headers onto
  * its own response. The browser therefore only ever sees HttpOnly cookies on this app's own host.
  *
- * `AUTH_API_URL` and `AUTH_BFF_SECRET` are required: there is no direct-to-Supabase sign-in any more.
+ * `API_BASE_URL` and `AUTH_BFF_SECRET` are required: there is no direct-to-Supabase sign-in any more.
  */
 
 export type AuthApiConfig = { url: string; secret: string };
 
-/** `null` when `AUTH_API_URL` is unset (callers then fail with a clear error). Throws if it is half configured. */
+/** `null` when `API_BASE_URL` is unset (callers then fail with a clear error). Throws if it is half configured. */
 export function getAuthApiConfig(env: Record<string, string | undefined> = process.env): AuthApiConfig | null {
-  const url = env.AUTH_API_URL?.trim().replace(/\/+$/, "");
+  const url = env.API_BASE_URL?.trim().replace(/\/+$/, "");
   const secret = env.AUTH_BFF_SECRET?.trim();
   if (!url) return null;
-  if (!/^https?:\/\//.test(url)) throw new Error("AUTH_API_URL must be an http(s) URL, e.g. http://localhost:4000/api/v1.");
+  if (!/^https?:\/\//.test(url)) throw new Error("API_BASE_URL must be an http(s) URL, e.g. http://localhost:4000/api/v1.");
   if (!secret || secret.length < 32)
-    throw new Error("AUTH_BFF_SECRET (at least 32 characters, the same value as in the API) is required when AUTH_API_URL is set.");
+    throw new Error("AUTH_BFF_SECRET (at least 32 characters, the same value as in the API) is required when API_BASE_URL is set.");
   return { url, secret };
 }
 
@@ -53,7 +53,7 @@ export type AuthApiCall = {
  * reached. Secrets and cookies are never logged.
  */
 export async function authApi<T = unknown>(path: string, call: AuthApiCall = {}, config = getAuthApiConfig()): Promise<AuthApiResult<T>> {
-  if (!config) throw new Error("The auth API is not configured (AUTH_API_URL).");
+  if (!config) throw new Error("The auth API is not configured (API_BASE_URL).");
   const headers: Record<string, string> = {
     Accept: "application/json",
     "X-Internal-Auth": config.secret,

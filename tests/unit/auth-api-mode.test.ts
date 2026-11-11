@@ -60,7 +60,7 @@ beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://proj.supabase.co");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "a".repeat(30));
   vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
-  vi.stubEnv("AUTH_API_URL", `http://127.0.0.1:${(server.address() as AddressInfo).port}/api/v1`);
+  vi.stubEnv("API_BASE_URL", `http://127.0.0.1:${(server.address() as AddressInfo).port}/api/v1`);
   vi.stubEnv("AUTH_BFF_SECRET", SECRET);
   jar.clear();
   seen = [];
@@ -71,17 +71,17 @@ beforeEach(() => {
 const redirected = async (p: Promise<unknown>) => p.then(() => null, (e: { url?: string }) => e.url ?? null);
 
 describe("configuration", () => {
-  it("is off without AUTH_API_URL and on with it", async () => {
+  it("is off without API_BASE_URL and on with it", async () => {
     const { getAuthApiConfig } = await import("@/lib/auth/nest-api");
     expect(getAuthApiConfig({})).toBeNull();
-    expect(getAuthApiConfig({ AUTH_API_URL: "http://api.test/api/v1/", AUTH_BFF_SECRET: SECRET })).toEqual({ url: "http://api.test/api/v1", secret: SECRET });
+    expect(getAuthApiConfig({ API_BASE_URL: "http://api.test/api/v1/", AUTH_BFF_SECRET: SECRET })).toEqual({ url: "http://api.test/api/v1", secret: SECRET });
   });
 
   it("refuses a half configuration instead of silently running unprotected", async () => {
     const { getAuthApiConfig } = await import("@/lib/auth/nest-api");
-    expect(() => getAuthApiConfig({ AUTH_API_URL: "http://api.test/api/v1" })).toThrow(/AUTH_BFF_SECRET/);
-    expect(() => getAuthApiConfig({ AUTH_API_URL: "http://api.test/api/v1", AUTH_BFF_SECRET: "short" })).toThrow(/AUTH_BFF_SECRET/);
-    expect(() => getAuthApiConfig({ AUTH_API_URL: "api.test", AUTH_BFF_SECRET: SECRET })).toThrow(/http/);
+    expect(() => getAuthApiConfig({ API_BASE_URL: "http://api.test/api/v1" })).toThrow(/AUTH_BFF_SECRET/);
+    expect(() => getAuthApiConfig({ API_BASE_URL: "http://api.test/api/v1", AUTH_BFF_SECRET: "short" })).toThrow(/AUTH_BFF_SECRET/);
+    expect(() => getAuthApiConfig({ API_BASE_URL: "api.test", AUTH_BFF_SECRET: SECRET })).toThrow(/http/);
   });
 });
 
@@ -196,7 +196,7 @@ describe("login", () => {
   });
 
   it("reports an unreachable API as a generic error, never as a login result", async () => {
-    vi.stubEnv("AUTH_API_URL", "http://127.0.0.1:1/api/v1");
+    vi.stubEnv("API_BASE_URL", "http://127.0.0.1:1/api/v1");
     const { loginAction } = await import("@/app/(auth)/actions");
     expect(await loginAction({ email: "a@b.co", password: "x" })).toMatchObject({ ok: false, error: "Something went wrong. Please try again." });
     expect(jar.size).toBe(0);
@@ -217,7 +217,7 @@ describe("logout", () => {
   });
 
   it("still signs the browser out locally when the API is down", async () => {
-    vi.stubEnv("AUTH_API_URL", "http://127.0.0.1:1/api/v1");
+    vi.stubEnv("API_BASE_URL", "http://127.0.0.1:1/api/v1");
     jar.set(`${NAME}.0`, { value: "A" });
     jar.set(`${NAME}.1`, { value: "B" });
     jar.set("sf_signed_in", { value: "1" });
@@ -251,7 +251,7 @@ describe("session check (getCurrentUser)", () => {
   });
 
   it("is null (not an error page) when the API cannot be reached", async () => {
-    vi.stubEnv("AUTH_API_URL", "http://127.0.0.1:1/api/v1");
+    vi.stubEnv("API_BASE_URL", "http://127.0.0.1:1/api/v1");
     jar.set(NAME, { value: sessionCookie(now() + 3600) });
     expect(await (await load())()).toBeNull();
   });
@@ -333,7 +333,7 @@ describe("proxy: session refresh and optimistic route gating", () => {
   });
 
   it("when the API is unreachable the visitor is not treated as signed in, and the cookies are kept for a retry", async () => {
-    vi.stubEnv("AUTH_API_URL", "http://127.0.0.1:1/api/v1");
+    vi.stubEnv("API_BASE_URL", "http://127.0.0.1:1/api/v1");
     const res = await run(request("/dashboard", `${NAME}=${sessionCookie(now() - 30)}`));
     expect(res.status).toBe(307);
     expect(res.headers.getSetCookie().join("\n")).not.toMatch(/Max-Age=0/i);

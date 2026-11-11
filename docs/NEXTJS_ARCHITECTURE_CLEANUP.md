@@ -22,8 +22,8 @@ Classes: **1** safe to remove, **2** must be preserved, **3** replace with an ex
 | 6 | `drizzle-orm`, `postgres`, `lib/db/*`, `lib/db/schema/*`, `DATABASE_URL`, `DIRECT_URL` | Template customization, public template engine, upload reference check, direct-mode rate limiter, plus `tests/db`, `scripts/` | 4 / 2 | **Kept** (see "Blocked") |
 | 7 | `services/template-settings`, `storefront-template`, `engine-cutover`, `storage-references` | Template customization and the upload workflow (approved exceptions) | 4 | **Kept** |
 | 8 | Supabase Storage (`lib/storage/*`, `components/products/image-uploader.tsx`, `NEXT_PUBLIC_SUPABASE_*`) | Upload workflow | 2 | **Kept**, untouched |
-| 9 | Authentication through the API: `lib/auth/nest-api.ts`, `session.ts`, `services/auth.service.ts`, `proxy.ts`, `AUTH_API_URL`, `AUTH_BFF_SECRET` | Login, logout, refresh, password change, cookies | 2 | **Kept**, untouched |
-| 10 | Direct (Supabase) sign-in mode: `signInDirect/signOutDirect/changePasswordDirect`, direct branch of `getCurrentUser`, `lib/supabase/middleware.ts` refresh, `enforceLoginRateLimit`, `rate_limits` schema, `RATE_LIMIT_SECRET` | Only when `AUTH_API_URL` is unset | 5 | **Kept.** It is an auth-path fallback; you asked for the auth flow to stay unchanged. Removing it makes `AUTH_API_URL` mandatory and deletes one of the DB users. Needs your decision. |
+| 9 | Authentication through the API: `lib/auth/nest-api.ts`, `session.ts`, `services/auth.service.ts`, `proxy.ts`, `API_BASE_URL`, `AUTH_BFF_SECRET` | Login, logout, refresh, password change, cookies | 2 | **Kept**, untouched |
+| 10 | Direct (Supabase) sign-in mode: `signInDirect/signOutDirect/changePasswordDirect`, direct branch of `getCurrentUser`, `lib/supabase/middleware.ts` refresh, `enforceLoginRateLimit`, `rate_limits` schema, `RATE_LIMIT_SECRET` | Only when `API_BASE_URL` is unset | 5 | **Kept.** It is an auth-path fallback; you asked for the auth flow to stay unchanged. Removing it makes `API_BASE_URL` mandatory and deletes one of the DB users. Needs your decision. |
 | 11 | `@supabase/ssr`, `@supabase/supabase-js` | `lib/supabase/server.ts` (Storage with the user's session, direct-mode auth), `middleware.ts` | 2 | **Kept** (Storage needs them) |
 | 12 | `drizzle/` migrations (0000-0024), `drizzle.config.ts`, `drizzle-kit`, `db:generate/migrate/check` | Schema migrations, `lib/db/schema` is its source | 5 | **Kept.** The API repo now has its own copy of all 25 migrations (identical except `0004_app_role.sql`) and its own `db:migrate`, so **two repos can migrate the same database with separate journals**. One must be declared the owner. Removing the frontend copy also breaks `tests/db/harness.ts` and `tests/integration/verify-db.test.ts`, which read `drizzle/`, i.e. the tests of the template code that stays. |
 | 13 | `scripts/seed*.ts`, `verify-db.ts`, `create-platform-admin.ts`, `resync-legacy-templates.ts` | Dev tooling, RLS verification, template resync | 5 | **Kept.** The API has equivalents for admin creation, seeding and schema verification, but not template resync. Remove with #12 once ownership is decided. |
@@ -43,7 +43,7 @@ Once the API exposes those three, the frontend can drop `drizzle-orm`, `postgres
 
 | Variable | Status |
 |---|---|
-| `AUTH_API_URL`, `AUTH_BFF_SECRET` | Kept (required) |
+| `API_BASE_URL`, `AUTH_BFF_SECRET` | Kept (required) |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_ROOT_DOMAIN` | Kept (Storage, proxy, subdomains) |
 | `DATABASE_URL` | Kept, comment now says it is only for the endpoint-less features |
 | `DIRECT_URL` | Kept (migrations/scripts only; never used by the running app) |
@@ -56,7 +56,7 @@ Real `.env*` files were not read for values or changed.
 ## Decisions needed from you
 
 1. **Migration owner.** Make the API repo the only schema owner and retire frontend `drizzle/`, `db:migrate`, `db:generate`, `db:check` (and move or drop `tests/db` that depends on them), or keep both with a documented rule. Running both against the shared database is the main risk found here.
-2. **Direct sign-in fallback.** Remove it (require `AUTH_API_URL`) or keep it.
+2. **Direct sign-in fallback.** Remove it (require `API_BASE_URL`) or keep it.
 3. **API endpoints** for templates, public template layout and upload discard, so Drizzle can be removed from the frontend.
 
 ## Verification (2026-11-10)

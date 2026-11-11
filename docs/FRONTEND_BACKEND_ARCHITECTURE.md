@@ -9,7 +9,7 @@ NestJS --> Supabase Auth (JWKS verification, Admin API) / Storage (signed URLs)
 
 ## Decision: the API is called from the Next.js **server**, not from browser code
 
-The brief suggests `NEXT_PUBLIC_API_URL`. We deviate on purpose: the session is an HttpOnly cookie on the store's own host, which browser code cannot read and which the API's host never receives. Calling from the server keeps tokens out of JavaScript, avoids CORS and cross-site cookies, keeps cookies host-scoped per store, and matches the authentication design already shipped (`docs/AUTH_VIA_API.md`). So there is **no `NEXT_PUBLIC_API_URL`**; the single base URL is the existing server-only `AUTH_API_URL`. Browser components keep calling server actions as today, so UI code does not change.
+The brief suggests `NEXT_PUBLIC_API_URL`. We deviate on purpose: the session is an HttpOnly cookie on the store's own host, which browser code cannot read and which the API's host never receives. Calling from the server keeps tokens out of JavaScript, avoids CORS and cross-site cookies, keeps cookies host-scoped per store, and matches the authentication design already shipped (`docs/AUTH_VIA_API.md`). So there is **no `NEXT_PUBLIC_API_URL`**; the single base URL is the existing server-only `API_BASE_URL`. Browser components keep calling server actions as today, so UI code does not change.
 
 ## Layers
 

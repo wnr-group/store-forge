@@ -6,10 +6,10 @@ Sign-in, sign-out, session refresh, password change and session checks can run t
 
 | Variable (server-only) | Meaning |
 |---|---|
-| `AUTH_API_URL` | e.g. `http://localhost:4000/api/v1`. **Set = authentication goes through the API. Unset = the previous direct-to-Supabase behaviour.** |
+| `API_BASE_URL` | e.g. `http://localhost:4000/api/v1`. **Set = authentication goes through the API. Unset = the previous direct-to-Supabase behaviour.** |
 | `AUTH_BFF_SECRET` | 32+ characters, the same value as `AUTH_BFF_SECRET` in the API. Proves the call comes from this server. Never `NEXT_PUBLIC_`. |
 
-Setting `AUTH_API_URL` without a valid `AUTH_BFF_SECRET` is an error (it never silently runs half-configured). **Rollback = remove `AUTH_API_URL`.**
+Setting `API_BASE_URL` without a valid `AUTH_BFF_SECRET` is an error (it never silently runs half-configured). **Rollback = remove `API_BASE_URL`.**
 
 ## How it works
 

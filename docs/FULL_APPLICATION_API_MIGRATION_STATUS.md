@@ -8,7 +8,7 @@ Updated 2026-11-10. Branch `fix/api-endpoints` (frontend), all changes uncommitt
 * **The final acceptance criterion is NOT met yet**, for three reasons: (1) the old direct-database code paths are still in the repo as the rollback while nothing has been verified live; (2) template customization and upload discard have no API endpoints (blocked, need approval); (3) `API_MODULES` still decides which path runs.
 * Because of (1) and (3), **do not describe the migration as complete.**
 
-## Module flags (`API_MODULES`, server env, needs `AUTH_API_URL`)
+## Module flags (`API_MODULES`, server env, needs `API_BASE_URL`)
 
 `categories, collections, products, inventory, customers, analytics, team, store, profile, storefront, organizations, platform` - or `*`. Unset = previous behaviour. Unknown names throw at startup of the first request.
 
@@ -80,7 +80,7 @@ Classification of what remains:
 
 ## Required environment (server-only)
 
-`AUTH_API_URL` (e.g. `http://localhost:4000/api/v1`), `AUTH_BFF_SECRET` (32+ chars, same as the API), `API_MODULES`. No `NEXT_PUBLIC_API_URL`: the browser never calls the API (tokens are HttpOnly). Existing Supabase/Storage variables unchanged.
+`API_BASE_URL` (e.g. `http://localhost:4000/api/v1`), `AUTH_BFF_SECRET` (32+ chars, same as the API), `API_MODULES`. No `NEXT_PUBLIC_API_URL`: the browser never calls the API (tokens are HttpOnly). Existing Supabase/Storage variables unchanged.
 
 ## Remaining work to reach the API-only architecture
 

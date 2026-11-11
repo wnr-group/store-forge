@@ -122,24 +122,24 @@ Copy-Item .env.example .env.local   # Windows PowerShell
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Auth | Anon key from step 1 |
 | `NEXT_PUBLIC_APP_URL` | Public origin of the app | `http://localhost:3000` (your production URL when deployed) |
 | `NEXT_PUBLIC_ROOT_DOMAIN` | Tenant subdomains (`<store>.<root>`) | `lvh.me:3000` locally; `store-forge.com` in production. Empty disables subdomain routing |
-| `AUTH_API_URL` | **Server only.** Base URL of the StoreForge API (required) | `http://localhost:4000/api/v1` locally |
+| `API_BASE_URL` | **Server only.** Base URL of the StoreForge API (required) | `http://localhost:4000/api/v1` locally |
 | `AUTH_BFF_SECRET` | **Server only.** Shared secret, 32+ characters, the same value as `AUTH_BFF_SECRET` in the API | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 
 Notes:
 
-- Never prefix `AUTH_API_URL` or `AUTH_BFF_SECRET` with `NEXT_PUBLIC_`; they must stay server-only. The browser never calls the API.
+- Never prefix `API_BASE_URL` or `AUTH_BFF_SECRET` with `NEXT_PUBLIC_`; they must stay server-only. The browser never calls the API.
 - This app holds no database credentials and no service-role key.
 
 ## 7. Database Setup
 
-The database is set up from the **`store-forge-api`** repository, not from this app: apply the migrations (`npm run db:migrate`), verify the schema (`npm run db:verify-schema`), create the first Platform Admin (`npm run admin:create`) and, for development projects only, seed demo data (`npm run db:seed:demo`). See that repository's README. Then start the API and point `AUTH_API_URL` / `AUTH_BFF_SECRET` here at it.
+The database is set up from the **`store-forge-api`** repository, not from this app: apply the migrations (`npm run db:migrate`), verify the schema (`npm run db:verify-schema`), create the first Platform Admin (`npm run admin:create`) and, for development projects only, seed demo data (`npm run db:seed:demo`). See that repository's README. Then start the API and point `API_BASE_URL` / `AUTH_BFF_SECRET` here at it.
 
 **Troubleshooting**
 
 | Problem | Fix |
 |---|---|
-| Login shows "Something went wrong" | The API answered an unexpected status. Check that `AUTH_API_URL` is reachable and that `AUTH_BFF_SECRET` is the same value in this app and in the API (a mismatch gives `CSRF_ORIGIN_REQUIRED`, 403) |
-| "The StoreForge API is not configured" | Set `AUTH_API_URL` and `AUTH_BFF_SECRET` in `.env.local` and restart |
+| Login shows "Something went wrong" | The API answered an unexpected status. Check that `API_BASE_URL` is reachable and that `AUTH_BFF_SECRET` is the same value in this app and in the API (a mismatch gives `CSRF_ORIGIN_REQUIRED`, 403) |
+| "The StoreForge API is not configured" | Set `API_BASE_URL` and `AUTH_BFF_SECRET` in `.env.local` and restart |
 | A user signs in and sees "No workspace available" | Their membership is deactivated or their company is suspended. A Platform Admin or the Owner can reactivate it |
 | A user forgot their password | There is no email recovery. The Owner resets a member's password (Team members → Reset password); a Platform Admin resets an Owner's (company page) |
 
@@ -189,7 +189,7 @@ Rules are defined in two places that must be kept in sync: `lib/auth/permissions
 - Reserved names (`www`, `app`, `api`, `admin`, ...) are never treated as stores. The Platform Admin's company page shows each store's URL.
 - Production DNS: add a wildcard record `*.store-forge.com` pointing at Vercel and add both `store-forge.com` and `*.store-forge.com` to the Vercel project (a wildcard domain needs Vercel nameservers or a DNS challenge). Requires migration 0009.
 
-**Deployment (Vercel).** Set these as Environment Variables for Production: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL` (the production origin), `NEXT_PUBLIC_ROOT_DOMAIN` (`store-forge.com`), `AUTH_API_URL` and `AUTH_BFF_SECRET` (server only, never `NEXT_PUBLIC_`). Deploy and migrate the StoreForge API first, turn off public sign-ups in Supabase, and create the Platform Admin from the API repository.
+**Deployment (Vercel).** Set these as Environment Variables for Production: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL` (the production origin), `NEXT_PUBLIC_ROOT_DOMAIN` (`store-forge.com`), `API_BASE_URL` and `AUTH_BFF_SECRET` (server only, never `NEXT_PUBLIC_`). Deploy and migrate the StoreForge API first, turn off public sign-ups in Supabase, and create the Platform Admin from the API repository.
 
 ## 10. Commands
 

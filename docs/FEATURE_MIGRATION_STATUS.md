@@ -1,6 +1,6 @@
 `analytics.service` -> `analytics-api` | Done, live check pending || Done, live check pending || Done, live check pending || Done, live check pending || Done, live check pending || Phase | Feature | API | Frontend | Status |
 |---|---|---|---|---|
-| 1 | Authentication (login, logout, refresh, session, change password) | yes | yes (`AUTH_API_URL`) | Done (pre-existing) |
+| 1 | Authentication (login, logout, refresh, session, change password) | yes | yes (`API_BASE_URL`) | Done (pre-existing) |
 | 1 | API client, config, error mapping, tests | - | `lib/api/*` | Done |
 | 2 | Categories | yes | `category.service` -> `category-api` | Done (pilot), live check pending |
 | 2 | Collections | yes | `collection.service` -> `collection-api` | Done, live check pending |

@@ -15,7 +15,7 @@ How to migrate one module (repeat per row of `API_INTEGRATION_MAPPING.md`).
 # API (D:\store-forge-api): copy .env.example -> .env, fill DATABASE_URL, SUPABASE_*, AUTH_BFF_SECRET
 npm run start:dev                       # http://localhost:4000/api/v1, Swagger /api/docs
 # Frontend (D:\store-forge): .env.local
-AUTH_API_URL=http://localhost:4000/api/v1
+API_BASE_URL=http://localhost:4000/api/v1
 AUTH_BFF_SECRET=<same 32+ chars as the API>
 API_MODULES=categories                  # or leave unset for the previous behaviour
 npm run dev

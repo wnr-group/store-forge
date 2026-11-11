@@ -29,7 +29,7 @@ beforeAll(async () => {
   });
   await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
   const { port } = server.address() as AddressInfo;
-  process.env.AUTH_API_URL = `http://127.0.0.1:${port}/api/v1`;
+  process.env.API_BASE_URL = `http://127.0.0.1:${port}/api/v1`;
   process.env.AUTH_BFF_SECRET = "s".repeat(40);
 });
 afterAll(() => new Promise<void>((r) => server.close(() => r())));
@@ -51,9 +51,9 @@ describe("serializeQuery / base URL", () => {
 
   it("needs the API to be configured; there is no direct-database alternative", async () => {
     const { apiBaseUrl } = await import("@/lib/api/config");
-    expect(apiBaseUrl({ AUTH_API_URL: "http://localhost:4000/api/v1/", AUTH_BFF_SECRET: "s".repeat(40) })).toBe("http://localhost:4000/api/v1");
-    expect(() => apiBaseUrl({})).toThrow(/AUTH_API_URL/);
-    expect(() => apiBaseUrl({ AUTH_API_URL: "http://localhost:4000/api/v1" })).toThrow(/AUTH_BFF_SECRET/);
+    expect(apiBaseUrl({ API_BASE_URL: "http://localhost:4000/api/v1/", AUTH_BFF_SECRET: "s".repeat(40) })).toBe("http://localhost:4000/api/v1");
+    expect(() => apiBaseUrl({})).toThrow(/API_BASE_URL/);
+    expect(() => apiBaseUrl({ API_BASE_URL: "http://localhost:4000/api/v1" })).toThrow(/AUTH_BFF_SECRET/);
   });
 });
 
@@ -112,12 +112,12 @@ describe("apiRequest", () => {
 
   it("turns a network failure into the generic error", async () => {
     const { apiRequest } = await import("@/lib/api/client");
-    const original = process.env.AUTH_API_URL;
-    process.env.AUTH_API_URL = "http://127.0.0.1:1/api/v1";
+    const original = process.env.API_BASE_URL;
+    process.env.API_BASE_URL = "http://127.0.0.1:1/api/v1";
     try {
       await expect(apiRequest("/categories", { timeoutMs: 2000 })).rejects.toMatchObject({ code: "UNKNOWN" });
     } finally {
-      process.env.AUTH_API_URL = original;
+      process.env.API_BASE_URL = original;
     }
   });
 });

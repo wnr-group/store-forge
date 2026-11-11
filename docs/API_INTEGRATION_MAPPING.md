@@ -37,4 +37,4 @@ if (apiServes("categories")) { /* typed call in lib/api/endpoints/*, adapt to th
 // ...existing Drizzle code unchanged below
 ```
 
-`API_MODULES=categories,...` (server env, needs `AUTH_API_URL`) selects modules; unset = old behaviour. Client: `lib/api/client.ts`.
+`API_MODULES=categories,...` (server env, needs `API_BASE_URL`) selects modules; unset = old behaviour. Client: `lib/api/client.ts`.

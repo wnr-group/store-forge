@@ -41,7 +41,7 @@ const wireCustomer = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  process.env.AUTH_API_URL = "http://localhost:4000/api/v1";
+  process.env.API_BASE_URL = "http://localhost:4000/api/v1";
   process.env.AUTH_BFF_SECRET = "s".repeat(40);
 });
 
