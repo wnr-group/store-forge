@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Building2 } from "lucide-react";
-import { logoutAction } from "@/app/(auth)/actions";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import { buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/config/app";
 import { requireUser } from "@/lib/auth/session";
 import { isPlatformAdmin } from "@/lib/auth/platform";
@@ -32,9 +32,7 @@ export default async function NoWorkspacePage() {
       title="No workspace available"
       description={description}
     >
-      <form action={logoutAction}>
-        <Button type="submit" variant="outline" className="w-full">Sign out</Button>
-      </form>
+      <SignOutButton className={buttonVariants({ variant: "outline", className: "w-full" })}>Sign out</SignOutButton>
     </AuthShell>
   );
 }

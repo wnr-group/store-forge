@@ -1,5 +1,5 @@
 import { LogOut } from "lucide-react";
-import { logoutAction } from "@/app/(auth)/actions";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -56,14 +56,9 @@ export function UserMenu({ name, email, role, compact = false, children }: Props
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         {children}
-        <form action={logoutAction}>
-          <button
-            type="submit"
-            className="flex w-full cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-sm outline-none hover:bg-accent focus-visible:bg-accent"
-          >
-            <LogOut className="size-4" aria-hidden /> Sign out
-          </button>
-        </form>
+        <SignOutButton className="flex w-full cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-sm outline-none hover:bg-accent focus-visible:bg-accent disabled:opacity-60">
+          <LogOut className="size-4" aria-hidden /> Sign out
+        </SignOutButton>
       </DropdownMenuContent>
     </DropdownMenu>
   );

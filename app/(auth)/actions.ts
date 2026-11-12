@@ -35,6 +35,15 @@ export async function loginAction(input: unknown, next?: string): Promise<Action
   redirect(destination);
 }
 
+/** Signs out without redirecting: the sign-out buttons follow it with a full page load (see components/auth/sign-out-button.tsx). */
+export async function signOutAction(): Promise<void> {
+  try {
+    await authService.signOut();
+  } catch (e) {
+    console.error("[logout]", e);
+  }
+}
+
 export async function logoutAction(): Promise<void> {
   try {
     await authService.signOut();
