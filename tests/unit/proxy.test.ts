@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 describe("proxy route protection (unauthenticated)", () => {
-  it.each(["/dashboard", "/dashboard/anything", "/admin", "/admin/companies/new", "/no-workspace"])("redirects %s to /login with next=", async (path) => {
+  it.each(["/dashboard", "/dashboard/anything", "/admin", "/admin/organizations/new", "/no-workspace"])("redirects %s to /login with next=", async (path) => {
     signedOut();
     const res = await updateSession(req(path));
     expect(res.status).toBe(307);
@@ -64,7 +64,7 @@ describe("tenant subdomains (proxy)", () => {
   it("serves only /login, /dashboard and /no-workspace as the app on a store host; /admin is storefront-only (404)", async () => {
     signedOut();
     expect((await proxy(withHost("urban.lvh.me:3000", "/admin"))).headers.get("x-middleware-rewrite")).toContain("/s/urban/admin");
-    expect((await proxy(withHost("urban.lvh.me:3000", "/admin/companies"))).headers.get("x-middleware-rewrite")).toContain("/s/urban/admin/companies");
+    expect((await proxy(withHost("urban.lvh.me:3000", "/admin/organizations"))).headers.get("x-middleware-rewrite")).toContain("/s/urban/admin/organizations");
     expect((await proxy(withHost("urban.lvh.me:3000", "/products"))).headers.get("x-middleware-rewrite")).toContain("/s/urban/products");
   });
 

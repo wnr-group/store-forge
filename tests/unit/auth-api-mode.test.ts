@@ -164,7 +164,7 @@ describe("login", () => {
     });
 
     it("an explicit next path wins, even for a Platform Admin", async () => {
-      expect(await land(loginAs("admin", []), "/admin/companies")).toBe("/admin/companies");
+      expect(await land(loginAs("admin", []), "/admin/organizations")).toBe("/admin/organizations");
     });
   });
 
