@@ -38,6 +38,7 @@ export const heroSection: SectionDefinition = {
         { label: "Small", value: "small" },
         { label: "Medium", value: "medium" },
         { label: "Large", value: "large" },
+        { label: "Full screen (fills the first screen)", value: "fullscreen" },
       ],
     },
     {

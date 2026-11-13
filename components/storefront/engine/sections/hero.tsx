@@ -1,11 +1,12 @@
 import React from "react";
+import { ArrowDown } from "lucide-react";
 import Image from "next/image";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { cn } from "@/lib/utils";
 import { renderBlockComponent } from "../blocks";
 import { LegacyHeroSection } from "./legacy-hero";
-import { hasTheme } from "@/lib/templates/engine/theme-style";
+import { hasTheme, isEditorialTheme } from "@/lib/templates/engine/theme-style";
 import { CONTAINER, ImagePlaceholder, RADIUS, resolveImage } from "../ui";
 
 interface HeroSectionProps {
@@ -18,6 +19,8 @@ const HEIGHTS: Record<string, string> = {
   small: "min-h-[340px] sm:min-h-[400px]",
   medium: "min-h-[460px] sm:min-h-[540px] lg:min-h-[600px]",
   large: "min-h-[540px] sm:min-h-[640px] lg:min-h-[760px]",
+  /** The first screen: the viewport minus the sticky header (4rem on phones, 5rem on desktop). */
+  fullscreen: "min-h-[max(34rem,calc(100svh-4rem))] lg:min-h-[max(40rem,calc(100svh-5rem))]",
 };
 
 /**
@@ -55,6 +58,30 @@ export function HeroSection({ node, context, sectionId }: HeroSectionProps) {
   const accentBar = <span aria-hidden className={cn("block h-0.5 w-12 bg-primary", alignment === "center" && "mx-auto")} style={accentColor ? { backgroundColor: accentColor } : undefined} />;
 
   // Banner: the picture fills the whole section.
+  if (variant === "banner" && isEditorialTheme(context.theme) && ["large", "fullscreen"].includes((node.settings?.height as string) ?? "")) {
+    return (
+      <section className={cn("relative isolate flex w-full flex-col overflow-hidden text-white", HEIGHTS.fullscreen)} {...sfProps}>
+        {imageUrl ? <Image src={imageUrl} alt={altText} fill priority sizes="100vw" className="-z-20 object-cover" /> : <ImagePlaceholder className="absolute inset-0 -z-20" icon={false} deep />}
+        <div aria-hidden className="absolute inset-0 -z-10" style={{ background: `linear-gradient(to top, rgba(0,0,0,${Math.min(0.8, overlay + 0.35)}) 0%, rgba(0,0,0,${overlay * 0.5}) 45%, rgba(0,0,0,${overlay * 0.35}) 100%), linear-gradient(to right, rgba(0,0,0,${overlay * 0.9}) 0%, transparent 60%)` }} />
+        <div className={cn(CONTAINER, "flex flex-1 flex-col justify-end pt-24 pb-10 sm:pb-14 lg:pb-16")}>
+          <div className="max-w-3xl space-y-6 sm:space-y-8">
+            <div className="flex items-center gap-4">
+              <span aria-hidden className="block h-px w-12 bg-white/80 sm:w-16" style={accentColor ? { backgroundColor: accentColor } : undefined} />
+              <p className="text-[0.7rem] tracking-[0.32em] text-white/85 uppercase sm:text-xs">{store.name}</p>
+            </div>
+            <h1 className="text-[2.75rem] leading-[1] tracking-tight text-balance sm:text-7xl lg:text-8xl">{heading}</h1>
+            {subheading ? <p className="max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">{subheading}</p> : null}
+            {buttons}
+          </div>
+          <div className="mt-12 flex items-center justify-between gap-6 border-t border-white/25 pt-5 text-[0.7rem] tracking-[0.28em] text-white/75 uppercase sm:mt-16">
+            <span>Scroll to explore</span>
+            <ArrowDown className="size-4" strokeWidth={1.25} />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (variant === "banner" || variant === "spotlight") {
     const centered = variant === "spotlight" || alignment === "center";
     const light = Boolean(imageUrl) && !darkText;

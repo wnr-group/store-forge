@@ -7,7 +7,7 @@ import type { RenderContext } from "../types";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { CONTAINER, ImagePlaceholder, RADIUS, SECTION_Y, SectionHeading } from "../ui";
 import { cn } from "@/lib/utils";
-import { themeSettingsOf } from "@/lib/templates/engine/theme-style";
+import { isEditorialTheme } from "@/lib/templates/engine/theme-style";
 
 interface CollectionListSectionProps {
   node: ComponentNode;
@@ -26,8 +26,7 @@ export function CollectionListSection({ node, context, sectionId }: CollectionLi
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
 
   // Atelier (serif headings, square buttons) always gets the editorial layout, including stores that applied it before the layout setting existed.
-  const ts = themeSettingsOf(context.theme) as { typography?: { headingFont?: string }; buttons?: { radius?: number } } | null;
-  const isAtelier = ts?.typography?.headingFont === "system-serif" && ts?.buttons?.radius === 0;
+  const isAtelier = isEditorialTheme(context.theme);
   const chosen = node.settings?.layout;
   const layout = chosen === "grid" || chosen === "editorial" ? chosen : isAtelier ? "editorial" : "grid";
   if (layout === "editorial" && collections.length > 0) {
