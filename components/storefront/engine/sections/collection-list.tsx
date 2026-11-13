@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { publicImageUrl } from "@/lib/storage/paths";
-import { CONTAINER, ImagePlaceholder, RADIUS, SECTION_Y, SectionHeading } from "../ui";
+import { CONTAINER, EditorialArt, EditorialHeader, ImagePlaceholder, RADIUS, SECTION_Y, SectionHeading } from "../ui";
 import { cn } from "@/lib/utils";
 import { isEditorialTheme } from "@/lib/templates/engine/theme-style";
 
@@ -84,16 +84,7 @@ function EditorialCollections({ title, showProductCount, collections, sfProps }:
   const { feature, span } = editorialPlan(collections.length);
   return (
     <section className={cn(CONTAINER, SECTION_Y)} {...sfProps}>
-      <div className="mb-8 flex items-end justify-between gap-6 border-b border-border pb-5 sm:mb-12 sm:pb-6">
-        <div className="min-w-0 space-y-2">
-          <p className="text-[0.7rem] tracking-[0.28em] text-muted-foreground uppercase">The collections</p>
-          {title ? <h2 className="text-3xl leading-[1.05] tracking-tight text-foreground sm:text-4xl lg:text-5xl">{title}</h2> : null}
-        </div>
-        <Link href="/collections" className="group/all hidden shrink-0 items-center gap-2 border-b border-foreground/0 pb-0.5 text-sm text-foreground transition-colors hover:border-foreground sm:inline-flex">
-          View all
-          <ArrowUpRight className="size-4 transition-transform duration-300 group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5" strokeWidth={1.5} />
-        </Link>
-      </div>
+      <EditorialHeader eyebrow="The collections" title={title} href="/collections" />
       <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:grid-cols-12 lg:gap-x-6 lg:gap-y-12">
         {collections.map((col, i) => {
           const isFeature = feature && i === 0;
@@ -120,31 +111,5 @@ function EditorialCollections({ title, showProductCount, collections, sfProps }:
         })}
       </ul>
     </section>
-  );
-}
-
-const TONES = [
-  { bg: "color-mix(in srgb, var(--primary) 92%, var(--background))", fg: "var(--background)" },
-  { bg: "color-mix(in srgb, var(--primary) 10%, var(--background))", fg: "var(--primary)" },
-  { bg: "color-mix(in srgb, var(--primary) 26%, var(--background))", fg: "var(--primary)" },
-  { bg: "color-mix(in srgb, var(--primary) 68%, var(--background))", fg: "var(--background)" },
-];
-
-/** What a collection without a picture shows: a toned panel with a fine inner frame and a large serif initial, so it reads as a designed tile rather than an empty box. */
-function EditorialArt({ name, index, large }: { name: string; index: number; large: boolean }) {
-  const tone = TONES[index % TONES.length];
-  return (
-    <div aria-hidden className="absolute inset-0 overflow-hidden transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]" style={{ background: tone.bg, color: tone.fg }}>
-      <div className="absolute -top-1/3 -right-1/4 aspect-square w-3/4 rounded-full" style={{ background: "radial-gradient(closest-side, color-mix(in srgb, currentColor 14%, transparent), transparent)" }} />
-      <div className="absolute inset-3 border border-current opacity-25 sm:inset-4" />
-      <span className={cn("absolute inset-0 flex items-center justify-center leading-none italic opacity-[0.16] select-none", large ? "text-[14rem] sm:text-[18rem]" : "text-[8rem] sm:text-[11rem]")} style={{ fontFamily: "var(--sf-font-heading, serif)", fontWeight: 400 }}>
-        {name.trim().charAt(0).toUpperCase()}
-      </span>
-      <span className="absolute inset-x-0 bottom-6 flex items-center justify-center gap-3 text-[0.65rem] tracking-[0.3em] uppercase opacity-70 sm:bottom-8">
-        <span className="h-px w-6 bg-current" />
-        Explore
-        <span className="h-px w-6 bg-current" />
-      </span>
-    </div>
   );
 }

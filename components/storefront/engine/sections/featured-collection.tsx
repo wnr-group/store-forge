@@ -3,7 +3,8 @@ import Link from "next/link";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { resolveCollection } from "@/lib/storefront/featured";
-import { CONTAINER, EmptyProducts, GRID_GAP, ProductCard, SECTION_Y, SectionHeading, balancedColumns, gridColumns, type CardProduct } from "../ui";
+import { isEditorialTheme } from "@/lib/templates/engine/theme-style";
+import { CONTAINER, EditorialHeader, EditorialProductCard, EmptyProducts, GRID_GAP, ProductCard, SECTION_Y, SectionHeading, balancedColumns, gridColumns, type CardProduct } from "../ui";
 import { cn } from "@/lib/utils";
 
 interface FeaturedCollectionSectionProps {
@@ -35,6 +36,22 @@ export function FeaturedCollectionSection({ node, context, sectionId }: Featured
 
   // A section pointing at an empty or deleted collection is hidden from shoppers; the merchant still sees it, with a hint.
   if (products.length === 0 && pickedCollection && !isPreview) return null;
+
+  if (isEditorialTheme(context.theme) && products.length > 0) {
+    const cols = balancedColumns(products.length, columns);
+    return (
+      <section id="products" className={cn(CONTAINER, SECTION_Y)} {...sfProps}>
+        <EditorialHeader eyebrow="Just in" title={title} href={showViewAll ? (matchedCollection ? `/collections/${matchedCollection.slug}` : "/products") : null} />
+        <ul className={cn("grid gap-x-3 gap-y-10 sm:gap-x-5 sm:gap-y-12 lg:gap-x-6", gridColumns(cols))}>
+          {products.map((p, i) => (
+            <li key={p.slug} className="min-w-0">
+              <EditorialProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} index={i} priority={i < 2} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  }
 
   return (
     <section id="products" className={cn(CONTAINER, SECTION_Y)} {...sfProps}>

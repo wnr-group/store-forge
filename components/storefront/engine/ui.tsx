@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ImageIcon, ShoppingBag } from "lucide-react";
+import { ArrowUpRight, ImageIcon, ShoppingBag } from "lucide-react";
 import { formatMoney } from "@/lib/money";
 import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
@@ -141,5 +141,104 @@ export function EmptyProducts({ mode, title, className }: { mode?: string; title
           : "We are getting things ready. Please check back soon."}
       </p>
     </div>
+  );
+}
+
+const TONES = [
+  { bg: "color-mix(in srgb, var(--primary) 92%, var(--background))", fg: "var(--background)" },
+  { bg: "color-mix(in srgb, var(--primary) 10%, var(--background))", fg: "var(--primary)" },
+  { bg: "color-mix(in srgb, var(--primary) 26%, var(--background))", fg: "var(--primary)" },
+  { bg: "color-mix(in srgb, var(--primary) 68%, var(--background))", fg: "var(--background)" },
+];
+
+/** What a collection without a picture shows: a toned panel with a fine inner frame and a large serif initial, so it reads as a designed tile rather than an empty box. */
+export function EditorialArt({ name, index, large }: { name: string; index: number; large: boolean }) {
+  const tone = TONES[index % TONES.length];
+  return (
+    <div aria-hidden className="absolute inset-0 overflow-hidden transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]" style={{ background: tone.bg, color: tone.fg }}>
+      <div className="absolute -top-1/3 -right-1/4 aspect-square w-3/4 rounded-full" style={{ background: "radial-gradient(closest-side, color-mix(in srgb, currentColor 14%, transparent), transparent)" }} />
+      <div className="absolute inset-3 border border-current opacity-25 sm:inset-4" />
+      <span className={cn("absolute inset-0 flex items-center justify-center leading-none italic opacity-[0.16] select-none", large ? "text-[14rem] sm:text-[18rem]" : "text-[8rem] sm:text-[11rem]")} style={{ fontFamily: "var(--sf-font-heading, serif)", fontWeight: 400 }}>
+        {name.trim().charAt(0).toUpperCase()}
+      </span>
+      <span className="absolute inset-x-0 bottom-6 flex items-center justify-center gap-3 text-[0.65rem] tracking-[0.3em] uppercase opacity-70 sm:bottom-8">
+        <span className="h-px w-6 bg-current" />
+        Explore
+        <span className="h-px w-6 bg-current" />
+      </span>
+    </div>
+  );
+}
+
+/** Header of an editorial section: a small tracked label, a large serif title, a hairline and a "View all" link. */
+export function EditorialHeader({ eyebrow, title, href, linkLabel = "View all" }: { eyebrow: string; title: string; href?: string | null; linkLabel?: string }) {
+  return (
+    <div className="mb-8 flex items-end justify-between gap-6 border-b border-border pb-5 sm:mb-12 sm:pb-6">
+      <div className="min-w-0 space-y-2">
+        <p className="text-[0.7rem] tracking-[0.28em] text-muted-foreground uppercase">{eyebrow}</p>
+        {title ? <h2 className="text-3xl leading-[1.05] tracking-tight text-foreground sm:text-4xl lg:text-5xl">{title}</h2> : null}
+      </div>
+      {href ? (
+        <Link href={href} className="group/all inline-flex shrink-0 items-center gap-2 border-b border-foreground/0 pb-0.5 text-sm text-foreground transition-colors hover:border-foreground">
+          {linkLabel}
+          <ArrowUpRight className="size-4 transition-transform duration-300 group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5" strokeWidth={1.5} />
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Product card for editorial themes: tall picture with a square tag and index, a "View piece" bar that slides up on
+ * hover, and the name in serif above a fine-tracked price. Corners follow the theme.
+ */
+export function EditorialProductCard({ product, currency, href, index, priority = false }: { product: CardProduct; currency: string; href: string; index: number; priority?: boolean }) {
+  const img = publicImageUrl(product.image_path);
+  const onSale = product.compare_at_price_minor != null && product.compare_at_price_minor > product.price_minor;
+  const soldOut = product.available === false;
+  return (
+    <Link href={href} className="group flex flex-col gap-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4">
+      <div className={cn("relative aspect-[3/4] w-full overflow-hidden bg-muted", RADIUS)}>
+        {img ? <Image src={img} alt={product.name} fill priority={priority} sizes="(min-width: 1024px) 25vw, 50vw" className={cn("object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]", soldOut && "opacity-60")} /> : <ProductPlaceholder index={index} />}
+        <span aria-hidden className="absolute top-3 left-3 text-[0.65rem] tracking-[0.2em] text-white mix-blend-difference sm:top-4 sm:left-4">{String(index + 1).padStart(2, "0")}</span>
+        {soldOut || onSale ? <span className="absolute top-3 right-3 bg-background px-2.5 py-1 text-[0.6rem] tracking-[0.2em] text-foreground uppercase sm:top-4 sm:right-4">{soldOut ? "Sold out" : "Sale"}</span> : null}
+        <span aria-hidden className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-2 bg-background/95 py-3.5 text-[0.65rem] tracking-[0.26em] text-foreground uppercase backdrop-blur-sm transition-transform duration-500 ease-out group-hover:translate-y-0 group-focus-visible:translate-y-0">
+          View piece <ArrowUpRight className="size-3.5" strokeWidth={1.5} />
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        <h3 className="truncate text-lg leading-snug tracking-tight text-foreground sm:text-xl">{product.name}</h3>
+        <p className="flex flex-wrap items-baseline gap-x-3 text-sm tracking-[0.06em]">
+          <span className="text-foreground">{formatMoney(product.price_minor, currency)}</span>
+          {onSale ? <span className="text-xs text-muted-foreground line-through">{formatMoney(product.compare_at_price_minor!, currency)}</span> : null}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+const PLACEHOLDER_WALLS = ["#e9e2d6", "#d9cfbf", "#cdbfa9", "#e2d6c5"];
+const PLACEHOLDER_GARMENTS = ["#2b2622", "#9a3412", "#f4efe6", "#6b6258"];
+
+/** A studio-style stand-in for a product photo: a warm wall, a floor shadow and a hanging garment, until the merchant adds the real picture. */
+function ProductPlaceholder({ index }: { index: number }) {
+  const wall = PLACEHOLDER_WALLS[index % PLACEHOLDER_WALLS.length];
+  const garment = PLACEHOLDER_GARMENTS[(index + 1) % PLACEHOLDER_GARMENTS.length];
+  return (
+    <svg aria-hidden viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 size-full transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]">
+      <defs>
+        <linearGradient id={`pw${index}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity=".35" />
+          <stop offset="1" stopColor="#000" stopOpacity=".12" />
+        </linearGradient>
+      </defs>
+      <rect width="300" height="400" fill={wall} />
+      <rect width="300" height="400" fill={`url(#pw${index})`} />
+      <ellipse cx="150" cy="352" rx="82" ry="9" fill="#000" opacity=".14" />
+      <path d="M150 74c0-9 9-12 9-21a9 9 0 1 0-18 0" fill="none" stroke="#8a8175" strokeWidth="3" strokeLinecap="round" />
+      <path d="M150 74 62 118h176z" fill="none" stroke="#8a8175" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M112 106 68 128l20 38 22-11v146h80V155l22 11 20-38-44-22q-38 26-76 0z" fill={garment} />
+      <path d="M112 106q38 26 76 0" fill="none" stroke="#000" strokeOpacity=".22" strokeWidth="2" />
+    </svg>
   );
 }
