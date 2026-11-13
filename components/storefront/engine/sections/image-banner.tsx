@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { publicImageUrl } from "@/lib/storage/paths";
+import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 import { renderBlockComponent } from "../blocks";
 
 interface ImageBannerSectionProps {
@@ -13,7 +13,7 @@ interface ImageBannerSectionProps {
 
 export function ImageBannerSection({ node, context, sectionId }: ImageBannerSectionProps) {
   const imageVal = node.settings?.image as { path?: string; alt?: string } | string | null | undefined;
-  const rawPath = typeof imageVal === "string" ? imageVal : imageVal?.path;
+  const rawPath = imageRawPath(imageVal);
   const altText = typeof imageVal === "object" ? imageVal?.alt ?? "" : "";
 
   const height = (node.settings?.height as string) ?? "medium";

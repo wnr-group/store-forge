@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { publicImageUrl } from "@/lib/storage/paths";
+import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 import { renderBlockComponent } from "../blocks";
 
 interface ImageWithTextSectionProps {
@@ -13,7 +13,7 @@ interface ImageWithTextSectionProps {
 
 export function ImageWithTextSection({ node, context, sectionId }: ImageWithTextSectionProps) {
   const imageVal = node.settings?.image as { path?: string; alt?: string } | string | null | undefined;
-  const rawPath = typeof imageVal === "string" ? imageVal : imageVal?.path;
+  const rawPath = imageRawPath(imageVal);
   const altText = typeof imageVal === "object" ? imageVal?.alt ?? "" : "";
 
   const imagePosition = (node.settings?.imagePosition as string) ?? "left";

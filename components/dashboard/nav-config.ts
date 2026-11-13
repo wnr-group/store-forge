@@ -27,7 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.inventory, label: "Inventory", icon: Boxes, group: "Catalog" },
   { href: ROUTES.customers, label: "Customers", icon: Users, group: "Insights" },
   { href: ROUTES.analytics, label: "Analytics", icon: BarChart3, group: "Insights" },
-  { href: ROUTES.templates, label: "Templates", icon: Palette, group: "Workspace" },
+  { href: ROUTES.templates, label: "Themes", icon: Palette, group: "Online Store" },
   { href: ROUTES.settings, label: "Settings", icon: Settings, group: "Workspace" },
 ];
 

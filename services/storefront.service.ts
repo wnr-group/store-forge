@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { z } from "zod";
-import { getStorefrontApi } from "@/lib/api/endpoints/public-api";
+import { getPublicCollectionsApi, getPublicLayoutApi, getStorefrontApi, type PublicCollectionApi, type PublicLayoutApi } from "@/lib/api/endpoints/public-api";
 import { AppError } from "@/lib/errors";
 
 const templateSchema = z.object({
@@ -62,5 +62,24 @@ export const getPublicStorefront = cache(async (slug: string): Promise<PublicSto
   } catch (error) {
     if (error instanceof AppError && error.code === "NOT_FOUND") return null;
     throw error;
+  }
+});
+
+/** What the engine renders for a store: its published page, theme and groups, plus its collections. */
+export type PublishedDesign = { layout: PublicLayoutApi & { template: NonNullable<PublicLayoutApi["template"]> }; collections: PublicCollectionApi[] };
+
+/**
+ * The store's PUBLISHED design, or null when it has not published one (the storefront then shows its built-in
+ * template). Only published work comes back from the API, so a draft can never reach a shopper. A failure here must not
+ * take the store down: it is treated as "no published design" and the built-in template renders.
+ */
+export const getPublishedDesign = cache(async (slug: string): Promise<PublishedDesign | null> => {
+  try {
+    const layout = await getPublicLayoutApi(slug, "index");
+    if (!layout.template?.document) return null;
+    const collections = await getPublicCollectionsApi(slug).catch(() => []);
+    return { layout: layout as PublishedDesign["layout"], collections };
+  } catch {
+    return null;
   }
 });

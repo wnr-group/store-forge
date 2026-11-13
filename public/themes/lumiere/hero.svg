@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true"><defs><linearGradient id="g" gradientTransform="rotate(130 .5 .5)"><stop offset="0" stop-color="#e8b4b8"/><stop offset="1" stop-color="#9d4a5b"/></linearGradient></defs><rect width="1600" height="900" fill="url(#g)"/>
+       <circle cx="1120" cy="450" r="330" fill="#fdf8f6" opacity=".55"/>
+       <circle cx="1120" cy="450" r="220" fill="#f3dfd9" opacity=".8"/>
+       <rect x="1050" y="250" width="140" height="330" rx="26" fill="#fdf8f6"/>
+       <rect x="1085" y="190" width="70" height="80" rx="14" fill="#9d4a5b"/>
+       <rect x="1050" y="400" width="140" height="70" fill="#9d4a5b" opacity=".15"/>
+       <circle cx="1330" cy="640" r="70" fill="#b9855a" opacity=".85"/>
+       <circle cx="860" cy="660" r="46" fill="#9d4a5b" opacity=".6"/></svg>

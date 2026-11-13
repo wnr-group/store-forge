@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
-import { Palette } from "lucide-react";
-import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
+import { ThemeStore } from "@/components/themes/theme-store";
+import { ThemeQueryProvider } from "@/lib/themes/queries";
+import { canManageStore } from "@/lib/auth/permissions";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
+import { getPreviewStoreData } from "@/services/theme.service";
 
-export const metadata: Metadata = { title: "Templates" };
+export const metadata: Metadata = { title: "Themes" };
 
-// Template customization is paused until the StoreForge API offers it. The public storefront still renders each store's saved template through the API.
-export default function TemplatesPage() {
+/** Online Store > Themes: browse ready-made storefront themes, preview them with your own products, apply one and customize it. */
+export default async function ThemesPage() {
+  const { active } = await requireWorkspaceCan("dashboard:view");
+  const data = await getPreviewStoreData();
   return (
     <>
-      <PageHeader title="Templates" description="Choose how your public storefront looks." />
-      <div className="mx-auto max-w-3xl">
-        <EmptyState
-          icon={Palette}
-          title="Coming soon"
-          description="Storefront templates and customization are on the way. Your public storefront keeps working as it does today."
-        />
-      </div>
+      <PageHeader title="Themes" description="Choose how your online store looks. Preview a theme with your own products, then customize it in the editor. Nothing goes live until you publish." />
+      <ThemeQueryProvider>
+        <ThemeStore canManage={canManageStore(active)} data={data} />
+      </ThemeQueryProvider>
     </>
   );
 }

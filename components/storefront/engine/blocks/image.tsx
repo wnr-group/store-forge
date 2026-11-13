@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { publicImageUrl } from "@/lib/storage/paths";
+import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 
 interface ImageBlockProps {
   node: ComponentNode;
@@ -17,7 +17,7 @@ export function ImageBlock({ node, context, blockId }: ImageBlockProps) {
     | null
     | undefined;
 
-  const rawPath = typeof imageValue === "string" ? imageValue : imageValue?.path;
+  const rawPath = imageRawPath(imageValue);
   const altText = (typeof imageValue === "object" && imageValue?.alt !== undefined && imageValue?.alt !== null)
     ? imageValue.alt
     : "";

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Store } from "lucide-react";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { publicImageUrl } from "@/lib/storage/paths";
+import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 import { renderBlockComponent } from "../blocks";
 
 interface HeaderSectionProps {
@@ -17,7 +17,7 @@ interface HeaderSectionProps {
 export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) {
   const store = context.store;
   const logoImageVal = node.settings?.logoImage as { path?: string; alt?: string } | string | null | undefined;
-  const rawCustomLogo = typeof logoImageVal === "string" ? logoImageVal : logoImageVal?.path;
+  const rawCustomLogo = imageRawPath(logoImageVal);
   const logoWidth = (node.settings?.logoWidth as number) ?? 120;
   const menuAlignment = (node.settings?.menuAlignment as string) ?? "left";
   const sticky = Boolean(node.settings?.sticky ?? true);

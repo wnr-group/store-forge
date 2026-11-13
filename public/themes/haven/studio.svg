@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true"><defs></defs><rect width="1600" height="900" fill="#f6f3ee"/>
+       <rect x="260" y="180" width="1080" height="560" fill="none" stroke="#2b2a28" stroke-width="6"/>
+       <path d="M260 460 H800 V180 M800 460 V740 M1060 180 V460 H1340" fill="none" stroke="#2b2a28" stroke-width="4"/>
+       <rect x="300" y="520" width="200" height="160" fill="#3f5d45" opacity=".8"/>
+       <rect x="860" y="230" width="150" height="190" fill="#c08552" opacity=".8"/>
+       <circle cx="1200" cy="620" r="70" fill="#a39e92" opacity=".6"/></svg>

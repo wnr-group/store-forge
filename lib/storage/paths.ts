@@ -32,3 +32,18 @@ export function publicImageUrl(path: string | null | undefined): string | null {
   if (!path || !base) return null;
   return `${base.replace(/\/$/, "")}/storage/v1/object/public/${PRODUCT_BUCKET}/${path.split("/").map(encodeURIComponent).join("/")}`;
 }
+
+/**
+ * The address-or-path an image setting points at. A string is used as is; `{ asset: "<theme>/<file>" }` is a picture
+ * that ships with a theme and is served from /themes; `{ path }` is a file in the store's own image folder (turn it
+ * into a URL with `publicImageUrl`).
+ */
+export function imageRawPath(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object") {
+    const v = value as { path?: unknown; asset?: unknown };
+    if (typeof v.asset === "string" && !v.asset.includes("..")) return `/themes/${v.asset}`;
+    if (typeof v.path === "string") return v.path;
+  }
+  return undefined;
+}

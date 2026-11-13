@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { publicImageUrl } from "@/lib/storage/paths";
+import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
 import { renderBlockComponent } from "../blocks";
 
@@ -20,7 +20,7 @@ export function HeroSection({ node, context, sectionId }: HeroSectionProps) {
   const accentColor = (node.settings?.accentColor as string) || null;
 
   const imageVal = node.settings?.image as { path?: string; alt?: string } | string | null | undefined;
-  const rawPath = typeof imageVal === "string" ? imageVal : imageVal?.path;
+  const rawPath = imageRawPath(imageVal);
   const altText = typeof imageVal === "object" ? imageVal?.alt ?? "" : "";
 
   const imageUrl = rawPath
