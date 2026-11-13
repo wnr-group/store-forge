@@ -158,7 +158,7 @@ function CurrentThemeCard({ loading, theme, updateAvailable, data, canManage }: 
   if (loading) return <Skeleton className="h-28 w-full rounded-lg" />;
   return (
     <section aria-labelledby="current-theme" className="flex flex-col gap-4 rounded-lg border bg-card p-4 sm:flex-row sm:items-center">
-      <div className="w-full shrink-0 overflow-hidden rounded-md border bg-muted sm:w-44" aria-hidden>
+      <div className="w-full shrink-0 overflow-hidden rounded-md border bg-muted sm:w-44" aria-hidden inert>
         {theme && detail.data?.documents.index ? (
           <ThemeFrame document={detail.data.documents.index as unknown as TemplateDocument} theme={detail.data.documents.theme_settings} groups={groupsOf(detail.data.documents)} data={data} cropHeight={110} className="pointer-events-none" />
         ) : (
@@ -195,18 +195,21 @@ function ThemeCard({ theme, data, canManage, onPreview, onApply }: { theme: Them
   const doc = detail.data?.documents.index as unknown as TemplateDocument | undefined;
   return (
     <motion.article layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card shadow-xs transition-shadow hover:shadow-md">
-      <button type="button" onClick={onPreview} aria-label={`Preview ${theme.name}`} className="relative block w-full overflow-hidden border-b bg-muted text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
-        {doc ? (
-          <ThemeFrame document={doc} theme={detail.data?.documents.theme_settings} groups={groupsOf(detail.data!.documents)} data={data} cropHeight={300} className="pointer-events-none" />
-        ) : detail.isError ? (
-          <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">Preview unavailable</div>
-        ) : (
-          <Skeleton className="h-[300px] w-full rounded-none" />
-        )}
-        <span className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/30 to-transparent pb-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+      {/* The live frame holds the storefront's own buttons, so it cannot sit inside a button: it is inert and a sibling button covers it. */}
+      <div className="relative w-full overflow-hidden border-b bg-muted">
+        <div inert aria-hidden="true">
+          {doc ? (
+            <ThemeFrame document={doc} theme={detail.data?.documents.theme_settings} groups={groupsOf(detail.data!.documents)} data={data} cropHeight={300} className="pointer-events-none" />
+          ) : detail.isError ? (
+            <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">Preview unavailable</div>
+          ) : (
+            <Skeleton className="h-[300px] w-full rounded-none" />
+          )}
+        </div>
+        <button type="button" onClick={onPreview} aria-label={`Preview ${theme.name}`} className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/30 to-transparent pb-3 opacity-0 outline-none transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
           <span className="rounded-md bg-white/95 px-3 py-1.5 text-xs font-medium text-neutral-900 shadow-sm">Preview theme</span>
-        </span>
-      </button>
+        </button>
+      </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="space-y-1">
           <div className="flex items-center justify-between gap-2">
