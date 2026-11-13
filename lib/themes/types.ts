@@ -101,4 +101,8 @@ export type PreviewStoreData = {
     }[];
   };
   collections: { id: string; name: string; slug: string; description: string | null; image_path: string | null; product_count: number }[];
+  /** Active products of each collection, by collection slug: what "Featured collection" sections show for that collection. */
+  collectionProducts?: Record<string, PreviewStoreData["store"]["products"]>;
+  /** The first product as a product page shows it (pictures, options, variants), for the editor's product-page preview. */
+  productPage?: Record<string, unknown> | null;
 };

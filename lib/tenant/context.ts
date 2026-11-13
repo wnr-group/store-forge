@@ -45,6 +45,9 @@ export const getUserTenants = cache(async (): Promise<TenantMembership[]> => (aw
  * The active tenant: the cookie's tenant if (and only if) the user is a
  * member of it, else their first tenant, else null (needs onboarding).
  */
+/** The active tenant's primary store (slug included), from the API-verified workspace. */
+export const getActiveStore = cache(async (): Promise<Store | null> => (await loadWorkspaceData()).store);
+
 export const getActiveTenant = cache(async (): Promise<TenantMembership | null> => (await loadWorkspaceData()).active);
 
 /** Verifies the user is a member of `tenantId` (never trusts the id itself). */

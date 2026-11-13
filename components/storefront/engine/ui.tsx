@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, ShoppingBag } from "lucide-react";
 import { formatMoney } from "@/lib/money";
 import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
@@ -65,21 +65,24 @@ export type CardProduct = {
   price_minor: number;
   compare_at_price_minor?: number | null;
   image_path?: string | null;
+  /** False when the product cannot be bought now. Absent means available (older API). */
+  available?: boolean;
 };
 
 /** One product in a grid: picture with a sale tag, name and price. Links to the product page when `href` is given. */
 export function ProductCard({ product, currency, href, accent, showDescription = false, priority = false }: { product: CardProduct; currency: string; href?: string | null; accent?: string | null; showDescription?: boolean; priority?: boolean }) {
   const img = publicImageUrl(product.image_path);
   const onSale = product.compare_at_price_minor != null && product.compare_at_price_minor > product.price_minor;
+  const soldOut = product.available === false;
   const body = (
     <>
       <div className={cn("relative aspect-[4/5] overflow-hidden bg-muted", RADIUS)}>
         {img ? (
-          <Image src={img} alt={product.name} fill priority={priority} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+          <Image src={img} alt={product.name} fill priority={priority} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" className={cn("object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]", soldOut && "opacity-60")} />
         ) : (
           <ImagePlaceholder className="absolute inset-0" />
         )}
-        {onSale ? <span className="absolute top-2 left-2 rounded-[calc(var(--radius,0.5rem)/2)] bg-foreground px-2 py-0.5 text-[11px] font-medium tracking-wide text-background">Sale</span> : null}
+        {soldOut ? <span className="absolute top-2 left-2 rounded-[calc(var(--radius,0.5rem)/2)] bg-background px-2 py-0.5 text-[11px] font-medium tracking-wide text-foreground shadow-xs">Sold out</span> : onSale ? <span className="absolute top-2 left-2 rounded-[calc(var(--radius,0.5rem)/2)] bg-foreground px-2 py-0.5 text-[11px] font-medium tracking-wide text-background">Sale</span> : null}
       </div>
       <div className="mt-3 space-y-1">
         <h3 className="line-clamp-2 text-sm leading-snug font-medium text-foreground sm:text-[15px]">{product.name}</h3>
@@ -119,3 +122,24 @@ export function gridColumns(columns: number): string {
 }
 
 export const GRID_GAP = "gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:gap-x-6";
+
+/**
+ * What a product area shows when there is nothing to list. Shoppers see a calm, honest message; the merchant (in the
+ * editor and theme preview) also learns how to fill it. Never fake products: an empty catalogue stays empty.
+ */
+export function EmptyProducts({ mode, title, className }: { mode?: string; title?: string; className?: string }) {
+  const merchant = mode === "preview" || mode === "editor";
+  return (
+    <div className={cn("flex flex-col items-center rounded-[min(var(--radius,0.5rem),28px)] border border-dashed border-border bg-[var(--surface,var(--muted))] px-6 py-14 text-center sm:py-20", className)}>
+      <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-background text-foreground/60 shadow-xs">
+        <ShoppingBag className="size-5" strokeWidth={1.5} aria-hidden />
+      </span>
+      <h3 className="text-lg text-foreground sm:text-xl">{title ?? (merchant ? "No products to show yet" : "New products are on their way")}</h3>
+      <p className="mt-2 max-w-md text-sm text-muted-foreground">
+        {merchant
+          ? "Add products in Products and set them to Active: they appear here automatically. Switch to Demo preview to see this theme with sample products."
+          : "We are getting things ready. Please check back soon."}
+      </p>
+    </div>
+  );
+}

@@ -7,7 +7,8 @@ import { run } from "@/lib/actions/run";
 import { pageInputSchema } from "@/lib/validations/pages";
 import { parseInput } from "@/lib/validations/parse";
 import { createPage, deletePage, updatePage } from "@/services/pages.service";
-import { getPreviewStoreData } from "@/services/theme.service";
+import { getActiveStore } from "@/lib/tenant/context";
+import { invalidateStorefront } from "@/lib/storefront/cache";
 
 /**
  * Server actions behind Online Store > Pages. Each one checks the member's permission through the service, forwards to
@@ -16,8 +17,9 @@ import { getPreviewStoreData } from "@/services/theme.service";
 
 async function refresh() {
   revalidatePath(ROUTES.pages);
-  const { store } = await getPreviewStoreData();
-  revalidatePath(`/s/${store.slug}`, "layout");
+  await invalidateStorefront();
+  const store = await getActiveStore();
+  if (store) revalidatePath(`/s/${store.slug}`, "layout");
 }
 
 export async function savePageAction(id: unknown, input: unknown) {

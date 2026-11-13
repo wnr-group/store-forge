@@ -21,6 +21,7 @@ import {
   saveDraft,
 } from "@/services/theme.service";
 import { THEME_INDUSTRIES } from "@/lib/themes/types";
+import { invalidateStorefront } from "@/lib/storefront/cache";
 
 /**
  * Server actions behind the Theme Store and the editor. The browser (TanStack Query) calls these; each one runs on the
@@ -78,6 +79,7 @@ export async function publishThemeAction(label?: unknown) {
       revalidatePath(ROUTES.templates);
       // The public storefront shows published work only; refresh it for this store.
       revalidatePath(`/s/${result.storeSlug}`, "layout");
+      await invalidateStorefront();
       return result;
     },
     { operation: "theme.publish" },
@@ -92,6 +94,7 @@ export async function publishTemplateAction(input: unknown) {
       const v = parseInput(publishOneSchema, input);
       const result = await publishTemplate(v.id, v.expectedRevision, v.label);
       revalidatePath(`/s/${result.storeSlug}`, "layout");
+      await invalidateStorefront();
       return result;
     },
     { operation: "template.publish" },
@@ -106,6 +109,7 @@ export async function rollbackAction(input: unknown) {
       const v = parseInput(z.object({ id: idSchema, versionId: idSchema }), input);
       const result = await rollbackTemplate(v.id, v.versionId);
       revalidatePath(`/s/${result.storeSlug}`, "layout");
+      await invalidateStorefront();
       return result;
     },
     { operation: "template.rollback" },

@@ -1,10 +1,10 @@
 import { TemplateRenderer } from "@/components/storefront/engine/renderer";
-import type { RenderContext } from "@/components/storefront/engine/types";
+import type { CollectionProductSummary, RenderContext } from "@/components/storefront/engine/types";
 import type { TemplateDocument } from "@/lib/templates/document";
 import type { PublicCollectionApi, PublicLayoutApi } from "@/lib/api/endpoints/public-api";
 import type { PublicStorefront } from "@/services/storefront.service";
 
-type Frame = { layout: Pick<PublicLayoutApi, "theme" | "groups">; collections: PublicCollectionApi[] } | null;
+type Frame = { layout: Pick<PublicLayoutApi, "theme" | "groups">; collections: PublicCollectionApi[]; collectionProducts?: Record<string, CollectionProductSummary[]> } | null;
 
 /**
  * Renders one storefront page with the same engine the editor preview uses. `frame` carries the store's published
@@ -25,6 +25,7 @@ export function PublishedView({
   const context: RenderContext = {
     store,
     collections: frame?.collections ?? [],
+    collectionProducts: frame?.collectionProducts,
     resource,
     theme: frame?.layout.theme ?? undefined,
     groupHeader: frame?.layout.groups.header ?? undefined,

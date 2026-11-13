@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { createContext, useContext, useId, useState } from "react";
 import { ImageUploader, type ImageItem } from "@/components/products/image-uploader";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,10 @@ type Props = {
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
+/** The store's active collections, so a "collection" setting is a picker of real collections, not a typed id. */
+export type CollectionChoice = { id: string; name: string; slug: string };
+export const CollectionChoicesContext = createContext<CollectionChoice[]>([]);
+
 /** One control for one setting, chosen by the descriptor's type. The descriptors are the single source of the rules. */
 export function SettingField({ descriptor: d, value, onChange, disabled, error }: Props) {
   const id = useId();
@@ -28,6 +32,26 @@ export function SettingField({ descriptor: d, value, onChange, disabled, error }
   const labelEl = <Label htmlFor={id} className="text-xs font-medium">{d.label}</Label>;
   const help = d.help ? <p className="text-xs text-muted-foreground">{d.help}</p> : null;
   const problem = error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null;
+
+  const collections = useContext(CollectionChoicesContext);
+  if (d.id === "collectionId" && d.type === "text") {
+    const value = typeof current === "string" ? current : "";
+    const known = collections.some((c) => c.slug === value || c.id === value);
+    return (
+      <div className="space-y-1.5">
+        {labelEl}
+        <NativeSelect id={id} value={value} disabled={disabled} aria-invalid={Boolean(error)} onChange={(e) => onChange(e.target.value)}>
+          <option value="">Newest products (no collection)</option>
+          {collections.map((c) => (
+            <option key={c.id} value={c.slug}>{c.name}</option>
+          ))}
+          {value && !known ? <option value={value}>Removed collection</option> : null}
+        </NativeSelect>
+        <p className="text-xs text-muted-foreground">Shows the active products of this collection. Create collections under Catalog &gt; Collections.</p>
+        {problem}
+      </div>
+    );
+  }
 
   switch (d.type) {
     case "text":

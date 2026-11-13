@@ -5,7 +5,6 @@ import { ROUTES } from "@/config/app";
 import { canManageStore } from "@/lib/auth/permissions";
 import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { ThemeQueryProvider } from "@/lib/themes/queries";
-import { withSamples } from "@/lib/themes/sample-data";
 import type { ThemeKind } from "@/lib/themes/types";
 import { getCurrentTheme, getPreviewStoreData, getTemplate, listTemplates } from "@/services/theme.service";
 
@@ -30,7 +29,7 @@ export default async function ThemeEditorPage({ searchParams }: Props) {
   const [docs, current, data] = await Promise.all([
     Promise.all([chosen, ...shared].map((t) => getTemplate(t.id))),
     getCurrentTheme(),
-    getPreviewStoreData(),
+    getPreviewStoreData({ collectionProducts: true, productPage: true }),
   ]);
 
   const init: EditorInit = {
@@ -41,7 +40,7 @@ export default async function ThemeEditorPage({ searchParams }: Props) {
     pages: pages.map((p) => ({ id: p.id, kind: p.kind, name: p.name })),
     pageId: chosen.id,
     docs: docs.map((d) => ({ templateId: d.id, kind: d.kind, name: d.name, revision: d.revision, document: d.document })),
-    data: withSamples(data),
+    data,
   };
 
   return (

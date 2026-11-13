@@ -16,7 +16,9 @@ import {
   rollbackApi,
   saveDraftApi,
 } from "@/lib/api/endpoints/theme-api";
+import { getPublicCollectionApi, getPublicCollectionsApi, getPublicProductApi, getStorefrontApi } from "@/lib/api/endpoints/public-api";
 import { requireActiveTenant } from "@/lib/tenant/context";
+import { toProductResource } from "@/services/storefront.service";
 import type { PreviewStoreData, ThemeIndustry } from "@/lib/themes/types";
 
 /**
@@ -88,31 +90,64 @@ export async function rollbackTemplate(id: string, versionId: string) {
 }
 
 /** The merchant's own store, products and collections in the shapes the storefront renderer takes, so the preview shows real data. */
-export async function getPreviewStoreData(): Promise<PreviewStoreData> {
+/** Cap on collections whose products the editor preloads, so a store with many collections cannot make the page fan out. */
+const PRELOADED_COLLECTIONS = 12;
+
+type PreviewOptions = {
+  /** Also load each active collection's products, for "Featured collection" sections in the editor. */
+  collectionProducts?: boolean;
+  /** Also load the first product as a product page shows it, for the editor's product-page preview. */
+  productPage?: boolean;
+};
+
+/**
+ * The store's real catalogue for the theme previews, read from the SAME public endpoints the live storefront uses, so
+ * "Your store" in a preview shows exactly what shoppers see: active products only, with description, sale price and
+ * pictures. The tenant comes from the verified workspace; the store slug from the API, never from the browser. If the
+ * public view is unavailable (for example the store is switched off), it falls back to the merchant's own active products.
+ */
+export async function getPreviewStoreData(options: PreviewOptions = {}): Promise<PreviewStoreData> {
   const { tenant } = await requireActiveTenant();
-  const [store, products, collections] = await Promise.all([
-    getStoreApi(tenant.id),
-    listProductsApi(tenant.id, { page: 1, limit: 24, status: "active", sortBy: "createdAt", sortOrder: "desc" }),
-    listCollectionsApi(tenant.id),
-  ]);
-  return {
-    store: {
-      name: store.name,
-      slug: store.slug,
-      description: store.description,
-      logo_path: store.logoPath,
-      currency: store.currency,
-      products: products.items.map((p) => ({
+  const store = await getStoreApi(tenant.id);
+  const [live, liveCollections] = await Promise.all([getStorefrontApi(store.slug).catch(() => null), getPublicCollectionsApi(store.slug).catch(() => null)]);
+
+  const products = live
+    ? live.products.map((p) => ({
+        name: p.name,
+        slug: p.slug,
+        short_description: p.shortDescription,
+        price_minor: p.priceMinor,
+        compare_at_price_minor: p.compareAtPriceMinor,
+        image_path: p.imagePath,
+      }))
+    : (await listProductsApi(tenant.id, { page: 1, limit: 48, status: "active", sortBy: "createdAt", sortOrder: "desc" })).items.map((p) => ({
         name: p.name,
         slug: p.slug,
         short_description: null,
         price_minor: p.priceMinor,
         compare_at_price_minor: null,
         image_path: p.imagePath,
-      })),
-    },
-    collections: collections
-      .filter((c) => c.status === "active")
-      .map((c) => ({ id: c.id, name: c.name, slug: c.slug, description: c.description, image_path: c.imagePath, product_count: c.productCount })),
+      }));
+
+  const collections = liveCollections
+    ? liveCollections
+    : (await listCollectionsApi(tenant.id)).filter((c) => c.status === "active").map((c) => ({ id: c.id, name: c.name, slug: c.slug, description: c.description, image_path: c.imagePath, product_count: c.productCount }));
+
+  const [collectionProducts, productPage] = await Promise.all([
+    options.collectionProducts && live
+      ? Promise.all(collections.slice(0, PRELOADED_COLLECTIONS).map(async (c) => [c.slug, await getPublicCollectionApi(store.slug, c.slug).then((r) => r.products, () => null)] as const)).then((rows) => {
+          const out: NonNullable<PreviewStoreData["collectionProducts"]> = {};
+          for (const [slug, list] of rows) if (list) out[slug] = list;
+          return out;
+        })
+      : undefined,
+    options.productPage && live && products[0] ? getPublicProductApi(store.slug, products[0].slug).then(toProductResource, () => null) : null,
+  ]);
+
+  return {
+    store: { name: store.name, slug: store.slug, description: store.description, logo_path: store.logoPath, currency: store.currency, products },
+    collections,
+    collectionProducts,
+    productPage,
   };
 }

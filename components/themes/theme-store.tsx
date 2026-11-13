@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ExternalLink, Laptop, LayoutTemplate, Loader2, Monitor, Palette, Search, Smartphone, Tablet } from "lucide-react";
+import { Check, Laptop, LayoutTemplate, Loader2, Monitor, Palette, Search, Smartphone, Tablet } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -17,9 +17,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/config/app";
 import type { TemplateDocument } from "@/lib/templates/document";
 import { ActionError, useApplyTheme, useCurrentTheme, useThemeDetail, useThemeList, useTemplates } from "@/lib/themes/queries";
-import { withSamples } from "@/lib/themes/sample-data";
+import { hasStoreProducts, previewData, type PreviewData, type PreviewMode } from "@/lib/themes/preview-data";
 import { INDUSTRY_LABELS, THEME_INDUSTRIES, type PreviewStoreData, type ThemeIndustry, type ThemeSummary } from "@/lib/themes/types";
 import { cn } from "@/lib/utils";
+import { PreviewModeNote, PreviewModeSwitch } from "./preview-mode-switch";
 import { ThemeFrame, type Device } from "./theme-frame";
 
 const PAGE_SIZE = 9;
@@ -39,7 +40,10 @@ export function ThemeStore({ canManage, data }: Props) {
   const current = useCurrentTheme();
   const templates = useTemplates();
   const apply = useApplyTheme();
-  const preview = useMemo(() => withSamples(data), [data]);
+  // The merchant's own catalogue by default; demo content only when they ask for it.
+  const [mode, setMode] = useState<PreviewMode>("store");
+  const preview = useMemo(() => previewData(data, mode), [data, mode]);
+  const storeHasProducts = hasStoreProducts(data);
 
   const hasWork = (templates.data?.length ?? 0) > 0;
   const currentTheme = current.data?.theme ?? null;
@@ -80,11 +84,15 @@ export function ThemeStore({ canManage, data }: Props) {
             <FilterChip key={i} active={industry === i} onClick={() => { setIndustry(i); setPage(1); }}>{INDUSTRY_LABELS[i]}</FilterChip>
           ))}
         </div>
+        <div className="flex w-full items-center gap-3 sm:w-auto">
+        <PreviewModeSwitch mode={mode} onChange={setMode} className="shrink-0" />
         <div className="relative w-full sm:w-64">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <Input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search themes" aria-label="Search themes" className="pl-8" />
         </div>
+        </div>
       </div>
+      <PreviewModeNote mode={mode} storeHasProducts={storeHasProducts} className="-mt-3" />
 
       {list.isError ? (
         <Alert variant="destructive">
@@ -235,7 +243,7 @@ const DEVICES: { id: Device; label: string; icon: typeof Monitor }[] = [
   { id: "mobile", label: "Mobile", icon: Smartphone },
 ];
 
-function PreviewDialog({ slug, data, canManage, applying, isCurrent, onClose, onApply }: { slug: string | null; data: PreviewStoreData & { usesSamples: boolean }; canManage: boolean; applying: boolean; isCurrent: boolean; onClose: () => void; onApply: (slug: string) => void }) {
+function PreviewDialog({ slug, data, canManage, applying, isCurrent, onClose, onApply }: { slug: string | null; data: PreviewData; canManage: boolean; applying: boolean; isCurrent: boolean; onClose: () => void; onApply: (slug: string) => void }) {
   const detail = useThemeDetail(slug);
   const [device, setDevice] = useState<Device>("desktop");
   const theme = detail.data;
@@ -265,9 +273,7 @@ function PreviewDialog({ slug, data, canManage, applying, isCurrent, onClose, on
           </div>
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-auto bg-muted/60 p-4">
-          {data.usesSamples ? (
-            <p className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground"><ExternalLink className="size-3" aria-hidden /> Showing sample products where your store has none yet.</p>
-          ) : null}
+          <PreviewModeNote mode={data.mode} storeHasProducts={data.store.products.length > 0 || data.mode === "demo"} className="mb-3" />
           <AnimatePresence mode="wait">
             {theme?.documents.index ? (
               <motion.div key={`${slug}-${device}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className={cn("mx-auto overflow-hidden rounded-md border bg-white shadow-sm", device === "desktop" ? "w-full" : device === "tablet" ? "w-[820px] max-w-full" : "w-[390px] max-w-full")}>

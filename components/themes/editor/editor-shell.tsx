@@ -21,11 +21,14 @@ import {
   replaceDoc, select, setSetting, setThemeSetting, toggleSection, type EditorDoc, type EditorState,
 } from "@/lib/themes/editor/state";
 import { ActionError, themeKeys, usePublishTheme, useTemplates } from "@/lib/themes/queries";
+import { hasStoreProducts, previewData, type PreviewData, type PreviewMode } from "@/lib/themes/preview-data";
 import type { PreviewStoreData, TemplateSummary, ThemeKind } from "@/lib/themes/types";
 import { cn } from "@/lib/utils";
 import { SectionsPanel, type SectionActions } from "./sections-panel";
+import { CollectionChoicesContext } from "./setting-field";
 import { SettingsPanel } from "./settings-panel";
 import { VersionsSheet } from "./versions-sheet";
+import { PreviewModeNote, PreviewModeSwitch } from "../preview-mode-switch";
 import { ThemeFrame, type Device } from "../theme-frame";
 
 const registry = getRegistry();
@@ -39,7 +42,7 @@ export type EditorInit = {
   pages: Pick<TemplateSummary, "id" | "kind" | "name">[];
   pageId: string;
   docs: Omit<EditorDoc, "saved">[];
-  data: PreviewStoreData & { usesSamples: boolean };
+  data: PreviewStoreData;
 };
 
 type SaveStatus = "saved" | "unsaved" | "saving" | "error" | "conflict" | "invalid";
@@ -51,15 +54,16 @@ const DEVICES: { id: Device; label: string; icon: typeof Monitor }[] = [
   { id: "mobile", label: "Mobile", icon: Smartphone },
 ];
 
-/** Sample or real resource the product and collection pages need to show something. */
-function resourceFor(kind: ThemeKind, data: PreviewStoreData): Record<string, unknown> | undefined {
+/** The product or collection a product or collection page shows: the store's own in "store" mode, sample content in "demo". */
+function resourceFor(kind: ThemeKind, data: PreviewData): Record<string, unknown> | undefined {
   if (kind === "product") {
+    if (data.productPage) return data.productPage;
     const p = data.store.products[0];
-    return p ? { ...p, images: p.image_path ? [p.image_path] : [], options: [], variants: [], description_html: p.short_description } : undefined;
+    return p ? { ...p, images: p.image_path ? [p.image_path] : [], options: [], variants: [], short_description: p.short_description } : undefined;
   }
   if (kind === "collection") {
     const c = data.collections[0];
-    return c ? { ...c, products: data.store.products } : undefined;
+    return c ? { ...c, products: data.collectionProducts?.[c.slug] ?? [] } : undefined;
   }
   return undefined;
 }
@@ -68,6 +72,9 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [state, setState] = useState<EditorState>(() => createState(init.pageId, init.docs));
+  // The merchant's real catalogue by default; demo content only on request, and never saved anywhere.
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("store");
+  const preview = useMemo(() => previewData(init.data, previewMode), [init.data, previewMode]);
   const stateRef = useRef(state);
   useEffect(() => {
     stateRef.current = state;
@@ -291,14 +298,14 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const selection = state.selection;
   const selectedSectionId = selection && "sectionId" in selection && selection.docId === state.pageId ? selection.sectionId : null;
   const frameProps = {
-    data: init.data,
+    data: preview,
     theme: themeDocId ? state.docs[themeDocId].document : null,
     groups: {
       header: groupIds.header ? (state.docs[groupIds.header].document as unknown as TemplateDocument) : null,
       footer: groupIds.footer ? (state.docs[groupIds.footer].document as unknown as TemplateDocument) : null,
       announcement: groupIds.announcement ? (state.docs[groupIds.announcement].document as unknown as TemplateDocument) : null,
     },
-    resource: resourceFor(page.kind, init.data),
+    resource: resourceFor(page.kind, preview),
   };
 
   return (
@@ -315,7 +322,8 @@ export function EditorShell({ init }: { init: EditorInit }) {
           ))}
         </NativeSelect>
         <SaveIndicator status={status} />
-        <div className="ml-auto hidden items-center rounded-md border p-0.5 md:flex" role="group" aria-label="Preview size">
+        <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="ml-auto hidden md:inline-flex" />
+        <div className="hidden items-center rounded-md border p-0.5 md:flex" role="group" aria-label="Preview size">
           {DEVICES.map(({ id, label, icon: Icon }) => (
             <Button key={id} size="icon-sm" variant={device === id ? "secondary" : "ghost"} aria-label={label} aria-pressed={device === id} onClick={() => setDevice(id)}><Icon aria-hidden /></Button>
           ))}
@@ -364,7 +372,10 @@ export function EditorShell({ init }: { init: EditorInit }) {
         </aside>
 
         <main className={cn("min-h-0 overflow-auto bg-muted/50 p-3 lg:block sm:p-5", mobileTab === "preview" ? "block" : "hidden")} aria-label="Live preview">
-          {init.data.usesSamples ? <p className="mb-2 text-center text-xs text-muted-foreground">Sample products are shown where your store has none yet.</p> : null}
+          <div className="mb-2 flex flex-col items-center gap-1.5">
+            <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="md:hidden" />
+            <PreviewModeNote mode={previewMode} storeHasProducts={hasStoreProducts(init.data)} className="text-center" />
+          </div>
           <div className={cn("mx-auto overflow-hidden rounded-md border bg-white shadow-sm transition-[max-width] duration-200", device === "desktop" ? "max-w-[1280px]" : device === "tablet" ? "max-w-[820px]" : "max-w-[390px]")}>
             {loadingPage ? (
               <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
@@ -375,6 +386,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
         </main>
 
         <aside className={cn("min-h-0 overflow-y-auto border-l bg-card lg:block", mobileTab === "settings" ? "block" : "hidden")} aria-label="Settings">
+          <CollectionChoicesContext.Provider value={init.data.collections}>
           <SettingsPanel
             state={state}
             mode={leftTab === "theme" ? "theme" : "section"}
@@ -384,6 +396,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             onSetting={(docId, sectionId, blockId, key, value) => edit((s) => setSetting(s, docId, sectionId, blockId, key, value))}
             onThemeSetting={(docId, group, key, value) => edit((s) => setThemeSetting(s, docId, group, key, value))}
           />
+          </CollectionChoicesContext.Provider>
         </aside>
       </div>
 

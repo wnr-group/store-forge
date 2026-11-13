@@ -87,6 +87,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
           context={{
             store: data.store,
             collections: data.collections,
+            collectionProducts: data.collectionProducts,
             resource,
             theme: theme ?? undefined,
             groupHeader: groups?.header ?? undefined,

@@ -11,11 +11,15 @@ import {
   getPublicProductApi,
   getStorefrontApi,
   type PublicCollectionApi,
+  type PublicProductApi,
   type PublicLayoutApi,
   type PublicPageApi,
   type PublicPageLinkApi,
 } from "@/lib/api/endpoints/public-api";
 import { AppError } from "@/lib/errors";
+import type { CollectionProductSummary } from "@/components/storefront/engine/types";
+import { featuredCollectionSlugs } from "@/lib/storefront/featured";
+import type { TemplateDocument } from "@/lib/templates/document";
 
 const templateSchema = z.object({
   key: z.string(),
@@ -79,7 +83,25 @@ export const getPublicStorefront = cache(async (slug: string): Promise<PublicSto
 });
 
 /** What the engine renders for a store: its published page, theme and groups, plus its collections. */
-export type PublishedDesign = { layout: PublicLayoutApi & { template: NonNullable<PublicLayoutApi["template"]> }; collections: PublicCollectionApi[] };
+export type PublishedDesign = {
+  layout: PublicLayoutApi & { template: NonNullable<PublicLayoutApi["template"]> };
+  collections: PublicCollectionApi[];
+  /** Products of the collections the page features, by collection slug: this store's own active products only. */
+  collectionProducts: Record<string, CollectionProductSummary[]>;
+};
+
+/**
+ * The active products of every collection a page features, fetched once per distinct collection and in parallel (never one
+ * call per section or per product). The API resolves each collection inside the store named by `slug`, so another store's
+ * products cannot come back. A collection that cannot be read is simply absent: its section shows an empty state.
+ */
+export async function loadCollectionProducts(slug: string, docs: (TemplateDocument | null | undefined)[], collections: PublicCollectionApi[]): Promise<Record<string, CollectionProductSummary[]>> {
+  const wanted = featuredCollectionSlugs(docs, collections);
+  const loaded = await Promise.all(wanted.map(async (collectionSlug) => ({ collectionSlug, products: await getPublicCollectionApi(slug, collectionSlug).then((c) => c.products as CollectionProductSummary[], () => null) })));
+  const result: Record<string, CollectionProductSummary[]> = {};
+  for (const { collectionSlug, products } of loaded) if (products) result[collectionSlug] = products;
+  return result;
+}
 
 /**
  * The store's PUBLISHED design, or null when it has not published one (the storefront then shows its built-in
@@ -91,7 +113,8 @@ export const getPublishedDesign = cache(async (slug: string): Promise<PublishedD
     const layout = await getPublicLayoutApi(slug, "index");
     if (!layout.template?.document) return null;
     const collections = await getPublicCollectionsApi(slug).catch(() => []);
-    return { layout: layout as PublishedDesign["layout"], collections };
+    const collectionProducts = await loadCollectionProducts(slug, [layout.template.document as unknown as TemplateDocument], collections);
+    return { layout: layout as PublishedDesign["layout"], collections, collectionProducts };
   } catch {
     return null;
   }
@@ -103,6 +126,7 @@ type PageKind = "product" | "collection";
 export type PublishedResourcePage = {
   layout: PublicLayoutApi & { template: NonNullable<PublicLayoutApi["template"]> };
   collections: PublicCollectionApi[];
+  collectionProducts: Record<string, CollectionProductSummary[]>;
   resource: Record<string, unknown>;
   store: PublicStorefront;
 };
@@ -126,6 +150,36 @@ const getResourceLayout = cache(async (slug: string, kind: PageKind, resource: s
   }
 });
 
+/** A public product as the engine's product blocks read it (pictures, options, variants, related products). */
+export function toProductResource(data: PublicProductApi): Record<string, unknown> {
+  const imagePathById = new Map(data.images.map((i) => [i.id, i.path]));
+  return {
+    name: data.product.name,
+    slug: data.product.slug,
+    // The product description block shows this field; the full description beats the short one.
+    short_description: data.product.description ?? data.product.short_description,
+    price_minor: data.product.price_minor,
+    compare_at_price_minor: data.product.compare_at_price_minor,
+    available: data.product.available ?? true,
+    sku: data.product.sku,
+    type: data.product.product_type,
+    category: data.product.category_name,
+    image_path: data.images[0]?.path ?? null,
+    images: data.images.map((i) => i.path),
+    options: data.options.map((o) => ({ id: o.name, name: o.name, values: o.values })),
+    variants: data.variants.map((v) => ({
+      id: v.id,
+      title: v.title,
+      price_minor: v.price_minor,
+      compare_at_price_minor: v.compare_at_price_minor,
+      sku: v.sku,
+      image_path: v.image_id ? (imagePathById.get(v.image_id) ?? null) : null,
+      option_values: v.options ?? {},
+    })),
+    related: data.related,
+  };
+}
+
 /** One product page: the product from the API mapped to what the engine's product blocks read, plus the published design. */
 export const getPublishedProductPage = cache(async (slug: string, productSlug: string): Promise<PublishedResourcePage | null> => {
   const [data, layout, collections, store] = await Promise.all([
@@ -135,36 +189,13 @@ export const getPublishedProductPage = cache(async (slug: string, productSlug: s
     getPublicStorefront(slug),
   ]);
   if (!data || !layout || !store) return null;
-  const imagePathById = new Map(data.images.map((i) => [i.id, i.path]));
-  const primary = data.images[0]?.path ?? null;
+  const collectionProducts = await loadCollectionProducts(slug, [layout.template.document as unknown as TemplateDocument], collections);
   return {
     layout,
     collections,
+    collectionProducts,
     store,
-    resource: {
-      name: data.product.name,
-      slug: data.product.slug,
-      // The product description block shows this field; the full description beats the short one.
-      short_description: data.product.description ?? data.product.short_description,
-      price_minor: data.product.price_minor,
-      compare_at_price_minor: data.product.compare_at_price_minor,
-      sku: data.product.sku,
-      type: data.product.product_type,
-      category: data.product.category_name,
-      image_path: primary,
-      images: data.images.map((i) => i.path),
-      options: data.options.map((o) => ({ id: o.name, name: o.name, values: o.values })),
-      variants: data.variants.map((v) => ({
-        id: v.id,
-        title: v.title,
-        price_minor: v.price_minor,
-        compare_at_price_minor: v.compare_at_price_minor,
-        sku: v.sku,
-        image_path: v.image_id ? (imagePathById.get(v.image_id) ?? null) : null,
-        option_values: v.options ?? {},
-      })),
-      related: data.related,
-    },
+    resource: toProductResource(data),
   };
 });
 
@@ -177,11 +208,12 @@ export const getPublishedCollectionPage = cache(async (slug: string, collectionS
     getPublicStorefront(slug),
   ]);
   if (!data || !layout || !store) return null;
-  return { layout, collections, store, resource: { ...data.collection, products: data.products } };
+  const collectionProducts = await loadCollectionProducts(slug, [layout.template.document as unknown as TemplateDocument], collections);
+  return { layout, collections, collectionProducts, store, resource: { ...data.collection, products: data.products } };
 });
 
 /** Shared frame for pages the engine builds from a small generated document: the store's published header, footer and theme. */
-export type PublishedFrame = { layout: PublishedDesign["layout"]; collections: PublicCollectionApi[] };
+export type PublishedFrame = { layout: PublishedDesign["layout"]; collections: PublicCollectionApi[]; collectionProducts?: Record<string, CollectionProductSummary[]> };
 
 export const getPublishedFrame = async (slug: string): Promise<PublishedFrame | null> => getPublishedDesign(slug);
 

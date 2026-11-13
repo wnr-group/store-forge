@@ -34,6 +34,12 @@ export type ApiCall = {
   organizationId?: string;
   /** For public endpoints (branding, storefront): no session is read and no token is sent. */
   anonymous?: boolean;
+  /**
+   * Cache this PUBLIC read in Next's data cache under these tags (anonymous calls only; a signed-in call is never cached).
+   * A tag names one store (`storefront:<slug>`), so an entry can never be served for another store and one call to
+   * `invalidateStorefront` drops everything that store showed. `revalidate` is the safety-net lifetime in seconds.
+   */
+  cache?: { tags: string[]; revalidate: number };
   timeoutMs?: number;
 };
 
@@ -93,7 +99,7 @@ export async function apiRequest<T = unknown>(path: string, call: ApiCall = {}):
       method: call.method ?? "GET",
       headers,
       body: call.json !== undefined ? JSON.stringify(call.json) : undefined,
-      cache: "no-store",
+      ...(call.anonymous && call.cache ? { next: { revalidate: call.cache.revalidate, tags: call.cache.tags } } : { cache: "no-store" as const }),
       redirect: "manual",
       signal: AbortSignal.timeout(call.timeoutMs ?? 15_000),
     });

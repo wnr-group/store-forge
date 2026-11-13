@@ -7,10 +7,12 @@ import { profileSchema, storeSettingsSchema } from "@/lib/validations/catalog";
 import { parseInput } from "@/lib/validations/parse";
 import { updateOwnName } from "@/services/profile.service";
 import { updateStoreSettings } from "@/services/store-settings.service";
+import { invalidateStorefront } from "@/lib/storefront/cache";
 
 export async function saveStoreSettingsAction(input: unknown) {
   return run(async () => {
     await updateStoreSettings(parseInput(storeSettingsSchema, input));
+    await invalidateStorefront();
     revalidatePath(ROUTES.dashboard, "layout");
   });
 }

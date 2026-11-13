@@ -1,6 +1,6 @@
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { CONTAINER, GRID_GAP, ProductCard, type CardProduct } from "../ui";
+import { CONTAINER, EmptyProducts, GRID_GAP, ProductCard, type CardProduct } from "../ui";
 import { cn } from "@/lib/utils";
 import { LegacyProductGridSection } from "./legacy-product-grid";
 import { hasTheme } from "@/lib/templates/engine/theme-style";
@@ -28,7 +28,7 @@ export function ProductGridSection({ node, context, sectionId }: ProductGridSect
   if (products.length === 0) {
     return (
       <section className={cn(CONTAINER, "py-12")} {...sfProps}>
-        <p className="rounded-[var(--radius,0.5rem)] border border-dashed py-16 text-center text-muted-foreground">Products are coming soon.</p>
+        <EmptyProducts mode={context.mode} title={collectionResource ? "Nothing in this collection yet" : undefined} />
       </section>
     );
   }

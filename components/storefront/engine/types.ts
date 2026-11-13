@@ -13,6 +13,16 @@ export interface CollectionSummary {
   product_count?: number;
 }
 
+export interface CollectionProductSummary {
+  name: string;
+  slug: string;
+  short_description?: string | null;
+  price_minor: number;
+  compare_at_price_minor?: number | null;
+  image_path?: string | null;
+  available?: boolean;
+}
+
 export interface ProductDetailData {
   id?: string;
   name: string;
@@ -21,6 +31,8 @@ export interface ProductDetailData {
   description_html?: string | null;
   price_minor: number;
   compare_at_price_minor?: number | null;
+  /** False when the product cannot be bought now. */
+  available?: boolean;
   sku?: string | null;
   type?: string | null;
   category?: string | null;
@@ -71,6 +83,8 @@ export interface RenderContext {
   };
   resource?: ProductDetailData | CollectionDetailData | Record<string, unknown>;
   collections?: CollectionSummary[];
+  /** Active products of the collections that featured sections point at, by collection slug. Real tenant data only. */
+  collectionProducts?: Record<string, CollectionProductSummary[]>;
   theme?: Record<string, unknown>;
   mode?: RenderMode;
   selectedOptions?: Record<string, string>;

@@ -66,6 +66,7 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
         </div>
 
         <div className={cn("flex flex-col space-y-4 lg:sticky lg:top-24 lg:self-start", mediaRight && "lg:order-1")}>
+          {product?.available === false ? <p className="w-fit rounded-[calc(var(--radius,0.5rem)/2)] bg-muted px-2.5 py-1 text-xs font-medium text-foreground">Sold out</p> : null}
           {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
         </div>
       </div>
