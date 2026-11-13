@@ -1,5 +1,4 @@
 import React from "react";
-import { ArrowDown } from "lucide-react";
 import Image from "next/image";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
@@ -58,25 +57,31 @@ export function HeroSection({ node, context, sectionId }: HeroSectionProps) {
   const accentBar = <span aria-hidden className={cn("block h-0.5 w-12 bg-primary", alignment === "center" && "mx-auto")} style={accentColor ? { backgroundColor: accentColor } : undefined} />;
 
   // Banner: the picture fills the whole section.
-  if (variant === "banner" && isEditorialTheme(context.theme) && ["large", "fullscreen"].includes((node.settings?.height as string) ?? "")) {
+  // Atelier's hero is always the full-screen campaign, even for stores that applied an older version with another height or variant.
+  if (isEditorialTheme(context.theme)) {
     return (
       <section className={cn("relative isolate flex w-full flex-col overflow-hidden text-white", HEIGHTS.fullscreen)} {...sfProps}>
         {imageUrl ? <Image src={imageUrl} alt={altText} fill priority sizes="100vw" className="-z-20 object-cover" /> : <ImagePlaceholder className="absolute inset-0 -z-20" icon={false} deep />}
-        <div aria-hidden className="absolute inset-0 -z-10" style={{ background: `linear-gradient(to top, rgba(0,0,0,${Math.min(0.8, overlay + 0.35)}) 0%, rgba(0,0,0,${overlay * 0.5}) 45%, rgba(0,0,0,${overlay * 0.35}) 100%), linear-gradient(to right, rgba(0,0,0,${overlay * 0.9}) 0%, transparent 60%)` }} />
-        <div className={cn(CONTAINER, "flex flex-1 flex-col justify-end pt-24 pb-10 sm:pb-14 lg:pb-16")}>
-          <div className="max-w-3xl space-y-6 sm:space-y-8">
-            <div className="flex items-center gap-4">
-              <span aria-hidden className="block h-px w-12 bg-white/80 sm:w-16" style={accentColor ? { backgroundColor: accentColor } : undefined} />
-              <p className="text-[0.7rem] tracking-[0.32em] text-white/85 uppercase sm:text-xs">{store.name}</p>
-            </div>
-            <h1 className="text-[2.75rem] leading-[1] tracking-tight text-balance sm:text-7xl lg:text-8xl">{heading}</h1>
-            {subheading ? <p className="max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">{subheading}</p> : null}
-            {buttons}
+        <div aria-hidden className="absolute inset-0 -z-10" style={{ background: `linear-gradient(to top, rgba(0,0,0,${Math.min(0.85, overlay + 0.5)}) 0%, rgba(0,0,0,${overlay * 0.6}) 55%, rgba(0,0,0,${overlay * 0.35}) 100%), linear-gradient(to right, rgba(0,0,0,${Math.min(0.7, overlay + 0.2)}) 0%, transparent 62%)` }} />
+        <span aria-hidden className="pointer-events-none absolute inset-3 border border-white/30 sm:inset-5 lg:inset-8" />
+        <div className={cn(CONTAINER, "relative flex flex-1 flex-col justify-end px-8 pt-24 pb-14 sm:px-12 sm:pb-20 lg:px-16 lg:pb-24")}>
+          <div className="max-w-xl lg:max-w-[36rem]">
+            <p className="flex items-center gap-4 text-[0.7rem] tracking-[0.34em] text-white/85 uppercase sm:text-xs">
+              <span aria-hidden className="block h-px w-10 bg-white/80 sm:w-14" style={accentColor ? { backgroundColor: accentColor } : undefined} />
+              {store.name}
+            </p>
+            <h1 className="mt-6 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.98] tracking-[-0.02em] text-balance sm:mt-8">{heading}</h1>
+            {subheading ? <p className="mt-6 max-w-md text-base leading-relaxed text-white/80 sm:mt-8 sm:text-lg">{subheading}</p> : null}
+            {blockOrder.length > 0 ? (
+              <div className="mt-8 flex flex-wrap gap-3 sm:mt-10 [&>div]:pt-0 [&_a]:rounded-[var(--sf-button-radius,0px)] [&_a]:border [&_a]:border-white [&_a]:bg-white [&_a]:px-9 [&_a]:py-4 [&_a]:text-xs [&_a]:font-medium [&_a]:tracking-[0.22em] [&_a]:text-neutral-950 [&_a]:uppercase [&_a]:shadow-none [&_a]:transition-colors [&_a]:duration-300 [&_a:hover]:bg-transparent [&_a:hover]:text-white">
+                {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
+              </div>
+            ) : null}
           </div>
-          <div className="mt-12 flex items-center justify-between gap-6 border-t border-white/25 pt-5 text-[0.7rem] tracking-[0.28em] text-white/75 uppercase sm:mt-16">
-            <span>Scroll to explore</span>
-            <ArrowDown className="size-4" strokeWidth={1.25} />
-          </div>
+          <span aria-hidden className="absolute right-8 bottom-14 hidden flex-col items-center gap-3 text-[0.65rem] tracking-[0.3em] text-white/70 uppercase [writing-mode:vertical-rl] sm:right-12 sm:bottom-20 sm:flex lg:right-16 lg:bottom-24">
+            Scroll
+            <span className="block h-12 w-px bg-white/50" />
+          </span>
         </div>
       </section>
     );
