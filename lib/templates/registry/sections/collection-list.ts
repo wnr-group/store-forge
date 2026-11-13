@@ -12,6 +12,17 @@ export const collectionListSection: SectionDefinition = {
       default: "Explore Collections",
     },
     {
+      id: "layout",
+      type: "select",
+      label: "Layout",
+      default: "auto",
+      options: [
+        { label: "Automatic (follows the theme)", value: "auto" },
+        { label: "Grid (picture cards)", value: "grid" },
+        { label: "Editorial (feature card, numbered captions)", value: "editorial" },
+      ],
+    },
+    {
       id: "columns",
       type: "range",
       label: "Columns",
