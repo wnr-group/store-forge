@@ -194,7 +194,7 @@ function ThemeCard({ theme, data, canManage, onPreview, onApply }: { theme: Them
   const detail = useThemeDetail(theme.slug);
   const doc = detail.data?.documents.index as unknown as TemplateDocument | undefined;
   return (
-    <motion.article layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card shadow-xs transition-shadow hover:shadow-md">
+    <motion.article initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card shadow-xs transition-shadow hover:shadow-md">
       {/* The live frame holds the storefront's own buttons, so it cannot sit inside a button: it is inert and a sibling button covers it. */}
       <div className="relative w-full overflow-hidden border-b bg-muted">
         <div inert aria-hidden="true">
@@ -241,7 +241,8 @@ function PreviewDialog({ slug, data, canManage, applying, isCurrent, onClose, on
   const theme = detail.data;
   return (
     <Dialog open={slug !== null} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="flex h-[calc(100dvh-2rem)] max-w-none flex-col gap-0 p-0 sm:max-w-[min(1400px,calc(100%-2rem))]">
+      {/* Fade only: no zoom, so the large preview does not scale in. */}
+      <DialogContent className="flex h-[calc(100dvh-2rem)] max-w-none flex-col gap-0 p-0 duration-150 [--tw-enter-scale:1]! [--tw-exit-scale:1]! sm:max-w-[min(1400px,calc(100%-2rem))]">
         <DialogHeader className="flex flex-row flex-wrap items-center justify-between gap-3 border-b p-4 pr-12">
           <div className="min-w-0">
             <DialogTitle>{theme?.name ?? "Theme preview"}</DialogTitle>
