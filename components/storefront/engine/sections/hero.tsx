@@ -2,9 +2,11 @@ import React from "react";
 import Image from "next/image";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
 import { renderBlockComponent } from "../blocks";
+import { LegacyHeroSection } from "./legacy-hero";
+import { hasTheme } from "@/lib/templates/engine/theme-style";
+import { CONTAINER, ImagePlaceholder, RADIUS, resolveImage } from "../ui";
 
 interface HeroSectionProps {
   node: ComponentNode;
@@ -12,85 +14,96 @@ interface HeroSectionProps {
   sectionId?: string;
 }
 
+const HEIGHTS: Record<string, string> = {
+  small: "min-h-[340px] sm:min-h-[400px]",
+  medium: "min-h-[460px] sm:min-h-[540px] lg:min-h-[600px]",
+  large: "min-h-[540px] sm:min-h-[640px] lg:min-h-[760px]",
+};
+
+/**
+ * The first screen of a page. Variants:
+ *  - banner: a full-width picture with the text over it (the merchant's own image, or a themed panel until they add one)
+ *  - split: text on one side, picture on the other, stacked on phones
+ *  - spotlight: centred text over the picture
+ *  - classic: a plain intro with a picture strip underneath (kept for stores that already use it)
+ * Every variant reads the same settings, so switching variant in the editor never loses the heading or the image.
+ */
 export function HeroSection({ node, context, sectionId }: HeroSectionProps) {
+  // No theme applied: the store keeps its built-in template, whose markup must not change.
+  if (!hasTheme(context.theme)) return <LegacyHeroSection node={node} context={context} sectionId={sectionId} />;
   const store = context.store;
   const variant = (node.settings?.variant as string) ?? "classic";
   const heading = (node.settings?.heading as string) || store.name;
   const subheading = (node.settings?.subheading as string) || store.description || null;
   const accentColor = (node.settings?.accentColor as string) || null;
+  const alignment = (node.settings?.alignment as string) === "center" ? "center" : "left";
+  const height = HEIGHTS[(node.settings?.height as string) ?? "medium"] ?? HEIGHTS.medium;
+  const darkText = (node.settings?.textTone as string) === "dark";
+  const overlay = Math.min(80, Math.max(0, Number(node.settings?.overlay ?? 35))) / 100;
 
-  const imageVal = node.settings?.image as { path?: string; alt?: string } | string | null | undefined;
-  const rawPath = imageRawPath(imageVal);
-  const altText = typeof imageVal === "object" ? imageVal?.alt ?? "" : "";
-
-  const imageUrl = rawPath
-    ? rawPath.startsWith("http://") || rawPath.startsWith("https://") || rawPath.startsWith("/")
-      ? rawPath
-      : publicImageUrl(rawPath)
-    : null;
+  const { url: imageUrl, alt: altText } = resolveImage(node.settings?.image);
 
   const blocks = node.blocks ?? {};
   const blockOrder = node.block_order ?? Object.keys(blocks);
+  const buttons =
+    blockOrder.length > 0 ? (
+      <div className={cn("flex flex-wrap gap-3 pt-2 [&>div]:pt-0", alignment === "center" && "justify-center")}>{blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}</div>
+    ) : null;
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
+  const accentBar = <span aria-hidden className={cn("block h-0.5 w-12 bg-primary", alignment === "center" && "mx-auto")} style={accentColor ? { backgroundColor: accentColor } : undefined} />;
 
-  // Spotlight Hero Variant
-  if (variant === "spotlight") {
-    const hasImage = Boolean(imageUrl);
+  // Banner: the picture fills the whole section.
+  if (variant === "banner" || variant === "spotlight") {
+    const centered = variant === "spotlight" || alignment === "center";
+    const light = Boolean(imageUrl) && !darkText;
     return (
-      <section
-        className="relative isolate flex min-h-72 items-center justify-center overflow-hidden bg-muted px-4 py-16 text-center"
-        {...sfProps}
-      >
-        {hasImage ? (
-          <>
-            <Image src={imageUrl!} alt={altText} fill sizes="100vw" className="-z-10 object-cover" />
-            <div className="absolute inset-0 -z-10 bg-black/50" aria-hidden />
-          </>
-        ) : null}
-        <div className={cn("mx-auto max-w-2xl space-y-3", hasImage ? "text-white" : "text-foreground")}>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{heading}</h1>
-          {subheading ? <p className="text-base opacity-90">{subheading}</p> : null}
-          <span
-            aria-hidden
-            className="mx-auto block h-1 w-16 rounded-full bg-primary"
-            style={accentColor ? { backgroundColor: accentColor } : undefined}
-          />
-          {blockOrder.length > 0 ? (
-            <div className="flex flex-wrap justify-center gap-3 pt-3">
-              {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
-            </div>
-          ) : null}
+      <section className={cn("relative isolate flex w-full items-center overflow-hidden", variant === "spotlight" ? HEIGHTS.small : height)} {...sfProps}>
+        {imageUrl ? <Image src={imageUrl} alt={altText} fill priority sizes="100vw" className="-z-20 object-cover" /> : <ImagePlaceholder className="absolute inset-0 -z-20" icon={false} />}
+        {imageUrl ? <div aria-hidden className="absolute inset-0 -z-10" style={{ background: darkText ? `rgba(255,255,255,${overlay})` : centered ? `rgba(0,0,0,${overlay})` : `linear-gradient(to right, rgba(0,0,0,${Math.min(0.85, overlay + 0.2)}) 0%, rgba(0,0,0,${overlay * 0.6}) 55%, rgba(0,0,0,${overlay * 0.2}) 100%)` }} /> : null}
+        <div className={cn(CONTAINER, "py-16 sm:py-24")}>
+          <div className={cn("max-w-2xl space-y-5", centered && "mx-auto text-center", light ? "text-white" : "text-foreground")}>
+            {accentBar}
+            <h1 className="text-4xl leading-[1.08] tracking-tight text-balance sm:text-5xl lg:text-6xl">{heading}</h1>
+            {subheading ? <p className={cn("max-w-xl text-base leading-relaxed sm:text-lg", light ? "text-white/85" : "text-muted-foreground", centered && "mx-auto")}>{subheading}</p> : null}
+            {buttons}
+          </div>
         </div>
       </section>
     );
   }
 
-  // Classic Hero Variant
-  if (!imageUrl && !subheading && blockOrder.length === 0 && !isPreview) {
-    return null;
+  // Split: copy beside the picture, picture below the copy on phones.
+  if (variant === "split") {
+    return (
+      <section className="w-full bg-[var(--surface,var(--muted))]" {...sfProps}>
+        <div className={cn(CONTAINER, "grid items-center gap-8 py-10 sm:py-14 lg:grid-cols-2 lg:gap-16 lg:py-20")}>
+          <div className={cn("space-y-5", alignment === "center" && "text-center lg:text-left")}>
+            {accentBar}
+            <h1 className="text-4xl leading-[1.08] tracking-tight text-balance sm:text-5xl lg:text-6xl">{heading}</h1>
+            {subheading ? <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">{subheading}</p> : null}
+            {buttons}
+          </div>
+          <div className={cn("relative aspect-[4/3] w-full overflow-hidden bg-muted sm:aspect-[16/10] lg:aspect-[6/5]", RADIUS)}>
+            {imageUrl ? <Image src={imageUrl} alt={altText} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" /> : <ImagePlaceholder className="absolute inset-0" />}
+          </div>
+        </div>
+      </section>
+    );
   }
 
-  const classicContent = (
-    <>
+  // Classic: intro text, then the picture as a wide strip.
+  if (!imageUrl && !subheading && blockOrder.length === 0 && !isPreview) return null;
+  return (
+    <section className={cn(CONTAINER, "py-8 sm:py-10")} {...sfProps}>
       {imageUrl ? (
-        <div className="relative mb-8 aspect-[16/5] overflow-hidden rounded-xl bg-muted">
-          <Image src={imageUrl} alt={altText} fill sizes="(min-width: 1152px) 1152px, 100vw" className="object-cover" />
+        <div className={cn("relative mb-8 aspect-[16/9] overflow-hidden bg-muted sm:aspect-[16/6]", RADIUS)}>
+          <Image src={imageUrl} alt={altText} fill priority sizes="(min-width: 1280px) 1200px, 100vw" className="object-cover" />
         </div>
       ) : null}
-      {subheading ? <p className="mb-8 max-w-2xl text-muted-foreground">{subheading}</p> : null}
-      {blockOrder.length > 0 ? (
-        <div className="mb-8 flex flex-wrap gap-3">
-          {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
-        </div>
-      ) : null}
-    </>
+      {subheading ? <p className="mb-6 max-w-2xl text-muted-foreground">{subheading}</p> : null}
+      {buttons}
+    </section>
   );
-
-  if (isPreview && sectionId) {
-    return <div {...sfProps}>{classicContent}</div>;
-  }
-
-  return classicContent;
 }

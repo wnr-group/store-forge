@@ -192,7 +192,7 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
         ) : null}
 
         {/* Main Page Content */}
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+        <main className={themed ? "w-full flex-1" : "mx-auto w-full max-w-6xl flex-1 px-4 py-8"}>
           {order.map((secId) => {
             const sec = sections[secId];
             if (!sec) return null;

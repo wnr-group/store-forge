@@ -4,6 +4,8 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER } from "../ui";
+import { cn } from "@/lib/utils";
 interface AnnouncementBarSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -36,11 +38,11 @@ export function AnnouncementBarSection({ node, context, sectionId }: Announcemen
 
   return (
     <div
-      className="w-full px-4 py-2.5 text-xs font-medium transition-colors"
+      className="w-full py-2.5 text-xs font-medium transition-colors sm:text-[13px]"
       style={{ backgroundColor, color: textColor }}
       {...sfProps}
     >
-      <div className={`mx-auto flex max-w-6xl items-center gap-4 ${alignClass}`}>
+      <div className={cn(CONTAINER, `flex items-center gap-4 ${alignClass}`)}>
         <div>{content}</div>
         {blockOrder.length > 0 ? (
           <div className="flex items-center gap-3">

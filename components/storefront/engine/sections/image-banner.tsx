@@ -5,6 +5,8 @@ import type { RenderContext } from "../types";
 import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER } from "../ui";
+import { cn } from "@/lib/utils";
 interface ImageBannerSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -33,7 +35,7 @@ export function ImageBannerSection({ node, context, sectionId }: ImageBannerSect
     : null;
 
   const heightClass =
-    height === "small" ? "min-h-[300px]" : height === "large" ? "min-h-[600px]" : "min-h-[450px]";
+    height === "small" ? "min-h-[280px] sm:min-h-[340px]" : height === "large" ? "min-h-[460px] sm:min-h-[600px]" : "min-h-[380px] sm:min-h-[450px]";
 
   const alignClass =
     textAlignment === "left"
@@ -43,7 +45,7 @@ export function ImageBannerSection({ node, context, sectionId }: ImageBannerSect
       : "items-center text-center";
 
   return (
-    <section className={`relative isolate flex ${heightClass} w-full items-center justify-center overflow-hidden bg-muted px-4 py-16`} {...sfProps}>
+    <section className={`relative isolate flex ${heightClass} w-full items-center justify-center overflow-hidden bg-muted py-16`} {...sfProps}>
       {imageUrl ? (
         <Image src={imageUrl} alt={altText} fill sizes="100vw" className="-z-10 object-cover" />
       ) : null}
@@ -52,7 +54,7 @@ export function ImageBannerSection({ node, context, sectionId }: ImageBannerSect
         style={{ opacity: overlayOpacity / 100 }}
         aria-hidden
       />
-      <div className={`mx-auto flex max-w-3xl flex-col gap-4 text-white ${alignClass}`}>
+      <div className={cn(CONTAINER, `flex max-w-3xl flex-col gap-4 text-white ${alignClass}`)}>
         {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
       </div>
     </section>

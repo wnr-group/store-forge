@@ -4,6 +4,8 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER } from "../ui";
+import { cn } from "@/lib/utils";
 interface PromotionalBannerSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -25,19 +27,19 @@ export function PromotionalBannerSection({ node, context, sectionId }: Promotion
 
   return (
     <section
-      className="w-full px-4 py-12 text-center transition-colors"
+      className={cn("w-full text-center transition-colors", "py-12 sm:py-16 lg:py-20")}
       style={{ backgroundColor, color: textColor }}
       {...sfProps}
     >
-      <div className="mx-auto max-w-4xl space-y-4">
-        {title ? <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2> : null}
-        {highlightText ? <p className="text-base font-medium opacity-90">{highlightText}</p> : null}
+      <div className={cn(CONTAINER, "max-w-4xl space-y-4")}>
+        {title ? <h2 className="text-3xl leading-tight tracking-tight text-balance sm:text-4xl lg:text-5xl">{title}</h2> : null}
+        {highlightText ? <p className="mx-auto max-w-xl text-base opacity-90 sm:text-lg">{highlightText}</p> : null}
 
         {link ? (
           <div className="pt-2">
             <Link
               href={link}
-              className="inline-flex items-center justify-center rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-xs hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center justify-center rounded-[var(--radius,0.375rem)] bg-white px-6 py-3 text-sm font-medium text-slate-900 shadow-xs hover:bg-slate-100 transition-colors"
             >
               Claim Offer
             </Link>

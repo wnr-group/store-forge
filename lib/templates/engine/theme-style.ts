@@ -23,6 +23,12 @@ export function readableOn(hex: string): string {
   return luminance > 0.4 ? "#111111" : "#ffffff";
 }
 
+/** How colourful a hex colour is, 0 (grey/black/white) to 1. */
+function chroma(hex: string): number {
+  const c = [0, 1, 2].map((i) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16));
+  return (Math.max(...c) - Math.min(...c)) / 255;
+}
+
 /** Darkens a hex colour by `amount` (0 to 1), for hover states. */
 export function darken(hex: string, amount = 0.12): string {
   const part = (i: number) =>
@@ -62,6 +68,10 @@ export function themeToStyle(theme: unknown): Record<string, string> {
     set("--primary-foreground", readableOn(primary));
     set("--ring", primary);
   }
+  // The colour picture placeholders are tinted with: the primary, unless that is near-black or grey, then the accent.
+  const accentHex = color("accent");
+  const tint = primary && HEX.test(primary) && (chroma(primary) > 0.25 || !(accentHex && HEX.test(accentHex))) ? primary : accentHex && HEX.test(accentHex) ? accentHex : primary;
+  if (tint && HEX.test(tint)) set("--tint", tint);
   const secondary = color("secondary");
   if (secondary && HEX.test(secondary)) {
     set("--secondary", secondary);
@@ -77,7 +87,16 @@ export function themeToStyle(theme: unknown): Record<string, string> {
     set("--foreground", text);
     set("--card-foreground", text);
   }
-  set("--muted-foreground", color("muted"));
+  // Neutral panels (image wells, quiet bands) are a whisper of the text colour over the background, so they stay warm on a
+  // warm theme and cool on a cool one instead of the app's fixed grey.
+  if (background && text) {
+    set("--muted", "color-mix(in srgb, var(--foreground) 5%, var(--background))");
+    set("--surface", "color-mix(in srgb, var(--tint, var(--foreground)) 7%, var(--background))");
+    // Secondary text stays readable on any palette: 68% of the text colour over the background.
+    set("--muted-foreground", "color-mix(in srgb, var(--foreground) 68%, var(--background))");
+  } else {
+    set("--muted-foreground", color("muted"));
+  }
   set("--border", color("border"));
   set("--input", color("border"));
   const accent = color("accent");
@@ -90,3 +109,6 @@ export function themeToStyle(theme: unknown): Record<string, string> {
 
   return style;
 }
+
+/** True when a store has a usable theme. Stores without one keep the markup of their built-in template. */
+export const hasTheme = (theme: unknown): boolean => Object.keys(themeToStyle(theme)).length > 0;

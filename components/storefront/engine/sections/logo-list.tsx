@@ -3,6 +3,8 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER } from "../ui";
+import { cn } from "@/lib/utils";
 interface LogoListSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -34,8 +36,8 @@ export function LogoListSection({ node, context, sectionId }: LogoListSectionPro
       : "grid-cols-2 sm:grid-cols-4";
 
   return (
-    <section className="w-full border-y border-border/50 bg-muted/10 px-4 py-12" {...sfProps}>
-      <div className="mx-auto max-w-6xl text-center">
+    <section className="w-full border-y border-border/60" {...sfProps}>
+      <div className={cn(CONTAINER, "py-10 text-center sm:py-14")}>
         {title ? <h2 className="mb-8 text-sm font-semibold uppercase tracking-wider text-muted-foreground">{title}</h2> : null}
 
         <div className={`grid items-center justify-center gap-8 ${colGridClass} ${grayscale ? "grayscale opacity-75 hover:grayscale-0 hover:opacity-100 transition-all" : ""}`}>

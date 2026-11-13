@@ -331,6 +331,5 @@
   font-family: var(--sf-font-heading, inherit);
   font-weight: var(--sf-font-heading-weight, 700);
 }
-.sf-theme main {
-  max-width: var(--sf-page-width, 72rem);
-}
+/* Sections own their width (see engine/ui.tsx), so full-bleed backgrounds can reach the edges. */
+.sf-theme h1, .sf-theme h2 { text-wrap: balance; }

@@ -3,6 +3,8 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER, SECTION_Y } from "../ui";
+import { cn } from "@/lib/utils";
 interface TestimonialsSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -30,10 +32,10 @@ export function TestimonialsSection({ node, context, sectionId }: TestimonialsSe
       : "sm:grid-cols-2 lg:grid-cols-3";
 
   return (
-    <section className="w-full bg-muted/30 px-4 py-16" {...sfProps}>
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{heading}</h2>
+    <section className="w-full bg-[var(--surface,var(--muted))]" {...sfProps}>
+      <div className={cn(CONTAINER, SECTION_Y)}>
+        <div className="mb-10 text-center sm:mb-12">
+          <h2 className="text-2xl tracking-tight text-foreground sm:text-3xl lg:text-4xl">{heading}</h2>
           {subheading ? <p className="mt-3 text-base text-muted-foreground">{subheading}</p> : null}
         </div>
 
