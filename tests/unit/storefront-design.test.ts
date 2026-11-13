@@ -111,6 +111,19 @@ describe("header", () => {
     expect(html).toContain('href="/search"');
     expect(html).toContain("Shop");
   });
+
+  it("stays at the top while scrolling: sticky, and not boxed in by a wrapper as tall as the header", () => {
+    const html = render(heroDoc({}), { theme, groupHeader: header });
+    expect(html).toContain("sticky top-0");
+    // A sticky element cannot leave its parent, so the group wrapper must not generate a box.
+    expect(html).toMatch(/<div class="contents"><header/);
+  });
+
+  it("does not stick when the merchant turns sticky off", () => {
+    const off = structuredClone(header);
+    off.sections.header.settings = { sticky: false };
+    expect(render(heroDoc({}), { theme, groupHeader: off })).not.toContain("sticky top-0");
+  });
 });
 
 describe("grids", () => {

@@ -146,7 +146,8 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
 
         {/* Header: Group Header if present, otherwise Layout Chrome Header */}
         {groupHeader ? (
-          <div>
+          // `contents`: a sticky header cannot stick outside its parent, so the wrapper must not be a box of its own.
+          <div className="contents">
             {(groupHeader.order || Object.keys(groupHeader.sections || {})).map((secId) =>
               renderSectionComponent(groupHeader.sections[secId], enrichedContext, secId)
             )}
