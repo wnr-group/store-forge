@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useId, useState } from "react";
+import { createContext, useContext, useId, useRef, useState } from "react";
 import { ImageUploader, type ImageItem } from "@/components/products/image-uploader";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -219,15 +219,17 @@ function ImageField({ descriptor: d, value, disabled, error, onChange }: { descr
   );
   const usingThemePicture = Boolean(stored?.asset) && items.length === 0;
 
+  // The latest list, so the next one can be worked out here and `onChange` (which updates the editor) is never called
+  // from inside a state updater, where React forbids updating another component.
+  const itemsRef = useRef(items);
   const update = (next: ImageItem[] | ((prev: ImageItem[]) => ImageItem[])) => {
-    setItems((prev) => {
-      const list = typeof next === "function" ? next(prev) : next;
-      const done = list.find((i) => i.status === "done" && i.path);
-      // Only a finished upload is written to the document; removing the picture clears the setting.
-      if (done?.path) onChange({ path: done.path, ...(stored?.alt ? { alt: stored.alt } : {}) });
-      else if (list.length === 0) onChange(undefined);
-      return list;
-    });
+    const list = typeof next === "function" ? next(itemsRef.current) : next;
+    itemsRef.current = list;
+    setItems(list);
+    const done = list.find((i) => i.status === "done" && i.path);
+    // Only a finished upload is written to the document; removing the picture clears the setting.
+    if (done?.path) onChange({ path: done.path, ...(stored?.alt ? { alt: stored.alt } : {}) });
+    else if (list.length === 0) onChange(undefined);
   };
 
   return (
