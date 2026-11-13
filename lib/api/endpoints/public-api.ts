@@ -38,3 +38,68 @@ export type PublicCollectionApi = { id: string; name: string; slug: string; desc
 
 export const getPublicCollectionsApi = async (slug: string) =>
   (await apiRequest<PublicCollectionApi[]>(`/public/storefronts/${encodeURIComponent(slug)}/collections`, { anonymous: true })).data;
+
+/** `GET /public/storefronts/:slug/products/:productSlug`: one active product, as the database function returns it. */
+export type PublicProductApi = {
+  store: { name: string; slug: string; description: string | null; logo_path: string | null; currency: string };
+  product: {
+    name: string;
+    slug: string;
+    description: string | null;
+    short_description: string | null;
+    product_type: string | null;
+    sku: string | null;
+    price_minor: number;
+    compare_at_price_minor: number | null;
+    has_variants: boolean;
+    category_name: string | null;
+  };
+  images: { id: string; path: string; alt: string | null; position: number; is_primary: boolean }[];
+  options: { name: string; values: string[] }[];
+  variants: {
+    id: string;
+    title: string;
+    options: Record<string, string> | null;
+    sku: string | null;
+    price_minor: number;
+    compare_at_price_minor: number | null;
+    image_id: string | null;
+  }[];
+  related: PublicProductCardApi[];
+};
+
+export type PublicProductCardApi = {
+  name: string;
+  slug: string;
+  short_description: string | null;
+  price_minor: number;
+  compare_at_price_minor: number | null;
+  image_path: string | null;
+};
+
+export const getPublicProductApi = async (slug: string, productSlug: string) =>
+  (await apiRequest<PublicProductApi>(`/public/storefronts/${encodeURIComponent(slug)}/products/${encodeURIComponent(productSlug)}`, { anonymous: true })).data;
+
+/** `GET /public/storefronts/:slug/collections/:collectionSlug`: one active collection with its active products. */
+export type PublicCollectionDetailApi = {
+  store: PublicProductApi["store"];
+  collection: { id: string; name: string; slug: string; description: string | null; image_path: string | null };
+  products: PublicProductCardApi[];
+};
+
+export const getPublicCollectionApi = async (slug: string, collectionSlug: string) =>
+  (await apiRequest<PublicCollectionDetailApi>(`/public/storefronts/${encodeURIComponent(slug)}/collections/${encodeURIComponent(collectionSlug)}`, { anonymous: true })).data;
+
+/** `GET /public/storefronts/:slug/pages[/:pageSlug]`: published content pages only. */
+export type PublicPageLinkApi = { title: string; slug: string };
+export type PublicPageApi = { store: PublicProductApi["store"]; page: { title: string; slug: string; body: string; updated_at: string } };
+
+export const getPublicPagesApi = async (slug: string) =>
+  (await apiRequest<PublicPageLinkApi[]>(`/public/storefronts/${encodeURIComponent(slug)}/pages`, { anonymous: true })).data;
+
+export const getPublicPageApi = async (slug: string, pageSlug: string) =>
+  (await apiRequest<PublicPageApi>(`/public/storefronts/${encodeURIComponent(slug)}/pages/${encodeURIComponent(pageSlug)}`, { anonymous: true })).data;
+
+/** The published design of a page assigned to one product or collection (falls back to the store default). */
+export const getPublicLayoutForApi = async (slug: string, kind: "product" | "collection", resource: string) =>
+  (await apiRequest<PublicLayoutApi>(`/public/storefronts/${encodeURIComponent(slug)}/layout`, { anonymous: true, query: { kind, resource } })).data;

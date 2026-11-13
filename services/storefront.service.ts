@@ -1,7 +1,20 @@
 import "server-only";
 import { cache } from "react";
 import { z } from "zod";
-import { getPublicCollectionsApi, getPublicLayoutApi, getStorefrontApi, type PublicCollectionApi, type PublicLayoutApi } from "@/lib/api/endpoints/public-api";
+import {
+  getPublicCollectionApi,
+  getPublicCollectionsApi,
+  getPublicLayoutApi,
+  getPublicLayoutForApi,
+  getPublicPageApi,
+  getPublicPagesApi,
+  getPublicProductApi,
+  getStorefrontApi,
+  type PublicCollectionApi,
+  type PublicLayoutApi,
+  type PublicPageApi,
+  type PublicPageLinkApi,
+} from "@/lib/api/endpoints/public-api";
 import { AppError } from "@/lib/errors";
 
 const templateSchema = z.object({
@@ -83,3 +96,105 @@ export const getPublishedDesign = cache(async (slug: string): Promise<PublishedD
     return null;
   }
 });
+
+type PageKind = "product" | "collection";
+
+/** The pieces the engine needs to render one resource page. */
+export type PublishedResourcePage = {
+  layout: PublicLayoutApi & { template: NonNullable<PublicLayoutApi["template"]> };
+  collections: PublicCollectionApi[];
+  resource: Record<string, unknown>;
+  store: PublicStorefront;
+};
+
+const notFoundToNull = async <T,>(run: () => Promise<T>): Promise<T | null> => {
+  try {
+    return await run();
+  } catch (error) {
+    if (error instanceof AppError && error.code === "NOT_FOUND") return null;
+    throw error;
+  }
+};
+
+/** The published design for a product or collection page. Null when the store has not published one: the page then does not exist. */
+const getResourceLayout = cache(async (slug: string, kind: PageKind, resource: string) => {
+  try {
+    const layout = await getPublicLayoutForApi(slug, kind, resource);
+    return layout.template?.document ? (layout as PublishedResourcePage["layout"]) : null;
+  } catch {
+    return null;
+  }
+});
+
+/** One product page: the product from the API mapped to what the engine's product blocks read, plus the published design. */
+export const getPublishedProductPage = cache(async (slug: string, productSlug: string): Promise<PublishedResourcePage | null> => {
+  const [data, layout, collections, store] = await Promise.all([
+    notFoundToNull(() => getPublicProductApi(slug, productSlug)),
+    getResourceLayout(slug, "product", productSlug),
+    getPublicCollectionsApi(slug).catch(() => []),
+    getPublicStorefront(slug),
+  ]);
+  if (!data || !layout || !store) return null;
+  const imagePathById = new Map(data.images.map((i) => [i.id, i.path]));
+  const primary = data.images[0]?.path ?? null;
+  return {
+    layout,
+    collections,
+    store,
+    resource: {
+      name: data.product.name,
+      slug: data.product.slug,
+      // The product description block shows this field; the full description beats the short one.
+      short_description: data.product.description ?? data.product.short_description,
+      price_minor: data.product.price_minor,
+      compare_at_price_minor: data.product.compare_at_price_minor,
+      sku: data.product.sku,
+      type: data.product.product_type,
+      category: data.product.category_name,
+      image_path: primary,
+      images: data.images.map((i) => i.path),
+      options: data.options.map((o) => ({ id: o.name, name: o.name, values: o.values })),
+      variants: data.variants.map((v) => ({
+        id: v.id,
+        title: v.title,
+        price_minor: v.price_minor,
+        compare_at_price_minor: v.compare_at_price_minor,
+        sku: v.sku,
+        image_path: v.image_id ? (imagePathById.get(v.image_id) ?? null) : null,
+        option_values: v.options ?? {},
+      })),
+      related: data.related,
+    },
+  };
+});
+
+/** One collection page: the collection with its active products, plus the published design. */
+export const getPublishedCollectionPage = cache(async (slug: string, collectionSlug: string): Promise<PublishedResourcePage | null> => {
+  const [data, layout, collections, store] = await Promise.all([
+    notFoundToNull(() => getPublicCollectionApi(slug, collectionSlug)),
+    getResourceLayout(slug, "collection", collectionSlug),
+    getPublicCollectionsApi(slug).catch(() => []),
+    getPublicStorefront(slug),
+  ]);
+  if (!data || !layout || !store) return null;
+  return { layout, collections, store, resource: { ...data.collection, products: data.products } };
+});
+
+/** Shared frame for pages the engine builds from a small generated document: the store's published header, footer and theme. */
+export type PublishedFrame = { layout: PublishedDesign["layout"]; collections: PublicCollectionApi[] };
+
+export const getPublishedFrame = async (slug: string): Promise<PublishedFrame | null> => getPublishedDesign(slug);
+
+/** Published content pages: titles for menus. A failure means "no pages", never a broken store. */
+export const getPublicPageLinks = cache(async (slug: string): Promise<PublicPageLinkApi[]> => {
+  try {
+    return await getPublicPagesApi(slug);
+  } catch {
+    return [];
+  }
+});
+
+/** One published content page; drafts and unknown pages are null. */
+export const getPublicContentPage = cache(async (slug: string, pageSlug: string): Promise<PublicPageApi | null> =>
+  notFoundToNull(() => getPublicPageApi(slug, pageSlug)),
+);

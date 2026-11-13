@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { TemplateRenderer } from "@/components/storefront/engine/renderer";
+import { PublishedView } from "@/components/storefront/published-view";
 import { TemplateView } from "@/components/storefront/templates";
 import type { TemplateDocument } from "@/lib/templates/document";
 import { resolveTemplateKey, resolveTemplateSettings, savedFromPublic } from "@/lib/templates/resolve";
@@ -26,21 +26,7 @@ export default async function StorefrontPage({ params }: Params) {
   // A published design from the Theme Store wins; without one the store keeps its built-in template.
   const design = await getPublishedDesign(slug);
   if (design) {
-    const { layout, collections } = design;
-    return (
-      <TemplateRenderer
-        document={layout.template.document as unknown as TemplateDocument}
-        mode="public"
-        context={{
-          store,
-          collections,
-          theme: layout.theme ?? undefined,
-          groupHeader: layout.groups.header ?? undefined,
-          groupFooter: layout.groups.footer ?? undefined,
-          groupAnnouncement: layout.groups.announcement ?? undefined,
-        }}
-      />
-    );
+    return <PublishedView store={store} frame={design} document={design.layout.template.document as unknown as TemplateDocument} />;
   }
 
   const settings = resolveTemplateSettings(store, savedFromPublic(store.template));

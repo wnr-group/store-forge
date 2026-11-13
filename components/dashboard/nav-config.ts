@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, Package, Palette, PenTool, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -29,6 +29,8 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.analytics, label: "Analytics", icon: BarChart3, group: "Insights" },
   { href: ROUTES.templates, label: "Themes", icon: Palette, group: "Online Store", exact: true },
   { href: ROUTES.themeEditor, label: "Customize", icon: PenTool, group: "Online Store" },
+  { href: ROUTES.pages, label: "Pages", icon: FileText, group: "Online Store" },
+  { href: ROUTES.navigation, label: "Navigation", icon: Menu, group: "Online Store" },
   { href: ROUTES.settings, label: "Settings", icon: Settings, group: "Workspace" },
 ];
 
