@@ -4,12 +4,13 @@ import { StoreAccessLink } from "@/components/storefront/store-access-link";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, Search, Store, X } from "lucide-react";
+import { Menu, Search, ShoppingBag, Store, X } from "lucide-react";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 import { CONTAINER, resolveImage } from "../ui";
 import { cn } from "@/lib/utils";
+import { isEditorialTheme } from "@/lib/templates/engine/theme-style";
 
 interface HeaderSectionProps {
   node: ComponentNode;
@@ -44,6 +45,63 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
   const logoSrc = custom ?? resolveImage(store.logo_path).url;
   const searchHref = context.basePath ? `${context.basePath}/search` : "/search";
   const menu = blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId));
+
+  // Atelier: a single-row editorial bar. Logo (or the store name as a serif wordmark) on the left, the menu in small spaced capitals
+  // (aligned by the Menu Alignment setting), search, sign-in and a (non-functional) bag icon on the right. On phones the menu folds
+  // into a button.
+  if (isEditorialTheme(context.theme)) {
+    const label = "text-[11px] font-medium uppercase tracking-[0.24em]";
+    const focus = "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-foreground";
+    const iconBtn = cn("inline-flex size-11 items-center justify-center text-foreground/75 transition-colors duration-300 hover:text-foreground", focus);
+    return (
+      <header className={cn(sticky ? "sticky top-0 z-40 bg-background/95 backdrop-blur-md" : "bg-background", showSeparator && "border-b border-foreground/10")} {...sfProps}>
+        <div className={cn(CONTAINER, "flex items-center gap-6 lg:gap-12", "h-14 lg:h-16")}>
+          <Link href="/" aria-label={store.name} className={cn("flex min-w-0 shrink-0 items-center", focus)}>
+            {logoSrc ? (
+              <Image src={logoSrc} alt={store.name} width={logoWidth} height={40} className={cn("object-contain object-left ", "h-7 lg:h-8")} style={{ width: "auto", maxWidth: `${logoWidth}px` }} />
+            ) : (
+              <span className="truncate text-xl font-light uppercase tracking-[0.3em] text-foreground sm:text-2xl" style={{ fontFamily: "var(--sf-font-heading, serif)" }}>
+                {store.name}
+              </span>
+            )}
+          </Link>
+
+          {blockOrder.length > 0 ? (
+            <nav aria-label="Main" className={cn("hidden items-center gap-10 md:flex [&_a]:relative [&_a]:py-1.5 [&_a]:text-[11px] [&_a]:font-medium [&_a]:uppercase [&_a]:tracking-[0.24em] [&_a]:text-foreground/70 [&_a]:no-underline [&_a]:transition-colors [&_a]:duration-300 [&_a:hover]:text-foreground [&_a:hover]:no-underline [&_a:focus-visible]:text-foreground [&_a:focus-visible]:outline [&_a:focus-visible]:outline-1 [&_a:focus-visible]:outline-offset-4 [&_a:focus-visible]:outline-foreground [&_a]:after:absolute [&_a]:after:inset-x-0 [&_a]:after:bottom-0 [&_a]:after:h-px [&_a]:after:origin-left [&_a]:after:scale-x-0 [&_a]:after:bg-current [&_a]:after:transition-transform [&_a]:after:duration-300 [&_a:hover]:after:scale-x-100 motion-reduce:[&_a]:after:transition-none", menuAlignment === "center" ? "mx-auto" : menuAlignment === "right" ? "ml-auto" : "mr-auto")}>
+              {menu}
+            </nav>
+          ) : (
+            <span className="mr-auto" />
+          )}
+
+          <div className={cn("flex shrink-0 items-center gap-1 md:gap-6", blockOrder.length > 0 ? "ml-auto md:ml-0" : "ml-auto")}>
+            <Link href={searchHref} aria-label="Search the store" className={iconBtn}>
+              <Search className="size-[18px]" strokeWidth={1.25} aria-hidden />
+            </Link>
+            <StoreAccessLink className={cn("hidden text-foreground/70 transition-colors duration-300 hover:text-foreground md:inline", label, focus)} />
+            {/* Placeholder: checkout is not built yet, so the bag does nothing. */}
+            <button type="button" aria-label="Shopping bag" className={cn(iconBtn, "md:-mr-2")}>
+              <ShoppingBag className="size-[18px]" strokeWidth={1.25} aria-hidden />
+            </button>
+            {blockOrder.length > 0 ? (
+              <button type="button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="storefront-menu" onClick={() => setOpen((v) => !v)} className={cn(iconBtn, "-mr-3 md:hidden")}>
+                {open ? <X className="size-5" strokeWidth={1.25} aria-hidden /> : <Menu className="size-5" strokeWidth={1.25} aria-hidden />}
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        {open ? (
+          <nav id="storefront-menu" aria-label="Main" className="border-t border-foreground/10 bg-background md:hidden" onClick={() => setOpen(false)}>
+            <div className={cn(CONTAINER, "flex flex-col py-3 [&_a]:block [&_a]:border-b [&_a]:border-foreground/10 [&_a]:py-4 [&_a]:text-xs [&_a]:font-medium [&_a]:uppercase [&_a]:tracking-[0.24em] [&_a]:text-foreground [&_a]:no-underline")}>
+              {menu}
+              <StoreAccessLink className="py-4 text-xs font-medium uppercase tracking-[0.24em] text-foreground/70" />
+            </div>
+          </nav>
+        ) : null}
+      </header>
+    );
+  }
 
   return (
     <header className={cn(sticky ? "sticky top-0 z-40 bg-background/90 backdrop-blur-md" : "bg-background", showSeparator && "border-b border-border")} {...sfProps}>
