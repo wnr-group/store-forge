@@ -56,32 +56,32 @@ export function HeroSection({ node, context, sectionId }: HeroSectionProps) {
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
   const accentBar = <span aria-hidden className={cn("block h-0.5 w-12 bg-primary", alignment === "center" && "mx-auto")} style={accentColor ? { backgroundColor: accentColor } : undefined} />;
 
-  // Banner: the picture fills the whole section.
   // Atelier's hero is always the full-screen campaign, even for stores that applied an older version with another height or variant.
+  // Same composition as the StoreForge landing hero, with one picture instead of a slider: the picture fills the section, a dark
+  // wash fades in from the left, and the copy sits left-aligned in the vertical middle (eyebrow with a rule, headline, text, one button).
   if (isEditorialTheme(context.theme)) {
+    const wash = (a: number) => `rgba(0,0,0,${Math.min(0.9, a).toFixed(2)})`;
     return (
-      <section className={cn("relative isolate flex w-full flex-col overflow-hidden text-white", HEIGHTS.fullscreen)} {...sfProps}>
-        {imageUrl ? <Image src={imageUrl} alt={altText} fill priority sizes="100vw" className="-z-20 object-cover" /> : <ImagePlaceholder className="absolute inset-0 -z-20" icon={false} deep />}
-        <div aria-hidden className="absolute inset-0 -z-10" style={{ background: `linear-gradient(to top, rgba(0,0,0,${Math.min(0.85, overlay + 0.5)}) 0%, rgba(0,0,0,${overlay * 0.6}) 55%, rgba(0,0,0,${overlay * 0.35}) 100%), linear-gradient(to right, rgba(0,0,0,${Math.min(0.7, overlay + 0.2)}) 0%, transparent 62%)` }} />
-        <span aria-hidden className="pointer-events-none absolute inset-3 border border-white/30 sm:inset-5 lg:inset-8" />
-        <div className={cn(CONTAINER, "relative flex flex-1 flex-col justify-end px-8 pt-24 pb-14 sm:px-12 sm:pb-20 lg:px-16 lg:pb-24")}>
-          <div className="max-w-xl lg:max-w-[36rem]">
-            <p className="flex items-center gap-4 text-[0.7rem] tracking-[0.34em] text-white/85 uppercase sm:text-xs">
-              <span aria-hidden className="block h-px w-10 bg-white/80 sm:w-14" style={accentColor ? { backgroundColor: accentColor } : undefined} />
+      <section className={cn("relative isolate flex w-full flex-col overflow-hidden text-white max-h-[58rem]", HEIGHTS.fullscreen)} {...sfProps}>
+        {imageUrl ? <Image src={imageUrl} alt={altText} fill priority sizes="100vw" className="-z-30 object-cover" /> : <ImagePlaceholder className="absolute inset-0 -z-30" icon={false} deep />}
+        {/* Phones: an even wash. From sm up: strongest behind the copy on the left, clear on the right. */}
+        <div aria-hidden className="absolute inset-0 -z-20 sm:hidden" style={{ background: wash(overlay + 0.3) }} />
+        <div aria-hidden className="absolute inset-0 -z-20 hidden sm:block" style={{ background: `linear-gradient(to right, ${wash(overlay + 0.55)} 0%, ${wash(overlay + 0.2)} 55%, transparent 100%)` }} />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-black/70 to-transparent" />
+        <div className={cn(CONTAINER, "relative flex flex-1 items-center py-20 sm:py-24")}>
+          <div className="max-w-2xl">
+            <p className="inline-flex items-center gap-2.5 text-sm font-medium tracking-wide text-white/90">
+              <span aria-hidden className="h-px w-8 bg-white/80" />
               {store.name}
             </p>
-            <h1 className="mt-6 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.98] tracking-[-0.02em] text-balance sm:mt-8">{heading}</h1>
-            {subheading ? <p className="mt-6 max-w-md text-base leading-relaxed text-white/80 sm:mt-8 sm:text-lg">{subheading}</p> : null}
+            <h1 className="mt-4 text-4xl leading-[1.05] tracking-tight text-balance sm:text-5xl lg:text-[3.75rem]">{heading}</h1>
+            {subheading ? <p className="mt-5 max-w-md text-base leading-7 text-pretty text-white/85 sm:text-lg sm:leading-8">{subheading}</p> : null}
             {blockOrder.length > 0 ? (
-              <div className="mt-8 flex flex-wrap gap-3 sm:mt-10 [&>div]:pt-0 [&_a]:rounded-[var(--sf-button-radius,0px)] [&_a]:border [&_a]:border-white [&_a]:bg-white [&_a]:px-9 [&_a]:py-4 [&_a]:text-xs [&_a]:font-medium [&_a]:tracking-[0.22em] [&_a]:text-neutral-950 [&_a]:uppercase [&_a]:shadow-none [&_a]:transition-colors [&_a]:duration-300 [&_a:hover]:bg-transparent [&_a:hover]:text-white">
+              <div className="mt-8 flex flex-wrap gap-3 [&>div]:pt-0 [&_a]:inline-flex [&_a]:h-12 [&_a]:items-center [&_a]:gap-2 [&_a]:rounded-[var(--sf-button-radius,0px)] [&_a]:border [&_a]:border-white [&_a]:bg-white [&_a]:px-8 [&_a]:text-[15px] [&_a]:font-medium [&_a]:text-neutral-950 [&_a]:shadow-none [&_a]:transition-colors [&_a]:duration-300 [&_a]:after:content-['→'] [&_a:hover]:bg-transparent [&_a:hover]:text-white">
                 {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
               </div>
             ) : null}
           </div>
-          <span aria-hidden className="absolute right-8 bottom-14 hidden flex-col items-center gap-3 text-[0.65rem] tracking-[0.3em] text-white/70 uppercase [writing-mode:vertical-rl] sm:right-12 sm:bottom-20 sm:flex lg:right-16 lg:bottom-24">
-            Scroll
-            <span className="block h-12 w-px bg-white/50" />
-          </span>
         </div>
       </section>
     );
