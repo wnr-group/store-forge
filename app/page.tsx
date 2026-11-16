@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <MotionProvider>
-      <div id="top" className="lp-root min-h-dvh bg-lp-bg text-lp-heading antialiased">
+      <div id="top" className="lp-root min-h-dvh overflow-x-clip bg-lp-bg text-lp-heading antialiased">
         {/* Without JavaScript nothing can animate in, so keep every revealed element visible */}
         <noscript>
           <style>{"[data-reveal]{opacity:1!important;transform:none!important;clip-path:none!important}"}</style>
