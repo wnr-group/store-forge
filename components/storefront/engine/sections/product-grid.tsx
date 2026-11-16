@@ -1,9 +1,9 @@
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { CONTAINER, EmptyProducts, GRID_GAP, ProductCard, type CardProduct } from "../ui";
+import { CONTAINER, EmptyProducts, GRID_GAP, GroceryProductCard, ProductCard, gridColumns, type CardProduct } from "../ui";
 import { cn } from "@/lib/utils";
 import { LegacyProductGridSection } from "./legacy-product-grid";
-import { hasTheme } from "@/lib/templates/engine/theme-style";
+import { hasTheme, isGroceryTheme } from "@/lib/templates/engine/theme-style";
 
 interface ProductGridSectionProps {
   node: ComponentNode;
@@ -29,6 +29,31 @@ export function ProductGridSection({ node, context, sectionId }: ProductGridSect
     return (
       <section className={cn(CONTAINER, "py-12")} {...sfProps}>
         <EmptyProducts mode={context.mode} title={collectionResource ? "Nothing in this collection yet" : undefined} />
+      </section>
+    );
+  }
+
+  // Freshly (grocery): a heading row with the item count, then the same dense white cards as the trending section.
+  if (isGroceryTheme(context.theme)) {
+    const columns = (node.settings?.columns as number) ?? 6;
+    const currency = store.currency ?? "INR";
+    return (
+      <section id="all-products" className={cn(CONTAINER, "py-12 sm:py-16 lg:py-20")} {...sfProps}>
+        {collectionResource ? null : (
+          <div className="mb-7 flex items-end justify-between gap-4 sm:mb-9">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-primary">{products.length} {products.length === 1 ? "item" : "items"}</p>
+              <h2 className="mt-1 text-2xl font-extrabold leading-tight tracking-tight text-foreground sm:text-3xl lg:text-4xl">All products</h2>
+            </div>
+          </div>
+        )}
+        <ul className={cn("grid gap-3 sm:gap-4", gridColumns(columns))}>
+          {products.map((p, i) => (
+            <li key={p.slug} className="min-w-0">
+              <GroceryProductCard product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} priority={i < 6} />
+            </li>
+          ))}
+        </ul>
       </section>
     );
   }
