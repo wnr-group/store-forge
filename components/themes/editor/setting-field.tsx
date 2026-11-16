@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { createContext, useContext, useId, useRef, useState } from "react";
 import { ImageUploader, type ImageItem } from "@/components/products/image-uploader";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { imageRawPath } from "@/lib/storage/paths";
 import type { SettingDescriptor } from "@/lib/templates/engine/descriptors";
 import { cn } from "@/lib/utils";
 
@@ -218,6 +220,7 @@ function ImageField({ descriptor: d, value, disabled, error, onChange }: { descr
     stored?.path ? [{ key: stored.path, path: stored.path, altText: stored.alt ?? null, progress: 100, status: "done", saved: true }] : [],
   );
   const usingThemePicture = Boolean(stored?.asset) && items.length === 0;
+  const themePictureUrl = stored?.asset ? imageRawPath(stored) ?? null : null;
 
   // The latest list, so the next one can be worked out here and `onChange` (which updates the editor) is never called
   // from inside a state updater, where React forbids updating another component.
@@ -235,6 +238,11 @@ function ImageField({ descriptor: d, value, disabled, error, onChange }: { descr
   return (
     <div className="space-y-1.5">
       <Label className="text-xs font-medium">{d.label}</Label>
+      {usingThemePicture && themePictureUrl ? (
+        <div className="relative aspect-video w-full overflow-hidden rounded-md border bg-muted">
+          <Image src={themePictureUrl} alt={stored?.alt ?? ""} fill sizes="320px" className="object-cover" />
+        </div>
+      ) : null}
       {usingThemePicture ? <p className="text-xs text-muted-foreground">Using the theme&apos;s picture. Upload yours to replace it.</p> : null}
       <div className={cn(disabled && "pointer-events-none opacity-60")}>
         <ImageUploader value={items} onChange={update} scope="store" max={1} single disabled={disabled} label={d.label} />
