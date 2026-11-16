@@ -4,13 +4,13 @@ import { StoreAccessLink } from "@/components/storefront/store-access-link";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Leaf, Menu, Search, ShoppingBag, Store, X } from "lucide-react";
+import { Armchair, Leaf, Menu, Search, ShoppingBag, Store, X } from "lucide-react";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 import { CONTAINER, resolveImage } from "../ui";
 import { cn } from "@/lib/utils";
-import { isEditorialTheme, isGroceryTheme } from "@/lib/templates/engine/theme-style";
+import { isEditorialTheme, isGroceryTheme, isHomeTheme } from "@/lib/templates/engine/theme-style";
 
 interface HeaderSectionProps {
   node: ComponentNode;
@@ -167,6 +167,62 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
             <div className={cn(CONTAINER, "flex flex-col gap-1 py-3 [&_a]:block [&_a]:rounded-xl [&_a]:px-4 [&_a]:py-3 [&_a]:text-base [&_a]:font-semibold [&_a]:text-foreground [&_a]:no-underline [&_a:hover]:bg-primary/10")}>
               {menu}
               <StoreAccessLink className="rounded-xl px-4 py-3 text-base font-semibold text-muted-foreground" />
+            </div>
+          </nav>
+        ) : null}
+      </header>
+    );
+  }
+
+  // Haven: a centred-brand header on warm cream. The menu sits on the left, the wordmark (with a small armchair emblem) in the
+  // middle, and search, sign-in and the bag on the right. Links get a terracotta dot on hover. Below lg the menu folds into a button.
+  if (isHomeTheme(context.theme)) {
+    const focus = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+    const iconBtn = cn("inline-flex size-11 items-center justify-center rounded-full text-foreground/80 transition-colors duration-300 hover:bg-foreground/[0.06] hover:text-foreground", focus);
+    return (
+      <header className={cn(sticky ? "sticky top-0 z-40 bg-background/90 backdrop-blur-md" : "bg-background", showSeparator && "border-b border-border")} {...sfProps}>
+        <div className={cn(CONTAINER, "grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4 lg:h-[5.25rem]")}>
+          <div className="flex items-center">
+            {blockOrder.length > 0 ? (
+              <>
+                <button type="button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="storefront-menu" onClick={() => setOpen((v) => !v)} className={cn(iconBtn, "-ml-3 lg:hidden")}>
+                  {open ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
+                </button>
+                <nav aria-label="Main" className="hidden items-center gap-8 lg:flex [&_a]:relative [&_a]:py-2 [&_a]:text-sm [&_a]:font-medium [&_a]:tracking-wide [&_a]:text-foreground/70 [&_a]:no-underline [&_a]:transition-colors [&_a]:duration-300 [&_a:hover]:text-foreground [&_a:hover]:no-underline [&_a:focus-visible]:text-foreground [&_a:focus-visible]:outline [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-offset-4 [&_a:focus-visible]:outline-accent [&_a]:after:absolute [&_a]:after:-bottom-0.5 [&_a]:after:left-1/2 [&_a]:after:size-1 [&_a]:after:-translate-x-1/2 [&_a]:after:scale-0 [&_a]:after:rounded-full [&_a]:after:bg-accent [&_a]:after:transition-transform [&_a]:after:duration-300 [&_a:hover]:after:scale-100 motion-reduce:[&_a]:after:transition-none">
+                  {menu}
+                </nav>
+              </>
+            ) : null}
+          </div>
+
+          <Link href="/" aria-label={store.name} className={cn("flex min-w-0 items-center justify-center gap-3 rounded-md", focus)}>
+            {logoSrc ? (
+              <Image src={logoSrc} alt={store.name} width={logoWidth} height={44} className="h-8 object-contain lg:h-10" style={{ width: "auto", maxWidth: `${logoWidth}px` }} />
+            ) : (
+              <>
+                <span aria-hidden className="hidden size-9 shrink-0 items-center justify-center rounded-full border border-accent/60 text-accent sm:flex lg:size-10"><Armchair className="size-[18px] lg:size-5" strokeWidth={1.5} /></span>
+                <span className="truncate text-lg font-semibold tracking-[0.04em] text-foreground lg:text-2xl" style={{ fontFamily: "var(--sf-font-heading, inherit)" }}>{store.name}</span>
+              </>
+            )}
+          </Link>
+
+          <div className="flex items-center justify-end gap-0.5 lg:gap-2">
+            <Link href={searchHref} aria-label="Search the store" className={iconBtn}>
+              <Search className="size-5" strokeWidth={1.5} aria-hidden />
+            </Link>
+            <StoreAccessLink className={cn("hidden rounded-full px-3 py-2 text-sm font-medium text-foreground/70 transition-colors duration-300 hover:text-foreground lg:inline-flex", focus)} />
+            {/* Placeholder: checkout is not built yet, so the bag does nothing. */}
+            <button type="button" aria-label="Shopping bag" className={cn(iconBtn, "-mr-3 lg:mr-0 lg:border lg:border-border lg:hover:border-accent/60")}>
+              <ShoppingBag className="size-5" strokeWidth={1.5} aria-hidden />
+            </button>
+          </div>
+        </div>
+
+        {open ? (
+          <nav id="storefront-menu" aria-label="Main" className="border-t border-border bg-background lg:hidden" onClick={() => setOpen(false)}>
+            <div className={cn(CONTAINER, "flex flex-col py-2 [&_a]:block [&_a]:border-b [&_a]:border-border [&_a]:py-4 [&_a]:text-lg [&_a]:font-medium [&_a]:text-foreground [&_a]:no-underline")}>
+              {menu}
+              <StoreAccessLink className="py-4 text-lg font-medium text-foreground/70" />
             </div>
           </nav>
         ) : null}

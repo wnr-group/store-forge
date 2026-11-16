@@ -119,6 +119,12 @@ export function isGroceryTheme(theme: unknown): boolean {
   return ts?.buttons?.radius === 12;
 }
 
+/** Haven (home & furniture) is the only catalogue theme with 4px button corners; its header gets the centred-brand layout. */
+export function isHomeTheme(theme: unknown): boolean {
+  const ts = themeSettingsOf(theme) as { buttons?: { radius?: number } } | null;
+  return ts?.buttons?.radius === 4;
+}
+
 /** Atelier is the only theme with square buttons (radius 0); sections use this to give it their editorial presentation. Fonts are not part of the test, so tenants can change them freely. */
 export function isEditorialTheme(theme: unknown): boolean {
   const ts = themeSettingsOf(theme) as { buttons?: { radius?: number } } | null;

@@ -4,7 +4,7 @@ export const heroSection: SectionDefinition = {
   type: "hero",
   name: "Hero Banner",
   category: "Banners",
-  accepts: ["heading", "text", "button"],
+  accepts: ["heading", "text", "button", "hero-slide"],
   maxChildren: 10,
   settings: [
     {

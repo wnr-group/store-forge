@@ -6,7 +6,9 @@ import { cn } from "@/lib/utils";
 import { renderBlockComponent } from "../blocks";
 import { LegacyHeroSection } from "./legacy-hero";
 import { Leaf } from "lucide-react";
-import { hasTheme, isEditorialTheme, isGroceryTheme } from "@/lib/templates/engine/theme-style";
+import { hasTheme, isEditorialTheme, isGroceryTheme, isHomeTheme } from "@/lib/templates/engine/theme-style";
+import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
+import { HeroSlider, type HeroSlideData } from "./hero-slider";
 import { CONTAINER, ImagePlaceholder, RADIUS, resolveImage } from "../ui";
 
 interface HeroSectionProps {
@@ -47,7 +49,10 @@ export function HeroSection({ node, context, sectionId }: HeroSectionProps) {
   const { url: imageUrl, alt: altText } = resolveImage(node.settings?.image);
 
   const blocks = node.blocks ?? {};
-  const blockOrder = node.block_order ?? Object.keys(blocks);
+  const allBlockIds = node.block_order ?? Object.keys(blocks);
+  // Slides belong to the slider (Haven); every other layout only reads its buttons, headings and text.
+  const slideIds = allBlockIds.filter((id) => blocks[id]?.type === "hero-slide");
+  const blockOrder = allBlockIds.filter((id) => blocks[id]?.type !== "hero-slide");
   const buttons =
     blockOrder.length > 0 ? (
       <div className={cn("flex flex-wrap gap-3 pt-2 [&>div]:pt-0", alignment === "center" && "justify-center")}>{blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}</div>
@@ -86,6 +91,44 @@ export function HeroSection({ node, context, sectionId }: HeroSectionProps) {
         </div>
       </section>
     );
+  }
+
+  // Haven: a full-height sliding hero. Slides are the hero's "Hero slide" blocks (a picture with text, or a video); with one slide
+  // there is no sliding. A hero without slide blocks (a store that applied an earlier version) shows its own picture as one slide.
+  if (isHomeTheme(context.theme)) {
+    const slides: HeroSlideData[] = [];
+    for (const id of slideIds) {
+      const slide = blocks[id];
+      if (!slide || (slide.disabled && context.mode === "public")) continue;
+      const st = slide.settings ?? {};
+      if (st.mediaType === "video") {
+        const raw = imageRawPath(st.video);
+        const src = raw ? (raw.startsWith("/") || raw.startsWith("http") ? raw : publicImageUrl(raw)) : null;
+        if (src && /\.(mp4|webm)$/i.test(src)) slides.push({ id, kind: "video", src, alt: "" });
+        continue;
+      }
+      const { url, alt } = resolveImage(st.image);
+      if (!url) continue;
+      slides.push({ id, kind: "image", src: url, alt, heading: (st.heading as string) || undefined, subheading: (st.subheading as string) || undefined, buttonLabel: (st.buttonLabel as string) || undefined, href: (st.link as string) || undefined });
+    }
+    if (slides.length === 0) {
+      const firstButton = blockOrder.map((id) => blocks[id]).find((b) => b?.type === "button");
+      const buttonLabel = (firstButton?.settings?.label as string) || undefined;
+      const href = (firstButton?.settings?.link as string) || undefined;
+      const legacy = !imageUrl || imageUrl.endsWith("/themes/haven/living-room.svg");
+      if (legacy) {
+        // A store that applied Haven before it had slides (still on the old illustration) gets the three default photos.
+        slides.push(
+          { id: "d1", kind: "image", src: "/themes/haven/hero-1.jpg", alt: "", heading, subheading: subheading ?? undefined, buttonLabel, href },
+          { id: "d2", kind: "image", src: "/themes/haven/hero-2.jpg", alt: "", heading: "Natural materials, calm spaces", subheading: "Oak, linen and stone, chosen to age beautifully.", buttonLabel: "Explore the rooms", href: "/collections" },
+          { id: "d3", kind: "image", src: "/themes/haven/hero-3.jpg", alt: "", heading: "Furniture with room to breathe", subheading: "Considered pieces for every corner of the home.", buttonLabel: "Browse everything", href: "/products" },
+        );
+      } else {
+        // The merchant chose their own picture and removed the slides: one plain hero.
+        slides.push({ id: "own", kind: "image", src: imageUrl, alt: altText, heading, subheading: subheading ?? undefined, buttonLabel, href });
+      }
+    }
+    return <HeroSlider slides={slides} storeName={store.name} sfProps={sfProps} />;
   }
 
   // Freshly: a two-column campaign that fills the first screen (viewport minus the announcement bar and the two-tier header).

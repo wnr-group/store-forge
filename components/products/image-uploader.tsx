@@ -37,7 +37,7 @@ type Props = {
 };
 
 /** PUT the file to a Supabase signed upload URL with real progress (same wire format as supabase-js uploadToSignedUrl). */
-function putWithProgress(signedUrl: string, file: File, onProgress: (pct: number) => void): Promise<void> {
+export function putWithProgress(signedUrl: string, file: File, onProgress: (pct: number) => void): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", signedUrl);

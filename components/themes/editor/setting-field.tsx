@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { VideoField } from "./video-field";
 import { imageRawPath } from "@/lib/storage/paths";
 import type { SettingDescriptor } from "@/lib/templates/engine/descriptors";
 import { cn } from "@/lib/utils";
@@ -159,6 +160,8 @@ export function SettingField({ descriptor: d, value, onChange, disabled, error }
     case "color":
       return <ColorField id={id} descriptor={d} value={typeof current === "string" ? current : ""} disabled={disabled} error={error} onChange={onChange} />;
     case "image":
+      // A video slot is an image-shaped value (`{ path }`) with its own uploader; see the hero-slide block.
+      if (d.id === "video") return <VideoField descriptor={d} value={value} disabled={disabled} error={error} onChange={onChange} />;
       return <ImageField descriptor={d} value={value} disabled={disabled} error={error} onChange={onChange} />;
     default:
       return (

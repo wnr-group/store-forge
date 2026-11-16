@@ -42,6 +42,7 @@ import { productDescriptionBlock } from "./blocks/product-description";
 import { variantPickerBlock } from "./blocks/variant-picker";
 import { collapsibleInfoBlock } from "./blocks/collapsible-info";
 import { socialShareBlock } from "./blocks/social-share";
+import { heroSlideBlock } from "./blocks/hero-slide";
 
 export function getRegistry(): ComponentRegistry {
   return {
@@ -87,6 +88,7 @@ export function getRegistry(): ComponentRegistry {
       "variant-picker": variantPickerBlock,
       "collapsible-info": collapsibleInfoBlock,
       "social-share": socialShareBlock,
+      "hero-slide": heroSlideBlock,
     },
   };
 }
