@@ -4,8 +4,8 @@ import { ArrowUpRight, Flame } from "lucide-react";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { resolveCollection } from "@/lib/storefront/featured";
-import { isEditorialTheme, isGroceryTheme } from "@/lib/templates/engine/theme-style";
-import { CONTAINER, EditorialHeader, EditorialProductCard, EmptyProducts, GRID_GAP, GroceryProductCard, ProductCard, SECTION_Y, SectionHeading, balancedColumns, gridColumns, type CardProduct } from "../ui";
+import { isEditorialTheme, isGroceryTheme, isHomeTheme } from "@/lib/templates/engine/theme-style";
+import { CONTAINER, EditorialHeader, EditorialProductCard, EmptyProducts, GRID_GAP, GroceryProductCard, HavenFeaturedProduct, HavenProductCard, ProductCard, SECTION_Y, SectionHeading, balancedColumns, gridColumns, type CardProduct } from "../ui";
 import { cn } from "@/lib/utils";
 
 interface FeaturedCollectionSectionProps {
@@ -50,6 +50,48 @@ export function FeaturedCollectionSection({ node, context, sectionId }: Featured
             </li>
           ))}
         </ul>
+      </section>
+    );
+  }
+
+  // Haven (home & furniture): large portrait cards with generous space, under a label, a big title and an "all" link.
+  if (isHomeTheme(context.theme) && products.length > 0) {
+    // One product becomes a feature; more are a compact card grid.
+    const currency = store.currency ?? "INR";
+    return (
+      <section id="products" className={cn(CONTAINER, SECTION_Y)} {...sfProps}>
+        <div className="mb-10 flex items-end justify-between gap-6 sm:mb-14">
+          <div className="min-w-0">
+            <span aria-hidden className="block h-0.5 w-10 bg-accent" />
+            <h2 className="mt-5 max-w-xl text-3xl font-semibold leading-[1.1] tracking-tight text-balance text-foreground sm:text-4xl lg:text-5xl">{title}</h2>
+          </div>
+          {showViewAll ? (
+            <Link href={matchedCollection ? `/collections/${matchedCollection.slug}` : "/products"} className="group/all hidden shrink-0 items-center gap-2 border-b border-foreground/30 pb-1 text-sm font-medium text-foreground transition-colors duration-300 hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:inline-flex">
+              View all
+              <ArrowUpRight className="size-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5 motion-reduce:transition-none" aria-hidden />
+            </Link>
+          ) : null}
+        </div>
+        {/* Cards keep a compact size (about 215px to 272px wide) however many products there are, instead of stretching to fill the row. */}
+        {products.length === 1 ? (
+          <HavenFeaturedProduct product={products[0]} currency={currency} href={`/products/${products[0].slug}`} priority />
+        ) : (
+          <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-[repeat(auto-fill,minmax(13.5rem,17rem))] sm:gap-x-5 sm:gap-y-10 lg:gap-x-6 lg:gap-y-12">
+            {products.map((p, i) => (
+              <li key={p.slug} className="min-w-0">
+                <HavenProductCard product={p} currency={currency} href={`/products/${p.slug}`} priority={i < 3} />
+              </li>
+            ))}
+          </ul>
+        )}
+        {showViewAll ? (
+          <div className="mt-10 sm:hidden">
+            <Link href={matchedCollection ? `/collections/${matchedCollection.slug}` : "/products"} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[var(--sf-button-radius,4px)] border border-foreground/25 text-sm font-medium text-foreground transition-colors duration-300 hover:bg-foreground hover:text-background">
+              View all
+              <ArrowUpRight className="size-4" aria-hidden />
+            </Link>
+          </div>
+        ) : null}
       </section>
     );
   }

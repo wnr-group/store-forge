@@ -291,3 +291,83 @@ export function GroceryProductCard({ product, currency, href, priority = false }
     <div className={cardClass}>{body}</div>
   );
 }
+
+/**
+ * Home & furniture product card (Haven): a tall portrait picture with no box around it, then name, a one-line description and the
+ * price. On hover the picture zooms slowly and a "View piece" bar rises from its bottom edge. Sale and sold-out tags are real data.
+ */
+export function HavenProductCard({ product, currency, href, priority = false }: { product: CardProduct; currency: string; href?: string | null; priority?: boolean }) {
+  const img = publicImageUrl(product.image_path);
+  const compare = product.compare_at_price_minor;
+  const onSale = compare != null && compare > product.price_minor;
+  const soldOut = product.available === false;
+  const cardClass = "group block outline-none";
+  const body = (
+    <>
+      <span className="relative isolate block aspect-[4/5] w-full transform-gpu overflow-hidden rounded-lg bg-[var(--surface,var(--muted))] sm:aspect-square ring-1 ring-foreground/5 group-focus-visible:ring-2 group-focus-visible:ring-accent group-focus-visible:ring-offset-4">
+        {img ? (
+          <Image src={img} alt="" fill priority={priority} sizes="(min-width: 640px) 272px, 50vw" className={cn("object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.05] motion-reduce:transition-none", soldOut && "opacity-60")} />
+        ) : (
+          <ImagePlaceholder className="absolute inset-0" />
+        )}
+        {soldOut ? (
+          <span className="absolute left-3 top-3 rounded-sm bg-background px-2.5 py-1 text-xs font-medium text-foreground shadow-sm">Sold out</span>
+        ) : onSale ? (
+          <span className="absolute left-3 top-3 rounded-sm bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground shadow-sm">Sale</span>
+        ) : null}
+        <span aria-hidden className="absolute inset-x-3 bottom-3 flex translate-y-3 items-center justify-between rounded-md bg-background/95 px-3.5 py-2.5 text-[13px] font-medium text-foreground opacity-0 shadow-sm backdrop-blur-sm transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 motion-reduce:transition-none">
+          View piece
+          <ArrowUpRight className="size-4" />
+        </span>
+      </span>
+      <span className="mt-4 block space-y-1">
+        <span className="line-clamp-2 block text-[15px] font-semibold leading-snug tracking-tight text-foreground">{product.name}</span>
+        {product.short_description ? <span className="line-clamp-1 block text-sm text-muted-foreground">{product.short_description}</span> : null}
+        <span className="flex flex-wrap items-baseline gap-x-2.5 pt-0.5">
+          <span className="text-[15px] font-semibold tabular-nums text-foreground">{formatMoney(product.price_minor, currency)}</span>
+          {onSale ? <span className="text-sm tabular-nums text-muted-foreground line-through">{formatMoney(compare!, currency)}</span> : null}
+        </span>
+      </span>
+    </>
+  );
+  return href ? (
+    <Link href={href} className={cardClass}>
+      {body}
+    </Link>
+  ) : (
+    <div className={cardClass}>{body}</div>
+  );
+}
+
+/**
+ * One product shown as a feature (Haven): a large picture beside the name, description, price and a button. Used when a section
+ * has a single product, where a grid would leave one small card and a lot of empty space.
+ */
+export function HavenFeaturedProduct({ product, currency, href, priority = false }: { product: CardProduct; currency: string; href?: string | null; priority?: boolean }) {
+  const img = publicImageUrl(product.image_path);
+  const compare = product.compare_at_price_minor;
+  const onSale = compare != null && compare > product.price_minor;
+  const soldOut = product.available === false;
+  return (
+    <div className="grid items-center gap-6 sm:grid-cols-[minmax(0,20rem)_1fr] sm:gap-10 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-14">
+      <div className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-lg bg-[var(--surface,var(--muted))] ring-1 ring-foreground/5 sm:aspect-square">
+        {img ? <Image src={img} alt={product.name} fill priority={priority} sizes="(min-width: 640px) 352px, 100vw" className={cn("object-cover", soldOut && "opacity-60")} /> : <ImagePlaceholder className="absolute inset-0" />}
+        {soldOut ? <span className="absolute left-4 top-4 rounded-sm bg-background px-2.5 py-1 text-xs font-medium text-foreground shadow-sm">Sold out</span> : onSale ? <span className="absolute left-4 top-4 rounded-sm bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground shadow-sm">Sale</span> : null}
+      </div>
+      <div className="max-w-md">
+        <h3 className="text-2xl font-semibold leading-[1.15] tracking-tight text-balance text-foreground sm:text-3xl">{product.name}</h3>
+        {product.short_description ? <p className="mt-4 text-base leading-7 text-pretty text-muted-foreground">{product.short_description}</p> : null}
+        <p className="mt-6 flex flex-wrap items-baseline gap-x-3">
+          <span className="text-xl font-semibold tabular-nums text-foreground">{formatMoney(product.price_minor, currency)}</span>
+          {onSale ? <span className="text-base tabular-nums text-muted-foreground line-through">{formatMoney(compare!, currency)}</span> : null}
+        </p>
+        {href ? (
+          <Link href={href} className="group/btn mt-6 inline-flex h-11 items-center gap-2 rounded-[var(--sf-button-radius,4px)] bg-primary px-6 text-[15px] font-medium text-primary-foreground transition-colors duration-300 hover:bg-[var(--primary-hover,var(--primary))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+            View product
+            <ArrowUpRight className="size-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 motion-reduce:transition-none" aria-hidden />
+          </Link>
+        ) : null}
+      </div>
+    </div>
+  );
+}
