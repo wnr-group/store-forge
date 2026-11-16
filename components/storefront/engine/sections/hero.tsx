@@ -5,7 +5,8 @@ import type { RenderContext } from "../types";
 import { cn } from "@/lib/utils";
 import { renderBlockComponent } from "../blocks";
 import { LegacyHeroSection } from "./legacy-hero";
-import { hasTheme, isEditorialTheme } from "@/lib/templates/engine/theme-style";
+import { Leaf } from "lucide-react";
+import { hasTheme, isEditorialTheme, isGroceryTheme } from "@/lib/templates/engine/theme-style";
 import { CONTAINER, ImagePlaceholder, RADIUS, resolveImage } from "../ui";
 
 interface HeroSectionProps {
@@ -81,6 +82,39 @@ export function HeroSection({ node, context, sectionId }: HeroSectionProps) {
                 {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
               </div>
             ) : null}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Freshly: a two-column campaign that fills the first screen (viewport minus the announcement bar and the two-tier header).
+  // Copy on the left, the photo in a rounded frame on the right; on phones the copy comes first and the photo sits below it.
+  if (isGroceryTheme(context.theme)) {
+    const cream = "#f8e8d8";
+    // Stores that applied Freshly earlier still point at the old illustration (or have no picture): show the campaign photo instead.
+    // A picture the merchant chose themselves is kept.
+    const heroUrl = imageUrl && !imageUrl.endsWith("/themes/freshly/hero.svg") ? imageUrl : "/themes/freshly/hero.jpg";
+    const heroAlt = altText || "A paper bag of fresh vegetables beside a basket of fruit, eggs, milk and bread on a wooden table";
+    return (
+      <section className="relative isolate w-full overflow-hidden" style={{ backgroundColor: cream }} {...sfProps}>
+        <div aria-hidden className="absolute -left-32 top-1/4 -z-10 size-96 rounded-full bg-primary/10 blur-3xl" />
+        <div className={cn(CONTAINER, "grid items-center gap-8 py-8 lg:min-h-[max(34rem,calc(100svh-9.5rem))] lg:grid-cols-2 lg:gap-14 lg:py-10")}>
+          <div className="max-w-xl lg:py-8">
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3.5 py-1.5 text-sm font-semibold text-primary shadow-sm ring-1 ring-primary/15">
+              <Leaf className="size-4" aria-hidden />
+              {store.name}
+            </p>
+            <h1 className="mt-6 text-[2.5rem] font-extrabold leading-[1.02] tracking-tight text-balance text-foreground sm:text-6xl xl:text-[4.25rem]">{heading}</h1>
+            {subheading ? <p className="mt-5 max-w-md text-base leading-7 text-pretty text-foreground/75 sm:text-lg sm:leading-8">{subheading}</p> : null}
+            {blockOrder.length > 0 ? (
+              <div className="mt-9 flex flex-wrap gap-3 [&>div]:pt-0 [&_a]:inline-flex [&_a]:h-13 [&_a]:items-center [&_a]:gap-2 [&_a]:rounded-full [&_a]:bg-primary [&_a]:px-9 [&_a]:text-base [&_a]:font-semibold [&_a]:text-primary-foreground [&_a]:no-underline [&_a]:shadow-[0_14px_28px_-10px_color-mix(in_srgb,var(--primary)_75%,transparent)] [&_a]:transition-[transform,background-color] [&_a]:duration-200 [&_a]:after:content-['→'] [&_a:hover]:-translate-y-0.5 [&_a:hover]:bg-[var(--primary-hover,var(--primary))] motion-reduce:[&_a]:transition-none motion-reduce:[&_a:hover]:translate-y-0">
+                {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
+              </div>
+            ) : null}
+          </div>
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-30px_rgba(60,40,10,0.45)] ring-1 ring-black/5 sm:aspect-[16/10] lg:aspect-auto lg:h-[min(34rem,calc(100svh-13rem))] xl:h-[min(40rem,calc(100svh-13rem))]">
+            <Image src={heroUrl} alt={heroAlt} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover object-[72%_center]" />
           </div>
         </div>
       </section>
