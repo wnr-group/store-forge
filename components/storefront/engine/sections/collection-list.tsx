@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Leaf } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ComponentNode } from "@/lib/templates/document";
@@ -7,7 +7,7 @@ import type { RenderContext } from "../types";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { CONTAINER, EditorialArt, EditorialHeader, ImagePlaceholder, RADIUS, SECTION_Y, SectionHeading } from "../ui";
 import { cn } from "@/lib/utils";
-import { isEditorialTheme } from "@/lib/templates/engine/theme-style";
+import { isEditorialTheme, isGroceryTheme } from "@/lib/templates/engine/theme-style";
 
 interface CollectionListSectionProps {
   node: ComponentNode;
@@ -31,6 +31,11 @@ export function CollectionListSection({ node, context, sectionId }: CollectionLi
   const layout = chosen === "grid" || chosen === "editorial" ? chosen : isAtelier ? "editorial" : "grid";
   if (layout === "editorial" && collections.length > 0) {
     return <EditorialCollections title={title} showProductCount={showProductCount} collections={collections} sfProps={sfProps} />;
+  }
+
+  // Freshly (grocery) gets compact tinted tiles with a round picture, built for scanning many categories at a glance.
+  if (isGroceryTheme(context.theme) && chosen !== "grid" && chosen !== "editorial" && collections.length > 0) {
+    return <GroceryCategories title={title} showProductCount={showProductCount} collections={collections} sfProps={sfProps} />;
   }
 
   // Avoid a lone card on the last row: four collections sit in four columns, not three plus one.
@@ -105,6 +110,58 @@ function EditorialCollections({ title, showProductCount, collections, sfProps }:
                   </div>
                   <ArrowUpRight className="mt-1 size-5 shrink-0 text-foreground/40 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" strokeWidth={1.25} />
                 </div>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+/** Soft fruit-and-vegetable tints the tiles cycle through. All are light enough for dark text at 4.5:1 or better. */
+const GROCERY_TINTS = ["#e7f5ea", "#ffefdc", "#fff6cc", "#fde5e1", "#eaf4d3", "#e2f3ee"];
+
+/**
+ * Grocery layout: a heading row with a "View all" pill, then tinted rounded tiles (2 per row on phones, 3 on tablets, 6 on desktop).
+ * Each tile has a round picture on a white ring, the bold name and an item count; hover lifts the tile and nudges the arrow.
+ */
+function GroceryCategories({ title, showProductCount, collections, sfProps }: { title: string; showProductCount: boolean; collections: NonNullable<RenderContext["collections"]>; sfProps: { "data-sf-section"?: string } }) {
+  return (
+    <section className={cn(CONTAINER, SECTION_Y)} {...sfProps}>
+      <div className="mb-7 flex items-end justify-between gap-4 sm:mb-9">
+        <div className="min-w-0">
+          <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+            <Leaf className="size-4" aria-hidden />
+            Fresh aisles
+          </p>
+          <h2 className="mt-1 text-2xl font-extrabold leading-tight tracking-tight text-foreground sm:text-3xl lg:text-4xl">{title}</h2>
+        </div>
+        <Link href="/collections" className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-border px-5 text-sm font-semibold text-foreground transition-colors duration-200 hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+          View all
+          <ArrowUpRight className="size-4" aria-hidden />
+        </Link>
+      </div>
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+        {collections.map((col, i) => {
+          const img = publicImageUrl(col.image_path);
+          return (
+            <li key={col.slug || col.id} className="min-w-0">
+              <Link
+                href={`/collections/${col.slug}`}
+                style={{ backgroundColor: GROCERY_TINTS[i % GROCERY_TINTS.length] }}
+                className="group relative isolate flex h-full transform-gpu flex-col items-center rounded-3xl px-3 pb-4 pt-5 text-center outline-none ring-1 ring-black/5 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform hover:-translate-y-1.5 focus-visible:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              >
+                {/* The lift shadow fades in on its own layer: animating box-shadow itself repaints every frame and looks choppy. */}
+                <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-3xl opacity-0 shadow-[0_22px_34px_-18px_rgba(20,35,26,0.4)] transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none" />
+                <span className="relative isolate block aspect-square w-full max-w-[8.5rem] transform-gpu overflow-hidden rounded-full bg-white shadow-[0_8px_20px_-10px_rgba(20,35,26,0.4)] ring-4 ring-white">
+                  {img ? <Image src={img} alt="" fill sizes="(min-width: 1024px) 140px, 40vw" className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.08] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" icon={false} deep />}
+                </span>
+                <span className="mt-4 block text-[15px] font-bold leading-tight text-foreground">{col.name}</span>
+                <span className="mt-1.5 inline-flex min-h-6 items-center gap-1 text-xs font-medium text-foreground/70">
+                  {showProductCount && typeof col.product_count === "number" ? `${col.product_count} ${col.product_count === 1 ? "item" : "items"}` : "Shop now"}
+                  <ArrowUpRight className="size-3.5 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none" aria-hidden />
+                </span>
               </Link>
             </li>
           );
