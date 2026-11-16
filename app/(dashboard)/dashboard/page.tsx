@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   const showAnalytics = canViewOrders(active);
   const data = showAnalytics ? await getAnalytics(30) : null;
   const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
-  const storeUrl = storefrontUrl(store.slug, root);
+  const storeUrl = storefrontUrl(store.slug, root, active.tenant.publicId);
 
   return (
     <>
@@ -40,7 +40,7 @@ export default async function DashboardPage() {
             <>
               {active.tenant.name} ·{" "}
               <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground underline-offset-4 hover:underline">
-                {storefrontHost(store.slug, root)}
+                {storefrontHost(store.slug, root, active.tenant.publicId)}
               </a>
             </>
           ) : (

@@ -15,7 +15,7 @@ export default async function PagesPage() {
   return (
     <>
       <PageHeader title="Pages" description="Write the pages your customers read, like About, Contact and your policies. Add them to your menu in Navigation." />
-      <PagesManager pages={pages} canManage={canManageStore(active)} storeUrl={store ? storefrontUrl(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN) : null} />
+      <PagesManager pages={pages} canManage={canManageStore(active)} storeUrl={store ? storefrontUrl(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, active.tenant.publicId) : null} />
     </>
   );
 }

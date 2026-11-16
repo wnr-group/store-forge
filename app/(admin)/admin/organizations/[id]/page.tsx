@@ -35,7 +35,7 @@ export default async function CompanyDetailsPage({ params }: { params: Promise<{
   const [found, usage] = await Promise.all([getCompany(id), getOrganizationUsage(id).catch(() => null)]);
   if (!found) notFound();
   const { company: c, store, team } = found;
-  const storeUrl = store ? storefrontUrl(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN) : null;
+  const storeUrl = store ? storefrontUrl(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, c.publicId) : null;
 
   return (
     <>
@@ -57,9 +57,10 @@ export default async function CompanyDetailsPage({ params }: { params: Promise<{
         </SectionCard>
 
         <SectionCard title="Organization details" description="The address (slug) and status cannot be edited here.">
-          <dl className="grid gap-4 sm:grid-cols-3">
+          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Detail label="Created" value={date.format(c.createdAt)} />
             <Detail label="Identifier" value={c.slug} />
+            <Detail label="Public ID" value={c.publicId} />
             <Detail label="Status" value={c.status === "active" ? "Active" : "Suspended"} />
           </dl>
           <EditOrganizationForm key={`${c.name}|${c.contactPhone}|${c.address}`} tenantId={c.id} initial={{ name: c.name, contactPhone: c.contactPhone, address: c.address }} />

@@ -35,6 +35,7 @@ export type CompanySummary = {
   id: string;
   name: string;
   slug: string;
+  publicId: string;
   status: "active" | "suspended";
   contactPhone: string | null;
   address: string | null;

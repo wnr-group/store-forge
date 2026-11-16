@@ -36,15 +36,16 @@ function OrganizationsTable({ companies }: { companies: CompanySummary[] }) {
             <TableRow key={c.id}>
               <TableCell>
                 <Link href={`${ROUTES.adminCompanies}/${c.id}`} className="font-medium hover:underline">{c.name}</Link>
+                <span className="block text-xs text-muted-foreground">ID {c.publicId}</span>
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 <span className="block">{c.ownerName ?? "—"}</span>
                 <span className="block text-xs text-muted-foreground">{c.ownerEmail ?? "No owner account"}</span>
               </TableCell>
               <TableCell className="hidden lg:table-cell">
-                {c.storeSlug && storefrontUrl(c.storeSlug, process.env.NEXT_PUBLIC_ROOT_DOMAIN) ? (
-                  <a href={storefrontUrl(c.storeSlug, process.env.NEXT_PUBLIC_ROOT_DOMAIN)!} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                    {storefrontHost(c.storeSlug, process.env.NEXT_PUBLIC_ROOT_DOMAIN)}
+                {c.storeSlug && storefrontUrl(c.storeSlug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, c.publicId) ? (
+                  <a href={storefrontUrl(c.storeSlug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, c.publicId)!} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                    {storefrontHost(c.storeSlug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, c.publicId)}
                   </a>
                 ) : (
                   (c.storeName ?? "—")

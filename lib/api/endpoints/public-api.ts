@@ -6,6 +6,7 @@ import { storefrontCache } from "@/lib/storefront/cache";
 export type StorefrontApi = {
   name: string;
   slug: string;
+  publicId: string;
   description: string | null;
   logoPath: string | null;
   currency: string;

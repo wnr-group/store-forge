@@ -41,7 +41,7 @@ export async function createCompanyAction(input: unknown) {
     const values = parseInput(createCompanySchema, input);
     const result = await createCompany(values);
     revalidatePath(ROUTES.admin, "layout");
-    return { tenantId: result.tenantId, ownerEmail: result.ownerEmail };
+    return { tenantId: result.tenantId, publicId: result.publicId, ownerEmail: result.ownerEmail };
   });
 }
 

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isSubdomainAppPath, storeSlugFromHost, STORE_HEADER } from "@/lib/tenant/host";
+import { resolveStoreHost } from "@/lib/tenant/resolve-host";
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function proxy(request: NextRequest) {
@@ -17,16 +18,30 @@ export async function proxy(request: NextRequest) {
   // Never trust a client-supplied store header: only the Host header may set it (below).
   request.headers.delete(STORE_HEADER);
 
-  const slug = storeSlugFromHost(request.headers.get("host"), process.env.NEXT_PUBLIC_ROOT_DOMAIN);
-  if (slug) {
-    // <store>.<root domain>: /login and /dashboard are that store's app (session cookies are per host, so
-    // each store host has its own sign-in); everything else is the public storefront (app/s/[slug]).
+  const label = storeSlugFromHost(request.headers.get("host"), process.env.NEXT_PUBLIC_ROOT_DOMAIN);
+  if (label) {
+    // <store>-<publicId>.<root domain> (or the older <store>.<root domain>). The host only SELECTS a store: the public id
+    // in it must match the one the API reports for that store, otherwise nothing is served for the host.
+    let store;
+    try {
+      store = await resolveStoreHost(label);
+    } catch {
+      return new NextResponse("Service temporarily unavailable. Please try again shortly.", { status: 503, headers: { "retry-after": "10" } });
+    }
+    if (!store) {
+      // Unknown host: render the storefront's own "not found" (also for /login and /dashboard, which belong to real stores only).
+      const url = request.nextUrl.clone();
+      url.pathname = `/s/${label}${url.pathname === "/" ? "" : url.pathname}`;
+      return NextResponse.rewrite(url);
+    }
+    // /login and /dashboard are that store's app (session cookies are per host, so each store host has its own
+    // sign-in); everything else is the public storefront (app/s/[slug]), addressed by the store's real slug.
     if (isSubdomainAppPath(request.nextUrl.pathname)) {
-      request.headers.set(STORE_HEADER, slug);
+      request.headers.set(STORE_HEADER, store.slug);
       return updateSession(request);
     }
     const url = request.nextUrl.clone();
-    url.pathname = `/s/${slug}${url.pathname === "/" ? "" : url.pathname}`;
+    url.pathname = `/s/${store.slug}${url.pathname === "/" ? "" : url.pathname}`;
     return NextResponse.rewrite(url);
   }
   return updateSession(request);

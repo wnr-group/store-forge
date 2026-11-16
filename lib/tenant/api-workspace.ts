@@ -11,7 +11,7 @@ import type { TenantMembership } from "@/services/tenant.service";
 export type WorkspaceData = { memberships: TenantMembership[]; active: TenantMembership | null; store: Store | null };
 
 const toMembership = (o: OrganizationSummaryApi): TenantMembership => ({
-  tenant: { id: o.id, name: o.name, slug: o.slug },
+  tenant: { id: o.id, name: o.name, slug: o.slug, publicId: o.publicId },
   role: o.role as TenantMembership["role"],
   permissions: o.permissions as MemberPermissions,
   joinedAt: new Date(o.joinedAt),

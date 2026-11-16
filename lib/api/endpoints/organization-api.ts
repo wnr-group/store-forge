@@ -7,13 +7,15 @@ export type OrganizationSummaryApi = {
   id: string;
   name: string;
   slug: string;
+  /** Read-only public identifier of the organization (the suffix of its storefront address). */
+  publicId: string;
   role: string;
   permissions: Record<string, string>;
   joinedAt: string;
 };
 
 export type CurrentOrganizationApi = {
-  organization: { id: string; name: string; slug: string };
+  organization: { id: string; name: string; slug: string; publicId: string };
   role: string;
   roleLabel: string;
   permissions: Record<string, string>;
