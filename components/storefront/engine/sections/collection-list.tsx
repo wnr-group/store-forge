@@ -7,7 +7,7 @@ import type { RenderContext } from "../types";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { CONTAINER, EditorialArt, EditorialHeader, ImagePlaceholder, RADIUS, SECTION_Y, SectionHeading } from "../ui";
 import { cn } from "@/lib/utils";
-import { isEditorialTheme, isGroceryTheme } from "@/lib/templates/engine/theme-style";
+import { isEditorialTheme, isGroceryTheme, isHomeTheme } from "@/lib/templates/engine/theme-style";
 
 interface CollectionListSectionProps {
   node: ComponentNode;
@@ -31,6 +31,11 @@ export function CollectionListSection({ node, context, sectionId }: CollectionLi
   const layout = chosen === "grid" || chosen === "editorial" ? chosen : isAtelier ? "editorial" : "grid";
   if (layout === "editorial" && collections.length > 0) {
     return <EditorialCollections title={title} showProductCount={showProductCount} collections={collections} sfProps={sfProps} />;
+  }
+
+  // Haven (home & furniture) gets arched room cards with a staggered rhythm.
+  if (isHomeTheme(context.theme) && chosen !== "grid" && chosen !== "editorial" && collections.length > 0) {
+    return <RoomCollections title={title} showProductCount={showProductCount} columns={columns} collections={collections} sfProps={sfProps} />;
   }
 
   // Freshly (grocery) gets compact tinted tiles with a round picture, built for scanning many categories at a glance.
@@ -161,6 +166,64 @@ function GroceryCategories({ title, showProductCount, collections, sfProps }: { 
                 <span className="mt-1.5 inline-flex min-h-6 items-center gap-1 text-xs font-medium text-foreground/70">
                   {showProductCount && typeof col.product_count === "number" ? `${col.product_count} ${col.product_count === 1 ? "item" : "items"}` : "Shop now"}
                   <ArrowUpRight className="size-3.5 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none" aria-hidden />
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+/** Desktop spans (12-column grid, fixed row height) for each room, and whether the first is a large feature. */
+function roomPlan(count: number, index: number): string {
+  if (count === 1) return "lg:col-span-12 lg:row-span-2";
+  if (count === 2) return "lg:col-span-6 lg:row-span-2";
+  if (count === 3) return index === 0 ? "lg:col-span-6 lg:row-span-2" : "lg:col-span-6";
+  if (count === 4) return index === 0 ? "lg:col-span-6 lg:row-span-2" : index === 3 ? "lg:col-span-6" : "lg:col-span-3";
+  if (count === 5) return index === 0 ? "lg:col-span-6 lg:row-span-2" : "lg:col-span-3";
+  return "lg:col-span-4 lg:row-span-2";
+}
+
+/**
+ * Room layout: a gallery of large photo tiles. The first room is a big feature beside smaller ones (a plain even grid from six
+ * rooms up), with the room name over the picture, a thin frame that draws in on hover and an arrow that rises into view.
+ * Only `transform` and `opacity` animate, so it stays smooth.
+ */
+function RoomCollections({ title, showProductCount, collections, sfProps }: { title: string; showProductCount: boolean; columns: number; collections: NonNullable<RenderContext["collections"]>; sfProps: { "data-sf-section"?: string } }) {
+  const count = collections.length;
+  const feature = (i: number) => i === 0 && count >= 3 && count <= 5;
+  return (
+    <section className={cn(CONTAINER, SECTION_Y)} {...sfProps}>
+      <div className="mb-8 flex items-end justify-between gap-6 sm:mb-12">
+        <div className="min-w-0">
+          <p className="text-sm font-medium tracking-wide text-accent">Room by room</p>
+          <h2 className="mt-2 max-w-xl text-3xl font-semibold leading-[1.1] tracking-tight text-balance text-foreground sm:text-4xl lg:text-5xl">{title}</h2>
+        </div>
+        <Link href="/collections" className="group/all hidden shrink-0 items-center gap-2 border-b border-foreground/30 pb-1 text-sm font-medium text-foreground transition-colors duration-300 hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:inline-flex">
+          All rooms
+          <ArrowUpRight className="size-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5 motion-reduce:transition-none" aria-hidden />
+        </Link>
+      </div>
+      <ul className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-12 lg:auto-rows-[15rem] lg:gap-5 xl:auto-rows-[17rem]">
+        {collections.map((col, i) => {
+          const img = publicImageUrl(col.image_path);
+          const big = feature(i) || count <= 2;
+          return (
+            <li key={col.slug || col.id} className={cn("min-w-0", feature(i) && "col-span-2", roomPlan(count, i))}>
+              <Link href={`/collections/${col.slug}`} className="group relative isolate block aspect-[4/5] size-full transform-gpu overflow-hidden rounded-lg bg-muted outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 sm:aspect-[4/3] lg:aspect-auto">
+                {img ? <Image src={img} alt="" fill sizes={big ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"} className="object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.06] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" icon={false} deep />}
+                <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <span aria-hidden className="pointer-events-none absolute inset-3 rounded-md border border-white/0 transition-colors duration-500 group-hover:border-white/60 sm:inset-4 motion-reduce:transition-none" />
+                <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 text-white sm:p-6">
+                  <span className="min-w-0">
+                    {showProductCount && typeof col.product_count === "number" ? <span className="block text-xs tracking-wide text-white/80">{col.product_count} {col.product_count === 1 ? "piece" : "pieces"}</span> : null}
+                    <span className={cn("mt-0.5 block font-semibold leading-tight tracking-tight", big ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl")}>{col.name}</span>
+                  </span>
+                  <span aria-hidden className="flex size-10 shrink-0 translate-y-1 items-center justify-center rounded-full bg-white text-neutral-950 opacity-90 transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none sm:size-11">
+                    <ArrowUpRight className="size-5" />
+                  </span>
                 </span>
               </Link>
             </li>
