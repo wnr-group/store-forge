@@ -113,6 +113,12 @@ export function themeToStyle(theme: unknown): Record<string, string> {
 /** True when a store has a usable theme. Stores without one keep the markup of their built-in template. */
 export const hasTheme = (theme: unknown): boolean => Object.keys(themeToStyle(theme)).length > 0;
 
+/** Freshly (grocery) is the only catalogue theme with 12px button corners; its header gets the two-tier, search-first layout. */
+export function isGroceryTheme(theme: unknown): boolean {
+  const ts = themeSettingsOf(theme) as { buttons?: { radius?: number } } | null;
+  return ts?.buttons?.radius === 12;
+}
+
 /** Atelier is the only theme with square buttons (radius 0); sections use this to give it their editorial presentation. Fonts are not part of the test, so tenants can change them freely. */
 export function isEditorialTheme(theme: unknown): boolean {
   const ts = themeSettingsOf(theme) as { buttons?: { radius?: number } } | null;
