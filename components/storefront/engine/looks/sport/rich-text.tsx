@@ -1,5 +1,6 @@
 import { RichTextSection } from "../../sections/rich-text";
 import type { SectionProps } from "..";
+import { SearchBox, searchTermOf } from "../../search-box";
 import { SportHeroBanner } from "./hero-banner";
 
 /**
@@ -15,6 +16,13 @@ export function SportRichText(props: SectionProps) {
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview ? { "data-sf-section": "intro" } : undefined;
   if (!title) return <RichTextSection {...props} />;
-  const search = title.startsWith("Search");
-  return <SportHeroBanner eyebrow={search ? "Search" : "Catalogue"} title={title} text={note || undefined} crumbs={[{ label: "Home", href: "/" }, { label: title }]} sfProps={sfProps} />;
+  const term = searchTermOf(title);
+  const banner = <SportHeroBanner eyebrow={term !== null ? "Search" : "Catalogue"} title={title} text={note || undefined} crumbs={[{ label: "Home", href: "/" }, { label: title }]} sfProps={sfProps} />;
+  if (term === null) return banner;
+  return (
+    <>
+      {banner}
+      <SearchBox term={term} basePath={String(context.basePath ?? "")} className="mt-6" />
+    </>
+  );
 }

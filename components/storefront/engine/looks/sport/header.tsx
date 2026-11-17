@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { resolveImage } from "../../ui";
 import type { SectionProps } from "..";
 import { SportMotion } from "./motion";
+import { useSearchSubmit } from "../../use-search-submit";
 import { HEADLINE_FONT, SHELL } from "./ui";
 
 const FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
@@ -47,6 +48,13 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
   const [open, setOpen] = useState(false);
   const collections = context.collections ?? [];
 
+  // A new page (a search, a link in the menu) closes the phone menu: the header stays mounted while the route changes.
+  const [shownPath, setShownPath] = useState(pathname);
+  if (shownPath !== pathname) {
+    setShownPath(pathname);
+    setOpen(false);
+  }
+
   useEffect(() => {
     if (!mega && !open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -66,6 +74,8 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
   const iconBtn = cn("relative inline-flex size-11 items-center justify-center rounded-full text-primary transition-colors duration-200 hover:bg-[var(--surface)]", FOCUS);
   const countPill = "ml-1.5 inline-flex h-[26px] min-w-[26px] items-center justify-center rounded-full bg-[var(--surface)] px-2 text-[12px] font-semibold text-secondary";
 
+  const searchHref = context.basePath ? `${context.basePath}/search` : "/search";
+  const search = useSearchSubmit(searchHref);
   const megaImage = collections.find((c) => c.image_path);
   const browse = [
     { label: "Shop all", href: "/products" },
@@ -110,7 +120,7 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
         </nav>
 
         <div className="ml-auto flex items-center lg:ml-0 lg:gap-2">
-          <form action="/search" method="get" role="search" className="hidden h-11 w-[210px] items-center gap-3 rounded-full bg-[var(--surface)] px-4 text-primary focus-within:ring-2 focus-within:ring-primary/30 xl:flex 2xl:w-[260px]">
+          <form action={searchHref} method="get" role="search" onSubmit={search.onSubmit} aria-busy={search.pending} className={cn(search.pending && "opacity-70", "hidden h-11 w-[210px] items-center gap-3 rounded-full bg-[var(--surface)] px-4 text-primary focus-within:ring-2 focus-within:ring-primary/30 xl:flex 2xl:w-[260px]")}>
             <Search className="size-[19px] shrink-0 text-secondary" strokeWidth={1.75} aria-hidden />
             <input name="q" type="search" placeholder="Search products" aria-label="Search the store" className="min-w-0 flex-1 bg-transparent text-[15px] text-primary outline-none placeholder:text-muted-foreground" />
           </form>
@@ -172,7 +182,7 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
       {open ? (
         <nav id="storefront-menu" aria-label="Main" className="border-t border-border bg-background lg:hidden" onClick={() => setOpen(false)}>
           <div className={cn(SHELL, "flex flex-col py-3")}>
-            <form action="/search" method="get" role="search" onClick={(e) => e.stopPropagation()} className="mb-2 flex h-12 items-center gap-3 rounded-full bg-[var(--surface)] px-4">
+            <form action={searchHref} method="get" role="search" onSubmit={search.onSubmit} aria-busy={search.pending} onClick={(e) => e.stopPropagation()} className={cn(search.pending && "opacity-70", "mb-2 flex h-12 items-center gap-3 rounded-full bg-[var(--surface)] px-4")}>
               <Search className="size-[18px] text-secondary" aria-hidden />
               <input name="q" type="search" placeholder="Search products" aria-label="Search the store" className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground" />
             </form>

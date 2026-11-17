@@ -10,6 +10,7 @@ import { useOptionalWishlist } from "@/components/storefront/wishlist/wishlist-p
 import { cn } from "@/lib/utils";
 import { resolveImage } from "../../ui";
 import type { SectionProps } from "..";
+import { useSearchSubmit } from "../../use-search-submit";
 import { FOCUS, Logo, WRAP } from "./ui";
 
 type Item = { id: string; label: string; url: string; isButton: boolean };
@@ -43,6 +44,13 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
   const wishlist = useOptionalWishlist();
   const [open, setOpen] = useState(false);
 
+  // A new page (a search, a link in the menu) closes the phone menu: the header stays mounted while the route changes.
+  const [shownPath, setShownPath] = useState(pathname);
+  if (shownPath !== pathname) {
+    setShownPath(pathname);
+    setOpen(false);
+  }
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
@@ -53,6 +61,8 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
   const logoSrc = resolveImage(node.settings?.logoImage).url ?? resolveImage(store.logo_path).url;
+  const searchHref = context.basePath ? `${context.basePath}/search` : "/search";
+  const search = useSearchSubmit(searchHref);
   const cartCount = cart?.ready ? cart.count : 0;
   const wishCount = wishlist?.ready ? wishlist.count : 0;
 
@@ -83,7 +93,7 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
             <Link href="/" aria-label={store.name} title={store.name} className={cn("mr-1 shrink-0 rounded-md", FOCUS)}>
               {mark}
             </Link>
-            <form action="/search" method="get" role="search" className="mx-1 flex h-10 min-w-0 max-w-3xl flex-1 overflow-hidden rounded-lg bg-white ring-1 ring-white/20 focus-within:ring-2 focus-within:ring-accent">
+            <form action={searchHref} method="get" role="search" onSubmit={search.onSubmit} aria-busy={search.pending} className={cn(search.pending && "opacity-80", "mx-1 flex h-10 min-w-0 max-w-3xl flex-1 overflow-hidden rounded-lg bg-white ring-1 ring-white/20 focus-within:ring-2 focus-within:ring-accent")}>
               <input name="q" type="search" placeholder={`Search ${store.name}`} aria-label="Search the store" className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm text-primary outline-none placeholder:text-muted-foreground" />
               <button type="submit" aria-label="Search" className="grid w-12 shrink-0 place-items-center bg-accent text-accent-foreground transition-colors hover:brightness-95">
                 <Search className="size-[18px]" aria-hidden />

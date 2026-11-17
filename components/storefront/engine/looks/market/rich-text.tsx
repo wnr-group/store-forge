@@ -1,5 +1,6 @@
 import { RichTextSection } from "../../sections/rich-text";
 import type { SectionProps } from "..";
+import { SearchBox, searchTermOf } from "../../search-box";
 import { MarketPageHead } from "./page-head";
 
 /**
@@ -15,5 +16,15 @@ export function MarketRichText(props: SectionProps) {
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview ? { "data-sf-section": "intro" } : undefined;
   if (!title) return <RichTextSection {...props} />;
-  return <MarketPageHead title={title} text={note || undefined} crumbs={[{ label: "Home", href: "/" }, { label: title }]} sfProps={sfProps} />;
+  const term = searchTermOf(title);
+  const head = <MarketPageHead title={title} text={note || undefined} crumbs={[{ label: "Home", href: "/" }, { label: title }]} sfProps={sfProps} />;
+  if (term === null) return head;
+  return (
+    <>
+      {head}
+      <div className="mx-auto w-full max-w-[var(--sf-page-width,97.5rem)] px-3 pt-3 sm:px-4 lg:px-5">
+        <SearchBox term={term} basePath={String(context.basePath ?? "")} variant="market" contained={false} />
+      </div>
+    </>
+  );
 }

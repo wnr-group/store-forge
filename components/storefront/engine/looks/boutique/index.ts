@@ -7,6 +7,7 @@ import { BoutiqueHero } from "./hero";
 import { BoutiqueProductGrid } from "./product-grid";
 import { BoutiquePromotionalBanner } from "./promotional-banner";
 import { BoutiqueRelatedProducts } from "./related-products";
+import { BoutiqueRichText } from "./rich-text";
 import { BoutiqueTestimonials } from "./testimonials";
 
 /**
@@ -25,6 +26,7 @@ export const boutiqueLook: StorefrontLook = {
     "featured-collection": BoutiqueFeaturedCollection,
     "product-grid": BoutiqueProductGrid,
     "related-products": BoutiqueRelatedProducts,
+    "rich-text": BoutiqueRichText,
     "promotional-banner": BoutiquePromotionalBanner,
     testimonials: BoutiqueTestimonials,
   },

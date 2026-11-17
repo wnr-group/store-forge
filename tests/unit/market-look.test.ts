@@ -19,6 +19,9 @@ import { MarketFooter } from "@/components/storefront/engine/looks/market/footer
 import { MarketHeader } from "@/components/storefront/engine/looks/market/header";
 import { MarketHero } from "@/components/storefront/engine/looks/market/hero";
 import { MarketListing } from "@/components/storefront/engine/looks/market/listing";
+import { MarketRichText } from "@/components/storefront/engine/looks/market/rich-text";
+import { BoutiqueRichText } from "@/components/storefront/engine/looks/boutique/rich-text";
+import { SportRichText } from "@/components/storefront/engine/looks/sport/rich-text";
 import { MarketProductCard } from "@/components/storefront/engine/looks/market/product-card";
 import { discount } from "@/components/storefront/engine/looks/market/ui";
 import { lookOf, themeToStyle } from "@/lib/templates/engine/theme-style";
@@ -121,4 +124,20 @@ describe("market rendering", () => {
     expect(html).toContain("Men");
     expect(html.match(/Item \d/g)).toHaveLength(4);
   });
+});
+
+describe("search page", () => {
+  const intro = (title: string) => node("rich-text", {}, { title: { type: "heading", settings: { text: title }, blocks: {}, block_order: [] }, note: { type: "text", settings: { content: "2 results" }, blocks: {}, block_order: [] } });
+  for (const [name, Section] of [["market", MarketRichText], ["sport", SportRichText], ["boutique", BoutiqueRichText]] as const) {
+    it(`${name}: shows a search field holding the term, posting to the store's own /search`, () => {
+      const html = renderToStaticMarkup(createElement(Section, { node: intro("Search: linen"), context: ctx({ basePath: "/s/b" }), sectionId: "intro" }));
+      expect(html).toContain('action="/s/b/search"');
+      expect(html).toContain('name="q"');
+      expect(html).toContain('value="linen"');
+    });
+    it(`${name}: leaves other rich text without a search field`, () => {
+      const html = renderToStaticMarkup(createElement(Section, { node: intro("All products"), context: ctx(), sectionId: "intro" }));
+      expect(html).not.toContain('name="q"');
+    });
+  }
 });

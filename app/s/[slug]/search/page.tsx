@@ -20,7 +20,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
   const results = searchProducts(store.products, term);
   const frame = await getPublishedFrame(slug);
   const note = !term
-    ? "Add ?q=shirt to the address to search for a product."
+    ? "Type a product name in the box above to search this store."
     : results.length === 0
       ? `No products match "${term}".`
       : `${results.length} result${results.length === 1 ? "" : "s"} for "${term}".`;
