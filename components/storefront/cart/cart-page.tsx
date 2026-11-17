@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatBagPrice } from "@/lib/cart/format";
@@ -29,20 +29,18 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
   const ready = cart?.ready ?? false;
   const hasLines = (cart?.lines.length ?? 0) > 0;
   const revalidate = cart?.revalidate;
+  const checked = useRef(false);
   useEffect(() => {
-    if (!ready || !hasLines || !revalidate || isPreview) return;
-    let cancelled = false;
+    // Once per visit, as soon as the saved bag has been read.
+    if (checked.current || !ready || !hasLines || !revalidate || isPreview) return;
+    checked.current = true;
     void revalidate().then((result) => {
-      if (cancelled || !result) return;
+      if (!result) return;
       const parts: string[] = [];
       if (result.removed.length > 0) parts.push(`${result.removed.join(", ")} ${result.removed.length === 1 ? "is" : "are"} no longer available and ${result.removed.length === 1 ? "was" : "were"} removed from your bag.`);
       if (result.priceChanged.length > 0) parts.push(`The price of ${result.priceChanged.join(", ")} has changed.`);
       setNotice(parts.length > 0 ? parts.join(" ") : null);
     });
-    return () => {
-      cancelled = true;
-    };
-    // Re-check once when the saved bag has been read, not on every quantity change.
   }, [ready, hasLines, revalidate, isPreview]);
 
   if (!cart) return null;

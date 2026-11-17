@@ -22,6 +22,7 @@ import { PromotionalBannerSection } from "./promotional-banner";
 import { LogoListSection } from "./logo-list";
 import { lookSection } from "../looks";
 import { CartPageSection } from "@/components/storefront/cart/cart-page";
+import { WishlistPageSection } from "@/components/storefront/wishlist/wishlist-page";
 
 export const SECTION_COMPONENTS: Record<
   string,
@@ -47,6 +48,8 @@ export const SECTION_COMPONENTS: Record<
   "logo-list": LogoListSection,
   /** The bag page. Only the generated cart document uses it; it is not an editor section. */
   cart: CartPageSection,
+  /** The wishlist page. Only the generated wishlist document uses it; it is not an editor section. */
+  wishlist: WishlistPageSection,
 };
 
 export function renderSectionComponent(

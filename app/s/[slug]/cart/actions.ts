@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { getPublicProductApi } from "@/lib/api/endpoints/public-api";
 import { AppError } from "@/lib/errors";
-import { MAX_LINES, type LineCheck } from "@/lib/cart/cart";
+import { MAX_LINES, type AddInput, type LineCheck } from "@/lib/cart/cart";
 
 /**
  * Re-checks guest cart lines against the store's LIVE public products, so a price change, a sold-out product or a deleted
@@ -86,4 +86,46 @@ export async function checkCartAction(input: unknown): Promise<LineCheck[]> {
     }
   }
   return checks;
+}
+
+const quickAddSchema = z.object({
+  storeSlug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/),
+  productSlug: z.string().min(1).max(200),
+});
+
+export type QuickAddResult =
+  | { status: "ok"; item: AddInput }
+  | { status: "options" }
+  | { status: "unavailable" }
+  | { status: "gone" }
+  | { status: "error" };
+
+/**
+ * "Add to bag" from a product card. The card only knows what the store list showed, so this reads the live public product:
+ * the price added is the current one, a sold-out or deleted product is refused, and a product with variants is sent to its
+ * page (a variant has to be chosen there). Public data only, under the one store slug it is given.
+ */
+export async function quickAddAction(input: unknown): Promise<QuickAddResult> {
+  const parsed = quickAddSchema.safeParse(input);
+  if (!parsed.success) return { status: "error" };
+  const { storeSlug, productSlug } = parsed.data;
+  try {
+    const data = await getPublicProductApi(storeSlug, productSlug);
+    if (data.product.available === false) return { status: "unavailable" };
+    if (data.variants.length > 0) return { status: "options" };
+    return {
+      status: "ok",
+      item: {
+        productSlug,
+        variantId: null,
+        name: data.product.name,
+        variantTitle: null,
+        imagePath: data.images[0]?.path ?? null,
+        unitPriceMinor: data.product.price_minor,
+        compareAtMinor: data.product.compare_at_price_minor,
+      },
+    };
+  } catch (error) {
+    return error instanceof AppError && error.code === "NOT_FOUND" ? { status: "gone" } : { status: "error" };
+  }
 }

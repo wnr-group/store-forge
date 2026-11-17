@@ -25,6 +25,8 @@ export type CartApi = {
   revalidate: () => Promise<{ removed: string[]; priceChanged: string[] } | null>;
   toast: CartToast | null;
   dismissToast: () => void;
+  /** Shows a message in the bottom-left toast (used by actions that are not an add, such as "Sold out"). */
+  notify: (message: string) => void;
 };
 
 const CartContext = createContext<CartApi | null>(null);
@@ -47,10 +49,9 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
     () => false,
   );
   const cart: Cart = useMemo(() => parseSnapshot(raw), [raw]);
-  const cartRef = useRef(cart);
-  useEffect(() => {
-    cartRef.current = cart;
-  }, [cart]);
+  // Always the saved bag as it is NOW (read from storage), never a copy kept in a ref: an effect in a child component (the bag
+  // page's "check on open") can run before this provider's own effects, and a stale copy would see an empty bag.
+  const current = useCallback((): Cart => parseSnapshot(store.read()), [store]);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [toast, setToast] = useState<CartToast | null>(null);
@@ -64,7 +65,6 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
 
   const commit = useCallback(
     (next: Cart) => {
-      cartRef.current = next;
       store.write(next);
     },
     [store],
@@ -82,7 +82,7 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
       openDrawer: () => setDrawerOpen(true),
       closeDrawer: () => setDrawerOpen(false),
       add: (input, options) => {
-        const result = addLine(cartRef.current, input);
+        const result = addLine(current(), input);
         if (!result.ok) {
           setToast({ id: ++toastId.current, message: result.reason === "full" ? "Your bag is full" : "This item could not be added" });
           return false;
@@ -93,26 +93,28 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
         if (options?.openDrawer !== false) setDrawerOpen(true);
         return true;
       },
-      setQuantity: (key, quantity) => commit(setQuantity(cartRef.current, key, quantity)),
-      remove: (key) => commit(removeLine(cartRef.current, key)),
+      setQuantity: (key, quantity) => commit(setQuantity(current(), key, quantity)),
+      remove: (key) => commit(removeLine(current(), key)),
       revalidate: async () => {
-        const current = cartRef.current;
-        if (current.lines.length === 0) return { removed: [], priceChanged: [] };
+        const before = current();
+        if (before.lines.length === 0) return { removed: [], priceChanged: [] };
         let checks: LineCheck[];
         try {
-          checks = await checkCartAction({ storeSlug, lines: current.lines.map((l) => ({ productSlug: l.productSlug, variantId: l.variantId })) });
+          checks = await checkCartAction({ storeSlug, lines: before.lines.map((l) => ({ productSlug: l.productSlug, variantId: l.variantId })) });
         } catch {
           return null;
         }
         // Lines may have changed while the check ran, so the result is applied to the cart as it is now.
-        const result = reconcile(cartRef.current, checks);
-        if (JSON.stringify(result.cart) !== JSON.stringify(cartRef.current)) commit(result.cart);
+        const latest = current();
+        const result = reconcile(latest, checks);
+        if (JSON.stringify(result.cart) !== JSON.stringify(latest)) commit(result.cart);
         return { removed: result.removed, priceChanged: result.priceChanged };
       },
       toast,
       dismissToast: () => setToast(null),
+      notify: (message) => setToast({ id: ++toastId.current, message }),
     }),
-    [storeSlug, currency, cart, ready, drawerOpen, toast, commit],
+    [storeSlug, currency, cart, ready, drawerOpen, toast, commit, current],
   );
 
   return <CartContext.Provider value={api}>{children}</CartContext.Provider>;

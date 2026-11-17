@@ -42,11 +42,23 @@ A guest cart, kept in the browser per store (`localStorage` key `sf-cart:v1:<sto
 
 The bag page and drawer were matched against `05-cart-drawer.jpg` and `06-cart-page.jpg` of the Karthika reference.
 
+## Wishlist, hover "Add to bag", filters, reviews
+
+- **Wishlist** (`lib/wishlist`, `components/storefront/wishlist`, `/wishlist`): a heart on every product card and a heart with a
+  count in the header. Kept in the browser per store (`sf-wishlist:v1:<store slug>`); opening the page refreshes the saved
+  products from the store's live data and drops deleted ones.
+- **Add to bag on hover** (`looks/boutique/card-actions.tsx`): slides up on hover or keyboard focus, always shown on touch
+  screens. It reads the live product (`quickAddAction`), so the price added is current; a product with variants opens its page,
+  a sold-out one is refused.
+- **Filters** (`looks/boutique/sortable-grid.tsx`): collection tabs (links, current one highlighted), price bands worked out
+  from the list (`lib/storefront/price-bands.ts`), in-stock only, and sorting.
+- **Reviews** (`looks/boutique/testimonials.tsx`): cards with stars, quote, name, place and product, built from the testimonials the
+  merchant adds (new `rating` setting; place is "Author role", product is "Company / Location"). With none, shoppers see nothing.
+
 Not included, and why:
 
 - **Checkout and payment**: StoreForge has no order or payment API yet (see `docs/migration-status.md`, "Not in the product").
   The checkout button keeps its place but is disabled, with a visible note.
-- **Move to wishlist, wishlist and account icons, free-shipping progress strip**: no wishlist, customer account or shipping
-  model exists.
-- **Category/colour/price filters, pagination, mega menu, rotating announcements, wishlist, second-image hover**:
+- **Move to wishlist (from the bag), customer account, free-shipping progress strip**: no customer account or shipping model exists.
+- **Category/colour/price filters, pagination, mega menu, rotating announcements, second-image hover**:
   the engine has no data or settings for them yet.

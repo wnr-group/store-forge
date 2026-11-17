@@ -14,6 +14,7 @@ import { themeToStyle } from "@/lib/templates/engine/theme-style";
 import { lookHasCart } from "./looks";
 import { CartProvider } from "@/components/storefront/cart/cart-provider";
 import { CartChrome } from "@/components/storefront/cart/cart-drawer";
+import { WishlistProvider } from "@/components/storefront/wishlist/wishlist-provider";
 
 /**
  * Resolves data-bound settings against store/resource context (AC-REN-016).
@@ -141,7 +142,9 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
     cartEnabled ? (
       // Editor and theme preview keep their cart in memory only, so they never touch a shopper's saved bag.
       <CartProvider storeSlug={store.slug} currency={typeof store.currency === "string" ? store.currency : "INR"} persist={activeMode === "public"}>
-        {node}
+        <WishlistProvider storeSlug={store.slug} persist={activeMode === "public"}>
+          {node}
+        </WishlistProvider>
       </CartProvider>
     ) : (
       node

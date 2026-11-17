@@ -1,9 +1,14 @@
 import { cn } from "@/lib/utils";
 
 /** The small, tracked, uppercase label that sits above Boutique headings. */
-export function Eyebrow({ children, tone = "light", className }: { children: React.ReactNode; tone?: "light" | "dark"; className?: string }) {
+export function Eyebrow({ children, tone = "light", dot = false, className }: { children: React.ReactNode; tone?: "light" | "dark"; dot?: boolean; className?: string }) {
   if (!children) return null;
-  return <p className={cn("text-[11px] font-medium uppercase tracking-[0.2em]", tone === "dark" ? "text-accent" : "text-foreground/70", className)}>{children}</p>;
+  return (
+    <p className={cn("flex items-center text-[11px] font-medium uppercase tracking-[0.2em]", tone === "dark" ? "text-accent" : "text-foreground/70", className)}>
+      {dot ? <span aria-hidden className="mr-2.5 size-1.5 shrink-0 rounded-full bg-accent" /> : null}
+      {children}
+    </p>
+  );
 }
 
 /** Display-face heading used by every Boutique section. */

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { useOptionalWishlist } from "@/components/storefront/wishlist/wishlist-provider";
 import { useSignedIn } from "@/lib/auth/use-signed-in";
 import { useOptionalCart } from "@/components/storefront/cart/cart-provider";
 import { StoreAccessLink } from "@/components/storefront/store-access-link";
@@ -16,7 +17,7 @@ import { initialsOf } from "./initials";
 
 const FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary";
 const NAV_LINKS =
-  "[&_a]:relative [&_a]:py-1.5 [&_a]:text-[11px] [&_a]:font-normal [&_a]:uppercase [&_a]:tracking-[0.2em] [&_a]:text-foreground/80 [&_a]:no-underline [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-foreground [&_a]:after:absolute [&_a]:after:inset-x-0 [&_a]:after:bottom-0 [&_a]:after:h-px [&_a]:after:origin-left [&_a]:after:scale-x-0 [&_a]:after:bg-current [&_a]:after:transition-transform [&_a]:after:duration-300 [&_a:hover]:after:scale-x-100 motion-reduce:[&_a]:after:transition-none";
+  "[&_a]:relative [&_a]:py-1.5 [&_a]:text-[11px] [&_a]:font-normal [&_a]:uppercase [&_a]:tracking-[0.2em] [&_a]:text-foreground/80 [&_a]:no-underline [&_a:hover]:no-underline [&_a:focus-visible]:no-underline [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-foreground [&_a]:after:absolute [&_a]:after:inset-x-0 [&_a]:after:bottom-0 [&_a]:after:h-px [&_a]:after:origin-left [&_a]:after:scale-x-0 [&_a]:after:bg-current [&_a]:after:transition-transform [&_a]:after:duration-300 [&_a:hover]:after:scale-x-100 motion-reduce:[&_a]:after:transition-none";
 
 /**
  * Boutique header: monogram and name on the left, the menu centred in small spaced capitals, search and sign-in on the
@@ -32,6 +33,7 @@ export function BoutiqueHeader({ node, context, sectionId }: SectionProps) {
   const blockOrder = node.block_order ?? Object.keys(blocks);
   const [open, setOpen] = useState(false);
   const cart = useOptionalCart();
+  const wishlist = useOptionalWishlist();
   const signedIn = useSignedIn() === true;
 
   useEffect(() => {
@@ -76,6 +78,16 @@ export function BoutiqueHeader({ node, context, sectionId }: SectionProps) {
           <Link href={signedIn ? "/dashboard" : "/login"} prefetch={false} aria-label={signedIn ? "Dashboard" : "Store login"} className={cn(iconBtn, "hidden md:inline-flex")}>
             <User className="size-[19px]" strokeWidth={1.4} aria-hidden />
           </Link>
+          {wishlist ? (
+            <Link href="/wishlist" prefetch={false} aria-label={wishlist.ready && wishlist.count > 0 ? `Wishlist, ${wishlist.count} ${wishlist.count === 1 ? "item" : "items"}` : "Wishlist"} className={cn(iconBtn, "relative")}>
+              <Heart className="size-[19px]" strokeWidth={1.4} aria-hidden />
+              {wishlist.ready && wishlist.count > 0 ? (
+                <span aria-hidden className="absolute right-1 top-1 flex size-[18px] items-center justify-center rounded-full bg-primary text-[9px] font-medium leading-none text-primary-foreground">
+                  {wishlist.count > 99 ? "99+" : wishlist.count}
+                </span>
+              ) : null}
+            </Link>
+          ) : null}
           {cart ? (
             <button type="button" onClick={cart.openDrawer} aria-label={cart.ready && cart.count > 0 ? `Bag, ${cart.count} ${cart.count === 1 ? "item" : "items"}` : "Bag"} className={cn(iconBtn, "relative")}>
               <ShoppingBag className="size-[19px]" strokeWidth={1.4} aria-hidden />

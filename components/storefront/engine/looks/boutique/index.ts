@@ -7,6 +7,7 @@ import { BoutiqueHero } from "./hero";
 import { BoutiqueProductGrid } from "./product-grid";
 import { BoutiquePromotionalBanner } from "./promotional-banner";
 import { BoutiqueRelatedProducts } from "./related-products";
+import { BoutiqueTestimonials } from "./testimonials";
 
 /**
  * The Boutique look (the Karthika theme): ivory page, forest-green primary, display serif headings, pill buttons, 3:4
@@ -25,5 +26,6 @@ export const boutiqueLook: StorefrontLook = {
     "product-grid": BoutiqueProductGrid,
     "related-products": BoutiqueRelatedProducts,
     "promotional-banner": BoutiquePromotionalBanner,
+    testimonials: BoutiqueTestimonials,
   },
 };

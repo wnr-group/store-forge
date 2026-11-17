@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { formatMoney } from "@/lib/money";
+import { formatBagPrice } from "@/lib/cart/format";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
 import { ImagePlaceholder, type CardProduct } from "../../ui";
+import { CardActions } from "./card-actions";
 
 /** Whole-number discount for a compare-at price, or null when the product is not reduced. */
 export function percentOff(price: number, compareAt?: number | null): number | null {
@@ -12,7 +13,7 @@ export function percentOff(price: number, compareAt?: number | null): number | n
   return pct > 0 ? pct : null;
 }
 
-const BADGE = "absolute top-3 left-3 bg-background/95 px-2 py-1 text-[9px] font-medium uppercase leading-none tracking-[0.18em] text-foreground";
+const BADGE = "absolute left-3 top-3 bg-background/95 px-2 py-1 text-[9px] font-medium uppercase leading-none tracking-[0.18em] text-foreground";
 
 /**
  * Boutique product card: a 3:4 picture with square corners and a hairline border, a small badge, the name in the display
@@ -39,10 +40,10 @@ export function BoutiqueProductCard({ product, currency, href, tone = "light", p
         </h3>
         {product.short_description ? <p className={cn("line-clamp-1 text-[13px]", dark ? "text-white/65" : "text-muted-foreground")}>{product.short_description}</p> : null}
         <p className="flex flex-wrap items-baseline gap-x-2 text-[13px]">
-          <span className={dark ? "text-white" : "text-foreground"}>{formatMoney(product.price_minor, currency)}</span>
+          <span className={dark ? "text-white" : "text-foreground"}>{formatBagPrice(product.price_minor, currency)}</span>
           {off ? (
             <>
-              <span className={cn("line-through", dark ? "text-white/55" : "text-muted-foreground")}>{formatMoney(product.compare_at_price_minor!, currency)}</span>
+              <span className={cn("line-through", dark ? "text-white/55" : "text-muted-foreground")}>{formatBagPrice(product.compare_at_price_minor!, currency)}</span>
               <span className={dark ? "text-accent" : "text-primary"}>{off}% off</span>
             </>
           ) : null}
@@ -51,11 +52,16 @@ export function BoutiqueProductCard({ product, currency, href, tone = "light", p
     </>
   );
   const focus = dark ? "focus-visible:outline-white" : "focus-visible:outline-primary";
-  return href ? (
-    <Link href={href} className={cn("group block outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4", focus)}>
-      {body}
-    </Link>
-  ) : (
-    <div className="group">{body}</div>
+  return (
+    <div className="group relative">
+      {href ? (
+        <Link href={href} className={cn("block outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4", focus)}>
+          {body}
+        </Link>
+      ) : (
+        body
+      )}
+      <CardActions product={product} href={href ?? null} />
+    </div>
   );
 }

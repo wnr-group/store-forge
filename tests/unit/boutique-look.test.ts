@@ -11,6 +11,8 @@ vi.mock("next/link", async () => {
   return { default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => h("a", { href, ...rest }, children) };
 });
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => {} }) }));
+
 import { LOOKS, lookSection, type StorefrontLook } from "@/components/storefront/engine/looks";
 import { BoutiqueHero } from "@/components/storefront/engine/looks/boutique/hero";
 import { initialsOf } from "@/components/storefront/engine/looks/boutique/initials";

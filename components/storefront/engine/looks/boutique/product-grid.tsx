@@ -8,7 +8,7 @@ import { SortableGrid } from "./sortable-grid";
 /** Boutique product listing: every product of the store, or of the collection being shown, with sorting. */
 export function BoutiqueProductGrid({ node, context, sectionId }: SectionProps) {
   const store = context.store;
-  const collection = context.resource as { name?: string; products?: CardProduct[] } | undefined;
+  const collection = context.resource as { name?: string; slug?: string; products?: CardProduct[] } | undefined;
   const products = collection?.products ?? (store.products as CardProduct[] | undefined) ?? [];
   const columns = (node.settings?.columns as number) ?? 4;
   const isPreview = context.mode === "preview" || context.mode === "editor";
@@ -26,7 +26,7 @@ export function BoutiqueProductGrid({ node, context, sectionId }: SectionProps) 
       {products.length === 0 ? (
         <EmptyProducts mode={context.mode} title={collection ? "Nothing in this collection yet" : undefined} />
       ) : (
-        <SortableGrid products={products} currency={store.currency ?? "INR"} columns={columns} basePath={String(context.basePath ?? "")} linked={linked} />
+        <SortableGrid products={products} currency={store.currency ?? "INR"} columns={columns} basePath={String(context.basePath ?? "")} linked={linked} collections={(context.collections ?? []).map((c) => ({ slug: c.slug, name: c.name }))} activeCollection={collection ? ((collection as { slug?: string }).slug ?? null) : null} />
       )}
     </section>
   );

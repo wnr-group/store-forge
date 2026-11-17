@@ -69,3 +69,8 @@ export function searchProducts<T extends { name: string; short_description?: str
 export function cartDocument(): TemplateDocument {
   return doc([["cart", node("cart", {})]]);
 }
+
+/** The wishlist page: one wishlist section. The saved products live in the shopper's browser. */
+export function wishlistDocument(): TemplateDocument {
+  return doc([["wishlist", node("wishlist", {})]]);
+}
