@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { TemplateRenderer } from "@/components/storefront/engine/renderer";
 import type { RenderMode } from "@/components/storefront/engine/types";
 import type { TemplateDocument } from "@/lib/templates/document";
@@ -29,6 +30,59 @@ export type ThemeFrameProps = {
   className?: string;
 };
 
+const BLANK_PAGE = "<!doctype html><html><head></head><body></body></html>";
+
+/**
+ * A device screen: an iframe exactly `width` CSS pixels wide, with the dashboard's own stylesheets copied in, and `children`
+ * rendered into it through a portal (so they keep the dashboard's React context). Tailwind's responsive rules (sm:, lg:, ...)
+ * follow the width of the window they run in, so only inside a real window of the device's width does a "mobile" preview lay
+ * out as the mobile site. The iframe is the device viewport: it scrolls inside, and its scrollbar is hidden so the page gets
+ * the full width it is meant to have.
+ */
+function DeviceScreen({ width, height, scale, left, children }: { width: number; height: number; scale: number; left: number; children: React.ReactNode }) {
+  const [mount, setMount] = useState<HTMLElement | null>(null);
+  const [shown, setShown] = useState(false);
+
+  const setup = (event: React.SyntheticEvent<HTMLIFrameElement>) => {
+    const doc = event.currentTarget.contentDocument;
+    if (!doc || doc.getElementById("sf-screen-root")) return;
+    const meta = doc.createElement("meta");
+    meta.name = "viewport";
+    meta.content = "width=device-width, initial-scale=1";
+    doc.head.appendChild(meta);
+    const hide = doc.createElement("style");
+    hide.textContent = "html{scrollbar-width:none}::-webkit-scrollbar{display:none}body{margin:0}";
+    doc.head.appendChild(hide);
+    const loaded: Promise<void>[] = [];
+    window.document.head.querySelectorAll("link[rel='stylesheet'], style").forEach((node) => {
+      const copy = node.cloneNode(true);
+      if (node instanceof HTMLLinkElement) loaded.push(new Promise<void>((resolve) => { copy.addEventListener("load", () => resolve()); copy.addEventListener("error", () => resolve()); }));
+      doc.head.appendChild(copy);
+    });
+    doc.documentElement.className = window.document.documentElement.className;
+    doc.body.className = window.document.body.className;
+    const root = doc.createElement("div");
+    root.id = "sf-screen-root";
+    doc.body.appendChild(root);
+    setMount(root);
+    // Shown once the styles are in (or after a moment), so the page never flashes unstyled.
+    void Promise.race([Promise.all(loaded), new Promise((resolve) => window.setTimeout(resolve, 2500))]).then(() => setShown(true));
+  };
+
+  return (
+    <>
+      <iframe
+        title="Theme preview"
+        srcDoc={BLANK_PAGE}
+        onLoad={setup}
+        className="block origin-top-left border-0 bg-white"
+        style={{ width, height, transform: `scale(${scale})`, marginLeft: left, opacity: shown ? 1 : 0, transition: "opacity 150ms" }}
+      />
+      {mount ? createPortal(children, mount) : null}
+    </>
+  );
+}
+
 /**
  * The page exactly as shoppers get it: the same `TemplateRenderer`, laid out at a fixed device width and scaled to the
  * space available. Nothing here is a mock-up, so what the merchant sees is what the storefront renders. Links and forms
@@ -36,23 +90,24 @@ export type ThemeFrameProps = {
  */
 export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, selectedSectionId, resource, className }: ThemeFrameProps) {
   const outer = useRef<HTMLDivElement>(null);
-  const inner = useRef<HTMLDivElement>(null);
   const [available, setAvailable] = useState(0);
-  const [contentHeight, setContentHeight] = useState(0);
+  const [viewport, setViewport] = useState(0);
 
   useEffect(() => {
     const o = outer.current;
-    const i = inner.current;
-    if (!o || !i) return;
+    if (!o) return;
     const measure = () => {
       setAvailable(o.clientWidth);
-      setContentHeight(i.scrollHeight);
+      setViewport(window.innerHeight);
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(o);
-    observer.observe(i);
-    return () => observer.disconnect();
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
   // The storefront is rebuilt only when what it shows changes. Measuring (every image that loads changes the height) re-renders
@@ -82,7 +137,6 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
 
   const width = DEVICE_WIDTH[device];
   const scale = available > 0 ? Math.min(1, available / width) : 1;
-  const shownHeight = cropHeight ? Math.min(contentHeight * scale, cropHeight) : contentHeight * scale;
   const editing = mode === "editor";
 
   const handleClick = (event: React.MouseEvent) => {
@@ -96,16 +150,18 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock });
   };
 
-  return (
-    // A cropped frame (a gallery thumbnail) has its height from the start, so the card around it never grows or jumps as the page inside
-    // is measured. A full frame follows the page height. Until the width is known the page would show at full size for a moment,
-    // so it stays invisible until then.
-    <div ref={outer} className={cn("relative w-full overflow-hidden", className)} style={{ height: cropHeight ?? (shownHeight || undefined), minHeight: cropHeight ?? 80 }}>
+  // Every frame but a gallery thumbnail is a device screen: its own window of the device's width, so the theme answers with its
+  // real tablet or phone layout. Thumbnails stay cheap and in the page (they are a fixed crop of the top of the desktop page).
+  const isolated = !cropHeight;
+  const screenHeight = Math.min(1100, Math.max(480, viewport - 210));
+  const left = device === "desktop" || scale < 1 ? 0 : Math.max(0, (available - width) / 2);
+
+  const body = (
+    <>
       <div
-        ref={inner}
         onClickCapture={handleClick}
-        className="sf-frame origin-top-left"
-        style={{ width, visibility: available > 0 ? "visible" : "hidden", transform: `scale(${scale})`, marginLeft: device === "desktop" || scale < 1 ? 0 : Math.max(0, (available - width) / 2) }}
+        className={cn("sf-frame", !isolated && "origin-top-left")}
+        style={isolated ? undefined : { width, visibility: available > 0 ? "visible" : "hidden", transform: `scale(${scale})`, marginLeft: left }}
         data-static={cropHeight ? "" : undefined}
         data-editing={editing || undefined}
         data-selected={selectedSectionId ?? undefined}
@@ -119,6 +175,26 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
         <style>{`.sf-frame [data-sf-section="${CSS.escape(selectedSectionId)}"]{outline:2px solid var(--editor-accent,#2563eb);outline-offset:-2px}`}</style>
       ) : null}
       {editing ? <style>{`.sf-frame[data-editing] [data-sf-section]{cursor:pointer}.sf-frame[data-editing] [data-sf-section]:hover{outline:1px dashed #2563eb;outline-offset:-1px}`}</style> : null}
+    </>
+  );
+
+  if (isolated) {
+    return (
+      <div ref={outer} className={cn("relative w-full overflow-hidden", className)} style={{ height: viewport > 0 ? screenHeight : undefined, minHeight: 480 }}>
+        {available > 0 ? (
+          <DeviceScreen width={width} height={screenHeight / scale} scale={scale} left={left}>
+            {body}
+          </DeviceScreen>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    // A cropped frame (a gallery thumbnail) has its height from the start, so the card around it never grows or jumps as the page inside
+    // is measured. Until the width is known the page would show at full size for a moment, so it stays invisible until then.
+    <div ref={outer} className={cn("relative w-full overflow-hidden", className)} style={{ height: cropHeight, minHeight: cropHeight }}>
+      {body}
     </div>
   );
 }
