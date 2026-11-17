@@ -6,6 +6,8 @@ import type { RenderContext } from "../types";
 import type { CardProduct } from "../ui";
 import { boutiqueLook } from "./boutique";
 import { BoutiqueProductCard } from "./boutique/product-card";
+import { marketLook } from "./market";
+import { MarketProductCard } from "./market/product-card";
 import { sportLook } from "./sport";
 import { SportProductCard } from "./sport/product-card";
 
@@ -33,6 +35,7 @@ export const LOOKS: Record<LookId, StorefrontLook> = {
   standard: { id: "standard", sections: {} },
   boutique: { ...boutiqueLook, card: BoutiqueProductCard },
   sport: { ...sportLook, card: SportProductCard },
+  market: { ...marketLook, card: MarketProductCard },
 };
 
 /** The look's own component for a section type, if the theme's look draws that section itself. */

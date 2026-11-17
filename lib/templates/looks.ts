@@ -9,7 +9,7 @@
  * read it. Adding a look = one entry here + one entry in `components/storefront/engine/looks/index.ts`
  * (a unit test keeps the two lists in sync).
  */
-export const LOOK_IDS = ["standard", "boutique", "sport"] as const;
+export const LOOK_IDS = ["standard", "boutique", "sport", "market"] as const;
 export type LookId = (typeof LOOK_IDS)[number];
 
 /** `standard` draws every section with the engine's own components (and its legacy per-theme variants). */
@@ -19,13 +19,14 @@ export const LOOK_LABELS: Record<LookId, string> = {
   standard: "Standard",
   boutique: "Boutique (Karthika)",
   sport: "Sport (Stride)",
+  market: "Market (Marketplace)",
 };
 
 /**
  * Which theme colour tints the soft panels and image wells (`--surface`, `--tint`). `auto` keeps the engine's rule (the primary
  * when it is colourful, otherwise the accent); Sport uses the secondary so its bands are a soft lavender, not yellow.
  */
-export const LOOK_TINT: Record<LookId, "auto" | "secondary"> = { standard: "auto", boutique: "auto", sport: "secondary" };
+export const LOOK_TINT: Record<LookId, "auto" | "secondary"> = { standard: "auto", boutique: "auto", sport: "secondary", market: "secondary" };
 
 export function isLookId(value: unknown): value is LookId {
   return typeof value === "string" && (LOOK_IDS as readonly string[]).includes(value);
