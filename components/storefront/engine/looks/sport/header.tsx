@@ -142,7 +142,7 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
         <div className="absolute inset-x-0 top-full hidden border-t border-border bg-[var(--surface)] shadow-[0_30px_60px_-30px_rgba(13,16,51,0.25)] lg:block" onMouseEnter={() => setMega(true)}>
           <div className={cn(SHELL, "grid grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,0.7fr))_220px] gap-10 py-12")}>
             <div className="pr-6">
-              <p className="text-[3rem] font-extrabold uppercase leading-none tracking-[-0.02em] text-primary" style={HEADLINE_FONT}>
+              <p className="text-[2.25rem] font-extrabold uppercase leading-none tracking-[-0.02em] text-primary" style={HEADLINE_FONT}>
                 Shop
               </p>
               {store.description ? <p className="mt-5 line-clamp-4 max-w-sm text-[17px] leading-8 text-muted-foreground">{store.description}</p> : null}

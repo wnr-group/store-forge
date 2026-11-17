@@ -59,7 +59,7 @@ export function SportImageWithText({ node, context, sectionId }: SectionProps) {
               </>
             ) : row.kind === "stat" ? (
               <>
-                <span className="w-28 shrink-0 text-[2.25rem] font-extrabold leading-none tracking-[-0.02em] text-primary md:w-44" style={HEADLINE_FONT}>
+                <span className="w-28 shrink-0 text-[1.75rem] font-extrabold leading-none tracking-[-0.02em] text-primary md:w-44" style={HEADLINE_FONT}>
                   {row.value}
                 </span>
                 <span className="text-[17px] text-foreground/80">{row.text}</span>
@@ -99,7 +99,7 @@ export function SportImageWithText({ node, context, sectionId }: SectionProps) {
     flush();
     if (b.type === "heading") {
       out.push(
-        <h2 key={id} className={cn("text-balance font-extrabold tracking-[-0.03em] text-primary", upper && "uppercase", panel ? "text-[2.75rem] md:text-[4.25rem] xl:text-[5.5rem]" : upper ? "text-[2.5rem] md:text-[3.5rem] xl:text-[4.5rem]" : "text-[2.5rem] md:text-[3.5rem] xl:text-[4.25rem]", upper ? "leading-[0.98]" : "leading-[1.05]")} style={HEADLINE_FONT}>
+        <h2 key={id} className={cn("text-balance font-extrabold tracking-[-0.03em] text-primary", upper && "uppercase", panel ? "text-[2.25rem] md:text-[3rem] xl:text-[4rem]" : upper ? "text-[2rem] md:text-[2.5rem] xl:text-[3.25rem]" : "text-[2rem] md:text-[2.5rem] xl:text-[3rem]", upper ? "leading-[0.98]" : "leading-[1.05]")} style={HEADLINE_FONT}>
           <Highlighted text={String(st.text ?? "")} className="text-secondary" />
         </h2>,
       );

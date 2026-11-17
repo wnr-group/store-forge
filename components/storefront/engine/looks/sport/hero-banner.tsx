@@ -48,7 +48,7 @@ export function SportHeroBanner({ eyebrow, title, text, imageUrl, crumbs, sfProp
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="max-w-3xl text-balance text-[2.75rem] font-extrabold uppercase leading-[0.98] tracking-[-0.03em] md:text-[4.5rem] xl:text-[5.5rem]" style={HEADLINE_FONT}>
+        <h1 className="max-w-3xl text-balance text-[2.25rem] font-extrabold uppercase leading-[1] tracking-[-0.03em] md:text-[3.25rem] xl:text-[4rem]" style={HEADLINE_FONT}>
           <TwoTone title={title} />
         </h1>
         {text ? <p className="mt-5 max-w-xl text-[16px] leading-7 text-white/80 md:text-[18px]">{text}</p> : null}

@@ -66,7 +66,7 @@ export function SportCollectionList({ node, context, sectionId }: SectionProps) 
                       <div className="relative aspect-[3/4] overflow-hidden rounded-[1.25rem] bg-[var(--surface)]">
                         {img ? <Image src={img} alt="" fill priority={i < 4} sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
                         <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/65 to-transparent" />
-                        <p className="absolute inset-x-6 bottom-6 text-balance text-[1.75rem] font-extrabold uppercase italic leading-none tracking-[-0.02em] text-white sm:text-[2.25rem]" style={HEADLINE_FONT}>
+                        <p className="absolute inset-x-6 bottom-6 text-balance text-[1.5rem] font-extrabold uppercase italic leading-none tracking-[-0.02em] text-white sm:text-[1.875rem]" style={HEADLINE_FONT}>
                           {col.name}
                         </p>
                       </div>

@@ -17,7 +17,7 @@ export function SportFaq({ eyebrow, heading, subheading, ctaLabel, ctaLink, item
       <div className={cn(SHELL, BAND_Y, "grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-24")}>
         <div className="space-y-6">
           <SportEyebrow>{eyebrow}</SportEyebrow>
-          <h2 className="text-balance text-[2.5rem] font-extrabold uppercase leading-[0.98] tracking-[-0.025em] text-primary md:text-[3.5rem] xl:text-[4rem]" style={HEADLINE_FONT}>
+          <h2 className="text-balance text-[2rem] font-extrabold uppercase leading-[1] tracking-[-0.025em] text-primary md:text-[2.5rem] xl:text-[3rem]" style={HEADLINE_FONT}>
             {heading}
           </h2>
           {subheading ? <p className="max-w-md text-[17px] leading-8 text-foreground/75">{subheading}</p> : null}

@@ -37,7 +37,7 @@ export function SportMulticolumn({ node, context, sectionId }: SectionProps) {
           <div className="mb-9 space-y-4 md:mb-12">
             <SportEyebrow>{eyebrow}</SportEyebrow>
             {heading ? (
-              <h2 className="max-w-3xl whitespace-pre-line text-balance text-[2.5rem] font-extrabold uppercase leading-[0.98] tracking-[-0.025em] text-primary md:text-[3.5rem] xl:text-[4rem]" style={HEADLINE_FONT}>
+              <h2 className="max-w-3xl whitespace-pre-line text-balance text-[2rem] font-extrabold uppercase leading-[1] tracking-[-0.025em] text-primary md:text-[2.5rem] xl:text-[3rem]" style={HEADLINE_FONT}>
                 {heading}
               </h2>
             ) : null}

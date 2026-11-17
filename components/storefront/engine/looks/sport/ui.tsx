@@ -12,7 +12,7 @@ export const HEADLINE_FONT = { fontFamily: "var(--sf-font-heading)" } as const;
 export function SportTitle({ children, italic = true, bar = true, tone = "dark", as: Tag = "h2", className }: { children: React.ReactNode; italic?: boolean; bar?: boolean; tone?: "dark" | "light"; as?: "h1" | "h2" | "h3"; className?: string }) {
   return (
     <div className={className}>
-      <Tag className={cn("text-balance text-[2.5rem] font-extrabold uppercase leading-[0.98] tracking-[-0.025em] md:text-[3.5rem] xl:text-[4rem]", italic && "italic", tone === "dark" ? "text-primary" : "text-white")} style={HEADLINE_FONT}>
+      <Tag className={cn("text-balance text-[2rem] font-extrabold uppercase leading-[1] tracking-[-0.025em] md:text-[2.5rem] xl:text-[3rem]", italic && "italic", tone === "dark" ? "text-primary" : "text-white")} style={HEADLINE_FONT}>
         {children}
       </Tag>
       {bar ? <span aria-hidden className="mt-5 block h-1 w-[70px] rounded-full bg-accent" /> : null}

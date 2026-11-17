@@ -34,7 +34,7 @@ export function SportPromotionalBanner({ node, context, sectionId }: SectionProp
               const st = b.settings ?? {};
               if (b.type === "heading") {
                 return (
-                  <h2 key={id} className="text-balance text-[2.25rem] font-extrabold leading-[1.02] tracking-[-0.03em] text-white md:text-[3.25rem] xl:text-[3.75rem]" style={HEADLINE_FONT}>
+                  <h2 key={id} className="text-balance text-[1.875rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-white md:text-[2.5rem] xl:text-[3rem]" style={HEADLINE_FONT}>
                     {String(st.text ?? "")}
                   </h2>
                 );
