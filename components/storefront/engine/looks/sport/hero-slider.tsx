@@ -90,7 +90,7 @@ export function SportHeroSlider({ slides, eyebrow, ctas, sfProps }: { slides: Sp
       </div>
 
       {count > 1 ? (
-        <div className={cn(SHELL, "relative flex items-center justify-between pb-8 lg:pb-10")}>
+        <div className={cn(SHELL, "relative flex items-center justify-between pb-8 lg:pb-10 lg:pl-[8%] xl:pl-[11%]")}>
           <div className="flex items-center gap-3 text-[14px] font-bold tabular-nums tracking-[0.1em] sm:gap-5" aria-live="off">
             <span>{pad(index + 1)}</span>
             <span aria-hidden className="relative h-0.5 w-14 overflow-hidden sm:w-40 rounded-full bg-white/25">
