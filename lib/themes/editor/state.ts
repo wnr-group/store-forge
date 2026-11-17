@@ -1,6 +1,7 @@
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import type { SectionDefinition, SettingDescriptor, ComponentRegistry } from "@/lib/templates/engine/descriptors";
 import { addNode, duplicateNode, generateId, moveNode, removeNode } from "@/lib/templates/engine/tree";
+import { stableStringify, type SnapshotEntry } from "@/lib/themes/editor/history";
 import type { ThemeKind } from "@/lib/themes/types";
 
 /**
@@ -220,4 +221,17 @@ export function replaceDoc(state: EditorState, docId: string, revision: number, 
 export function sectionOrder(state: EditorState, docId: string): string[] {
   const d = state.docs[docId]?.document as { order?: string[] } | undefined;
   return d?.order ?? [];
+}
+
+/**
+ * Puts the pages and shared parts of an undo or redo step back as drafts (only those still being edited, and only when the
+ * content differs). The selection is cleared, because a restored page may no longer have the selected section.
+ */
+export function restoreDocs(state: EditorState, step: Record<string, SnapshotEntry>): EditorState {
+  let docs = state.docs;
+  for (const [id, saved] of Object.entries(step)) {
+    const doc = docs[id];
+    if (doc && stableStringify(doc.document) !== saved.key) docs = { ...docs, [id]: { ...doc, document: JSON.parse(saved.raw) as Record<string, unknown> } };
+  }
+  return docs === state.docs ? state : { ...state, docs, selection: null };
 }

@@ -20,6 +20,7 @@ import { AppError } from "@/lib/errors";
 import type { CollectionProductSummary } from "@/components/storefront/engine/types";
 import { featuredCollectionSlugs } from "@/lib/storefront/featured";
 import type { TemplateDocument } from "@/lib/templates/document";
+import { parsePresentation } from "@/lib/templates/product-presentation";
 
 const templateSchema = z.object({
   key: z.string(),
@@ -177,6 +178,9 @@ export function toProductResource(data: PublicProductApi): Record<string, unknow
       option_values: v.options ?? {},
     })),
     related: data.related,
+    // Published settings of this product only. Parsed defensively: anything unusable is null and the page renders as the
+    // store design says, so a bad or newer document can never break a product page.
+    presentation: parsePresentation(data.presentation),
   };
 }
 

@@ -1,4 +1,5 @@
 import type { TemplateDocument } from "@/lib/templates/document";
+import type { ProductPresentation } from "@/lib/templates/product-presentation";
 import type { StorefrontData } from "@/lib/templates/types";
 import type { ProductOption, ProductVariantSummary } from "@/lib/templates/variant-selection";
 
@@ -42,6 +43,8 @@ export interface ProductDetailData {
   images?: string[];
   options?: ProductOption[];
   variants?: ProductVariantSummary[];
+  /** The product's own presentation (the published one on the storefront, the draft in the editor), or null. */
+  presentation?: ProductPresentation | null;
   [key: string]: unknown;
 }
 
