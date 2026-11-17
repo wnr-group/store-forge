@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Check, Laptop, LayoutTemplate, Loader2, Monitor, Palette, Search, Smartphone, Tablet } from "lucide-react";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -24,6 +24,42 @@ import { PreviewModeNote, PreviewModeSwitch } from "./preview-mode-switch";
 import { ThemeFrame, type Device } from "./theme-frame";
 
 const PAGE_SIZE = 9;
+
+/** True once the element has come within `margin` of the screen, and stays true. Cards below the fold cost nothing until then. */
+function useNearScreen<T extends Element>(margin = "300px") {
+  const ref = useRef<T>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || near) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setNear(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: margin },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [margin, near]);
+  return [ref, near] as const;
+}
+
+/** True a moment after `active` turns on, so a heavy child mounts after the dialog has finished opening instead of during it. */
+function useAfterOpen(active: boolean, delay = 220) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (!active) {
+      const reset = window.setTimeout(() => setReady(false), 0);
+      return () => window.clearTimeout(reset);
+    }
+    const t = window.setTimeout(() => setReady(true), delay);
+    return () => window.clearTimeout(t);
+  }, [active, delay]);
+  return active && ready;
+}
 
 type Props = { canManage: boolean; data: PreviewStoreData };
 
@@ -199,12 +235,14 @@ function groupsOf(documents: Record<string, Record<string, unknown> | undefined>
 }
 
 function ThemeCard({ theme, data, canManage, onPreview, onApply }: { theme: ThemeSummary; data: PreviewStoreData; canManage: boolean; onPreview: () => void; onApply: () => void }) {
-  const detail = useThemeDetail(theme.slug);
+  // A card fetches and draws its live preview only once it is near the screen, so opening the page costs a few cards, not all nine.
+  const [frameRef, near] = useNearScreen<HTMLDivElement>();
+  const detail = useThemeDetail(near ? theme.slug : null);
   const doc = detail.data?.documents.index as unknown as TemplateDocument | undefined;
   return (
     <motion.article initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card shadow-xs transition-shadow hover:shadow-md">
       {/* The live frame holds the storefront's own buttons, so it cannot sit inside a button: it is inert and a sibling button covers it. */}
-      <div className="relative w-full overflow-hidden border-b bg-muted">
+      <div ref={frameRef} className="relative w-full overflow-hidden border-b bg-muted">
         <div inert aria-hidden="true">
           {doc ? (
             <ThemeFrame document={doc} theme={detail.data?.documents.theme_settings} groups={groupsOf(detail.data!.documents)} data={data} cropHeight={300} className="pointer-events-none" />
@@ -247,6 +285,7 @@ function PreviewDialog({ slug, data, canManage, applying, isCurrent, onClose, on
   const detail = useThemeDetail(slug);
   const [device, setDevice] = useState<Device>("desktop");
   const theme = detail.data;
+  const ready = useAfterOpen(slug !== null);
   return (
     <Dialog open={slug !== null} onOpenChange={(open) => { if (!open) onClose(); }}>
       {/* Fade only: no zoom, so the large preview does not scale in. */}
@@ -274,17 +313,16 @@ function PreviewDialog({ slug, data, canManage, applying, isCurrent, onClose, on
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-auto bg-muted/60 p-4">
           <PreviewModeNote mode={data.mode} storeHasProducts={data.store.products.length > 0 || data.mode === "demo"} className="mb-3" />
-          <AnimatePresence mode="wait">
-            {theme?.documents.index ? (
-              <motion.div key={`${slug}-${device}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className={cn("mx-auto overflow-hidden rounded-md border bg-white shadow-sm", device === "desktop" ? "w-full" : device === "tablet" ? "w-[820px] max-w-full" : "w-[390px] max-w-full")}>
-                <ThemeFrame document={theme.documents.index as unknown as TemplateDocument} theme={theme.documents.theme_settings} groups={groupsOf(theme.documents)} data={data} device={device === "desktop" ? "desktop" : device} />
-              </motion.div>
-            ) : detail.isError ? (
-              <div className="flex h-60 items-center justify-center text-sm text-muted-foreground"><Laptop className="mr-2 size-4" aria-hidden /> This preview could not be loaded.</div>
-            ) : (
-              <Skeleton className="mx-auto h-[70dvh] w-full max-w-5xl" />
-            )}
-          </AnimatePresence>
+          {theme?.documents.index && ready ? (
+            // Keyed by theme only: changing the device just rescales the frame, it does not rebuild the whole page.
+            <motion.div key={slug} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className={cn("mx-auto overflow-hidden rounded-md border bg-white shadow-sm", device === "desktop" ? "w-full" : device === "tablet" ? "w-[820px] max-w-full" : "w-[390px] max-w-full")}>
+              <ThemeFrame document={theme.documents.index as unknown as TemplateDocument} theme={theme.documents.theme_settings} groups={groupsOf(theme.documents)} data={data} device={device === "desktop" ? "desktop" : device} />
+            </motion.div>
+          ) : detail.isError ? (
+            <div className="flex h-60 items-center justify-center text-sm text-muted-foreground"><Laptop className="mr-2 size-4" aria-hidden /> This preview could not be loaded.</div>
+          ) : (
+            <Skeleton className="mx-auto h-[70dvh] w-full max-w-5xl" />
+          )}
         </div>
       </DialogContent>
     </Dialog>

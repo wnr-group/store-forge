@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { TemplateRenderer } from "@/components/storefront/engine/renderer";
 import type { RenderMode } from "@/components/storefront/engine/types";
 import type { TemplateDocument } from "@/lib/templates/document";
@@ -55,6 +55,31 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     return () => observer.disconnect();
   }, []);
 
+  // The storefront is rebuilt only when what it shows changes. Measuring (every image that loads changes the height) re-renders
+  // this component, and without this each of those renders would rebuild the whole page.
+  const headerGroup = groups?.header;
+  const footerGroup = groups?.footer;
+  const announcementGroup = groups?.announcement;
+  const content = useMemo(
+    () => (
+      <TemplateRenderer
+        document={document}
+        mode={mode}
+        context={{
+          store: data.store,
+          collections: data.collections,
+          collectionProducts: data.collectionProducts,
+          resource,
+          theme: theme ?? undefined,
+          groupHeader: headerGroup ?? undefined,
+          groupFooter: footerGroup ?? undefined,
+          groupAnnouncement: announcementGroup ?? undefined,
+        }}
+      />
+    ),
+    [document, mode, data, resource, theme, headerGroup, footerGroup, announcementGroup],
+  );
+
   const width = DEVICE_WIDTH[device];
   const scale = available > 0 ? Math.min(1, available / width) : 1;
   const shownHeight = cropHeight ? Math.min(contentHeight * scale, cropHeight) : contentHeight * scale;
@@ -72,30 +97,24 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
   };
 
   return (
-    <div ref={outer} className={cn("relative w-full overflow-hidden", className)} style={{ height: shownHeight || undefined, minHeight: 80 }}>
+    // A cropped frame (a gallery thumbnail) has its height from the start, so the card around it never grows or jumps as the page inside
+    // is measured. A full frame follows the page height. Until the width is known the page would show at full size for a moment,
+    // so it stays invisible until then.
+    <div ref={outer} className={cn("relative w-full overflow-hidden", className)} style={{ height: cropHeight ?? (shownHeight || undefined), minHeight: cropHeight ?? 80 }}>
       <div
         ref={inner}
         onClickCapture={handleClick}
         className="sf-frame origin-top-left"
-        style={{ width, transform: `scale(${scale})`, marginLeft: device === "desktop" || scale < 1 ? 0 : Math.max(0, (available - width) / 2) }}
+        style={{ width, visibility: available > 0 ? "visible" : "hidden", transform: `scale(${scale})`, marginLeft: device === "desktop" || scale < 1 ? 0 : Math.max(0, (available - width) / 2) }}
+        data-static={cropHeight ? "" : undefined}
         data-editing={editing || undefined}
         data-selected={selectedSectionId ?? undefined}
       >
-        <TemplateRenderer
-          document={document}
-          mode={mode}
-          context={{
-            store: data.store,
-            collections: data.collections,
-            collectionProducts: data.collectionProducts,
-            resource,
-            theme: theme ?? undefined,
-            groupHeader: groups?.header ?? undefined,
-            groupFooter: groups?.footer ?? undefined,
-            groupAnnouncement: groups?.announcement ?? undefined,
-          }}
-        />
+        {content}
       </div>
+      {/* A preview shows the finished page at once: the scroll reveals and entrance animations of a live storefront are switched off
+          here (and every transition in a gallery thumbnail), so nothing waits to scroll into view or keeps animating. */}
+      <style>{`.sf-frame [data-sf-reveal],.sf-frame [data-sf-reveal] .sf-word,.sf-frame .sf-up,.sf-frame .sf-hero-word{animation:none!important;transition:none!important;opacity:1!important;translate:none!important}.sf-frame[data-static] *{animation:none!important;transition:none!important}`}</style>
       {editing && selectedSectionId ? (
         <style>{`.sf-frame [data-sf-section="${CSS.escape(selectedSectionId)}"]{outline:2px solid var(--editor-accent,#2563eb);outline-offset:-2px}`}</style>
       ) : null}
