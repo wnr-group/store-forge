@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Heart, Home, LayoutGrid, Menu, Search, ShoppingCart, Sparkles, User, X } from "lucide-react";
+import { ChevronRight, Heart, Home, LayoutGrid, Menu, ShoppingCart, Sparkles, User, X } from "lucide-react";
 import { useSignedIn } from "@/lib/auth/use-signed-in";
 import { useOptionalCart } from "@/components/storefront/cart/cart-provider";
 import { useOptionalWishlist } from "@/components/storefront/wishlist/wishlist-provider";
 import { cn } from "@/lib/utils";
 import { resolveImage } from "../../ui";
 import type { SectionProps } from "..";
-import { useSearchSubmit } from "../../use-search-submit";
+import { MarketSearch } from "./search";
 import { FOCUS, Logo, WRAP } from "./ui";
 
 type Item = { id: string; label: string; url: string; isButton: boolean };
@@ -66,7 +66,6 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
   const logoSrc = resolveImage(node.settings?.logoImage).url ?? resolveImage(store.logo_path).url;
   const searchHref = context.basePath ? `${context.basePath}/search` : "/search";
-  const search = useSearchSubmit(searchHref);
   const cartCount = cart?.ready ? cart.count : 0;
   const wishCount = wishlist?.ready ? wishlist.count : 0;
 
@@ -96,12 +95,15 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
             <Link href="/" aria-label={store.name} title={store.name} className={cn("mr-1 shrink-0 rounded-md", FOCUS)}>
               {mark}
             </Link>
-            <form action={searchHref} method="get" role="search" onSubmit={search.onSubmit} aria-busy={search.pending} className={cn(search.pending && "opacity-80", "mx-1 flex h-10 min-w-0 max-w-3xl flex-1 overflow-hidden rounded-lg bg-white ring-1 ring-white/20 focus-within:ring-2 focus-within:ring-accent")}>
-              <input name="q" type="search" placeholder={`Search ${store.name}`} aria-label="Search the store" className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm text-primary outline-none placeholder:text-muted-foreground" />
-              <button type="submit" aria-label="Search" className="grid w-12 shrink-0 place-items-center bg-accent text-accent-foreground transition-colors hover:brightness-95">
-                <Search className="size-[18px]" aria-hidden />
-              </button>
-            </form>
+            <MarketSearch
+              className="mx-1 max-w-3xl"
+              storeSlug={String(store.slug ?? "")}
+              storeName={store.name}
+              currency={store.currency ?? "INR"}
+              products={((store.products ?? []) as { name: string; slug: string; price_minor: number }[]).map((p) => ({ name: p.name, slug: p.slug, price_minor: p.price_minor }))}
+              collections={collections.map((c) => ({ name: c.name, slug: c.slug }))}
+              action={searchHref}
+            />
             <div className="ml-auto flex shrink-0 items-center gap-0.5">
               {wishlist ? (
                 <Link href="/wishlist" prefetch={false} aria-label={wishCount > 0 ? `Wishlist, ${wishCount} ${wishCount === 1 ? "item" : "items"}` : "Wishlist"} className={cn(NAV_LINK, "hidden sm:flex", FOCUS)}>

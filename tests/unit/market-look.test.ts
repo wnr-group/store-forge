@@ -22,6 +22,8 @@ import { MarketListing } from "@/components/storefront/engine/looks/market/listi
 import { MarketRichText } from "@/components/storefront/engine/looks/market/rich-text";
 import { BoutiqueRichText } from "@/components/storefront/engine/looks/boutique/rich-text";
 import { SportRichText } from "@/components/storefront/engine/looks/sport/rich-text";
+import { MarketSearch } from "@/components/storefront/engine/looks/market/search";
+import { searchUrl } from "@/components/storefront/engine/use-search-submit";
 import { MarketProductCard } from "@/components/storefront/engine/looks/market/product-card";
 import { discount } from "@/components/storefront/engine/looks/market/ui";
 import { lookOf, themeToStyle } from "@/lib/templates/engine/theme-style";
@@ -140,4 +142,28 @@ describe("search page", () => {
       expect(html).not.toContain('name="q"');
     });
   }
+});
+
+describe("market search bar", () => {
+  it("builds the search address, with the category only when one is chosen", () => {
+    expect(searchUrl("/search", " linen shirt ", "all")).toBe("/search?q=linen+shirt");
+    expect(searchUrl("/search", "linen", "men")).toBe("/search?q=linen&cat=men");
+    expect(searchUrl("/s/b/search", "", null)).toBe("/s/b/search");
+  });
+
+  it("draws a category menu, the field with the real product count and an orange search button", () => {
+    const html = renderToStaticMarkup(createElement(MarketSearch, { storeSlug: "b", storeName: "Bazaar", currency: "INR", products: [{ name: "Linen Shirt", slug: "l", price_minor: 100000 }, { name: "Scarf", slug: "s", price_minor: 50000 }], collections: [{ name: "Men", slug: "men" }], action: "/search" }));
+    expect(html).toContain('name="cat"');
+    expect(html).toContain("All categories");
+    expect(html).toContain("Men");
+    expect(html).toContain('placeholder="Search 2 products in Bazaar"');
+    expect(html).toContain('aria-label="Search"');
+    expect(html).toContain("bg-accent");
+  });
+
+  it("leaves out the category menu for a store with no collections", () => {
+    const html = renderToStaticMarkup(createElement(MarketSearch, { storeSlug: "b", storeName: "Bazaar", currency: "INR", products: [], collections: [], action: "/search" }));
+    expect(html).not.toContain('name="cat"');
+    expect(html).toContain('placeholder="Search Bazaar"');
+  });
 });
