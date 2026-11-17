@@ -12,10 +12,28 @@ export const featuredCollectionSection: SectionDefinition = {
       default: "",
     },
     {
+      id: "eyebrow",
+      type: "text",
+      label: "Small label above the heading",
+      default: "",
+      help: "Shown by themes that support it",
+    },
+    {
       id: "title",
       type: "text",
       label: "Heading",
       default: "Featured Collection",
+    },
+    {
+      id: "tone",
+      type: "select",
+      label: "Section tone",
+      default: "light",
+      help: "Dark puts the products on the theme's primary colour. Shown by themes that support it",
+      options: [
+        { label: "Light", value: "light" },
+        { label: "Dark", value: "dark" },
+      ],
     },
     {
       id: "productsToShow",

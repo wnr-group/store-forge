@@ -6,6 +6,13 @@ export const collectionListSection: SectionDefinition = {
   category: "Collections",
   settings: [
     {
+      id: "eyebrow",
+      type: "text",
+      label: "Small label above the title",
+      default: "",
+      help: "Shown by themes that support it",
+    },
+    {
       id: "title",
       type: "text",
       label: "Section Title",

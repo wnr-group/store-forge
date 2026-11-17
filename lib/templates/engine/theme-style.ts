@@ -1,3 +1,4 @@
+import { DEFAULT_LOOK, isLookId, type LookId } from "../looks";
 import { themeToCssVars, type ThemeSettings } from "./theme-css";
 
 /**
@@ -129,4 +130,13 @@ export function isHomeTheme(theme: unknown): boolean {
 export function isEditorialTheme(theme: unknown): boolean {
   const ts = themeSettingsOf(theme) as { buttons?: { radius?: number } } | null;
   return ts?.buttons?.radius === 0;
+}
+
+/**
+ * The storefront look a theme asks for (`settings.brand.look`). Anything missing or unknown is the standard look, so a
+ * stored document can never select a look that does not exist.
+ */
+export function lookOf(theme: unknown): LookId {
+  const look = themeSettingsOf(theme)?.brand?.look;
+  return isLookId(look) ? look : DEFAULT_LOOK;
 }

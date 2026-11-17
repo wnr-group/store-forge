@@ -64,7 +64,7 @@ describe("[AC-ENG-001] theme descriptors are the single source of the theme sett
 
   it("[AC-ENG-001] the ids are the nested keys of the stored document, grouped as D24 says", () => {
     const idsOf = (group: string) => byGroup(group).map((d) => d.id);
-    expect(idsOf("brand")).toEqual(["favicon"]);
+    expect(idsOf("brand")).toEqual(["favicon", "look"]);
     expect(idsOf("colors")).toEqual(["primary", "secondary", "background", "text", "accent", "muted", "border"]);
     expect(idsOf("typography")).toEqual(["headingFont", "bodyFont", "baseSize", "headingWeight", "bodyWeight", "lineHeight"]);
     expect(idsOf("layout")).toEqual(["pageWidth", "gridGap"]);

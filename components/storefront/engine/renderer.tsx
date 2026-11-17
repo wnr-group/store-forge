@@ -11,6 +11,9 @@ import { renderSectionComponent } from "./sections";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { resolveBinding } from "@/lib/templates/engine/bindings";
 import { themeToStyle } from "@/lib/templates/engine/theme-style";
+import { lookHasCart } from "./looks";
+import { CartProvider } from "@/components/storefront/cart/cart-provider";
+import { CartChrome } from "@/components/storefront/cart/cart-drawer";
 
 /**
  * Resolves data-bound settings against store/resource context (AC-REN-016).
@@ -132,7 +135,19 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
   // Split hero section out when layout is spotlight and hero variant is spotlight
   const isSpotlightHero = layout === "spotlight" && heroSection && heroSection.settings?.variant === "spotlight";
 
-  return (
+  const cartEnabled = themed && typeof store.slug === "string" && store.slug.length > 0;
+  const cartChrome = cartEnabled && lookHasCart(enrichedContext.theme);
+  const withCart = (node: React.ReactNode) =>
+    cartEnabled ? (
+      // Editor and theme preview keep their cart in memory only, so they never touch a shopper's saved bag.
+      <CartProvider storeSlug={store.slug} currency={typeof store.currency === "string" ? store.currency : "INR"} persist={activeMode === "public"}>
+        {node}
+      </CartProvider>
+    ) : (
+      node
+    );
+
+  return withCart(
     <StorefrontContext.Provider value={enrichedContext}>
       <div className={themed ? "sf-theme flex min-h-dvh flex-col bg-background text-foreground" : "flex min-h-dvh flex-col"} style={themed ? themeStyle : undefined}>
         {/* Optional Announcement Group */}
@@ -215,6 +230,7 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
             {store.name} · Powered by StoreForge
           </footer>
         )}
+        {cartChrome ? <CartChrome /> : null}
       </div>
     </StorefrontContext.Provider>
   );

@@ -7,6 +7,8 @@ import { renderBlockComponent } from "../blocks";
 import { resolveVariant } from "@/lib/templates/variant-selection";
 import { CONTAINER, ImagePlaceholder, RADIUS } from "../ui";
 import { cn } from "@/lib/utils";
+import { lookHasCart } from "../looks";
+import { AddToBag } from "@/components/storefront/cart/add-to-bag";
 
 interface MainProductSectionProps {
   node: ComponentNode;
@@ -19,8 +21,12 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
   const product = context.resource as ProductDetailData | undefined;
   const mediaPosition = (node.settings?.mediaPosition as string) ?? "left";
   const [picked, setPicked] = useState<string | null>(null);
+  // With a cart, the option the shopper picks is shared by the picker, the price and "Add to bag"; it starts on the first value of each option.
+  const withCart = lookHasCart(context.theme);
+  const [chosen, setChosen] = useState<Record<string, string>>(() => Object.fromEntries((product?.options ?? []).filter((o) => o.values.length > 0).map((o) => [o.name, o.values[0]])));
+  const ctx: RenderContext = withCart ? { ...context, selectedOptions: chosen, onSelectOption: (option: string, value: string) => setChosen((prev) => ({ ...prev, [option]: value })) } : context;
 
-  const matchedVariant = product?.variants && context.selectedOptions ? resolveVariant(product.variants, context.selectedOptions) : undefined;
+  const matchedVariant = product?.variants && ctx.selectedOptions ? resolveVariant(product.variants, ctx.selectedOptions) : undefined;
 
   // A variant with its own picture wins; otherwise the thumbnail the shopper chose; otherwise the first picture.
   const gallery = [...new Set([product?.image_path, ...(product?.images ?? [])].filter((p): p is string => Boolean(p)))];
@@ -67,7 +73,8 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
 
         <div className={cn("flex flex-col space-y-4 lg:sticky lg:top-24 lg:self-start", mediaRight && "lg:order-1")}>
           {product?.available === false ? <p className="w-fit rounded-[calc(var(--radius,0.5rem)/2)] bg-muted px-2.5 py-1 text-xs font-medium text-foreground">Sold out</p> : null}
-          {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
+          {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], ctx, blockId))}
+          {withCart && product ? <AddToBag product={product} selectedOptions={chosen} /> : null}
         </div>
       </div>
     </section>

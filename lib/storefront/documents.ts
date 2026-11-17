@@ -64,3 +64,8 @@ export function searchProducts<T extends { name: string; short_description?: str
   if (!needle) return [];
   return products.filter((p) => p.name.toLowerCase().includes(needle) || (p.short_description ?? "").toLowerCase().includes(needle));
 }
+
+/** The bag page: one cart section. The lines live in the shopper's browser, so the page itself holds no store data. */
+export function cartDocument(): TemplateDocument {
+  return doc([["cart", node("cart", {})]]);
+}

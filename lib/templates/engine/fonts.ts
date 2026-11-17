@@ -1,12 +1,14 @@
 /**
  * Closed font registry and typography boundaries (D21).
- * Supports exactly 6 approved font keys. No external Google Fonts requests.
+ * Supports exactly 8 approved font keys, all self-hosted. No external Google Fonts requests.
  */
 
 export const FONT_KEYS = [
   "inter",
   "manrope",
   "dm-sans",
+  "jost",
+  "cormorant-garamond",
   "system-sans",
   "system-serif",
   "system-mono",
@@ -63,6 +65,24 @@ export const FONT_REGISTRY: Record<FontKey, FontConfig> = {
     minWeight: 100,
     maxWeight: 1000,
     woff2Path: "app/fonts/dm-sans-latin.woff2",
+  },
+  jost: {
+    key: "jost",
+    name: "Jost",
+    fontFamily: "var(--font-jost), sans-serif",
+    variable: true,
+    minWeight: 100,
+    maxWeight: 900,
+    woff2Path: "app/fonts/jost-latin.woff2",
+  },
+  "cormorant-garamond": {
+    key: "cormorant-garamond",
+    name: "Cormorant Garamond",
+    fontFamily: "var(--font-cormorant-garamond), Georgia, serif",
+    variable: true,
+    minWeight: 300,
+    maxWeight: 700,
+    woff2Path: "app/fonts/cormorant-garamond-latin.woff2",
   },
   "system-sans": {
     key: "system-sans",

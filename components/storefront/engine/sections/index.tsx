@@ -20,6 +20,8 @@ import { MainProductSection } from "./main-product";
 import { RelatedProductsSection } from "./related-products";
 import { PromotionalBannerSection } from "./promotional-banner";
 import { LogoListSection } from "./logo-list";
+import { lookSection } from "../looks";
+import { CartPageSection } from "@/components/storefront/cart/cart-page";
 
 export const SECTION_COMPONENTS: Record<
   string,
@@ -43,6 +45,8 @@ export const SECTION_COMPONENTS: Record<
   "related-products": RelatedProductsSection,
   "promotional-banner": PromotionalBannerSection,
   "logo-list": LogoListSection,
+  /** The bag page. Only the generated cart document uses it; it is not an editor section. */
+  cart: CartPageSection,
 };
 
 export function renderSectionComponent(
@@ -55,7 +59,8 @@ export function renderSectionComponent(
     return null;
   }
 
-  const Component = SECTION_COMPONENTS[node.type];
+  // A theme's look may draw this section itself; every other section is the engine's own component.
+  const Component = lookSection(context.theme, node.type) ?? SECTION_COMPONENTS[node.type];
 
   // AC-REN-014: Unknown component skipped publicly, warning in editor/preview
   if (!Component) {

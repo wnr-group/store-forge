@@ -31,7 +31,13 @@ export interface ThemeButtons {
   radius?: number;
 }
 
+export interface ThemeBrand {
+  /** Id of the storefront look the theme is drawn with (see lib/templates/looks.ts). */
+  look?: string;
+}
+
 export interface ThemeSettings {
+  brand?: ThemeBrand;
   colors?: ThemeColors;
   typography?: ThemeTypography;
   layout?: ThemeLayout;
