@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Heart, Home, LayoutGrid, Menu, Search, ShoppingCart, Sparkles, X } from "lucide-react";
+import { ChevronRight, Heart, Home, LayoutGrid, Menu, Search, ShoppingCart, Sparkles, User, X } from "lucide-react";
+import { useSignedIn } from "@/lib/auth/use-signed-in";
 import { useOptionalCart } from "@/components/storefront/cart/cart-provider";
 import { useOptionalWishlist } from "@/components/storefront/wishlist/wishlist-provider";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,9 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
   const pathname = usePathname() ?? "/";
   const cart = useOptionalCart();
   const wishlist = useOptionalWishlist();
+  const signedIn = useSignedIn() === true;
+  const accountHref = signedIn ? "/dashboard" : "/login";
+  const accountLabel = signedIn ? "Dashboard" : "Login";
   const [open, setOpen] = useState(false);
 
   // A new page (a search, a link in the menu) closes the phone menu: the header stays mounted while the route changes.
@@ -78,7 +82,6 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
   const tabs = [
     { href: "/", label: "Home", icon: Home, badge: 0 },
     { href: "/collections", label: "Categories", icon: LayoutGrid, badge: 0 },
-    { href: "/search", label: "Search", icon: Search, badge: 0 },
     ...(wishlist ? [{ href: "/wishlist", label: "Wishlist", icon: Heart, badge: wishCount }] : []),
   ];
 
@@ -107,6 +110,10 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
                   {wishCount > 0 ? <span aria-hidden className={COUNT}>{wishCount > 99 ? "99+" : wishCount}</span> : null}
                 </Link>
               ) : null}
+              <Link href={accountHref} prefetch={false} aria-label={signedIn ? "Your dashboard" : "Store login"} className={cn(NAV_LINK, "hidden sm:flex", FOCUS)}>
+                <User className="size-[18px]" aria-hidden />
+                <span className="hidden xl:inline">{accountLabel}</span>
+              </Link>
               {cart ? (
                 <button type="button" onClick={cart.openDrawer} aria-label={cartCount > 0 ? `Cart, ${cartCount} ${cartCount === 1 ? "item" : "items"}` : "Cart"} className={cn(NAV_LINK, "pr-2.5", FOCUS)}>
                   <ShoppingCart className="size-[19px]" aria-hidden />
@@ -164,6 +171,7 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
                 <DrawerLink key={l.id} href={l.url}>{l.label}</DrawerLink>
               ))}
               {wishlist ? <DrawerLink href="/wishlist">Wishlist</DrawerLink> : null}
+              <DrawerLink href={accountHref}>{signedIn ? "Your dashboard" : "Store login"}</DrawerLink>
             </div>
           </div>
         </div>
@@ -192,6 +200,12 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
               </button>
             </li>
           ) : null}
+          <li className="flex-1">
+            <Link href={accountHref} prefetch={false} className="flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-muted-foreground">
+              <User className="size-[19px]" aria-hidden />
+              Account
+            </Link>
+          </li>
         </ul>
       </nav>
     </>
