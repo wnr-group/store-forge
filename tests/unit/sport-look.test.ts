@@ -15,6 +15,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => {} }), usePa
 import { LOOKS, lookCard, lookSection } from "@/components/storefront/engine/looks";
 import { splitHeading } from "@/components/storefront/engine/looks/sport/hero-slider";
 import { SportHero } from "@/components/storefront/engine/looks/sport/hero";
+import { SportFooter } from "@/components/storefront/engine/looks/sport/footer";
 import { parseRow, SportImageWithText } from "@/components/storefront/engine/looks/sport/image-with-text";
 import { toMinor } from "@/components/storefront/engine/looks/sport/listing";
 import { SportCollectionList } from "@/components/storefront/engine/looks/sport/collection-list";
@@ -31,7 +32,7 @@ describe("sport look registration", () => {
   it("is selected by settings.brand.look and draws its own sections and product card", () => {
     expect(lookOf(sportTheme)).toBe("sport");
     expect(lookSection(sportTheme, "hero")).toBe(SportHero);
-    expect(lookSection(sportTheme, "footer")).toBeUndefined();
+    expect(lookSection(sportTheme, "footer")).toBe(SportFooter);
     expect(lookCard(sportTheme)).toBe(SportProductCard);
     expect(LOOKS.sport.cart).toBe(true);
   });

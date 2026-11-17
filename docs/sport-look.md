@@ -24,7 +24,7 @@ Sans body text, pill controls, rounded 4:5 product cards. Soft panels are tinted
 | Product grid | filter sidebar (collections, price range, in stock), search field, sort menu |
 | Product page | vertical thumbnails, big rounded picture with counter, buy row with wishlist |
 
-Everything else (footer, testimonials, ...) is the engine's own and takes the theme's colours and fonts.
+The footer is the engine's own in LESPARO's deep indigo (`#12164c`) when it is still on the theme's stock navy; a colour chosen in the editor wins. Everything else (testimonials, ...) is the engine's own and takes the theme's colours and fonts.
 
 ## Text conventions in "Image with text"
 

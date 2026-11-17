@@ -4,6 +4,7 @@ import { SportCollapsibleContent } from "./collapsible-content";
 import { SportCollectionBanner } from "./collection-banner";
 import { SportCollectionList } from "./collection-list";
 import { SportFeaturedCollection } from "./featured-collection";
+import { SportFooter } from "./footer";
 import { SportHeader } from "./header";
 import { SportHero } from "./hero";
 import { SportImageWithText } from "./image-with-text";
@@ -24,6 +25,7 @@ export const sportLook: StorefrontLook = {
   cart: true,
   sections: {
     "announcement-bar": SportAnnouncementBar,
+    footer: SportFooter,
     header: SportHeader,
     hero: SportHero,
     "collection-list": SportCollectionList,
