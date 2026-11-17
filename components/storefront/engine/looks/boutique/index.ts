@@ -11,7 +11,7 @@ import { BoutiqueRichText } from "./rich-text";
 import { BoutiqueTestimonials } from "./testimonials";
 
 /**
- * The Boutique look (the Karthika theme): ivory page, forest-green primary, display serif headings, pill buttons, 3:4
+ * The Boutique look (the Maison theme): ivory page, forest-green primary, display serif headings, pill buttons, 3:4
  * square-cornered product cards. It draws the sections whose presentation defines the look; every other section
  * (footer, testimonials, product page, ...) is the engine's own and picks up the theme's colours and fonts.
  */

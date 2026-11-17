@@ -1,4 +1,4 @@
-# Storefront looks and the Karthika (Boutique) theme
+# Storefront looks and the Maison (Boutique) theme
 
 ## How a theme chooses how it is drawn
 
@@ -40,7 +40,7 @@ A guest cart, kept in the browser per store (`localStorage` key `sf-cart:v1:<sto
 - Entry points (header bag with count, add to bag on the product page) appear only for looks with `cart: true`.
   `/cart` works for every store. The editor and theme preview keep the bag in memory only.
 
-The bag page and drawer were matched against `05-cart-drawer.jpg` and `06-cart-page.jpg` of the Karthika reference.
+The bag page and drawer were matched against `05-cart-drawer.jpg` and `06-cart-page.jpg` of the original design reference.
 
 ## Wishlist, hover "Add to bag", filters, reviews
 

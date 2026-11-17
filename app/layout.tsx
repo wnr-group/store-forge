@@ -15,7 +15,7 @@ const geistMono = localFont({ src: "./fonts/geist-mono-latin.woff2", variable: "
 const manrope = localFont({ src: "./fonts/manrope-latin.woff2", variable: "--font-manrope", weight: "200 800", display: "swap" });
 const dmSans = localFont({ src: "./fonts/dm-sans-latin.woff2", variable: "--font-dm-sans", weight: "100 1000", display: "swap" });
 
-// Storefront theme fonts (Karthika): Cormorant Garamond for display, Jost for body. Registered in lib/templates/engine/fonts.ts.
+// Storefront theme fonts (Maison): Cormorant Garamond for display, Jost for body. Registered in lib/templates/engine/fonts.ts.
 const jost = localFont({ src: "./fonts/jost-latin.woff2", variable: "--font-jost", weight: "100 900", display: "swap" });
 const cormorantGaramond = localFont({ src: "./fonts/cormorant-garamond-latin.woff2", variable: "--font-cormorant-garamond", weight: "300 700", display: "swap" });
 

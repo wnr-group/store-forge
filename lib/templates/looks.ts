@@ -17,7 +17,7 @@ export const DEFAULT_LOOK: LookId = "standard";
 
 export const LOOK_LABELS: Record<LookId, string> = {
   standard: "Standard",
-  boutique: "Boutique (Karthika)",
+  boutique: "Boutique (Maison)",
   sport: "Sport (Stride)",
   market: "Market (Marketplace)",
 };
