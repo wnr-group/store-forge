@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { publicImageUrl } from "@/lib/storage/paths";
+import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 
 interface TestimonialBlockProps {
   node: ComponentNode;
@@ -16,7 +16,7 @@ export function TestimonialBlock({ node, context, blockId }: TestimonialBlockPro
   const company = (node.settings?.company as string) ?? "";
 
   const avatarVal = node.settings?.avatar as { path?: string; alt?: string } | string | null | undefined;
-  const rawPath = typeof avatarVal === "string" ? avatarVal : avatarVal?.path;
+  const rawPath = imageRawPath(avatarVal);
   const altText = typeof avatarVal === "object" ? avatarVal?.alt ?? author : author;
 
   const isPreview = context.mode === "preview" || context.mode === "editor";

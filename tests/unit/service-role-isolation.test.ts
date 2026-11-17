@@ -21,23 +21,18 @@ function walk(dir: string, out: string[] = []): string[] {
 const files = walk(ROOT).map((f) => ({ path: relative(ROOT, f).split(sep).join("/"), text: readFileSync(f, "utf8") }));
 
 describe("service-role key isolation", () => {
-  it("the key is read only by config/env.ts (and the one-off admin:create script)", () => {
+  it("the app never reads the key: account provisioning and every privileged operation belong to the StoreForge API", () => {
     const users = files.filter((f) => f.text.includes("SUPABASE_SERVICE_ROLE_KEY")).map((f) => f.path).sort();
-    expect(users).toEqual(["config/env.ts", "scripts/create-platform-admin.ts"]);
+    expect(users).toEqual([]);
   });
 
-  it("only lib/auth/provisioning.ts talks to the Admin Auth client", () => {
-    const users = files.filter((f) => f.text.includes("getAdminAuthClient")).map((f) => f.path).sort();
-    expect(users).toEqual(["lib/auth/provisioning.ts", "lib/supabase/admin.ts"]);
+  it("the Admin Auth client no longer exists in the app: account provisioning is done by the StoreForge API", () => {
+    expect(files.filter((f) => f.text.includes("getAdminAuthClient")).map((f) => f.path)).toEqual([]);
+    expect(files.some((f) => /from "@\/lib\/auth\/provisioning"|from "@\/lib\/supabase\/admin"/.test(f.text))).toBe(false);
   });
 
-  it("only the three services that create or delete accounts call the provisioning helpers", () => {
-    const users = files.filter((f) => /from "@\/lib\/auth\/provisioning"/.test(f.text)).map((f) => f.path).sort();
-    expect(users).toEqual(["services/platform-team.service.ts", "services/platform.service.ts", "services/team.service.ts"]);
-  });
-
-  it("the privileged modules are server-only", () => {
-    for (const path of ["lib/supabase/admin.ts", "lib/auth/provisioning.ts", "services/platform.service.ts", "services/platform-team.service.ts", "services/team.service.ts", "lib/auth/platform.ts"]) {
+  it("the services that reach privileged operations are server-only", () => {
+    for (const path of ["services/platform.service.ts", "services/platform-team.service.ts", "services/team.service.ts", "lib/auth/platform.ts"]) {
       expect(files.find((f) => f.path === path)?.text, path).toMatch(/^import "server-only";/m);
     }
   });
@@ -47,7 +42,7 @@ describe("service-role key isolation", () => {
     expect(clients.length).toBeGreaterThan(10);
     for (const f of clients) {
       // `import type` is erased at build time, so type-only imports from services are fine.
-      expect(f.text, f.path).not.toMatch(/^import (?!type\b)[^;]*from "@\/(lib\/supabase\/admin|lib\/auth\/(provisioning|platform)|services\/)/m);
+      expect(f.text, f.path).not.toMatch(/^import (?!type\b)[^;]*from "@\/(lib\/auth\/platform|services\/)/m);
       expect(f.text, f.path).not.toMatch(/SERVICE_ROLE/i);
     }
   });
@@ -56,16 +51,7 @@ describe("service-role key isolation", () => {
     for (const f of files) expect(f.text, f.path).not.toMatch(/NEXT_PUBLIC_[A-Z_]*SERVICE/);
   });
 
-  it("the Admin Auth client is never used for data access", () => {
-    for (const f of files.filter((x) => x.path === "lib/supabase/admin.ts" || x.path === "lib/auth/provisioning.ts")) {
-      const code = f.text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-      expect(code, f.path).not.toMatch(/\.from\(|\.rpc\(|\.storage\b/);
-    }
-  });
-
-  it("every provisioned account is created pre-confirmed, so no email verification is required", () => {
-    const text = files.find((f) => f.path === "lib/auth/provisioning.ts")!.text;
-    expect(text).toMatch(/email_confirm:\s*true/);
+  it("no account is ever self-registered or needs e-mail verification in the app", () => {
     expect(files.some((f) => /auth\.signUp\(/.test(f.text))).toBe(false);
   });
 

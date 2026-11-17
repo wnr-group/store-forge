@@ -319,3 +319,17 @@
     stroke 0.35s ease,
     box-shadow 0.35s ease !important;
 }
+
+/* Storefront theme: the wrapper sets --sf-* tokens and overrides the design tokens (see lib/templates/engine/theme-style.ts). */
+.sf-theme {
+  font-family: var(--sf-font-body, inherit);
+  font-size: var(--sf-font-base-size, 1rem);
+  font-weight: var(--sf-font-body-weight, 400);
+  line-height: var(--sf-line-height, 1.5);
+}
+.sf-theme :is(h1, h2, h3, h4) {
+  font-family: var(--sf-font-heading, inherit);
+  font-weight: var(--sf-font-heading-weight, 700);
+}
+/* Sections own their width (see engine/ui.tsx), so full-bleed backgrounds can reach the edges. */
+.sf-theme h1, .sf-theme h2 { text-wrap: balance; }

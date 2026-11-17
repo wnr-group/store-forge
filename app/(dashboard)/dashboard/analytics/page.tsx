@@ -12,7 +12,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const n = Number(Array.isArray(raw) ? raw[0] : raw);
   const range = (RANGES as readonly number[]).includes(n) ? (n as RangeDays) : 30;
   const { store } = await requireWorkspaceCan("orders:view");
-  const data = await getAnalytics(range, store?.timezone ?? "UTC");
+  const data = await getAnalytics(range);
 
   return (
     <>

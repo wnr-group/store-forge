@@ -3,6 +3,8 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER } from "../ui";
+import { cn } from "@/lib/utils";
 interface MulticolumnSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -32,9 +34,9 @@ export function MulticolumnSection({ node, context, sectionId }: MulticolumnSect
       : "sm:grid-cols-2 lg:grid-cols-3";
 
   return (
-    <section className="w-full px-4 py-16 transition-colors" style={{ backgroundColor }} {...sfProps}>
-      <div className="mx-auto max-w-6xl">
-        <div className={`grid grid-cols-1 gap-8 text-${columnAlignment} ${colGridClass}`}>
+    <section className="w-full transition-colors" style={{ backgroundColor }} {...sfProps}>
+      <div className={cn(CONTAINER, "py-12 sm:py-16 lg:py-20")}>
+        <div className={`grid grid-cols-1 gap-8 sm:gap-10 text-${columnAlignment} ${colGridClass}`}>
           {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
         </div>
       </div>

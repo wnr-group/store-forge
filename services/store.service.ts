@@ -1,45 +1,4 @@
-import "server-only";
-import { asc, eq } from "drizzle-orm";
-import { stores, type Store } from "@/lib/db/schema";
-import { withAuthenticatedDb, type DbTx } from "@/lib/db/tenant-db";
+import type { Store } from "@/lib/domain/entities";
 
+/** The primary store comes from the StoreForge API (`GET /organizations/current`); see `lib/tenant/api-workspace.ts`. */
 export type { Store };
-
-/**
- * Store queries take an already-authorised tenantId (from getActiveTenant /
- * withTenantDb) and filter on it explicitly. RLS repeats the membership check
- * in the database, so even a wrong tenantId here returns nothing.
- */
-export async function listStores(tenantId: string): Promise<Store[]> {
-  return withAuthenticatedDb((tx) =>
-    tx.select().from(stores).where(eq(stores.tenantId, tenantId)).orderBy(asc(stores.createdAt), asc(stores.id)),
-  );
-}
-
-/** The tenant's primary (oldest) store. */
-export async function getPrimaryStore(tenantId: string): Promise<Store | null> {
-  return withAuthenticatedDb((tx) => getPrimaryStoreInTx(tx, tenantId));
-}
-
-export async function getPrimaryStoreInTx(tx: DbTx, tenantId: string): Promise<Store | null> {
-  const [store] = await tx
-    .select()
-    .from(stores)
-    .where(eq(stores.tenantId, tenantId))
-    .orderBy(asc(stores.createdAt), asc(stores.id))
-    .limit(1);
-  return store ?? null;
-}
-
-/**
- * The tenant that owns the store with this slug - but only if the signed-in user is a member of it:
- * RLS hides every other tenant's stores, so a non-member (or a suspended company) gets null.
- */
-export async function getTenantIdForStoreSlug(slug: string): Promise<string | null> {
-  return withAuthenticatedDb((tx) => getTenantIdForStoreSlugInTx(tx, slug));
-}
-
-export async function getTenantIdForStoreSlugInTx(tx: DbTx, slug: string): Promise<string | null> {
-  const [row] = await tx.select({ tenantId: stores.tenantId }).from(stores).where(eq(stores.slug, slug)).limit(1);
-  return row?.tenantId ?? null;
-}

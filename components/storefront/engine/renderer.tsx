@@ -10,6 +10,7 @@ import { StorefrontContext } from "./context";
 import { renderSectionComponent } from "./sections";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { resolveBinding } from "@/lib/templates/engine/bindings";
+import { themeToStyle } from "@/lib/templates/engine/theme-style";
 
 /**
  * Resolves data-bound settings against store/resource context (AC-REN-016).
@@ -106,6 +107,10 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
   const activeMode: RenderMode = mode ?? context.mode ?? "public";
   const enrichedContext: RenderContext = { ...context, mode: activeMode };
 
+  // Without a theme the markup is exactly what it always was (the V1 equivalence tests depend on it).
+  const themeStyle = themeToStyle(enrichedContext.theme);
+  const themed = Object.keys(themeStyle).length > 0;
+
   const doc = resolveDocumentWithBindings(document, enrichedContext, activeMode);
   const layout = doc.layout || "classic";
   const store = enrichedContext.store;
@@ -129,7 +134,7 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
 
   return (
     <StorefrontContext.Provider value={enrichedContext}>
-      <div className="flex min-h-dvh flex-col">
+      <div className={themed ? "sf-theme flex min-h-dvh flex-col bg-background text-foreground" : "flex min-h-dvh flex-col"} style={themed ? themeStyle : undefined}>
         {/* Optional Announcement Group */}
         {groupAnnouncement ? (
           <div>
@@ -141,7 +146,8 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
 
         {/* Header: Group Header if present, otherwise Layout Chrome Header */}
         {groupHeader ? (
-          <div>
+          // `contents`: a sticky header cannot stick outside its parent, so the wrapper must not be a box of its own.
+          <div className="contents">
             {(groupHeader.order || Object.keys(groupHeader.sections || {})).map((secId) =>
               renderSectionComponent(groupHeader.sections[secId], enrichedContext, secId)
             )}
@@ -187,7 +193,7 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
         ) : null}
 
         {/* Main Page Content */}
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+        <main className={themed ? "w-full flex-1" : "mx-auto w-full max-w-6xl flex-1 px-4 py-8"}>
           {order.map((secId) => {
             const sec = sections[secId];
             if (!sec) return null;

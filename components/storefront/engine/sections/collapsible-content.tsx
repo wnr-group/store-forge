@@ -3,6 +3,8 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER, SECTION_Y } from "../ui";
+import { cn } from "@/lib/utils";
 interface CollapsibleContentSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -20,13 +22,13 @@ export function CollapsibleContentSection({ node, context, sectionId }: Collapsi
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
 
   return (
-    <section className="mx-auto w-full max-w-4xl px-4 py-16" {...sfProps}>
+    <section className={cn(CONTAINER, SECTION_Y, "max-w-4xl")} {...sfProps}>
       <div className="mb-8 text-center">
-        <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{heading}</h2>
+        <h2 className="text-2xl tracking-tight text-foreground sm:text-3xl lg:text-4xl">{heading}</h2>
         {subheading ? <p className="mt-3 text-base text-muted-foreground">{subheading}</p> : null}
       </div>
 
-      <div className="divide-y divide-border rounded-xl border border-border bg-card p-6 shadow-xs">
+      <div className="divide-y divide-border rounded-[var(--radius,0.5rem)] border border-border bg-card px-4 py-2 sm:px-6">
         {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
       </div>
     </section>

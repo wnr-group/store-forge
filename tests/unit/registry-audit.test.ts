@@ -45,6 +45,7 @@ const APPROVED_BLOCKS = [
   "variant-picker",
   "collapsible-info",
   "social-share",
+  "hero-slide",
 ] as const;
 
 const FORBIDDEN_COMPONENT_IDS = [
@@ -68,10 +69,10 @@ describe("Component Registry Audit [AC-REN-011]", () => {
     expect(sectionKeys.length).toBe(18);
   });
 
-  it("contains exactly the 21 approved blocks", () => {
+  it("contains exactly the 22 approved blocks", () => {
     const blockKeys = Object.keys(registry.blocks).sort();
     expect(blockKeys).toEqual([...APPROVED_BLOCKS].sort());
-    expect(blockKeys.length).toBe(21);
+    expect(blockKeys.length).toBe(22);
   });
 
   it("contains no unsupported or forbidden component IDs", () => {

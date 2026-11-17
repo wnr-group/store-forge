@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, Package, Palette, PlusCircle, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -27,7 +27,10 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.inventory, label: "Inventory", icon: Boxes, group: "Catalog" },
   { href: ROUTES.customers, label: "Customers", icon: Users, group: "Insights" },
   { href: ROUTES.analytics, label: "Analytics", icon: BarChart3, group: "Insights" },
-  { href: ROUTES.templates, label: "Templates", icon: Palette, group: "Workspace" },
+  { href: ROUTES.templates, label: "Themes", icon: Palette, group: "Online Store", exact: true },
+  { href: ROUTES.themeEditor, label: "Customize", icon: PenTool, group: "Online Store" },
+  { href: ROUTES.pages, label: "Pages", icon: FileText, group: "Online Store" },
+  { href: ROUTES.navigation, label: "Navigation", icon: Menu, group: "Online Store" },
   { href: ROUTES.settings, label: "Settings", icon: Settings, group: "Workspace" },
 ];
 
@@ -40,8 +43,7 @@ export const OWNER_NAV_ITEMS: NavItem[] = [
 /** Platform Admin area: companies only - no merchant data. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: ROUTES.adminCompanies, label: "Organizations", icon: Building2, exact: true, group: "Platform" },
-  { href: ROUTES.adminNewCompany, label: "Create organization", icon: PlusCircle, group: "Platform" },
+  { href: ROUTES.adminCompanies, label: "Organizations", icon: Building2, group: "Platform" },
   { href: ROUTES.adminTeam, label: "Platform Team", icon: ShieldCheck, group: "Platform" },
   { href: ROUTES.adminActivity, label: "Activity & Audit Logs", icon: ScrollText, group: "Platform" },
   { href: ROUTES.adminUsage, label: "Usage & Analytics", icon: BarChart3, group: "Platform" },

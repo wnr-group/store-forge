@@ -179,10 +179,15 @@ export function imageValueMessage(code: ImageIssueCode): string {
  * without one (missing or unsafe) every image is rejected with TENANT_REQUIRED. The issue sits on the
  * image value itself so the error path is the setting, not its `path` field.
  */
+/** `<theme-slug>/<file>`: the only shape of a theme asset reference. */
+export const THEME_ASSET_REGEX = /^[a-z][a-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}$/;
+
 export function imageValueSchema(tenantId?: string) {
   return z
     .object({
-      path: z.string().min(1, "Image path is required").max(LIMITS.maxTextLength),
+      path: z.string().min(1, "Image path is required").max(LIMITS.maxTextLength).optional(),
+      /** A picture that ships with a theme: `<theme>/<file>`, served from /themes. Never a tenant file. */
+      asset: z.string().max(140).optional(),
       alt: z.string().max(LIMITS.maxAltLength, `Alt text must be at most ${LIMITS.maxAltLength} characters`).optional(),
       focal: z
         .object({
@@ -192,6 +197,20 @@ export function imageValueSchema(tenantId?: string) {
         .optional(),
     })
     .superRefine((image, ctx) => {
+      if (image.asset !== undefined) {
+        if (image.path !== undefined || !THEME_ASSET_REGEX.test(image.asset) || image.asset.includes("..")) {
+          ctx.addIssue({
+            code: "custom",
+            message: imageValueMessage(IMAGE_ISSUE_CODES.invalidImage),
+            params: { imageIssue: IMAGE_ISSUE_CODES.invalidImage },
+          });
+        }
+        return;
+      }
+      if (image.path === undefined) {
+        ctx.addIssue({ code: "custom", path: ["path"], message: "Image path is required" });
+        return;
+      }
       const violation = imagePathViolation(image.path, tenantId);
       if (violation) {
         ctx.addIssue({ code: "custom", message: IMAGE_ISSUE_MESSAGES[violation], params: { imageIssue: violation } });

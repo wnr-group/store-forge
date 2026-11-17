@@ -35,7 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     tenants: tenants.filter((t) => !onStoreHost || t.tenant.id === active.tenant.id).map((t) => ({ id: t.tenant.id, name: t.tenant.name, role: t.role })),
   };
   const role = ROLE_LABELS[active.role];
-  const storeUrl = store ? storefrontUrl(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN) : null;
+  const storeUrl = store ? storefrontUrl(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, active.tenant.publicId) : null;
   const accountLink = (
     <DropdownMenuItem render={<Link href={ROUTES.settings} />}>
       <Settings aria-hidden /> Account settings
@@ -65,7 +65,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 target="_blank"
                 rel="noopener noreferrer"
                 className={buttonVariants({ variant: "outline", size: "sm" })}
-                title={`Open ${storefrontHost(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN)}`}
+                title={`Open ${storefrontHost(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, active.tenant.publicId)}`}
               >
                 <ExternalLink aria-hidden /> <span className="hidden sm:inline">View store</span>
                 <span className="sr-only sm:hidden">View store</span>

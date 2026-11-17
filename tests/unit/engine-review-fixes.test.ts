@@ -83,14 +83,14 @@ describe("shared constants are declared once [AC-ENG-001] [AC-ENG-015]", () => {
 
   it("[AC-ENG-001] the theme font options are derived from the font registry, with the same values and order as before", () => {
     const options = (id: string) => themeSettingDescriptors.find((d) => d.id === id)?.options ?? [];
-    expect(options("headingFont").map((o) => o.value)).toEqual(["manrope", "inter", "system-sans", "system-serif", "system-mono"]);
-    expect(options("bodyFont").map((o) => o.value)).toEqual(["inter", "manrope", "system-sans", "system-serif", "system-mono"]);
+    expect(options("headingFont").map((o) => o.value)).toEqual(["manrope", "inter", "dm-sans", "system-sans", "system-serif", "system-mono"]);
+    expect(options("bodyFont").map((o) => o.value)).toEqual(["inter", "manrope", "dm-sans", "system-sans", "system-serif", "system-mono"]);
     for (const id of ["headingFont", "bodyFont"]) {
       expect([...options(id).map((o) => o.value)].sort()).toEqual([...FONT_KEYS].sort());
       for (const option of options(id)) expect(option.label).toBe(FONT_REGISTRY[option.value as keyof typeof FONT_REGISTRY].name);
     }
-    expect(options("headingFont").map((o) => o.label)).toEqual(["Manrope", "Inter", "System Sans", "System Serif", "System Mono"]);
-    expect(options("bodyFont").map((o) => o.label)).toEqual(["Inter", "Manrope", "System Sans", "System Serif", "System Mono"]);
+    expect(options("headingFont").map((o) => o.label)).toEqual(["Manrope", "Inter", "DM Sans", "System Sans", "System Serif", "System Mono"]);
+    expect(options("bodyFont").map((o) => o.label)).toEqual(["Inter", "Manrope", "DM Sans", "System Sans", "System Serif", "System Mono"]);
     const text = source("lib/templates/registry/theme-settings.ts");
     expect(text).not.toMatch(/value: "system-mono"/);
   });

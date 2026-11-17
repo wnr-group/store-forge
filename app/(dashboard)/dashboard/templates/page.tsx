@@ -1,42 +1,23 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/shared/page-header";
-import { TemplatesWorkspace } from "@/components/templates/templates-workspace";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemeStore } from "@/components/themes/theme-store";
+import { ThemeQueryProvider } from "@/lib/themes/queries";
 import { canManageStore } from "@/lib/auth/permissions";
-import { requireWorkspace } from "@/lib/tenant/context";
-import { getPublicStorefront } from "@/services/storefront.service";
-import { getTemplateSettings } from "@/services/template-settings.service";
+import { requireWorkspaceCan } from "@/lib/tenant/context";
+import { getPreviewStoreData } from "@/services/theme.service";
 
-export const metadata: Metadata = { title: "Templates" };
+export const metadata: Metadata = { title: "Themes" };
 
-export default async function TemplatesPage() {
-  const { active, store } = await requireWorkspace();
-
-  if (!store) {
-    return (
-      <>
-        <PageHeader title="Templates" description="Choose how your public storefront looks." />
-        <div className="mx-auto max-w-3xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>No store yet</CardTitle>
-              <CardDescription>This workspace does not have a store.</CardDescription>
-            </CardHeader>
-            <CardContent />
-          </Card>
-        </div>
-      </>
-    );
-  }
-
-  // The slug comes from the user's own primary store, never from the client. getPublicStorefront() applies the same
-  // public filtering as the live page, and returns null for an inactive or suspended store (preview unavailable).
-  const [saved, storefront] = await Promise.all([getTemplateSettings(), getPublicStorefront(store.slug)]);
-
+/** Online Store > Themes: browse ready-made storefront themes, preview them with your own products, apply one and customize it. */
+export default async function ThemesPage() {
+  const { active } = await requireWorkspaceCan("dashboard:view");
+  const data = await getPreviewStoreData();
   return (
     <>
-      <PageHeader title="Templates" description="Choose how your public storefront looks and customize it. Changes go live when you save." />
-      <TemplatesWorkspace key={saved?.updatedAt ?? "none"} saved={saved} storefront={storefront} canEdit={canManageStore(active)} />
+      <PageHeader title="Themes" description="Choose how your online store looks. Preview a theme with your own products, then customize it in the editor. Nothing goes live until you publish." />
+      <ThemeQueryProvider>
+        <ThemeStore canManage={canManageStore(active)} data={data} />
+      </ThemeQueryProvider>
     </>
   );
 }

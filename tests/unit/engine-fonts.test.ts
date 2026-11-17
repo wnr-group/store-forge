@@ -18,10 +18,11 @@ import { themeSettingsSchema } from "../../lib/templates/engine/root-schema";
 import { themeSettingDescriptors } from "../../lib/templates/registry/theme-settings";
 
 describe("Engine Fonts [AC-ENG-013]", () => {
-  it("defines exactly 5 approved font keys", () => {
+  it("defines exactly 6 approved font keys", () => {
     const expected: FontKey[] = [
       "inter",
       "manrope",
+      "dm-sans",
       "system-sans",
       "system-serif",
       "system-mono",
@@ -183,6 +184,7 @@ const FREE_TEXT_FONTS: unknown[] = [
 const WEIGHT_BOUNDARIES: Record<FontKey, { accepted: number[]; rejected: number[] }> = {
   inter: { accepted: [100, 400, 900, 450], rejected: [99, 901, 0, -100, 1000] },
   manrope: { accepted: [200, 400, 800, 450], rejected: [100, 199, 801, 900, 0, -200] },
+  "dm-sans": { accepted: [100, 400, 900], rejected: [99, 1001, 0, -100] },
   "system-sans": { accepted: [100, 400, 900], rejected: [99, 901, 0, -400] },
   "system-serif": { accepted: [400, 700], rejected: [100, 300, 500, 600, 800, 900, 0] },
   "system-mono": { accepted: [400, 700], rejected: [100, 300, 500, 600, 800, 900, 0] },
@@ -199,6 +201,7 @@ describe("Font weights and typography values [AC-ENG-013]", () => {
     for (const [key, file] of [
       ["inter", "inter-latin.woff2"],
       ["manrope", "manrope-latin.woff2"],
+      ["dm-sans", "dm-sans-latin.woff2"],
     ] as const) {
       const support = woff2WeightSupport(file);
       const font = FONT_REGISTRY[key];
@@ -207,12 +210,12 @@ describe("Font weights and typography values [AC-ENG-013]", () => {
     }
   });
 
-  it("[AC-ENG-013] only the two embedded files are registered as bundled fonts", () => {
+  it("[AC-ENG-013] only the three embedded files are registered as bundled fonts", () => {
     expect(
       Object.values(FONT_REGISTRY)
         .filter((f) => f.woff2Path)
         .map((f) => f.woff2Path),
-    ).toEqual(["app/fonts/inter-latin.woff2", "app/fonts/manrope-latin.woff2"]);
+    ).toEqual(["app/fonts/inter-latin.woff2", "app/fonts/manrope-latin.woff2", "app/fonts/dm-sans-latin.woff2"]);
     for (const font of Object.values(FONT_REGISTRY)) {
       if (font.woff2Path) expect(fs.existsSync(path.resolve(process.cwd(), font.woff2Path))).toBe(true);
       else expect(font.fontFamily).not.toContain("var(--font-");

@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { RichText } from "../richtext-renderer";
-import { publicImageUrl } from "@/lib/storage/paths";
+import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 
 interface ColumnBlockProps {
   node: ComponentNode;
@@ -13,7 +13,7 @@ interface ColumnBlockProps {
 
 export function ColumnBlock({ node, context, blockId }: ColumnBlockProps) {
   const imageVal = node.settings?.image as { path?: string; alt?: string } | string | null | undefined;
-  const rawPath = typeof imageVal === "string" ? imageVal : imageVal?.path;
+  const rawPath = imageRawPath(imageVal);
   const altText = typeof imageVal === "object" ? imageVal?.alt ?? "" : "";
 
   const title = (node.settings?.title as string) ?? "";

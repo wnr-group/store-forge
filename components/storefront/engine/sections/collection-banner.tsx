@@ -5,6 +5,8 @@ import type { RenderContext, CollectionDetailData } from "../types";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER } from "../ui";
+import { cn } from "@/lib/utils";
 interface CollectionBannerSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -27,8 +29,8 @@ export function CollectionBannerSection({ node, context, sectionId }: Collection
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
 
   return (
-    <section className="border-b border-border bg-muted/20 px-4 py-12" {...sfProps}>
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 text-center md:flex-row md:text-left">
+    <section className="border-b border-border bg-[var(--surface,var(--muted))]" {...sfProps}>
+      <div className={cn(CONTAINER, "flex flex-col items-center gap-6 py-10 text-center sm:py-14 md:flex-row md:gap-10 md:text-left")}>
         {showImage && imageUrl ? (
           <div className="relative aspect-4/3 w-full max-w-xs shrink-0 overflow-hidden rounded-xl bg-muted">
             <Image src={imageUrl} alt={title} fill sizes="320px" className="object-cover" />
@@ -36,7 +38,7 @@ export function CollectionBannerSection({ node, context, sectionId }: Collection
         ) : null}
 
         <div className="flex-1 space-y-3">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{title}</h1>
+          <h1 className="text-3xl leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">{title}</h1>
           {showDescription && description ? (
             <p className="max-w-2xl text-base text-muted-foreground">{description}</p>
           ) : null}

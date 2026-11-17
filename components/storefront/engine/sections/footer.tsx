@@ -3,6 +3,8 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER } from "../ui";
+import { cn } from "@/lib/utils";
 interface FooterSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -26,17 +28,17 @@ export function FooterSection({ node, context, sectionId }: FooterSectionProps) 
   return (
     <footer
       className="border-t border-border mt-auto w-full transition-colors"
-      style={{ backgroundColor, color: textColor }}
+      style={{ backgroundColor, color: textColor, ["--foreground" as string]: textColor, ["--muted-foreground" as string]: `color-mix(in srgb, ${textColor} 72%, ${backgroundColor})` }}
       {...sfProps}
     >
-      <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className={cn(CONTAINER, "py-12 sm:py-16")}>
         {blockOrder.length > 0 ? (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 pb-8 border-b border-border/40">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 pb-10 border-b border-current/15 md:grid-cols-4 [&>*:first-child]:col-span-2 md:[&>*:first-child]:col-span-1">
             {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
           </div>
         ) : null}
 
-        <div className="pt-6 text-center text-sm text-muted-foreground">
+        <div className="pt-6 text-center text-xs opacity-70 sm:text-sm">
           {copyrightText || defaultCopyright}
         </div>
       </div>

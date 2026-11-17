@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { COLLECTION_STATUSES, INVENTORY_REASONS, PRODUCT_STATUSES } from "@/lib/db/schema/enums";
+import { COLLECTION_STATUSES, INVENTORY_REASONS, PRODUCT_STATUSES } from "@/lib/domain/enums";
 import {
   emailField,
   isSupportedCurrency,
@@ -19,6 +19,9 @@ import { storeSlugSchema } from "./company";
 
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+/** Hero-slide videos: MP4 or WebM, store folder only, at most 50 MB. */
+export const VIDEO_TYPES = ["video/mp4", "video/webm"] as const;
+export const VIDEO_MAX_BYTES = 50 * 1024 * 1024;
 export const MAX_IMAGES_PER_PRODUCT = 10;
 export const MAX_VARIANTS = 100;
 

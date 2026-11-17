@@ -6,6 +6,7 @@ import { run } from "@/lib/actions/run";
 import { inventoryAdjustSchema } from "@/lib/validations/catalog";
 import { parseInput } from "@/lib/validations/parse";
 import { adjustStock } from "@/services/inventory.service";
+import { invalidateStorefront } from "@/lib/storefront/cache";
 
 export async function adjustStockAction(input: unknown) {
   return run(async () => {
@@ -13,6 +14,7 @@ export async function adjustStockAction(input: unknown) {
     revalidatePath(ROUTES.inventory);
     revalidatePath(ROUTES.products);
     revalidatePath(ROUTES.dashboard);
+    await invalidateStorefront();
     return result;
   });
 }

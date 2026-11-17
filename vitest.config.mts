@@ -8,8 +8,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    // Each DB test file boots its own in-process Postgres (WASM). Cap parallel
-    // workers so a typical dev machine is not starved of memory.
+    // Cap parallel workers so a typical dev machine is not starved of memory.
     maxWorkers: 3,
     include: ["tests/**/*.test.ts"],
     // Wall-clock budget files run serially via vitest.timing.config.mts.

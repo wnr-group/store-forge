@@ -1,10 +1,10 @@
 /**
  * Central access definition. UI and server code ask `can(actor, permission)`;
  * nobody hardcodes role names at call sites. The database enforces the same
- * rules independently through RLS (drizzle/0002 role policies plus the restrictive
- * per-module policies of drizzle/0018_member_permissions) - keep the two in sync.
+ * rules independently through RLS (role policies plus the restrictive per-module policies, in the store-forge-api
+ * repository's migrations 0002 and 0018) - keep the two in sync.
  */
-import { MEMBERSHIP_ROLES, MODULES, type AccessLevel, type MemberPermissions, type MembershipRole, type Module } from "@/lib/db/schema/enums";
+import { MEMBERSHIP_ROLES, MODULES, type AccessLevel, type MemberPermissions, type MembershipRole, type Module } from "@/lib/domain/enums";
 
 export const ROLES = MEMBERSHIP_ROLES;
 export type Role = MembershipRole;

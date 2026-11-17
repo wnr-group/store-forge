@@ -11,8 +11,8 @@ export const ROUTES = {
   login: "/login",
   noWorkspace: "/no-workspace",
   admin: "/admin",
-  adminCompanies: "/admin/companies",
-  adminNewCompany: "/admin/companies/new",
+  adminCompanies: "/admin/organizations",
+  adminNewCompany: "/admin/organizations/new",
   adminAccount: "/admin/account",
   adminActivity: "/admin/activity",
   adminTeam: "/admin/team",
@@ -28,6 +28,9 @@ export const ROUTES = {
   team: "/dashboard/team",
   settings: "/dashboard/settings",
   templates: "/dashboard/templates",
+  themeEditor: "/dashboard/templates/editor",
+  pages: "/dashboard/pages",
+  navigation: "/dashboard/navigation",
 } as const;
 
 /** Routes that require a signed-in user (enforced again server-side in the data layer). */

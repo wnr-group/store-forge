@@ -3,6 +3,8 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { renderBlockComponent } from "../blocks";
 
+import { CONTAINER, SECTION_Y } from "../ui";
+import { cn } from "@/lib/utils";
 interface RichTextSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -31,8 +33,8 @@ export function RichTextSection({ node, context, sectionId }: RichTextSectionPro
       : "items-center text-center";
 
   return (
-    <section className="w-full px-4 py-16 transition-colors" style={{ backgroundColor }} {...sfProps}>
-      <div className={`mx-auto flex ${widthClass} flex-col gap-4 ${alignClass}`}>
+    <section className="w-full transition-colors" style={{ backgroundColor }} {...sfProps}>
+      <div className={cn(CONTAINER, SECTION_Y, `flex ${widthClass} flex-col gap-4 ${alignClass}`)}>
         {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
       </div>
     </section>

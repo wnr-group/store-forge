@@ -2,8 +2,9 @@ import React from "react";
 import Image from "next/image";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
-import { publicImageUrl } from "@/lib/storage/paths";
 import { renderBlockComponent } from "../blocks";
+import { CONTAINER, ImagePlaceholder, RADIUS, SECTION_Y, resolveImage } from "../ui";
+import { cn } from "@/lib/utils";
 
 interface ImageWithTextSectionProps {
   node: ComponentNode;
@@ -11,11 +12,9 @@ interface ImageWithTextSectionProps {
   sectionId?: string;
 }
 
+/** A picture beside some text. Stacks on phones (picture first), splits 50/50 or 40/60 from tablet width up. */
 export function ImageWithTextSection({ node, context, sectionId }: ImageWithTextSectionProps) {
-  const imageVal = node.settings?.image as { path?: string; alt?: string } | string | null | undefined;
-  const rawPath = typeof imageVal === "string" ? imageVal : imageVal?.path;
-  const altText = typeof imageVal === "object" ? imageVal?.alt ?? "" : "";
-
+  const { url: imageUrl, alt: altText } = resolveImage(node.settings?.image);
   const imagePosition = (node.settings?.imagePosition as string) ?? "left";
   const imageWidth = (node.settings?.imageWidth as string) ?? "medium";
 
@@ -25,37 +24,15 @@ export function ImageWithTextSection({ node, context, sectionId }: ImageWithText
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
 
-  const imageUrl = rawPath
-    ? rawPath.startsWith("http://") || rawPath.startsWith("https://") || rawPath.startsWith("/")
-      ? rawPath
-      : publicImageUrl(rawPath)
-    : null;
-
-  const imageSpanClass =
-    imageWidth === "small" ? "md:w-1/3" : imageWidth === "large" ? "md:w-2/3" : "md:w-1/2";
-  const textSpanClass =
-    imageWidth === "small" ? "md:w-2/3" : imageWidth === "large" ? "md:w-1/3" : "md:w-1/2";
+  const columns = imageWidth === "small" ? "md:grid-cols-[2fr_3fr]" : imageWidth === "large" ? "md:grid-cols-[3fr_2fr]" : "md:grid-cols-2";
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-16" {...sfProps}>
-      <div className={`flex flex-col gap-8 md:items-center ${imagePosition === "right" ? "md:flex-row-reverse" : "md:flex-row"}`}>
-        {/* Media Column */}
-        <div className={`w-full ${imageSpanClass}`}>
-          {imageUrl ? (
-            <div className="relative aspect-4/3 w-full overflow-hidden rounded-xl bg-muted shadow-xs">
-              <Image src={imageUrl} alt={altText} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
-            </div>
-          ) : (
-            <div className="flex aspect-4/3 w-full items-center justify-center rounded-xl bg-muted text-muted-foreground text-sm">
-              Image placeholder
-            </div>
-          )}
+    <section className={cn(CONTAINER, SECTION_Y)} {...sfProps}>
+      <div className={cn("grid items-center gap-8 md:gap-12 lg:gap-20", columns)}>
+        <div className={cn("relative aspect-[4/3] w-full overflow-hidden bg-muted md:aspect-[4/5]", RADIUS, imagePosition === "right" && "md:order-2")}>
+          {imageUrl ? <Image src={imageUrl} alt={altText} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" /> : <ImagePlaceholder className="absolute inset-0" />}
         </div>
-
-        {/* Content Column */}
-        <div className={`flex w-full flex-col gap-4 ${textSpanClass}`}>
-          {blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}
-        </div>
+        <div className="flex flex-col gap-4 [&_h2]:text-2xl [&_h2]:leading-tight [&_h2]:sm:text-3xl [&_h2]:lg:text-4xl">{blockOrder.map((blockId) => renderBlockComponent(blocks[blockId], context, blockId))}</div>
       </div>
     </section>
   );

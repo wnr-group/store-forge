@@ -15,9 +15,9 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { storeSettingsSchema } from "@/lib/validations/catalog";
-import type { Store } from "@/lib/db/schema";
+import type { Store } from "@/lib/domain/entities";
 
-type Props = { store: Store; canEdit: boolean; currencyLocked: boolean };
+type Props = { store: Store; publicId: string; canEdit: boolean; currencyLocked: boolean };
 
 const names = (kind: "currency" | "timeZone") => {
   try {
@@ -36,7 +36,7 @@ const getClientExtra = () => (clientExtra ??= { currencies: names("currency"), z
 const getServerExtra = () => NO_EXTRA;
 const subscribeNever = () => () => {};
 
-export function StoreSettingsForm({ store, canEdit, currencyLocked }: Props) {
+export function StoreSettingsForm({ store, publicId, canEdit, currencyLocked }: Props) {
   const router = useRouter();
   const [v, setV] = useState({
     name: store.name,
@@ -93,7 +93,7 @@ export function StoreSettingsForm({ store, canEdit, currencyLocked }: Props) {
           <FormField id="st-name" label="Store name" required error={errors.name}>
             <Input id="st-name" value={v.name} onChange={set("name")} onBlur={blur("name")} disabled={off} aria-invalid={Boolean(errors.name)} aria-describedby="st-name-msg" aria-required />
           </FormField>
-          <FormField id="st-slug" label="Store slug" required error={errors.slug} hint={`Your store is served at ${storefrontHost(v.slug || "your-store", process.env.NEXT_PUBLIC_ROOT_DOMAIN)}`}>
+          <FormField id="st-slug" label="Store slug" required error={errors.slug} hint={`Your store is served at ${storefrontHost(v.slug || "your-store", process.env.NEXT_PUBLIC_ROOT_DOMAIN, publicId)}`}>
             <Input id="st-slug" value={v.slug} onChange={set("slug")} onBlur={blur("slug")} disabled={off} aria-invalid={Boolean(errors.slug)} aria-describedby="st-slug-msg" aria-required />
           </FormField>
         </div>

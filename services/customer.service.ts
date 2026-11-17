@@ -1,91 +1,68 @@
 import "server-only";
-import { and, asc, desc, eq, ilike, or, sql, type SQL } from "drizzle-orm";
-import { customers, orders, type Customer, type Order } from "@/lib/db/schema";
-import { REVENUE_ORDER_STATUSES } from "@/lib/db/schema/enums";
-import { mapErrors } from "@/lib/db/errors";
+import type { Customer, Order } from "@/lib/domain/entities";
+import {
+  createCustomerApi,
+  deleteCustomerApi,
+  getCustomerApi,
+  listCustomersApi,
+  updateCustomerApi,
+  type CustomerApi,
+} from "@/lib/api/endpoints/customer-api";
 import { AppError } from "@/lib/errors";
-import { withTenantDb } from "@/lib/tenant/context";
+import { requireActiveTenant } from "@/lib/tenant/context";
 import { PAGE_SIZE, type CustomerListQuery } from "@/lib/validations/catalog";
 import type { Paged } from "./product.service";
 
+/**
+ * Customers, served by the StoreForge API (`/customers`). Order counts, spend (paid + fulfilled orders only) and the last
+ * order date are computed by the API.
+ */
 export type CustomerRow = Customer & { orderCount: number; totalSpentMinor: number; lastOrderAt: Date | null };
 
-const revenueStatuses = sql.join(REVENUE_ORDER_STATUSES.map((s) => sql`${s}`), sql`, `);
+const toRow = (c: CustomerApi, tenantId: string): CustomerRow => ({
+  ...c,
+  tenantId,
+  createdAt: new Date(c.createdAt),
+  updatedAt: new Date(c.updatedAt),
+  lastOrderAt: c.lastOrderAt ? new Date(c.lastOrderAt) : null,
+});
 
-/** Per-customer order aggregates, computed in SQL from real orders (revenue statuses only for spend). */
-const orderCount = sql<number>`(select count(*)::int from "orders" o where o.customer_id = "customers"."id")`;
-const spent = sql<number>`coalesce((select sum(o.total_minor) from "orders" o where o.customer_id = "customers"."id" and o.status in (${revenueStatuses})), 0)::float8`;
-const lastOrder = sql<Date | null>`(select max(o.placed_at) from "orders" o where o.customer_id = "customers"."id")`;
+const SORT_BY = { created: "createdAt", name: "name", spent: "spent", orders: "orders" } as const;
 
 export async function listCustomers(q: CustomerListQuery): Promise<Paged<CustomerRow>> {
-  return withTenantDb({}, async (tx, ctx) => {
-    const where: (SQL | undefined)[] = [eq(customers.tenantId, ctx.tenantId)];
-    if (q.q) {
-      const term = `%${q.q.replace(/[%_\\]/g, "\\$&")}%`;
-      where.push(or(ilike(customers.fullName, term), ilike(customers.email, term), ilike(customers.phone, term)));
-    }
-    const dir = q.dir === "asc" ? asc : desc;
-    const order = q.sort === "name" ? dir(customers.fullName) : q.sort === "spent" ? dir(spent) : q.sort === "orders" ? dir(orderCount) : dir(customers.createdAt);
-    const cond = and(...where) as SQL;
-    const [rows, [{ total }]] = await Promise.all([
-      tx
-        .select({ customer: customers, orderCount, totalSpentMinor: spent, lastOrderAt: lastOrder })
-        .from(customers)
-        .where(cond)
-        .orderBy(order, asc(customers.id))
-        .limit(PAGE_SIZE)
-        .offset((q.page - 1) * PAGE_SIZE),
-      tx.select({ total: sql<number>`count(*)::int` }).from(customers).where(cond),
-    ]);
-    return {
-      items: rows.map((r) => ({ ...r.customer, orderCount: r.orderCount, totalSpentMinor: Number(r.totalSpentMinor), lastOrderAt: r.lastOrderAt ? new Date(r.lastOrderAt) : null })),
-      total,
-      page: q.page,
-      pageSize: PAGE_SIZE,
-    };
-  });
+  const { tenant } = await requireActiveTenant("customers:view");
+  const { items, meta } = await listCustomersApi(tenant.id, { page: q.page, limit: PAGE_SIZE, search: q.q, sortBy: SORT_BY[q.sort], sortOrder: q.dir });
+  return { items: items.map((c) => toRow(c, tenant.id)), total: meta.total, page: meta.page, pageSize: PAGE_SIZE };
 }
 
 export async function getCustomer(id: string): Promise<{ customer: CustomerRow; orders: Order[] } | null> {
-  return withTenantDb({}, async (tx, ctx) => {
-    const [row] = await tx
-      .select({ customer: customers, orderCount, totalSpentMinor: spent, lastOrderAt: lastOrder })
-      .from(customers)
-      .where(and(eq(customers.id, id), eq(customers.tenantId, ctx.tenantId)));
-    if (!row) return null;
-    const history = await tx.select().from(orders).where(and(eq(orders.customerId, id), eq(orders.tenantId, ctx.tenantId))).orderBy(desc(orders.placedAt)).limit(50);
+  const { tenant } = await requireActiveTenant("customers:view");
+  try {
+    const { orders: history, ...customer } = await getCustomerApi(tenant.id, id);
     return {
-      customer: { ...row.customer, orderCount: row.orderCount, totalSpentMinor: Number(row.totalSpentMinor), lastOrderAt: row.lastOrderAt ? new Date(row.lastOrderAt) : null },
-      orders: history,
+      customer: toRow(customer, tenant.id),
+      orders: history.map((o) => ({ ...o, tenantId: tenant.id, customerId: id, status: o.status as Order["status"], placedAt: new Date(o.placedAt), createdAt: new Date(o.placedAt) })),
     };
-  });
+  } catch (error) {
+    if (error instanceof AppError && error.code === "NOT_FOUND") return null;
+    throw error;
+  }
 }
 
 type Values = { fullName: string; email: string; phone: string | null; notes: string | null };
 
 export async function createCustomer(v: Values): Promise<{ id: string }> {
-  return withTenantDb({ permission: "customers:manage" }, (tx, ctx) =>
-    mapErrors(async () => {
-      const [row] = await tx.insert(customers).values({ tenantId: ctx.tenantId, ...v }).returning({ id: customers.id });
-      return row;
-    }),
-  );
+  const { tenant } = await requireActiveTenant("customers:manage");
+  const { id } = await createCustomerApi(tenant.id, v);
+  return { id };
 }
 
 export async function updateCustomer(id: string, v: Values): Promise<void> {
-  await withTenantDb({ permission: "customers:manage" }, (tx, ctx) =>
-    mapErrors(async () => {
-      const rows = await tx.update(customers).set(v).where(and(eq(customers.id, id), eq(customers.tenantId, ctx.tenantId))).returning({ id: customers.id });
-      if (!rows.length) throw new AppError("NOT_FOUND", "That customer no longer exists.");
-    }),
-  );
+  const { tenant } = await requireActiveTenant("customers:manage");
+  await updateCustomerApi(tenant.id, id, v);
 }
 
 export async function deleteCustomer(id: string): Promise<void> {
-  await withTenantDb({ permission: "customers:delete" }, (tx, ctx) =>
-    mapErrors(async () => {
-      const rows = await tx.delete(customers).where(and(eq(customers.id, id), eq(customers.tenantId, ctx.tenantId))).returning({ id: customers.id });
-      if (!rows.length) throw new AppError("NOT_FOUND", "That customer no longer exists.");
-    }),
-  );
+  const { tenant } = await requireActiveTenant("customers:delete");
+  await deleteCustomerApi(tenant.id, id);
 }

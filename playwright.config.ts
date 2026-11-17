@@ -1,6 +1,6 @@
 import { defineConfig } from "@playwright/test";
 
-// Same as drizzle.config.ts: load .env.local when present. Variables already set in the shell are NOT overridden,
+// Load .env.local when present. Variables already set in the shell are NOT overridden,
 // which is how the E2E run is pointed at a local/dev Supabase instead of whatever .env.local names.
 try {
   process.loadEnvFile(".env.local");
