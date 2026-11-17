@@ -61,6 +61,13 @@ export const heroSection: SectionDefinition = {
       help: "Darkens the picture behind light text, or lightens it behind dark text",
     },
     {
+      id: "eyebrow",
+      type: "text",
+      label: "Small label above the heading",
+      default: "",
+      help: "Shown by themes that support it. Empty shows the store name.",
+    },
+    {
       id: "heading",
       type: "text",
       label: "Heading",

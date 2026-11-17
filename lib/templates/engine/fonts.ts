@@ -1,6 +1,6 @@
 /**
  * Closed font registry and typography boundaries (D21).
- * Supports exactly 8 approved font keys, all self-hosted. No external Google Fonts requests.
+ * Supports exactly 10 approved font keys, all self-hosted. No external Google Fonts requests.
  */
 
 export const FONT_KEYS = [
@@ -9,6 +9,8 @@ export const FONT_KEYS = [
   "dm-sans",
   "jost",
   "cormorant-garamond",
+  "plus-jakarta-sans",
+  "archivo",
   "system-sans",
   "system-serif",
   "system-mono",
@@ -83,6 +85,24 @@ export const FONT_REGISTRY: Record<FontKey, FontConfig> = {
     minWeight: 300,
     maxWeight: 700,
     woff2Path: "app/fonts/cormorant-garamond-latin.woff2",
+  },
+  "plus-jakarta-sans": {
+    key: "plus-jakarta-sans",
+    name: "Plus Jakarta Sans",
+    fontFamily: "var(--font-plus-jakarta-sans), sans-serif",
+    variable: true,
+    minWeight: 200,
+    maxWeight: 800,
+    woff2Path: "app/fonts/plus-jakarta-sans-latin.woff2",
+  },
+  archivo: {
+    key: "archivo",
+    name: "Archivo",
+    fontFamily: "var(--font-archivo), sans-serif",
+    variable: true,
+    minWeight: 100,
+    maxWeight: 900,
+    woff2Path: "app/fonts/archivo-latin.woff2",
   },
   "system-sans": {
     key: "system-sans",

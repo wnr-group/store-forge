@@ -1,4 +1,4 @@
-import { DEFAULT_LOOK, isLookId, type LookId } from "../looks";
+import { DEFAULT_LOOK, LOOK_TINT, isLookId, type LookId } from "../looks";
 import { themeToCssVars, type ThemeSettings } from "./theme-css";
 
 /**
@@ -71,7 +71,8 @@ export function themeToStyle(theme: unknown): Record<string, string> {
   }
   // The colour picture placeholders are tinted with: the primary, unless that is near-black or grey, then the accent.
   const accentHex = color("accent");
-  const tint = primary && HEX.test(primary) && (chroma(primary) > 0.25 || !(accentHex && HEX.test(accentHex))) ? primary : accentHex && HEX.test(accentHex) ? accentHex : primary;
+  const preferred = LOOK_TINT[lookOf(theme)] === "secondary" ? color("secondary") : undefined;
+  const tint = preferred && HEX.test(preferred) ? preferred : primary && HEX.test(primary) && (chroma(primary) > 0.25 || !(accentHex && HEX.test(accentHex))) ? primary : accentHex && HEX.test(accentHex) ? accentHex : primary;
   if (tint && HEX.test(tint)) set("--tint", tint);
   const secondary = color("secondary");
   if (secondary && HEX.test(secondary)) {

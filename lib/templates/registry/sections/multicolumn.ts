@@ -8,6 +8,20 @@ export const multicolumnSection: SectionDefinition = {
   maxChildren: 12,
   settings: [
     {
+      id: "eyebrow",
+      type: "text",
+      label: "Small label above the heading",
+      default: "",
+      help: "Shown by themes that support it",
+    },
+    {
+      id: "heading",
+      type: "text",
+      label: "Heading",
+      default: "",
+      help: "Shown by themes that support it",
+    },
+    {
       id: "columns",
       type: "range",
       label: "Columns on Desktop",

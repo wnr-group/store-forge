@@ -38,6 +38,13 @@ export const collectionListSection: SectionDefinition = {
       max: 6,
     },
     {
+      id: "showViewAll",
+      type: "toggle",
+      label: "Show View All Link",
+      default: true,
+      help: "Shown by themes that support it",
+    },
+    {
       id: "showProductCount",
       type: "toggle",
       label: "Show Product Count",

@@ -3,9 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import type { SectionProps } from "../engine/looks";
+import { lookCard, type SectionProps } from "../engine/looks";
 import { SHELL } from "../engine/looks/boutique/shell";
-import { BoutiqueProductCard } from "../engine/looks/boutique/product-card";
 import { gridColumns, type CardProduct } from "../engine/ui";
 import { useOptionalWishlist } from "./wishlist-provider";
 
@@ -38,6 +37,7 @@ export function WishlistPageSection({ context, sectionId }: SectionProps) {
   }, [ready, hasItems, revalidate, isPreview]);
 
   if (!wishlist) return null;
+  const Card = lookCard(context.theme);
   const products: CardProduct[] = wishlist.items.map((i) => ({
     name: i.name,
     slug: i.productSlug,
@@ -98,7 +98,7 @@ export function WishlistPageSection({ context, sectionId }: SectionProps) {
         <ul className={cn("mt-10 grid gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:gap-x-6", gridColumns(4))}>
           {products.map((p) => (
             <li key={p.slug} className="min-w-0">
-              <BoutiqueProductCard product={p} currency={currency} href={`/products/${p.slug}`} />
+              <Card product={p} currency={currency} href={`/products/${p.slug}`} />
             </li>
           ))}
         </ul>

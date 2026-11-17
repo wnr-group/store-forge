@@ -14,7 +14,7 @@ import type { CardProduct } from "../../ui";
  * is hovered or focused (always shown on touch screens, which have no hover). Rendered only where the store has a wishlist
  * or a bag. It sits OUTSIDE the card's link, so the card is never an anchor that contains buttons.
  */
-export function CardActions({ product, href }: { product: CardProduct; href: string | null }) {
+export function CardActions({ product, href, aspect = "aspect-[3/4]", inset = "inset-x-3 bottom-3", round = "" }: { product: CardProduct; href: string | null; aspect?: string; inset?: string; round?: string }) {
   const cart = useOptionalCart();
   const wishlist = useOptionalWishlist();
   const router = useRouter();
@@ -56,7 +56,7 @@ export function CardActions({ product, href }: { product: CardProduct; href: str
 
   if (!wishlist && !cart) return null;
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 aspect-[3/4]">
+    <div className={cn("pointer-events-none absolute inset-x-0 top-0", aspect)}>
       {wishlist ? (
         <button
           type="button"
@@ -73,7 +73,7 @@ export function CardActions({ product, href }: { product: CardProduct; href: str
           type="button"
           onClick={addToBag}
           disabled={busy}
-          className="pointer-events-auto absolute inset-x-3 bottom-3 flex h-10 translate-y-2 items-center justify-center bg-primary text-[11px] font-[450] uppercase tracking-[0.15em] text-primary-foreground opacity-0 transition-all duration-300 ease-[cubic-bezier(.22,.61,.36,1)] hover:bg-[var(--primary-hover,var(--primary))] focus-visible:translate-y-0 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100 disabled:cursor-wait disabled:opacity-80 motion-reduce:transition-none [@media(hover:none)]:translate-y-0 [@media(hover:none)]:opacity-100"
+          className={cn("pointer-events-auto absolute flex h-10 translate-y-2 items-center justify-center bg-primary text-[11px] font-[450] uppercase tracking-[0.15em] text-primary-foreground opacity-0 transition-all duration-300 ease-[cubic-bezier(.22,.61,.36,1)] hover:bg-[var(--primary-hover,var(--primary))] focus-visible:translate-y-0 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100 disabled:cursor-wait disabled:opacity-80 motion-reduce:transition-none [@media(hover:none)]:translate-y-0 [@media(hover:none)]:opacity-100", inset, round)}
         >
           {busy ? "Adding" : "Add to bag"}
         </button>
