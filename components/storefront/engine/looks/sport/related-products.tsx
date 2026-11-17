@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { gridColumns, type CardProduct } from "../../ui";
 import type { ProductDetailData } from "../../types";
 import type { SectionProps } from "..";
+import { rise } from "./reveal";
 import { SHELL, SportTitle, ViewAll } from "./ui";
 import { SportProductCard } from "./product-card";
 
@@ -40,8 +41,8 @@ export function SportRelatedProducts({ node, context, sectionId }: SectionProps)
         <p className="text-xs italic text-muted-foreground">Products from the same collection or category appear here.</p>
       ) : (
         <ul className={cn("grid gap-x-4 gap-y-9 sm:gap-x-6", gridColumns(columns))}>
-          {related.map((p) => (
-            <li key={p.slug} className="min-w-0">
+          {related.map((p, i) => (
+            <li key={p.slug} className="min-w-0" {...rise(i % 4)}>
               <SportProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} />
             </li>
           ))}
