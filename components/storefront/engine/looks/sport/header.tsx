@@ -11,6 +11,7 @@ import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
 import { resolveImage } from "../../ui";
 import type { SectionProps } from "..";
+import { SportMotion } from "./motion";
 import { HEADLINE_FONT, SHELL } from "./ui";
 
 const FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
@@ -76,6 +77,7 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
 
   return (
     <header className={cn("z-40 bg-background", sticky && "sticky top-0", showSeparator && "border-b border-border")} onMouseLeave={() => setMega(false)} {...sfProps}>
+      <SportMotion />
       <div className={cn(SHELL, "flex h-[60px] items-center gap-3 sm:gap-6 lg:h-[72px] lg:gap-10")}>
         <Link href="/" aria-label={store.name} title={store.name} className={cn("flex shrink-0 items-center", FOCUS)}>
           {logoSrc ? (

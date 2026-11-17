@@ -5,6 +5,7 @@ import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
 import { ImagePlaceholder } from "../../ui";
 import type { SectionProps } from "..";
+import { rise, tintStyle } from "./reveal";
 import { BAND_Y, HEADLINE_FONT, SHELL, SportEyebrow, SportTitle, ViewAll } from "./ui";
 
 const COLS: Record<number, string> = {
@@ -61,8 +62,8 @@ export function SportCollectionList({ node, context, sectionId }: SectionProps) 
               const count = showCount && typeof col.product_count === "number" ? `${col.product_count} ${col.product_count === 1 ? "piece" : "pieces"}` : null;
               if (layout === "overlay") {
                 return (
-                  <li key={col.slug || col.id} className="min-w-0">
-                    <Link href={href} className={link}>
+                  <li key={col.slug || col.id} className="min-w-0" {...rise(i)}>
+                    <Link href={href} className={cn(link, "sf-tint block rounded-[1.75rem] p-2")} style={tintStyle(i + 2)}>
                       <div className="relative aspect-[3/4] overflow-hidden rounded-[1.25rem] bg-[var(--surface)]">
                         {img ? <Image src={img} alt="" fill priority={i < 4} sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
                         <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/65 to-transparent" />
@@ -79,7 +80,7 @@ export function SportCollectionList({ node, context, sectionId }: SectionProps) 
               }
               if (layout === "editorial") {
                 return (
-                  <li key={col.slug || col.id} className={cn("min-w-0", i % 2 === 1 && "lg:mt-10")}>
+                  <li key={col.slug || col.id} className={cn("min-w-0", i % 2 === 1 && "lg:mt-10")} {...rise(i)}>
                     <Link href={href} className={link}>
                       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
                         {img ? <Image src={img} alt="" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
@@ -96,8 +97,8 @@ export function SportCollectionList({ node, context, sectionId }: SectionProps) 
                 );
               }
               return (
-                <li key={col.slug || col.id} className="min-w-0">
-                  <Link href={href} className={link}>
+                <li key={col.slug || col.id} className="min-w-0" {...rise(i)}>
+                  <Link href={href} className={cn(link, "sf-tint block rounded-[1.75rem] p-2")} style={tintStyle(i)}>
                     <div className="relative aspect-[4/5] overflow-hidden rounded-[1.25rem] bg-[var(--surface)]">
                       {img ? <Image src={img} alt="" fill priority={i < 6} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
                     </div>

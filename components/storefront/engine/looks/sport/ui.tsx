@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SplitWords } from "./motion";
 
 /** The engine's own container (page width and gutters from the theme), so Sport sections line up with the footer. */
 export const SHELL = "mx-auto w-full max-w-[var(--sf-page-width,80rem)] px-4 sm:px-6 lg:px-8";
@@ -13,7 +14,7 @@ export function SportTitle({ children, italic = true, bar = true, tone = "dark",
   return (
     <div className={className}>
       <Tag className={cn("text-balance text-[2rem] font-extrabold uppercase leading-[1] tracking-[-0.025em] md:text-[2.5rem] xl:text-[3rem]", italic && "italic", tone === "dark" ? "text-primary" : "text-white")} style={HEADLINE_FONT}>
-        {children}
+        {typeof children === "string" ? <SplitWords>{children}</SplitWords> : children}
       </Tag>
       {bar ? <span aria-hidden className="mt-5 block h-1 w-[70px] rounded-full bg-accent" /> : null}
     </div>

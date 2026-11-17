@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { EmptyProducts, gridColumns, type CardProduct } from "../../ui";
 import type { SectionProps } from "..";
 import { BAND_Y, SHELL, SportEyebrow, SportTitle, ViewAll } from "./ui";
+import { rise } from "./reveal";
 import { SportProductCard } from "./product-card";
 
 /**
@@ -44,7 +45,7 @@ export function SportFeaturedCollection({ node, context, sectionId }: SectionPro
         ) : (
           <ul className={cn("grid gap-x-4 gap-y-9 sm:gap-x-6", gridColumns(columns))}>
             {products.map((p, i) => (
-              <li key={p.slug} className="min-w-0">
+              <li key={p.slug} className="min-w-0" {...rise(i)}>
                 <SportProductCard product={p} currency={currency} href={`/products/${p.slug}`} tone={tone} priority={i < 4} />
               </li>
             ))}
