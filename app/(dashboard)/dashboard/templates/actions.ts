@@ -9,6 +9,8 @@ import {
   applyTheme,
   getCurrentTheme,
   getPreview,
+  getPreviewCollectionProducts,
+  getPreviewProduct,
   getPreviewStoreData,
   getTemplate,
   getThemeDetail,
@@ -30,6 +32,8 @@ import { invalidateStorefront } from "@/lib/storefront/cache";
 
 const idSchema = z.string().uuid();
 const slugSchema = z.string().regex(/^[a-z][a-z0-9-]{1,39}$/);
+/** Product and collection slugs as the storefront writes them in its links. */
+const resourceSlugSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{0,99}$/);
 const labelSchema = z.string().trim().max(80).optional();
 
 const listSchema = z.object({
@@ -58,6 +62,8 @@ export const listTemplatesAction = async () => run(() => listTemplates());
 export const getTemplateAction = async (id: unknown) => run(() => getTemplate(parseInput(idSchema, id)));
 export const getPreviewAction = async (id: unknown) => run(() => getPreview(parseInput(idSchema, id)));
 export const getPreviewStoreDataAction = async () => run(() => getPreviewStoreData());
+export const getPreviewProductAction = async (slug: unknown) => run(() => getPreviewProduct(parseInput(resourceSlugSchema, slug)));
+export const getPreviewCollectionProductsAction = async (slug: unknown) => run(() => getPreviewCollectionProducts(parseInput(resourceSlugSchema, slug)));
 
 const saveSchema = z.object({
   id: idSchema,

@@ -105,4 +105,6 @@ export type PreviewStoreData = {
   collectionProducts?: Record<string, PreviewStoreData["store"]["products"]>;
   /** The first product as a product page shows it (pictures, options, variants), for the editor's product-page preview. */
   productPage?: Record<string, unknown> | null;
+  /** The store's published content pages (About, Contact ...), so the editor can open and design them. */
+  contentPages?: { title: string; slug: string; body: string }[];
 };

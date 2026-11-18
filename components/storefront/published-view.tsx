@@ -1,5 +1,6 @@
 import { TemplateRenderer } from "@/components/storefront/engine/renderer";
 import type { CollectionProductSummary, RenderContext } from "@/components/storefront/engine/types";
+import { resolvePageDocument, type PageKey } from "@/lib/storefront/pages";
 import type { TemplateDocument } from "@/lib/templates/document";
 import type { PublicCollectionApi, PublicLayoutApi } from "@/lib/api/endpoints/public-api";
 import type { PublicStorefront } from "@/services/storefront.service";
@@ -16,11 +17,17 @@ export function PublishedView({
   document,
   frame,
   resource,
+  page,
+  adapt,
 }: {
   store: PublicStorefront;
   document: TemplateDocument;
   frame: Frame;
   resource?: Record<string, unknown>;
+  /** A generated page the merchant can design: their edited version, if saved in the theme, replaces `document`. */
+  page?: PageKey;
+  /** Final touch on the page chosen above (the search page puts its live title and note in). */
+  adapt?: (doc: TemplateDocument) => TemplateDocument;
 }) {
   const context: RenderContext = {
     store,
@@ -33,5 +40,6 @@ export function PublishedView({
     groupAnnouncement: frame?.layout.groups.announcement ?? undefined,
     basePath: "",
   };
-  return <TemplateRenderer document={document} mode="public" context={context} />;
+  const chosen = page ? resolvePageDocument(context.theme, page, document) : document;
+  return <TemplateRenderer document={adapt && chosen !== document ? adapt(chosen) : chosen} mode="public" context={context} />;
 }

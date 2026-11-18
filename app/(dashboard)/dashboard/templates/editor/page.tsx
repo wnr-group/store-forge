@@ -29,7 +29,7 @@ export default async function ThemeEditorPage({ searchParams }: Props) {
   const [docs, current, data] = await Promise.all([
     Promise.all([chosen, ...shared].map((t) => getTemplate(t.id))),
     getCurrentTheme(),
-    getPreviewStoreData({ collectionProducts: true, productPage: true }),
+    getPreviewStoreData({ collectionProducts: true, productPage: true, contentPages: true }),
   ]);
 
   const init: EditorInit = {

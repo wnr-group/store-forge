@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { PublishedView } from "@/components/storefront/published-view";
 import { getPublicCollectionApi } from "@/lib/api/endpoints/public-api";
 import { productListDocument, searchProducts } from "@/lib/storefront/documents";
+import { withSearchTerm } from "@/lib/storefront/pages";
 import { getPublicStorefront, getPublishedFrame } from "@/services/storefront.service";
 
 /**
@@ -44,5 +45,5 @@ export default async function SearchPage({ params, searchParams }: Props) {
     : results.length === 0
       ? `No products match "${term}"${where}.`
       : `${results.length} result${results.length === 1 ? "" : "s"} for "${term}"${where}.`;
-  return <PublishedView store={store} frame={frame} resource={{ products: results }} document={productListDocument(term ? `Search: ${term}` : "Search", note)} />;
+  return <PublishedView store={store} frame={frame} resource={{ products: results }} document={productListDocument(term ? `Search: ${term}` : "Search", note)} page="search" adapt={(doc) => withSearchTerm(doc, term, note)} />;
 }

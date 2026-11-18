@@ -16,5 +16,5 @@ export default async function CartPage({ params }: Params) {
   const store = await getPublicStorefront(slug);
   if (!store) notFound();
   const frame = (await getPublishedFrame(slug)) ?? { layout: { theme: null, groups: {} }, collections: [] };
-  return <PublishedView store={store} frame={frame} document={cartDocument()} />;
+  return <PublishedView store={store} frame={frame} document={cartDocument()} page="cart" />;
 }

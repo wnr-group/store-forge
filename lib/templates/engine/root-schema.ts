@@ -7,6 +7,7 @@ import type { SettingDescriptor } from "./descriptors";
 import { isFontKey, isValidWeight, type FontKey } from "./fonts";
 import { componentNodeSchema, groupTemplateSchema, pageTemplateSchema, socialLinksSchema } from "./schema";
 import { getForTenant } from "./tenant-cache";
+import { PAGES_GROUP, PAGE_KEYS } from "../../storefront/pages";
 
 /** The font a theme uses when `headingFont` / `bodyFont` is absent: the descriptor default, if it is a closed font key. */
 function defaultFont(descriptors: SettingDescriptor[], id: string): FontKey | undefined {
@@ -58,6 +59,8 @@ export function buildThemeSettingsSchema(descriptors: SettingDescriptor[] = them
   for (const group of THEME_GROUPS) {
     if (descriptors.some((d) => d.group === group)) shape[group] = groupSchema(group, descriptors, tenantId).optional();
   }
+  // Pages the engine generates (all products, cart ...) that the merchant has designed: whole page documents, by page key.
+  shape[PAGES_GROUP] = z.object(Object.fromEntries(PAGE_KEYS.map((k) => [k, pageTemplateSchema.optional()]))).strict().optional();
   return z.object({
     schemaVersion: z.literal(DOCUMENT_SCHEMA_VERSION),
     settings: z.object(shape).strict().optional(),

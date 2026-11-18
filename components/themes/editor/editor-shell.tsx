@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, Check, ChevronRight, CircleAlert, Eye, History as HistoryIcon, Loader2, Monitor, Palette, PanelLeft, Redo2, Rocket, Smartphone, Tablet, Undo2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, History as HistoryIcon, Link2, Loader2, Monitor, MousePointerClick, Palette, PanelLeft, Redo2, Rocket, Smartphone, Tablet, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getTemplateAction, saveDraftAction } from "@/app/(dashboard)/dashboard/templates/actions";
@@ -16,6 +16,8 @@ import { ROUTES } from "@/config/app";
 import { adapterForLook, lookOf } from "@/lib/editor/adapters";
 import { findSettingForClick } from "@/lib/editor/locate";
 import { originalOf, readTextOverrides } from "@/lib/editor/text";
+import { PAGE_KEYS, PAGE_LABELS, routeForHref, withPageContent } from "@/lib/storefront/pages";
+import { foldVirtualPages, isVirtualId, openVirtualPage, rebuildVirtualPages, resetVirtualPage, virtualId, virtualKey } from "@/lib/themes/editor/virtual";
 import type { PartStyleKey, StyleDevice, StyleKey as StyleKeyType } from "@/lib/editor/style";
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import { validateDocument } from "@/lib/templates/engine/validate";
@@ -32,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { SectionsPanel, type SectionActions } from "./sections-panel";
 import { CollectionChoicesContext } from "./setting-field";
 import { SettingsPanel } from "./settings-panel";
+import { usePreviewTarget, type TargetKind } from "./use-preview-target";
 import { VersionsSheet } from "./versions-sheet";
 import { PreviewModeNote, PreviewModeSwitch } from "../preview-mode-switch";
 import { ThemeFrame, type ClickTarget, type Device } from "../theme-frame";
@@ -71,20 +74,6 @@ const DEVICES: { id: Device; label: string; icon: typeof Monitor }[] = [
 const STYLE_DEVICE: Record<Device, StyleDevice> = { desktop: "base", tablet: "tablet", mobile: "mobile" };
 const ZOOMS = [{ label: "Fit", value: 0 }, { label: "50%", value: 0.5 }, { label: "75%", value: 0.75 }, { label: "100%", value: 1 }, { label: "125%", value: 1.25 }];
 
-/** The product or collection a product or collection page shows: the store's own in "store" mode, sample content in "demo". */
-function resourceFor(kind: ThemeKind, data: PreviewData): Record<string, unknown> | undefined {
-  if (kind === "product") {
-    if (data.productPage) return data.productPage;
-    const p = data.store.products[0];
-    return p ? { ...p, images: p.image_path ? [p.image_path] : [], options: [], variants: [], short_description: p.short_description } : undefined;
-  }
-  if (kind === "collection") {
-    const c = data.collections[0];
-    return c ? { ...c, products: data.collectionProducts?.[c.slug] ?? [] } : undefined;
-  }
-  return undefined;
-}
-
 export function EditorShell({ init }: { init: EditorInit }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -105,6 +94,11 @@ export function EditorShell({ init }: { init: EditorInit }) {
   // The merchant's real catalogue by default; demo content only on request, and never saved anywhere.
   const [previewMode, setPreviewMode] = useState<PreviewMode>("store");
   const preview = useMemo(() => previewData(init.data, previewMode), [init.data, previewMode]);
+  // Browsing inside the editor: which product, collection or content page is shown, links that open pages, and a way back.
+  const target = usePreviewTarget(preview);
+  const [linkMode, setLinkMode] = useState<"open" | "select">("open");
+  type TrailStep = { pageId: string; ref?: { kind: TargetKind; slug: string } };
+  const [trail, setTrail] = useState<TrailStep[]>([]);
   // What the server round trip is doing; the visible status below is derived from this and the document state.
   const [saveState, setSaveState] = useState<"idle" | "saving" | "error" | "conflict">("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -159,7 +153,10 @@ export function EditorShell({ init }: { init: EditorInit }) {
     setSaveState("saving");
     setSaveError(null);
     try {
-      for (const doc of dirtyDocs(stateRef.current)) {
+      // Generated pages (all products, cart ...) live inside the theme document: fold their changes into it first.
+      const themeId = Object.values(stateRef.current.docs).find((d) => d.kind === "theme_settings")?.templateId;
+      if (themeId) commit((s) => foldVirtualPages(s, themeId));
+      for (const doc of dirtyDocs(stateRef.current).filter((d) => !isVirtualId(d.templateId))) {
         const json = JSON.stringify(doc.document);
         const result = await saveDraftAction({ id: doc.templateId, document: doc.document, expectedRevision: doc.revision });
         if (!result.ok) {
@@ -293,12 +290,14 @@ export function EditorShell({ init }: { init: EditorInit }) {
       const order = [s.pageId, ...Object.keys(s.docs).filter((id) => id !== s.pageId)];
       const docId = order.find((id) => (s.docs[id].document as { sections?: Record<string, unknown> }).sections?.[target.sectionId]);
       if (!docId) return;
-      edit((prev) => select(prev, { docId, sectionId: target.sectionId, blockId: target.blockId }));
+      const known = (s.docs[docId].document as { sections: Record<string, ComponentNode> }).sections[target.sectionId];
+      const blockId = target.blockId && known && findNode(known, target.blockId) ? target.blockId : undefined;
+      edit((prev) => select(prev, { docId, sectionId: target.sectionId, blockId }));
       setLeftTab("sections");
       setMobileTab("settings");
       // Clicked text or a picture: jump to the setting that holds it (the block first, then its section).
       const section = (s.docs[docId].document as { sections: Record<string, ComponentNode> }).sections[target.sectionId];
-      const block = target.blockId ? findNode(section, target.blockId) : undefined;
+      const block = blockId ? findNode(section, blockId) : undefined;
       const element = block ?? section;
       const descriptors = (block ? registry.blocks[block.type] : registry.sections[section.type])?.settings ?? [];
       const key = findSettingForClick([{ descriptors, settings: element.settings }], target);
@@ -309,6 +308,51 @@ export function EditorShell({ init }: { init: EditorInit }) {
     },
     [edit],
   );
+
+  /** The product, collection or content page being shown, so Back can return to it. */
+  const currentRef = (): TrailStep["ref"] => {
+    const kind = state.docs[state.pageId]?.kind;
+    if (isVirtualId(state.pageId)) return virtualKey(state.pageId) === "content" && target.contentPage ? { kind: "content", slug: target.contentPage.slug } : undefined;
+    if (kind === "product" && target.productSlug) return { kind: "product", slug: target.productSlug };
+    if (kind === "collection" && target.collectionSlug) return { kind: "collection", slug: target.collectionSlug };
+    return undefined;
+  };
+
+  /** Opens a page in the editor, like following a link on the storefront. */
+  const goTo = async (pageId: string, ref?: TrailStep["ref"], record = true) => {
+    if (record && (pageId !== state.pageId || ref)) setTrail((t) => [...t.slice(-19), { pageId: state.pageId, ref: currentRef() }]);
+    if (ref) target.choose(ref.kind, ref.slug);
+    await switchPage(pageId);
+  };
+  const goBack = () => {
+    const last = trail[trail.length - 1];
+    if (!last) return;
+    setTrail((t) => t.slice(0, -1));
+    void goTo(last.pageId, last.ref, false);
+  };
+
+  /** Following a link in the preview: opens the page it leads to, as the live store would. */
+  const navigateHref = (href: string) => {
+    if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+    const route = routeForHref(href);
+    if (!route) {
+      toast.message(/^https?:/i.test(href) ? "That link leaves your store." : "Sign-in and account pages have no design to edit here.");
+      return;
+    }
+    const pageIdFor = (kind: ThemeKind) => init.pages.find((p) => p.kind === kind)?.id;
+    if (route.page === "home") return void goTo(pageIdFor("index") ?? state.pageId);
+    if (route.page === "product" || route.page === "collection") {
+      const id = pageIdFor(route.page);
+      if (!id) return void toast.message("This theme has no " + route.page + " page to edit.");
+      return void goTo(id, { kind: route.page, slug: route.slug });
+    }
+    if (route.page === "content") {
+      if (!themeDocId) return;
+      if (!target.contentPages.some((p) => p.slug === route.slug)) toast.message("There is no page at /" + route.slug + " yet. Showing the layout all content pages share; add the page under Pages.");
+      return void goTo(virtualId("content"), target.contentPages.some((p) => p.slug === route.slug) ? { kind: "content", slug: route.slug } : undefined);
+    }
+    if (themeDocId) void goTo(virtualId(route.page));
+  };
 
   const onStyle = useCallback(
     (docId: string, sectionId: string, blockId: string | undefined, device: StyleDevice, key: StyleKeyType, value: unknown) =>
@@ -346,7 +390,9 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const switchPage = async (id: string) => {
     if (id === state.pageId) return;
     setLoadingPage(true);
-    if (!state.docs[id] && !(await loadDoc(id))) {
+    if (isVirtualId(id)) {
+      if (themeDocId) commit((s) => openVirtualPage(s, themeDocId, virtualKey(id)));
+    } else if (!state.docs[id] && !(await loadDoc(id))) {
       setLoadingPage(false);
       return;
     }
@@ -356,7 +402,8 @@ export function EditorShell({ init }: { init: EditorInit }) {
 
   const reloadAll = async () => {
     setLoadingPage(true);
-    await Promise.all(Object.keys(stateRef.current.docs).map(loadDoc));
+    await Promise.all(Object.keys(stateRef.current.docs).filter((id) => !isVirtualId(id)).map(loadDoc));
+    if (themeDocId) commit((s) => rebuildVirtualPages(s, themeDocId));
     setServerProblems({});
     setSaveState("idle");
     historyRef.current = emptyHistory();
@@ -367,6 +414,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
 
   const afterRestore = async (templateId: string) => {
     await loadDoc(templateId);
+    if (themeDocId && templateId === themeDocId) commit((s) => rebuildVirtualPages(s, themeDocId));
     historyRef.current = emptyHistory();
     setHistory(historyRef.current);
     setVersionsOpen(false);
@@ -401,6 +449,12 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const selection = state.selection;
   const selectedSectionId = selection && "sectionId" in selection && selection.docId === state.pageId ? selection.sectionId : null;
   const selectedBlockId = selection && "blockId" in selection && selection.docId === state.pageId ? (selection.blockId ?? null) : null;
+  const virtualPage = isVirtualId(state.pageId) ? virtualKey(state.pageId) : null;
+  // A content page is shown with the title and text of the page being previewed in its shared layout.
+  const frameDocument = useMemo(
+    () => (virtualPage === "content" ? withPageContent(page.document as unknown as TemplateDocument, target.contentPage) : (page.document as unknown as TemplateDocument)),
+    [virtualPage, page.document, target.contentPage],
+  );
   const frameProps = {
     data: preview,
     theme: themeDocId ? state.docs[themeDocId].document : null,
@@ -409,7 +463,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
       footer: groupIds.footer ? (state.docs[groupIds.footer].document as unknown as TemplateDocument) : null,
       announcement: groupIds.announcement ? (state.docs[groupIds.announcement].document as unknown as TemplateDocument) : null,
     },
-    resource: resourceFor(page.kind, preview),
+    resource: virtualPage ? (virtualPage === "search" ? { products: preview.store.products } : undefined) : page.kind === "product" ? target.productResource : page.kind === "collection" ? target.collectionResource : undefined,
   };
 
   return (
@@ -420,11 +474,25 @@ export function EditorShell({ init }: { init: EditorInit }) {
           <Palette className="size-4 shrink-0 text-muted-foreground" aria-hidden />
           <span className="truncate text-sm font-medium">{init.themeName ?? "Your storefront"}</span>
         </div>
-        <NativeSelect aria-label="Page to edit" value={state.pageId} disabled={loadingPage} onChange={(e) => void switchPage(e.target.value)} className="h-8 w-36 text-xs sm:w-44">
-          {init.pages.map((p) => (
-            <option key={p.id} value={p.id}>{PAGE_LABEL[p.kind] ?? p.name}</option>
-          ))}
+        <NativeSelect aria-label="Page to edit" value={state.pageId} disabled={loadingPage} onChange={(e) => void goTo(e.target.value)} className="h-8 w-36 text-xs sm:w-44">
+          <optgroup label="Pages">
+            {init.pages.map((p) => (
+              <option key={p.id} value={p.id}>{PAGE_LABEL[p.kind] ?? p.name}</option>
+            ))}
+          </optgroup>
+          {themeDocId ? (
+            <optgroup label="Other pages">
+              {PAGE_KEYS.map((k) => (
+                <option key={k} value={virtualId(k)}>{PAGE_LABELS[k]}</option>
+              ))}
+            </optgroup>
+          ) : null}
         </NativeSelect>
+        <Button variant="ghost" size="icon-sm" aria-label="Back to the previous page" title="Back" disabled={trail.length === 0 || loadingPage} onClick={goBack}><ArrowLeftToLine aria-hidden /></Button>
+        <PreviewTargetSelect page={state.docs[state.pageId]} virtualPage={virtualPage} preview={preview} target={target} disabled={loadingPage} onChoose={(kind, slug) => void goTo(state.pageId, { kind, slug })} />
+        {isVirtualId(state.pageId) && init.canManage ? (
+          <Button variant="ghost" size="sm" disabled={!canEdit} title="Remove your changes to this page and use the original layout" onClick={() => { if (themeDocId && window.confirm(`Put the ${PAGE_LABELS[virtualKey(state.pageId)]} page back to its original layout?`)) edit((s) => resetVirtualPage(s, themeDocId, virtualKey(state.pageId))); }}>Reset page</Button>
+        ) : null}
         <SaveIndicator status={status} />
         <div className="flex items-center" role="group" aria-label="History">
           <Button variant="ghost" size="icon-sm" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)" disabled={!canUndo(history) || !canEdit} onClick={() => stepHistory("undo")}><Undo2 aria-hidden /></Button>
@@ -436,6 +504,9 @@ export function EditorShell({ init }: { init: EditorInit }) {
             <Button key={id} size="icon-sm" variant={device === id ? "secondary" : "ghost"} aria-label={label} aria-pressed={device === id} onClick={() => setDevice(id)}><Icon aria-hidden /></Button>
           ))}
         </div>
+        <Button variant={linkMode === "open" ? "secondary" : "ghost"} size="sm" aria-pressed={linkMode === "open"} title={linkMode === "open" ? "Clicking a link opens its page. Switch to select the link itself." : "Clicking a link selects it. Switch to open pages."} onClick={() => setLinkMode((m) => (m === "open" ? "select" : "open"))}>
+          {linkMode === "open" ? <Link2 aria-hidden /> : <MousePointerClick aria-hidden />}<span className="hidden lg:inline">{linkMode === "open" ? "Links open pages" : "Links are selected"}</span>
+        </Button>
         <NativeSelect aria-label="Zoom" value={String(zoom)} onChange={(e) => setZoom(Number(e.target.value))} className="hidden h-8 w-20 text-xs md:block">
           {ZOOMS.map((z) => (
             <option key={z.label} value={String(z.value)}>{z.label}</option>
@@ -494,7 +565,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             {loadingPage ? (
               <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
             ) : (
-              <ThemeFrame document={page.document as unknown as TemplateDocument} device={device} mode="editor" onSelect={onPreviewSelect} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} zoom={zoom || null} {...frameProps} />
+              <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} linkMode={linkMode} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} zoom={zoom || null} {...frameProps} />
             )}
           </div>
         </main>
@@ -546,13 +617,13 @@ export function EditorShell({ init }: { init: EditorInit }) {
           </DialogHeader>
           <div className="min-h-0 flex-1 overflow-auto bg-muted/60 p-4">
             <div className={cn("mx-auto overflow-hidden rounded-md border bg-white shadow-sm", device === "desktop" ? "w-full" : device === "tablet" ? "w-[820px] max-w-full" : "w-[390px] max-w-full")}>
-              <ThemeFrame document={page.document as unknown as TemplateDocument} device={device} mode="preview" {...frameProps} />
+              <ThemeFrame document={frameDocument} device={device} mode="preview" {...frameProps} />
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      <VersionsSheet open={versionsOpen} onClose={() => setVersionsOpen(false)} templateId={state.pageId} pageName={PAGE_LABEL[page.kind] ?? page.name} canManage={init.canManage} hasUnsavedChanges={isDirty(page)} onRestored={(id) => void afterRestore(id)} />
+      <VersionsSheet open={versionsOpen} onClose={() => setVersionsOpen(false)} templateId={isVirtualId(state.pageId) && themeDocId ? themeDocId : state.pageId} pageName={isVirtualId(state.pageId) ? "Theme settings and other pages" : (PAGE_LABEL[page.kind] ?? page.name)} canManage={init.canManage} hasUnsavedChanges={isDirty(page) || (themeDocId ? isDirty(state.docs[themeDocId]) : false)} onRestored={(id) => void afterRestore(id)} />
 
       <AlertDialog open={publishOpen} onOpenChange={setPublishOpen}>
         <AlertDialogContent>
@@ -613,5 +684,31 @@ function SelectionPath({ state, onSelect }: { state: EditorState; onSelect: (doc
         </>
       ) : null}
     </nav>
+  );
+}
+
+/** Which product, collection or content page is shown on a page that shows one of them. */
+function PreviewTargetSelect({ page, virtualPage, preview, target, disabled, onChoose }: {
+  page: EditorState["docs"][string] | undefined;
+  virtualPage: string | null;
+  preview: PreviewData;
+  target: ReturnType<typeof usePreviewTarget>;
+  disabled: boolean;
+  onChoose: (kind: TargetKind, slug: string) => void;
+}) {
+  const kind: TargetKind | null = virtualPage === "content" ? "content" : virtualPage ? null : page?.kind === "product" ? "product" : page?.kind === "collection" ? "collection" : null;
+  if (!kind) return null;
+  const options =
+    kind === "product" ? preview.store.products.map((p) => ({ slug: p.slug, label: p.name }))
+    : kind === "collection" ? preview.collections.map((c) => ({ slug: c.slug, label: c.name }))
+    : target.contentPages.map((p) => ({ slug: p.slug, label: p.title }));
+  const value = kind === "product" ? target.productSlug : kind === "collection" ? target.collectionSlug : target.contentPage?.slug;
+  if (options.length === 0) return null;
+  return (
+    <NativeSelect aria-label={kind === "product" ? "Product to preview" : kind === "collection" ? "Collection to preview" : "Content page to preview"} value={value ?? ""} disabled={disabled} onChange={(e) => onChoose(kind, e.target.value)} className="hidden h-8 w-36 text-xs md:block lg:w-44">
+      {options.map((o) => (
+        <option key={o.slug} value={o.slug}>{o.label}</option>
+      ))}
+    </NativeSelect>
   );
 }

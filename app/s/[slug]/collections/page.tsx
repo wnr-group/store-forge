@@ -22,5 +22,5 @@ export default async function CollectionsPage({ params }: Params) {
   const frame = (await getPublishedFrame(slug)) ?? { layout: { theme: null, groups: {} }, collections: [] };
   // Collections come straight from the API so the page also works before a design is published.
   const collections = await getPublicCollectionsApi(slug).catch(() => frame.collections);
-  return <PublishedView store={store} frame={{ ...frame, collections }} document={collectionsDocument()} />;
+  return <PublishedView store={store} frame={{ ...frame, collections }} document={collectionsDocument()} page="collections" />;
 }

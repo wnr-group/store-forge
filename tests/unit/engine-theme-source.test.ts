@@ -76,7 +76,8 @@ describe("[AC-ENG-001] theme descriptors are the single source of the theme sett
   it("[AC-ENG-001] every key of the generated schema exists as a descriptor, and every descriptor is a key of the schema", () => {
     const keys = generatedKeys();
     const groupsWithDescriptors = THEME_GROUPS.filter((g) => byGroup(g).length > 0);
-    expect(Object.keys(keys).sort()).toEqual([...groupsWithDescriptors].sort());
+    // `pages` is the one group without descriptors: whole page documents for the generated storefront pages (lib/storefront/pages.ts).
+    expect(Object.keys(keys).sort()).toEqual([...groupsWithDescriptors, "pages"].sort());
     for (const group of groupsWithDescriptors) {
       const schemaKeys = keys[group] ?? Object.keys(ALLOWED_SOCIAL_NETWORKS); // social: the host-checked rule, keyed by the one network list
       expect({ group, keys: [...schemaKeys].sort() }).toEqual({ group, keys: byGroup(group).map((d) => d.id).sort() });

@@ -48,6 +48,10 @@ export type ThemeFrameProps = {
   cropHeight?: number;
   /** Section or block clicks, in editor mode. `text` and `image` say what was under the pointer, to find the setting behind it. */
   onSelect?: (target: ClickTarget) => void;
+  /** Double click on a link, in editor mode: the link's address. */
+  onNavigate?: (href: string) => void;
+  /** "open": clicking a link opens the page it leads to (like the live store); "select": it selects the link instead. */
+  linkMode?: "open" | "select";
   selectedSectionId?: string | null;
   /** The selected block inside that section, outlined instead of the section. */
   selectedBlockId?: string | null;
@@ -118,7 +122,7 @@ function DeviceScreen({ width, height, scale, left, children }: { width: number;
  * space available. Nothing here is a mock-up, so what the merchant sees is what the storefront renders. Links and forms
  * inside never navigate; in editor mode a click selects the section or block under the pointer instead.
  */
-export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, selectedSectionId, selectedBlockId, zoom, resource, className }: ThemeFrameProps) {
+export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, linkMode = "select", selectedSectionId, selectedBlockId, zoom, resource, className }: ThemeFrameProps) {
   const outer = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ sectionId: string; blockId?: string } | null>(null);
   const [available, setAvailable] = useState(0);
@@ -176,6 +180,14 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     // Nothing in a preview may navigate away or submit.
     if (target.closest("a, button, form, input, select, textarea, summary")) event.preventDefault();
     if (!editing || !onSelect) return;
+    // Like the live store: a click on a link opens the page it leads to (the toolbar switches to selecting the link instead).
+    if (linkMode === "open" && onNavigate) {
+      const href = target.closest("a")?.getAttribute("href");
+      if (href) {
+        onNavigate(href);
+        return;
+      }
+    }
     const section = target.closest<HTMLElement>("[data-sf-section]");
     if (!section) return;
     const block = target.closest<HTMLElement>("[data-sf-block]");
@@ -185,6 +197,11 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
       if (t) texts.push(t.slice(0, 600));
     }
     onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock, texts, image: imageSource(target.closest("img")), text: textUnderPointer(event, target) });
+  };
+
+  const handleDoubleClick = (event: React.MouseEvent) => {
+    const href = (event.target as HTMLElement).closest("a")?.getAttribute("href");
+    if (href && onNavigate) onNavigate(href);
   };
 
   const handleOver = (event: React.MouseEvent) => {
@@ -206,6 +223,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     <>
       <div
         onClickCapture={handleClick}
+        onDoubleClickCapture={editing ? handleDoubleClick : undefined}
         onMouseOver={editing ? handleOver : undefined}
         onMouseLeave={editing ? () => setHover(null) : undefined}
         className={cn("sf-frame", !isolated && "origin-top-left")}
