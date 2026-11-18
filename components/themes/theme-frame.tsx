@@ -50,8 +50,8 @@ export type ThemeFrameProps = {
   onSelect?: (target: ClickTarget) => void;
   /** Double click on a link, in editor mode: the link's address. */
   onNavigate?: (href: string) => void;
-  /** "open": clicking a link opens the page it leads to (like the live store); "select": it selects the link instead. */
-  linkMode?: "open" | "select";
+  /** Inspector on (default): a click selects what is under the pointer. Off: the page behaves like the live store, and a click on a link opens the page it leads to. */
+  inspector?: boolean;
   selectedSectionId?: string | null;
   /** The selected block inside that section, outlined instead of the section. */
   selectedBlockId?: string | null;
@@ -122,7 +122,7 @@ function DeviceScreen({ width, height, scale, left, children }: { width: number;
  * space available. Nothing here is a mock-up, so what the merchant sees is what the storefront renders. Links and forms
  * inside never navigate; in editor mode a click selects the section or block under the pointer instead.
  */
-export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, linkMode = "select", selectedSectionId, selectedBlockId, zoom, resource, className }: ThemeFrameProps) {
+export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, inspector = true, selectedSectionId, selectedBlockId, zoom, resource, className }: ThemeFrameProps) {
   const outer = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ sectionId: string; blockId?: string } | null>(null);
   const [available, setAvailable] = useState(0);
@@ -174,19 +174,18 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
   const fit = available > 0 ? Math.min(1, available / width) : 1;
   const scale = zoom ? Math.max(0.25, Math.min(2, zoom)) : fit;
   const editing = mode === "editor";
+  const inspecting = editing && inspector;
 
   const handleClick = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement;
     // Nothing in a preview may navigate away or submit.
     if (target.closest("a, button, form, input, select, textarea, summary")) event.preventDefault();
     if (!editing || !onSelect) return;
-    // Like the live store: a click on a link opens the page it leads to (the toolbar switches to selecting the link instead).
-    if (linkMode === "open" && onNavigate) {
+    // Inspector off: browse like the live store. Links open their page; buttons do what they do; nothing is selected.
+    if (!inspector) {
       const href = target.closest("a")?.getAttribute("href");
-      if (href) {
-        onNavigate(href);
-        return;
-      }
+      if (href && onNavigate) onNavigate(href);
+      return;
     }
     const section = target.closest<HTMLElement>("[data-sf-section]");
     if (!section) return;
@@ -205,7 +204,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
   };
 
   const handleOver = (event: React.MouseEvent) => {
-    if (!editing) return;
+    if (!inspecting) return;
     const target = event.target as HTMLElement;
     const section = target.closest<HTMLElement>("[data-sf-section]")?.dataset.sfSection;
     const blockId = target.closest<HTMLElement>("[data-sf-block]")?.dataset.sfBlock;
@@ -223,13 +222,13 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     <>
       <div
         onClickCapture={handleClick}
-        onDoubleClickCapture={editing ? handleDoubleClick : undefined}
-        onMouseOver={editing ? handleOver : undefined}
-        onMouseLeave={editing ? () => setHover(null) : undefined}
+        onDoubleClickCapture={inspecting ? handleDoubleClick : undefined}
+        onMouseOver={inspecting ? handleOver : undefined}
+        onMouseLeave={inspecting ? () => setHover(null) : undefined}
         className={cn("sf-frame", !isolated && "origin-top-left")}
         style={isolated ? undefined : { width, visibility: available > 0 ? "visible" : "hidden", transform: `scale(${scale})`, marginLeft: left }}
         data-static={cropHeight ? "" : undefined}
-        data-editing={editing || undefined}
+        data-editing={inspecting || undefined}
         data-selected={selectedSectionId ?? undefined}
       >
         {content}
@@ -239,21 +238,21 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
       <style>{`.sf-frame [data-sf-reveal],.sf-frame [data-sf-reveal] .sf-word,.sf-frame .sf-up,.sf-frame .sf-hero-word{animation:none!important;transition:none!important;opacity:1!important;translate:none!important}.sf-frame[data-static] *{animation:none!important;transition:none!important}`}</style>
       {/* Selection and hover outlines. Ids come from the document's own node ids; CSS.escape keeps them inert. The selected block
           is outlined instead of its section; hover outlines the innermost block or section under the pointer. */}
-      {editing && selectedSectionId ? (
+      {inspecting && selectedSectionId ? (
         <style>
           {selectedBlockId
             ? `.sf-frame [data-sf-block="${CSS.escape(selectedBlockId)}"]{outline:2px solid var(--editor-accent,#2563eb)!important;outline-offset:2px}.sf-frame [data-sf-section="${CSS.escape(selectedSectionId)}"]{outline:1px dashed var(--editor-accent,#2563eb);outline-offset:-1px}`
             : `.sf-frame [data-sf-section="${CSS.escape(selectedSectionId)}"]{outline:2px solid var(--editor-accent,#2563eb);outline-offset:-2px}`}
         </style>
       ) : null}
-      {editing && hover ? (
+      {inspecting && hover ? (
         <style>
           {hover.blockId
             ? `.sf-frame [data-sf-block="${CSS.escape(hover.blockId)}"]{outline:1px dashed #2563eb;outline-offset:2px}`
             : `.sf-frame [data-sf-section="${CSS.escape(hover.sectionId)}"]{outline:1px dashed #2563eb;outline-offset:-1px}`}
         </style>
       ) : null}
-      {editing ? <style>{`.sf-frame[data-editing] [data-sf-section],.sf-frame[data-editing] [data-sf-block]{cursor:pointer}`}</style> : null}
+      {inspecting ? <style>{`.sf-frame[data-editing] [data-sf-section],.sf-frame[data-editing] [data-sf-block]{cursor:pointer}`}</style> : null}
     </>
   );
 

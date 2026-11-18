@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, History as HistoryIcon, Link2, Loader2, Monitor, MousePointerClick, Palette, PanelLeft, Redo2, Rocket, Smartphone, Tablet, Undo2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, History as HistoryIcon, Loader2, Monitor, Palette, PanelLeft, Redo2, Rocket, Smartphone, SquareDashedMousePointer, Tablet, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getTemplateAction, saveDraftAction } from "@/app/(dashboard)/dashboard/templates/actions";
@@ -97,7 +97,8 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const preview = useMemo(() => previewData(init.data, previewMode), [init.data, previewMode]);
   // Browsing inside the editor: which product, collection or content page is shown, links that open pages, and a way back.
   const target = usePreviewTarget(preview);
-  const [linkMode, setLinkMode] = useState<"open" | "select">("open");
+  // Inspector on: clicking selects and edits. Off: the preview works like the live store (links open pages, buttons work).
+  const [inspector, setInspector] = useState(true);
   type TrailStep = { pageId: string; ref?: { kind: TargetKind; slug: string } };
   const [trail, setTrail] = useState<TrailStep[]>([]);
   // What the server round trip is doing; the visible status below is derived from this and the document state.
@@ -240,9 +241,14 @@ export function EditorShell({ init }: { init: EditorInit }) {
   useEffect(() => {
     // Ctrl/Cmd+Z, Shift+Ctrl/Cmd+Z and Ctrl+Y, unless a text field has focus (it keeps its own undo).
     const onKey = (e: KeyboardEvent) => {
-      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
       const el = e.target as HTMLElement | null;
       if (el && (el.isContentEditable || /^(input|textarea|select)$/i.test(el.tagName))) return;
+      // "I" turns the inspector on and off.
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === "i") {
+        setInspector((v) => !v);
+        return;
+      }
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
       const k = e.key.toLowerCase();
       if (k === "z") {
         e.preventDefault();
@@ -519,8 +525,17 @@ export function EditorShell({ init }: { init: EditorInit }) {
             <Button key={id} size="icon-sm" variant={device === id ? "secondary" : "ghost"} aria-label={label} aria-pressed={device === id} onClick={() => setDevice(id)}><Icon aria-hidden /></Button>
           ))}
         </div>
-        <Button variant={linkMode === "open" ? "secondary" : "ghost"} size="sm" aria-pressed={linkMode === "open"} title={linkMode === "open" ? "Clicking a link opens its page. Switch to select the link itself." : "Clicking a link selects it. Switch to open pages."} onClick={() => setLinkMode((m) => (m === "open" ? "select" : "open"))}>
-          {linkMode === "open" ? <Link2 aria-hidden /> : <MousePointerClick aria-hidden />}<span className="hidden lg:inline">{linkMode === "open" ? "Links open pages" : "Links are selected"}</span>
+        <Button
+          variant={inspector ? "default" : "ghost"}
+          size="icon-sm"
+          aria-label="Inspector"
+          aria-pressed={inspector}
+          aria-keyshortcuts="I"
+          title={inspector ? "Inspector on: click anything to select and edit it. Turn off to browse like your store (press I)." : "Inspector off: links open pages and buttons work. Turn on to select and edit (press I)."}
+          className={inspector ? undefined : "text-muted-foreground"}
+          onClick={() => setInspector((v) => !v)}
+        >
+          <SquareDashedMousePointer aria-hidden />
         </Button>
         <NativeSelect aria-label="Zoom" value={String(zoom)} onChange={(e) => setZoom(Number(e.target.value))} className="hidden h-8 w-20 text-xs md:block">
           {ZOOMS.map((z) => (
@@ -580,7 +595,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             {loadingPage ? (
               <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
             ) : (
-              <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} linkMode={linkMode} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} zoom={zoom || null} {...frameProps} />
+              <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} zoom={zoom || null} {...frameProps} />
             )}
           </div>
         </main>
