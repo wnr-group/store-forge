@@ -87,8 +87,9 @@ export function renderSectionComponent(
 
   let out: React.ReactNode = <Component node={node} context={context} sectionId={sectionId} />;
   // A section with style overrides sits in a box the generated stylesheet can reach (see lib/editor/render.ts).
-  if (sectionId && !UNWRAPPED_SECTIONS.has(node.type) && hasStyleOverrides(node)) {
-    out = <div data-sf-ov={overrideValue(sectionId)}>{out}</div>;
+  if (sectionId && hasStyleOverrides(node)) {
+    // A sticky section gets a box-less wrapper: only inherited properties (fonts) can reach it, and sticky positioning survives.
+    out = <div data-sf-ov={overrideValue(sectionId)} style={UNWRAPPED_SECTIONS.has(node.type) ? { display: "contents" } : undefined}>{out}</div>;
   }
   // Replaced words (see lib/editor/text.ts). The wrapper has no box, so it is safe around a sticky header too.
   const texts = readTextOverrides(node.settings);

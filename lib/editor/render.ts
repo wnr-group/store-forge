@@ -18,7 +18,7 @@ export function collectCssTargets(documents: readonly ({ sections?: Record<strin
   const out: CssTarget[] = [];
   for (const doc of documents) {
     for (const [id, section] of Object.entries(doc?.sections ?? {})) {
-      if (hasStyleOverrides(section) && !UNWRAPPED_SECTIONS.has(section.type)) out.push({ id, style: readStyle(section.settings), textScope: false });
+      if (hasStyleOverrides(section)) out.push({ id, style: readStyle(section.settings), textScope: false });
       collectBlocks(section.blocks, out);
     }
   }

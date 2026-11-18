@@ -19,7 +19,7 @@ const DEVICE_NOTE: Record<StyleDevice, string> = {
 const DEVICE_NAME: Record<StyleDevice, string> = { base: "Desktop", tablet: "Tablet", mobile: "Mobile" };
 
 /** A style field as the settings-field descriptor the existing controls understand, so every control is the editor's own. */
-function toDescriptor(field: StyleField): SettingDescriptor {
+export function toDescriptor(field: StyleField): SettingDescriptor {
   const c = field.control;
   const base = { id: field.key, label: field.label, default: null as unknown };
   switch (c.type) {

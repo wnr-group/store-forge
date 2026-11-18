@@ -2,7 +2,8 @@ import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import type { SectionDefinition, SettingDescriptor, ComponentRegistry } from "@/lib/templates/engine/descriptors";
 import { addNode, duplicateNode, generateId, moveNode, removeNode } from "@/lib/templates/engine/tree";
 import { isEmptyStyle, readStyle, STYLE_SETTING_KEY, withStyleValue, type StyleDevice, type StyleKey } from "@/lib/editor/style";
-import { readTextOverrides, TEXT_SETTING_KEY, withTextOverride } from "@/lib/editor/text";
+import { readTextOverrides, TEXT_SETTING_KEY, withTextOverride, withTextStyle } from "@/lib/editor/text";
+import type { PartStyleKey } from "@/lib/editor/style";
 import type { ThemeKind } from "@/lib/themes/types";
 
 /**
@@ -86,6 +87,14 @@ export function setTextOverride(state: EditorState, docId: string, sectionId: st
   const section = (state.docs[docId]?.document as { sections?: Record<string, ComponentNode> } | undefined)?.sections?.[sectionId];
   if (!section) return state;
   const next = withTextOverride(readTextOverrides(section.settings), from, to);
+  return setSetting(state, docId, sectionId, undefined, TEXT_SETTING_KEY, next.length ? next : undefined);
+}
+
+/** Sets one style property (font, size, colour ...) of the text `from` in a section; `undefined` removes it. */
+export function setTextStyle(state: EditorState, docId: string, sectionId: string, from: string, key: PartStyleKey, value: unknown): EditorState {
+  const section = (state.docs[docId]?.document as { sections?: Record<string, ComponentNode> } | undefined)?.sections?.[sectionId];
+  if (!section) return state;
+  const next = withTextStyle(readTextOverrides(section.settings), from, key, value);
   return setSetting(state, docId, sectionId, undefined, TEXT_SETTING_KEY, next.length ? next : undefined);
 }
 

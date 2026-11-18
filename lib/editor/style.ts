@@ -15,10 +15,11 @@ import { hexColorSchema } from "@/lib/templates/engine/schema";
 
 export const STYLE_SETTING_KEY = "_style";
 
-export const CAPABILITY_IDS = ["typography", "textColor", "background", "spacing", "size", "border", "opacity", "visibility"] as const;
+export const CAPABILITY_IDS = ["fonts", "typography", "textColor", "background", "spacing", "size", "border", "opacity", "visibility"] as const;
 export type CapabilityId = (typeof CAPABILITY_IDS)[number];
 
 export const CAPABILITY_LABELS: Record<CapabilityId, string> = {
+  fonts: "Fonts for this section",
   typography: "Typography",
   textColor: "Text colour",
   background: "Background",
@@ -54,7 +55,11 @@ const FONT_WEIGHTS: Option[] = [
 
 const px = (min: number, max: number, step = 1) => ({ type: "range", min, max, step, unit: "px" }) as const;
 
+const FONT_OPTIONS: Option[] = FONT_KEYS.map((k) => ({ label: FONT_REGISTRY[k].name, value: k }));
+
 export const STYLE_FIELDS = [
+  { key: "headingFont", label: "Heading font", capability: "fonts", control: { type: "select", options: FONT_OPTIONS } },
+  { key: "bodyFont", label: "Body font", capability: "fonts", control: { type: "select", options: FONT_OPTIONS } },
   { key: "fontFamily", label: "Font", capability: "typography", control: { type: "select", options: FONT_KEYS.map((k) => ({ label: FONT_REGISTRY[k].name, value: k })) } },
   { key: "fontSize", label: "Size", capability: "typography", control: px(TYPOGRAPHY_BOUNDS.minSize, TYPOGRAPHY_BOUNDS.maxSize) },
   { key: "fontWeight", label: "Weight", capability: "typography", control: { type: "select", options: FONT_WEIGHTS } },
@@ -85,6 +90,8 @@ export type StyleKey = (typeof STYLE_FIELDS)[number]["key"];
 export const STYLE_KEYS = STYLE_FIELDS.map((f) => f.key) as StyleKey[];
 
 export type StyleValues = {
+  headingFont?: FontKey;
+  bodyFont?: FontKey;
   fontFamily?: FontKey;
   fontSize?: number;
   fontWeight?: number;
@@ -183,6 +190,20 @@ export function resolveStyleValue(layers: readonly StyleLayer[], key: StyleKey, 
   return { value: undefined, source: null, device: null };
 }
 
+// ---- parts of text ----------------------------------------------------------------------------------------------------
+
+/** What one piece of text can carry on its own (see lib/editor/text.ts). */
+export const PART_STYLE_KEYS = ["fontFamily", "fontSize", "fontWeight", "fontStyle", "lineHeight", "letterSpacing", "textTransform", "textDecoration", "color"] as const satisfies readonly StyleKey[];
+export type PartStyleKey = (typeof PART_STYLE_KEYS)[number];
+export type PartStyle = Pick<StyleValues, PartStyleKey>;
+export const partStyleSchema = valuesSchema.pick(Object.fromEntries(PART_STYLE_KEYS.map((k) => [k, true])) as Record<PartStyleKey, true>).strict();
+
+/** Validated declarations (`font-size:20px;color:#112233`) for one piece of text. */
+export function partStyleDeclarations(style: PartStyle): string {
+  const parsed = partStyleSchema.safeParse(style);
+  return parsed.success ? declarations(parsed.data as StyleValues).join(";") : "";
+}
+
 // ---- CSS ----------------------------------------------------------------------------------------------------------
 
 const SAFE_ID = /^[A-Za-z0-9_-]{1,128}$/;
@@ -212,6 +233,13 @@ function declarations(values: StyleValues, only?: (key: StyleKey) => boolean): s
     switch (key) {
       case "fontFamily":
         out.push(`font-family:${FONT_REGISTRY[n as FontKey].fontFamily}`);
+        break;
+      // The theme draws headings from --sf-font-heading and body text from --sf-font-body, so a section changes them for itself only.
+      case "headingFont":
+        out.push(`--sf-font-heading:${FONT_REGISTRY[n as FontKey].fontFamily}`);
+        break;
+      case "bodyFont":
+        out.push(`--sf-font-body:${FONT_REGISTRY[n as FontKey].fontFamily}`, "font-family:var(--sf-font-body)");
         break;
       case "fontSize":
       case "letterSpacing":

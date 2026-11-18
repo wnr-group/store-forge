@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import "@/lib/editor/adapters";
 import { adapterForLook } from "@/lib/editor/adapter";
 import { collectCssTargets, documentsCss, hasStyleOverrides } from "@/lib/editor/render";
-import { elementCss, elementStyleSchema, fieldsFor, isEmptyStyle, parseElementStyle, resolveStyleValue, withStyleValue, type ElementStyle } from "@/lib/editor/style";
+import { partStyleDeclarations, partStyleSchema, elementCss, elementStyleSchema, fieldsFor, isEmptyStyle, parseElementStyle, resolveStyleValue, withStyleValue, type ElementStyle } from "@/lib/editor/style";
 import { validateDocument } from "@/lib/templates/engine/validate";
 import { getRegistry } from "@/lib/templates/registry/index";
 
@@ -121,9 +121,9 @@ describe("collecting styled elements from a document", () => {
     },
   };
 
-  it("finds styled sections and blocks, skips unstyled ones and the sticky header", () => {
+  it("finds styled sections and blocks, and skips unstyled ones", () => {
     const targets = collectCssTargets([doc]);
-    expect(targets.map((t) => t.id).sort()).toEqual(["b1", "s1"]);
+    expect(targets.map((t) => t.id).sort()).toEqual(["b1", "s1", "s2"]);
     expect(targets.find((t) => t.id === "s1")?.textScope).toBe(false);
     expect(targets.find((t) => t.id === "b1")?.textScope).toBe(true);
     expect(documentsCss([doc])).toContain("min-height:600px");
@@ -157,11 +157,26 @@ describe("validateDocument with style overrides", () => {
   });
 });
 
+describe("section fonts and text parts", () => {
+  it("a section sets the theme's heading and body font variables for itself only", () => {
+    const css = elementCss([{ id: "s1", textScope: false, style: { base: { headingFont: "archivo", bodyFont: "jost" } } }]);
+    expect(css).toContain("--sf-font-heading:var(--font-archivo)");
+    expect(css).toContain("--sf-font-body:var(--font-jost)");
+    expect(css).toContain("font-family:var(--sf-font-body)");
+  });
+
+  it("a part of text carries validated declarations only", () => {
+    expect(partStyleDeclarations({ fontFamily: "jost", fontSize: 22, color: "#112233" })).toBe("font-family:var(--font-jost), sans-serif;font-size:22px;color:#112233");
+    expect(partStyleDeclarations({ color: "red;x:y" } as never)).toBe("");
+    expect(partStyleSchema.safeParse({ paddingTop: 5 }).success).toBe(false);
+  });
+});
+
 describe("theme adapters", () => {
-  it("each look has an adapter and the stock sticky header is never styled", () => {
+  it("each look has an adapter; the sticky header can change fonts only", () => {
     for (const look of ["standard", "boutique", "sport", "market", "unknown-future-look"]) {
       const a = adapterForLook(look);
-      expect(a.section("header")).toBeNull();
+      expect(a.section("header")?.capabilities).toEqual(["fonts"]);
       expect(a.section("hero")?.capabilities.length).toBeGreaterThan(0);
     }
   });

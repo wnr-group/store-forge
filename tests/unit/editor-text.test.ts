@@ -13,7 +13,7 @@ vi.mock("next/link", async () => {
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => {} }), usePathname: () => "/" }));
 
 import { TemplateRenderer } from "@/components/storefront/engine/renderer";
-import { originalOf, readTextOverrides, textOverridesSchema, withTextOverride } from "@/lib/editor/text";
+import { originalOf, readTextOverrides, textOverridesSchema, withTextOverride, withTextStyle } from "@/lib/editor/text";
 import { validateDocument } from "@/lib/templates/engine/validate";
 import { getRegistry } from "@/lib/templates/registry/index";
 import { createState, setTextOverride } from "@/lib/themes/editor/state";
@@ -36,6 +36,16 @@ describe("text overrides", () => {
     expect(l).toEqual([{ from: "Add to bag", to: "Get it" }]);
     expect(withTextOverride(l, "Add to bag", "Add to bag")).toEqual([]);
     expect(withTextOverride(l, "Add to bag", undefined)).toEqual([]);
+  });
+
+  it("styles a piece of text on its own, keeping or dropping its words", () => {
+    let l = withTextStyle([], "Shop", "fontSize", 30);
+    expect(l).toEqual([{ from: "Shop", to: "Shop", style: { fontSize: 30 } }]);
+    l = withTextOverride(l, "Shop", "Store");
+    expect(l).toEqual([{ from: "Shop", to: "Store", style: { fontSize: 30 } }]);
+    expect(withTextStyle(l, "Shop", "fontSize", undefined)).toEqual([{ from: "Shop", to: "Store" }]);
+    expect(withTextOverride(l, "Shop", undefined)).toEqual([]);
+    expect(textOverridesSchema.safeParse([{ from: "a", to: "a", style: { color: "bad" } }]).success).toBe(false);
   });
 
   it("finds the original of a text the merchant already replaced", () => {

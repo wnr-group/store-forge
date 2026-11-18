@@ -4,7 +4,9 @@ import type { CapabilityId } from "../style";
 
 const caps = (...c: CapabilityId[]): readonly CapabilityId[] => c;
 
-const SECTION: ElementSpec = { capabilities: caps("background", "spacing", "size", "border", "opacity", "visibility"), textScope: false };
+const SECTION: ElementSpec = { capabilities: caps("fonts", "background", "spacing", "size", "border", "opacity", "visibility"), textScope: false };
+/** A sticky header cannot be boxed, but its fonts can change: they travel as inherited variables. */
+const HEADER: ElementSpec = { capabilities: caps("fonts"), textScope: false };
 const TEXT: ElementSpec = { capabilities: caps("typography", "textColor", "background", "spacing", "border", "opacity", "visibility"), textScope: true };
 const CONTROL: ElementSpec = { capabilities: caps("typography", "textColor", "background", "spacing", "size", "border", "opacity", "visibility"), textScope: true };
 const CONTAINER: ElementSpec = CONTROL;
@@ -59,7 +61,7 @@ export function createEngineAdapter(config: EngineAdapterConfig): ThemeEditorAda
     name: config.name,
     looks: config.looks,
     addableSections: config.addableSections,
-    section: (type) => (UNWRAPPED_SECTIONS.has(type) ? null : SECTION),
+    section: (type) => (UNWRAPPED_SECTIONS.has(type) ? HEADER : SECTION),
     block: (type, sectionType) => (withBlocks.has(sectionType) ? (BLOCKS[type] ?? null) : null),
   };
 }

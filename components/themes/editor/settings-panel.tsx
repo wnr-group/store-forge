@@ -4,7 +4,7 @@ import { CornerLeftUp, MousePointerClick } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { ThemeEditorAdapter } from "@/lib/editor/adapter";
-import { readStyle, type StyleDevice, type StyleKey } from "@/lib/editor/style";
+import { readStyle, type PartStyleKey, type StyleDevice, type StyleKey } from "@/lib/editor/style";
 import { isSettingVisible } from "@/lib/templates/engine/descriptor-check";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { SettingDescriptor } from "@/lib/templates/engine/descriptors";
@@ -49,9 +49,10 @@ type Props = {
   /** Text clicked in the preview that no setting holds, and the handler that replaces it. */
   clickedText: { text: string; nonce: number } | null;
   onText: (docId: string, sectionId: string, from: string, to: string | undefined) => void;
+  onTextStyle: (docId: string, sectionId: string, from: string, key: PartStyleKey, value: unknown) => void;
 };
 
-export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText }: Props) {
+export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle }: Props) {
   if (mode === "theme") {
     return themeDocId && state.docs[themeDocId] ? (
       <ThemeSettings doc={state.docs[themeDocId].document} disabled={disabled} problems={problems[themeDocId] ?? {}} onChange={(group, key, value) => onThemeSetting(themeDocId, group, key, value)} />
@@ -89,11 +90,12 @@ export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSet
       onFocusConsumed={onFocusConsumed}
       clickedText={clickedText}
       onText={onText}
+      onTextStyle={onTextStyle}
     />
   );
 }
 
-type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "styleDevice" | "onStyle" | "onResetStyle" | "onSelectParent" | "focusSetting" | "onFocusConsumed" | "clickedText" | "onText"> & {
+type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "styleDevice" | "onStyle" | "onResetStyle" | "onSelectParent" | "focusSetting" | "onFocusConsumed" | "clickedText" | "onText" | "onTextStyle"> & {
   docId: string;
   sectionId: string;
   blockId: string | undefined;
@@ -103,7 +105,7 @@ type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "st
 };
 
 /** The selected section or block: a Content tab (its own settings) and a Style tab (what the theme's adapter allows). */
-function ElementEditor({ docId, sectionId, blockId, section, node, disabled, problems, onSetting, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText }: ElementEditorProps) {
+function ElementEditor({ docId, sectionId, blockId, section, node, disabled, problems, onSetting, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle }: ElementEditorProps) {
   const [tab, setTab] = useState<"content" | "style">("content");
   const content = useRef<HTMLDivElement>(null);
   const def = blockId ? registry.blocks[node.type] : registry.sections[node.type];
@@ -154,7 +156,7 @@ function ElementEditor({ docId, sectionId, blockId, section, node, disabled, pro
 
       {tab === "content" ? (
         <div ref={content} role="tabpanel" aria-label="Content" className="space-y-4">
-          <TextOnPage section={section} clicked={clickedText} disabled={disabled} onChange={(from, to) => onText(docId, sectionId, from, to)} />
+          <TextOnPage section={section} clicked={clickedText} disabled={disabled} onChange={(from, to) => onText(docId, sectionId, from, to)} onStyle={(from, key, value) => onTextStyle(docId, sectionId, from, key, value)} />
           {def && def.settings.length > 0 ? (
             <div className="space-y-4">
               {def.settings

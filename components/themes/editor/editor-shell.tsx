@@ -16,13 +16,13 @@ import { ROUTES } from "@/config/app";
 import { adapterForLook, lookOf } from "@/lib/editor/adapters";
 import { findSettingForClick } from "@/lib/editor/locate";
 import { originalOf, readTextOverrides } from "@/lib/editor/text";
-import type { StyleDevice, StyleKey as StyleKeyType } from "@/lib/editor/style";
+import type { PartStyleKey, StyleDevice, StyleKey as StyleKeyType } from "@/lib/editor/style";
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import { validateDocument } from "@/lib/templates/engine/validate";
 import { getRegistry } from "@/lib/templates/registry/index";
 import {
   addBlock, addSection, createBlockNode, createState, dirtyDocs, duplicateSection, isDirty, markSaved, moveBlock, moveSection, removeBlock, removeSection,
-  replaceDoc, resetElementStyle, select, setElementStyle, setSetting, setTextOverride, setThemeSetting, toggleSection, type EditorDoc, type EditorState,
+  replaceDoc, resetElementStyle, select, setElementStyle, setSetting, setTextOverride, setTextStyle, setThemeSetting, toggleSection, type EditorDoc, type EditorState,
 } from "@/lib/themes/editor/state";
 import { canRedo, canUndo, emptyHistory, record, redo, undo, type History } from "@/lib/themes/editor/history";
 import { ActionError, themeKeys, usePublishTheme, useTemplates } from "@/lib/themes/queries";
@@ -320,6 +320,10 @@ export function EditorShell({ init }: { init: EditorInit }) {
     (docId: string, sectionId: string, from: string, to: string | undefined) => edit((s) => setTextOverride(s, docId, sectionId, from, to), `text:${docId}:${sectionId}:${from}`),
     [edit],
   );
+  const onTextStyle = useCallback(
+    (docId: string, sectionId: string, from: string, key: PartStyleKey, value: unknown) => edit((s) => setTextStyle(s, docId, sectionId, from, key, value), `textstyle:${docId}:${sectionId}:${from}:${key}`),
+    [edit],
+  );
   const clearFocus = useCallback(() => setFocusSetting(null), []);
   const onSelectParent = useCallback((docId: string, sectionId: string) => edit((s) => select(s, { docId, sectionId })), [edit]);
 
@@ -514,6 +518,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             onFocusConsumed={clearFocus}
             clickedText={clickedText}
             onText={onText}
+            onTextStyle={onTextStyle}
           />
           </CollectionChoicesContext.Provider>
         </aside>
