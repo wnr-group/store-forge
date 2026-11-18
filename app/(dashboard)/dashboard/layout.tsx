@@ -6,6 +6,8 @@ import { cookies } from "next/headers";
 import { AppShell } from "@/components/dashboard/app-shell";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumbs";
 import { CommandSearch } from "@/components/dashboard/command-search";
+import { MerchantScope } from "@/components/dashboard/merchant-scope";
+import { SkipLink } from "@/components/dashboard/skip-link";
 import { Notifications, NotificationsFallback } from "@/components/dashboard/notifications";
 import { ThemeToggle } from "@/components/dashboard/theme-toggle";
 import { TenantSwitcher } from "@/components/dashboard/tenant-switcher";
@@ -42,45 +44,51 @@ export default async function DashboardLayout({ children }: { children: React.Re
     </DropdownMenuItem>
   );
   const collapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "1";
+  // One source for the sidebar and the Ctrl+K palette, so they always list the same sections.
+  const navKey = active.role === "owner" ? "owner" : "merchant";
+  const hiddenNav = hiddenNavHrefs(active);
 
   return (
-    <AppShell
-      navKey={active.role === "owner" ? "owner" : "merchant"}
-      hiddenNav={hiddenNavHrefs(active)}
-      homeHref={ROUTES.dashboard}
-      defaultCollapsed={collapsed}
-      brandName={(await getPublicBranding()).platformName}
-      switcher={{ full: <TenantSwitcher {...switcherProps} />, compact: <TenantSwitcher {...switcherProps} compact /> }}
-      footer={{
-        full: <UserMenu name={name} email={email} role={role}>{accountLink}</UserMenu>,
-        compact: <UserMenu name={name} email={email} role={role} compact>{accountLink}</UserMenu>,
-      }}
-      header={
-        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-          <Breadcrumbs />
-          <div className="flex items-center gap-2">
-            {storeUrl && store ? (
-              <a
-                href={storeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={buttonVariants({ variant: "outline", size: "sm" })}
-                title={`Open ${storefrontHost(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, active.tenant.publicId)}`}
-              >
-                <ExternalLink aria-hidden /> <span className="hidden sm:inline">View store</span>
-                <span className="sr-only sm:hidden">View store</span>
-              </a>
-            ) : null}
-            <CommandSearch />
-            <ThemeToggle />
-            <Suspense fallback={<NotificationsFallback />}>
-              <Notifications />
-            </Suspense>
+    <MerchantScope>
+      <SkipLink />
+      <AppShell
+        navKey={navKey}
+        hiddenNav={hiddenNav}
+        homeHref={ROUTES.dashboard}
+        defaultCollapsed={collapsed}
+        brandName={(await getPublicBranding()).platformName}
+        switcher={{ full: <TenantSwitcher {...switcherProps} />, compact: <TenantSwitcher {...switcherProps} compact /> }}
+        footer={{
+          full: <UserMenu name={name} email={email} role={role}>{accountLink}</UserMenu>,
+          compact: <UserMenu name={name} email={email} role={role} compact>{accountLink}</UserMenu>,
+        }}
+        header={
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+            <Breadcrumbs />
+            <div className="flex items-center gap-2">
+              {storeUrl && store ? (
+                <a
+                  href={storeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                  title={`Open ${storefrontHost(store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, active.tenant.publicId)}`}
+                >
+                  <ExternalLink aria-hidden /> <span className="hidden sm:inline">View store</span>
+                  <span className="sr-only sm:hidden">View store</span>
+                </a>
+              ) : null}
+              <CommandSearch navKey={navKey} hidden={hiddenNav} />
+              <ThemeToggle />
+              <Suspense fallback={<NotificationsFallback />}>
+                <Notifications />
+              </Suspense>
+            </div>
           </div>
-        </div>
-      }
-    >
-      {children}
-    </AppShell>
+        }
+      >
+        {children}
+      </AppShell>
+    </MerchantScope>
   );
 }
