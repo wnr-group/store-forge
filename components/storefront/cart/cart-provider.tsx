@@ -10,6 +10,8 @@ export type CartToast = { id: number; message: string };
 export type CartApi = {
   storeSlug: string;
   currency: string;
+  /** True in the theme editor and theme preview, where the bag is in memory and nothing is saved. */
+  preview: boolean;
   lines: CartLine[];
   count: number;
   subtotalMinor: number;
@@ -74,6 +76,7 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
     () => ({
       storeSlug,
       currency,
+      preview: !persist,
       lines: cart.lines,
       count: itemCount(cart),
       subtotalMinor: subtotalMinor(cart),
@@ -114,7 +117,7 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
       dismissToast: () => setToast(null),
       notify: (message) => setToast({ id: ++toastId.current, message }),
     }),
-    [storeSlug, currency, cart, ready, drawerOpen, toast, commit, current],
+    [storeSlug, currency, persist, cart, ready, drawerOpen, toast, commit, current],
   );
 
   return <CartContext.Provider value={api}>{children}</CartContext.Provider>;

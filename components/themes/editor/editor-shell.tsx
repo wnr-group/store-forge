@@ -35,6 +35,7 @@ import { SectionsPanel, type SectionActions } from "./sections-panel";
 import { CollectionChoicesContext } from "./setting-field";
 import { SettingsPanel } from "./settings-panel";
 import { usePreviewTarget, type TargetKind } from "./use-preview-target";
+import { PREVIEW_OPEN_EVENT } from "@/components/storefront/cart/use-quick-add";
 import { VersionsSheet } from "./versions-sheet";
 import { PreviewModeNote, PreviewModeSwitch } from "../preview-mode-switch";
 import { ThemeFrame, type ClickTarget, type Device } from "../theme-frame";
@@ -309,51 +310,6 @@ export function EditorShell({ init }: { init: EditorInit }) {
     [edit],
   );
 
-  /** The product, collection or content page being shown, so Back can return to it. */
-  const currentRef = (): TrailStep["ref"] => {
-    const kind = state.docs[state.pageId]?.kind;
-    if (isVirtualId(state.pageId)) return virtualKey(state.pageId) === "content" && target.contentPage ? { kind: "content", slug: target.contentPage.slug } : undefined;
-    if (kind === "product" && target.productSlug) return { kind: "product", slug: target.productSlug };
-    if (kind === "collection" && target.collectionSlug) return { kind: "collection", slug: target.collectionSlug };
-    return undefined;
-  };
-
-  /** Opens a page in the editor, like following a link on the storefront. */
-  const goTo = async (pageId: string, ref?: TrailStep["ref"], record = true) => {
-    if (record && (pageId !== state.pageId || ref)) setTrail((t) => [...t.slice(-19), { pageId: state.pageId, ref: currentRef() }]);
-    if (ref) target.choose(ref.kind, ref.slug);
-    await switchPage(pageId);
-  };
-  const goBack = () => {
-    const last = trail[trail.length - 1];
-    if (!last) return;
-    setTrail((t) => t.slice(0, -1));
-    void goTo(last.pageId, last.ref, false);
-  };
-
-  /** Following a link in the preview: opens the page it leads to, as the live store would. */
-  const navigateHref = (href: string) => {
-    if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
-    const route = routeForHref(href);
-    if (!route) {
-      toast.message(/^https?:/i.test(href) ? "That link leaves your store." : "Sign-in and account pages have no design to edit here.");
-      return;
-    }
-    const pageIdFor = (kind: ThemeKind) => init.pages.find((p) => p.kind === kind)?.id;
-    if (route.page === "home") return void goTo(pageIdFor("index") ?? state.pageId);
-    if (route.page === "product" || route.page === "collection") {
-      const id = pageIdFor(route.page);
-      if (!id) return void toast.message("This theme has no " + route.page + " page to edit.");
-      return void goTo(id, { kind: route.page, slug: route.slug });
-    }
-    if (route.page === "content") {
-      if (!themeDocId) return;
-      if (!target.contentPages.some((p) => p.slug === route.slug)) toast.message("There is no page at /" + route.slug + " yet. Showing the layout all content pages share; add the page under Pages.");
-      return void goTo(virtualId("content"), target.contentPages.some((p) => p.slug === route.slug) ? { kind: "content", slug: route.slug } : undefined);
-    }
-    if (themeDocId) void goTo(virtualId(route.page));
-  };
-
   const onStyle = useCallback(
     (docId: string, sectionId: string, blockId: string | undefined, device: StyleDevice, key: StyleKeyType, value: unknown) =>
       edit((s) => setElementStyle(s, docId, sectionId, blockId, device, key, value), `style:${docId}:${sectionId}:${blockId ?? ""}:${device}:${key}`),
@@ -399,6 +355,65 @@ export function EditorShell({ init }: { init: EditorInit }) {
     commit((prev) => ({ ...prev, pageId: id, selection: null }));
     setLoadingPage(false);
   };
+
+  /** The product, collection or content page being shown, so Back can return to it. */
+  const currentRef = (): TrailStep["ref"] => {
+    const kind = state.docs[state.pageId]?.kind;
+    if (isVirtualId(state.pageId)) return virtualKey(state.pageId) === "content" && target.contentPage ? { kind: "content", slug: target.contentPage.slug } : undefined;
+    if (kind === "product" && target.productSlug) return { kind: "product", slug: target.productSlug };
+    if (kind === "collection" && target.collectionSlug) return { kind: "collection", slug: target.collectionSlug };
+    return undefined;
+  };
+
+  /** Opens a page in the editor, like following a link on the storefront. */
+  const goTo = async (pageId: string, ref?: TrailStep["ref"], record = true) => {
+    if (record && (pageId !== state.pageId || ref)) setTrail((t) => [...t.slice(-19), { pageId: state.pageId, ref: currentRef() }]);
+    if (ref) target.choose(ref.kind, ref.slug);
+    await switchPage(pageId);
+  };
+  const goBack = () => {
+    const last = trail[trail.length - 1];
+    if (!last) return;
+    setTrail((t) => t.slice(0, -1));
+    void goTo(last.pageId, last.ref, false);
+  };
+
+  /** Following a link in the preview: opens the page it leads to, as the live store would. */
+  const navigateHref = (href: string) => {
+    if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+    const route = routeForHref(href);
+    if (!route) {
+      toast.message(/^https?:/i.test(href) ? "That link leaves your store." : "Sign-in and account pages have no design to edit here.");
+      return;
+    }
+    const pageIdFor = (kind: ThemeKind) => init.pages.find((p) => p.kind === kind)?.id;
+    if (route.page === "home") return void goTo(pageIdFor("index") ?? state.pageId);
+    if (route.page === "product" || route.page === "collection") {
+      const id = pageIdFor(route.page);
+      if (!id) return void toast.message("This theme has no " + route.page + " page to edit.");
+      return void goTo(id, { kind: route.page, slug: route.slug });
+    }
+    if (route.page === "content") {
+      if (!themeDocId) return;
+      if (!target.contentPages.some((p) => p.slug === route.slug)) toast.message("There is no page at /" + route.slug + " yet. Showing the layout all content pages share; add the page under Pages.");
+      return void goTo(virtualId("content"), target.contentPages.some((p) => p.slug === route.slug) ? { kind: "content", slug: route.slug } : undefined);
+    }
+    if (themeDocId) void goTo(virtualId(route.page));
+  };
+
+  // A card's "Add to bag" on a product that needs options opens that product, as it would for a shopper.
+  const navigateRef = useRef(navigateHref);
+  useEffect(() => {
+    navigateRef.current = navigateHref;
+  });
+  useEffect(() => {
+    const open = (e: Event) => {
+      const href = (e as CustomEvent<{ href?: string }>).detail?.href;
+      if (href) navigateRef.current(href);
+    };
+    window.addEventListener(PREVIEW_OPEN_EVENT, open);
+    return () => window.removeEventListener(PREVIEW_OPEN_EVENT, open);
+  }, []);
 
   const reloadAll = async () => {
     setLoadingPage(true);

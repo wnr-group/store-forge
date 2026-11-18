@@ -1,10 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
-import { quickAddAction } from "@/app/s/[slug]/cart/actions";
-import { useOptionalCart } from "@/components/storefront/cart/cart-provider";
+import { useQuickAdd } from "@/components/storefront/cart/use-quick-add";
 import { useOptionalWishlist } from "@/components/storefront/wishlist/wishlist-provider";
 import { cn } from "@/lib/utils";
 import type { CardProduct } from "../../ui";
@@ -15,10 +12,8 @@ import type { CardProduct } from "../../ui";
  * or a bag. It sits OUTSIDE the card's link, so the card is never an anchor that contains buttons.
  */
 export function CardActions({ product, href, aspect = "aspect-[3/4]", inset = "inset-x-3 bottom-3", round = "" }: { product: CardProduct; href: string | null; aspect?: string; inset?: string; round?: string }) {
-  const cart = useOptionalCart();
+  const { cart, busy, addToBag } = useQuickAdd(product, href);
   const wishlist = useOptionalWishlist();
-  const router = useRouter();
-  const [busy, setBusy] = useState(false);
   const soldOut = product.available === false;
   const saved = wishlist?.ready ? wishlist.has(product.slug) : false;
 
@@ -36,23 +31,6 @@ export function CardActions({ product, href, aspect = "aspect-[3/4]", inset = "i
     cart?.notify(nowSaved ? `${product.name} saved to your wishlist` : `${product.name} removed from your wishlist`);
   };
 
-  const addToBag = async () => {
-    if (!cart || busy) return;
-    setBusy(true);
-    try {
-      const result = await quickAddAction({ storeSlug: cart.storeSlug, productSlug: product.slug });
-      if (result.status === "ok") cart.add(result.item, { openDrawer: false });
-      else if (result.status === "options") {
-        if (href) router.push(href);
-      } else if (result.status === "unavailable") cart.notify(`${product.name} is sold out`);
-      else if (result.status === "gone") cart.notify(`${product.name} is no longer available`);
-      else cart.notify("Could not add this item. Please try again.");
-    } catch {
-      cart.notify("Could not add this item. Please try again.");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   if (!wishlist && !cart) return null;
   return (
