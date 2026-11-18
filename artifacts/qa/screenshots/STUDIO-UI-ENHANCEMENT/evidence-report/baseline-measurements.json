@@ -1,0 +1,222 @@
+{
+  "light.productsToolbar": {
+    "trigger": 36,
+    "search": 32,
+    "status": 36,
+    "addProductLink": 32
+  },
+  "light.categoryDialog": {
+    "nameInput": 32,
+    "parentSelect": 36,
+    "errorText": {
+      "fg": {
+        "r": 220,
+        "g": 83,
+        "b": 83
+      },
+      "bg": {
+        "r": 255,
+        "g": 255,
+        "b": 255
+      },
+      "ratio": 3.89
+    },
+    "formAlertText": {
+      "fg": {
+        "r": 220,
+        "g": 83,
+        "b": 83
+      },
+      "bg": {
+        "r": 255,
+        "g": 255,
+        "b": 255
+      },
+      "ratio": 3.89
+    },
+    "invalidInputBorder": "rgb(201, 63, 63)",
+    "invalidInputBackground": "rgb(255, 255, 255)"
+  },
+  "light.productBanner": {
+    "border": "oklab(0.624576 0.157866 0.0686655 / 0.3)",
+    "fill": "oklab(0.624576 0.157866 0.0686655 / 0.05)",
+    "text": {
+      "fg": {
+        "r": 220,
+        "g": 83,
+        "b": 83
+      },
+      "bg": {
+        "r": 246,
+        "g": 240,
+        "b": 242
+      },
+      "ratio": 3.45
+    }
+  },
+  "light.admin": {
+    "statusSelect": 36,
+    "search": 32,
+    "errorText": {
+      "fg": {
+        "r": 220,
+        "g": 83,
+        "b": 83
+      },
+      "bg": {
+        "r": 255,
+        "g": 255,
+        "b": 255
+      },
+      "ratio": 3.89
+    },
+    "orgNameInput": 32,
+    "htmlArea": null
+  },
+  "light.login": {
+    "emailInput": 36,
+    "errorText": {
+      "fg": {
+        "r": 220,
+        "g": 83,
+        "b": 83
+      },
+      "bg": {
+        "r": 255,
+        "g": 255,
+        "b": 255
+      },
+      "ratio": 3.89
+    },
+    "htmlArea": null
+  },
+  "dark.categoryDialog": {
+    "nameInput": 32,
+    "parentSelect": 36,
+    "errorText": {
+      "fg": {
+        "r": 224,
+        "g": 82,
+        "b": 82
+      },
+      "bg": {
+        "r": 28,
+        "g": 29,
+        "b": 32
+      },
+      "ratio": 4.41
+    },
+    "formAlertText": {
+      "fg": {
+        "r": 224,
+        "g": 82,
+        "b": 82
+      },
+      "bg": {
+        "r": 28,
+        "g": 29,
+        "b": 32
+      },
+      "ratio": 4.41
+    },
+    "invalidInputBorder": "oklab(0.724644 0.128594 0.0494419 / 0.5)",
+    "invalidInputBackground": "rgb(24, 25, 28)"
+  },
+  "dark.productBanner": {
+    "border": "oklab(0.629456 0.162608 0.0714653 / 0.3)",
+    "fill": "oklab(0.629456 0.162608 0.0714653 / 0.05)",
+    "text": {
+      "fg": {
+        "r": 224,
+        "g": 82,
+        "b": 82
+      },
+      "bg": {
+        "r": 27,
+        "g": 21,
+        "b": 23
+      },
+      "ratio": 4.71
+    }
+  },
+  "dark.admin": {
+    "statusSelect": 36,
+    "search": 32,
+    "errorText": {
+      "fg": {
+        "r": 224,
+        "g": 82,
+        "b": 82
+      },
+      "bg": {
+        "r": 24,
+        "g": 25,
+        "b": 28
+      },
+      "ratio": 4.6
+    },
+    "orgNameInput": 32,
+    "htmlArea": null
+  },
+  "dark.login": {
+    "emailInput": 36,
+    "errorText": {
+      "fg": {
+        "r": 224,
+        "g": 82,
+        "b": 82
+      },
+      "bg": {
+        "r": 255,
+        "g": 255,
+        "b": 255
+      },
+      "ratio": 3.82
+    },
+    "htmlArea": null
+  },
+  "palette.owner": [
+    "Overview",
+    "Products",
+    "Categories",
+    "Collections",
+    "Inventory",
+    "Customers",
+    "Analytics",
+    "Themes",
+    "Customize",
+    "Pages",
+    "Navigation",
+    "Settings"
+  ],
+  "palette.staff": [
+    "Overview",
+    "Products",
+    "Categories",
+    "Collections",
+    "Inventory",
+    "Customers",
+    "Analytics",
+    "Themes",
+    "Customize",
+    "Pages",
+    "Navigation",
+    "Settings"
+  ],
+  "chartAxis": {
+    "ticks": [
+      "20 Oct",
+      "23 Oct",
+      "26 Oct",
+      "29 Oct",
+      "1 Nov",
+      "3 Nov",
+      "5 Nov",
+      "7 Nov",
+      "9 Nov",
+      "11 Nov",
+      "14 Nov",
+      "18 Nov"
+    ]
+  }
+}
