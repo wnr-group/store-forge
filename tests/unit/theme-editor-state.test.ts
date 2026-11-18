@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getRegistry } from "@/lib/templates/registry/index";
 import {
   addBlock, addSection, createBlockNode, createState, dirtyDocs, duplicateSection, isDirty, markSaved, moveSection, removeBlock, removeSection,
-  replaceDoc, sectionOrder, setSetting, setThemeSetting, toggleSection,
+  replaceDoc, resetElementStyle, sectionOrder, setElementStyle, setSetting, setThemeSetting, toggleSection,
 } from "@/lib/themes/editor/state";
 
 const registry = getRegistry();
@@ -117,5 +117,32 @@ describe("editor state", () => {
     const s = fresh();
     expect(setSetting(s, "nope", "a", undefined, "x", 1)).toBe(s);
     expect(removeSection(s, "nope", "a")).toBe(s);
+  });
+});
+
+describe("element style edits", () => {
+  type Blocks = { sections: Record<string, { blocks: Record<string, { settings: Record<string, unknown> }> }> };
+
+  it("sets an override per device and removes the style setting with its last override", () => {
+    let s = setElementStyle(fresh(), "p", "a", undefined, "base", "backgroundColor", "#112233");
+    s = setElementStyle(s, "p", "a", undefined, "mobile", "paddingTop", 12);
+    expect((s.docs.p.document as Loose).sections.a.settings._style).toEqual({ base: { backgroundColor: "#112233" }, mobile: { paddingTop: 12 } });
+    s = setElementStyle(s, "p", "a", undefined, "base", "backgroundColor", undefined);
+    s = setElementStyle(s, "p", "a", undefined, "mobile", "paddingTop", undefined);
+    expect((s.docs.p.document as Loose).sections.a.settings).toEqual({ heading: "A" });
+  });
+
+  it("styles a block and resets all of its overrides at once", () => {
+    const withBlock = addBlock(fresh(), "p", "a", createBlockNode("heading", registry)!);
+    const id = withBlock.id!;
+    let s = setElementStyle(withBlock.state, "p", "a", id, "base", "color", "#ff0000");
+    expect((s.docs.p.document as unknown as Blocks).sections.a.blocks[id].settings._style).toEqual({ base: { color: "#ff0000" } });
+    s = resetElementStyle(s, "p", "a", id);
+    expect((s.docs.p.document as unknown as Blocks).sections.a.blocks[id].settings._style).toBeUndefined();
+  });
+
+  it("ignores an element that is gone", () => {
+    const s = fresh();
+    expect(setElementStyle(s, "p", "nope", undefined, "base", "opacity", 50)).toBe(s);
   });
 });

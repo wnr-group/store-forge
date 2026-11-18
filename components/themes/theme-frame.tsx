@@ -11,6 +11,21 @@ import { cn } from "@/lib/utils";
 export type Device = "desktop" | "tablet" | "mobile";
 export const DEVICE_WIDTH: Record<Device, number> = { desktop: 1280, tablet: 820, mobile: 390 };
 
+/** `texts`: the text of the clicked element and of its text-bearing ancestors, innermost first. */
+export type ClickTarget = { sectionId: string; blockId?: string; texts?: string[]; image?: string };
+
+/** The picture a clicked `<img>` shows, as a storage path or theme asset name (the optimiser's wrapper url is unwrapped). */
+function imageSource(img: HTMLImageElement | null): string | undefined {
+  const src = img?.getAttribute("src");
+  if (!src) return undefined;
+  try {
+    const wrapped = new URL(src, "http://x").searchParams.get("url");
+    return wrapped ?? src;
+  } catch {
+    return src;
+  }
+}
+
 type Groups = { header?: TemplateDocument | null; footer?: TemplateDocument | null; announcement?: TemplateDocument | null };
 
 export type ThemeFrameProps = {
@@ -22,13 +37,19 @@ export type ThemeFrameProps = {
   mode?: RenderMode;
   /** Shows at most this many pixels of the page (for gallery thumbnails). */
   cropHeight?: number;
-  /** Section or block clicks, in editor mode. */
-  onSelect?: (target: { sectionId: string; blockId?: string }) => void;
+  /** Section or block clicks, in editor mode. `text` and `image` say what was under the pointer, to find the setting behind it. */
+  onSelect?: (target: ClickTarget) => void;
   selectedSectionId?: string | null;
+  /** The selected block inside that section, outlined instead of the section. */
+  selectedBlockId?: string | null;
+  /** A fixed scale (1 = 100%). Without it the page is scaled to fit the space. */
+  zoom?: number | null;
   /** The product or collection a product or collection page shows. */
   resource?: Record<string, unknown>;
   className?: string;
 };
+
+const TEXT_TAGS = "h1,h2,h3,h4,h5,h6,p,a,button,span,li,label,blockquote,dt,dd";
 
 const BLANK_PAGE = "<!doctype html><html><head></head><body></body></html>";
 
@@ -88,8 +109,9 @@ function DeviceScreen({ width, height, scale, left, children }: { width: number;
  * space available. Nothing here is a mock-up, so what the merchant sees is what the storefront renders. Links and forms
  * inside never navigate; in editor mode a click selects the section or block under the pointer instead.
  */
-export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, selectedSectionId, resource, className }: ThemeFrameProps) {
+export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, selectedSectionId, selectedBlockId, zoom, resource, className }: ThemeFrameProps) {
   const outer = useRef<HTMLDivElement>(null);
+  const [hover, setHover] = useState<{ sectionId: string; blockId?: string } | null>(null);
   const [available, setAvailable] = useState(0);
   const [viewport, setViewport] = useState(0);
 
@@ -136,7 +158,8 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
   );
 
   const width = DEVICE_WIDTH[device];
-  const scale = available > 0 ? Math.min(1, available / width) : 1;
+  const fit = available > 0 ? Math.min(1, available / width) : 1;
+  const scale = zoom ? Math.max(0.25, Math.min(2, zoom)) : fit;
   const editing = mode === "editor";
 
   const handleClick = (event: React.MouseEvent) => {
@@ -147,19 +170,35 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     const section = target.closest<HTMLElement>("[data-sf-section]");
     if (!section) return;
     const block = target.closest<HTMLElement>("[data-sf-block]");
-    onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock });
+    const texts: string[] = [];
+    for (let el: HTMLElement | null = target.closest<HTMLElement>(TEXT_TAGS); el && texts.length < 4 && section.contains(el); el = el.parentElement?.closest<HTMLElement>(TEXT_TAGS) ?? null) {
+      const t = el.textContent?.trim();
+      if (t) texts.push(t.slice(0, 600));
+    }
+    onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock, texts, image: imageSource(target.closest("img")) });
+  };
+
+  const handleOver = (event: React.MouseEvent) => {
+    if (!editing) return;
+    const target = event.target as HTMLElement;
+    const section = target.closest<HTMLElement>("[data-sf-section]")?.dataset.sfSection;
+    const blockId = target.closest<HTMLElement>("[data-sf-block]")?.dataset.sfBlock;
+    setHover((prev) => (section ? (prev?.sectionId === section && prev.blockId === blockId ? prev : { sectionId: section, blockId }) : prev ? null : prev));
   };
 
   // Every frame but a gallery thumbnail is a device screen: its own window of the device's width, so the theme answers with its
   // real tablet or phone layout. Thumbnails stay cheap and in the page (they are a fixed crop of the top of the desktop page).
   const isolated = !cropHeight;
   const screenHeight = Math.min(1100, Math.max(480, viewport - 210));
-  const left = device === "desktop" || scale < 1 ? 0 : Math.max(0, (available - width) / 2);
+  // The page is centred when it is narrower than the space (a phone or tablet at full size, or any zoomed-out page).
+  const left = Math.max(0, (available - width * scale) / 2);
 
   const body = (
     <>
       <div
         onClickCapture={handleClick}
+        onMouseOver={editing ? handleOver : undefined}
+        onMouseLeave={editing ? () => setHover(null) : undefined}
         className={cn("sf-frame", !isolated && "origin-top-left")}
         style={isolated ? undefined : { width, visibility: available > 0 ? "visible" : "hidden", transform: `scale(${scale})`, marginLeft: left }}
         data-static={cropHeight ? "" : undefined}
@@ -171,10 +210,23 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
       {/* A preview shows the finished page at once: the scroll reveals and entrance animations of a live storefront are switched off
           here (and every transition in a gallery thumbnail), so nothing waits to scroll into view or keeps animating. */}
       <style>{`.sf-frame [data-sf-reveal],.sf-frame [data-sf-reveal] .sf-word,.sf-frame .sf-up,.sf-frame .sf-hero-word{animation:none!important;transition:none!important;opacity:1!important;translate:none!important}.sf-frame[data-static] *{animation:none!important;transition:none!important}`}</style>
+      {/* Selection and hover outlines. Ids come from the document's own node ids; CSS.escape keeps them inert. The selected block
+          is outlined instead of its section; hover outlines the innermost block or section under the pointer. */}
       {editing && selectedSectionId ? (
-        <style>{`.sf-frame [data-sf-section="${CSS.escape(selectedSectionId)}"]{outline:2px solid var(--editor-accent,#2563eb);outline-offset:-2px}`}</style>
+        <style>
+          {selectedBlockId
+            ? `.sf-frame [data-sf-block="${CSS.escape(selectedBlockId)}"]{outline:2px solid var(--editor-accent,#2563eb)!important;outline-offset:2px}.sf-frame [data-sf-section="${CSS.escape(selectedSectionId)}"]{outline:1px dashed var(--editor-accent,#2563eb);outline-offset:-1px}`
+            : `.sf-frame [data-sf-section="${CSS.escape(selectedSectionId)}"]{outline:2px solid var(--editor-accent,#2563eb);outline-offset:-2px}`}
+        </style>
       ) : null}
-      {editing ? <style>{`.sf-frame[data-editing] [data-sf-section]{cursor:pointer}.sf-frame[data-editing] [data-sf-section]:hover{outline:1px dashed #2563eb;outline-offset:-1px}`}</style> : null}
+      {editing && hover ? (
+        <style>
+          {hover.blockId
+            ? `.sf-frame [data-sf-block="${CSS.escape(hover.blockId)}"]{outline:1px dashed #2563eb;outline-offset:2px}`
+            : `.sf-frame [data-sf-section="${CSS.escape(hover.sectionId)}"]{outline:1px dashed #2563eb;outline-offset:-1px}`}
+        </style>
+      ) : null}
+      {editing ? <style>{`.sf-frame[data-editing] [data-sf-section],.sf-frame[data-editing] [data-sf-block]{cursor:pointer}`}</style> : null}
     </>
   );
 

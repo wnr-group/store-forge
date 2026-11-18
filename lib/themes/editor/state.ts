@@ -1,6 +1,7 @@
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import type { SectionDefinition, SettingDescriptor, ComponentRegistry } from "@/lib/templates/engine/descriptors";
 import { addNode, duplicateNode, generateId, moveNode, removeNode } from "@/lib/templates/engine/tree";
+import { isEmptyStyle, readStyle, STYLE_SETTING_KEY, withStyleValue, type StyleDevice, type StyleKey } from "@/lib/editor/style";
 import type { ThemeKind } from "@/lib/themes/types";
 
 /**
@@ -64,6 +65,24 @@ export function setSetting(state: EditorState, docId: string, sectionId: string,
     node.settings = settings;
     return next;
   });
+}
+
+/**
+ * Sets one style override of a section or block for a device (`base`, `tablet` or `mobile`). `undefined` removes it, and the
+ * element goes back to the style it inherits. The `_style` setting disappears when its last override does.
+ */
+export function setElementStyle(state: EditorState, docId: string, sectionId: string, blockId: string | undefined, device: StyleDevice, key: StyleKey, value: unknown): EditorState {
+  const doc = state.docs[docId]?.document as { sections?: Record<string, ComponentNode> } | undefined;
+  const section = doc?.sections?.[sectionId];
+  const node = blockId ? findBlock(section, blockId) : section;
+  if (!node) return state;
+  const next = withStyleValue(readStyle(node.settings), device, key, value);
+  return setSetting(state, docId, sectionId, blockId, STYLE_SETTING_KEY, isEmptyStyle(next) ? undefined : next);
+}
+
+/** Removes every style override of an element. */
+export function resetElementStyle(state: EditorState, docId: string, sectionId: string, blockId?: string): EditorState {
+  return setSetting(state, docId, sectionId, blockId, STYLE_SETTING_KEY, undefined);
 }
 
 function findBlock(node: ComponentNode | undefined, blockId: string): ComponentNode | undefined {

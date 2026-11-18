@@ -2,6 +2,7 @@ import React from "react";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { LinkBlock } from "./link";
+import { blockMarkers } from "../markers";
 
 interface LinkColumnBlockProps {
   node: ComponentNode;
@@ -15,7 +16,7 @@ export function LinkColumnBlock({ node, context, blockId }: LinkColumnBlockProps
   const blockOrder = node.block_order ?? Object.keys(blocks);
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   return (
     <div className="space-y-3" {...sfProps}>

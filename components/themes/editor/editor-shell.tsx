@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, Check, CircleAlert, Eye, History, Loader2, Monitor, Palette, PanelLeft, Rocket, Smartphone, Tablet } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, ChevronRight, CircleAlert, Eye, History as HistoryIcon, Loader2, Monitor, Palette, PanelLeft, Redo2, Rocket, Smartphone, Tablet, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getTemplateAction, saveDraftAction } from "@/app/(dashboard)/dashboard/templates/actions";
@@ -13,13 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { NativeSelect } from "@/components/ui/native-select";
 import { ROUTES } from "@/config/app";
-import type { TemplateDocument } from "@/lib/templates/document";
+import { adapterForLook, lookOf } from "@/lib/editor/adapters";
+import { findSettingForClick } from "@/lib/editor/locate";
+import type { StyleDevice, StyleKey as StyleKeyType } from "@/lib/editor/style";
+import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import { validateDocument } from "@/lib/templates/engine/validate";
 import { getRegistry } from "@/lib/templates/registry/index";
 import {
   addBlock, addSection, createBlockNode, createState, dirtyDocs, duplicateSection, isDirty, markSaved, moveBlock, moveSection, removeBlock, removeSection,
-  replaceDoc, select, setSetting, setThemeSetting, toggleSection, type EditorDoc, type EditorState,
+  replaceDoc, resetElementStyle, select, setElementStyle, setSetting, setThemeSetting, toggleSection, type EditorDoc, type EditorState,
 } from "@/lib/themes/editor/state";
+import { canRedo, canUndo, emptyHistory, record, redo, undo, type History } from "@/lib/themes/editor/history";
 import { ActionError, themeKeys, usePublishTheme, useTemplates } from "@/lib/themes/queries";
 import { hasStoreProducts, previewData, type PreviewData, type PreviewMode } from "@/lib/themes/preview-data";
 import type { PreviewStoreData, TemplateSummary, ThemeKind } from "@/lib/themes/types";
@@ -29,9 +33,18 @@ import { CollectionChoicesContext } from "./setting-field";
 import { SettingsPanel } from "./settings-panel";
 import { VersionsSheet } from "./versions-sheet";
 import { PreviewModeNote, PreviewModeSwitch } from "../preview-mode-switch";
-import { ThemeFrame, type Device } from "../theme-frame";
+import { ThemeFrame, type ClickTarget, type Device } from "../theme-frame";
 
 const registry = getRegistry();
+
+function findNode(node: ComponentNode, id: string): ComponentNode | undefined {
+  if (node.blocks?.[id]) return node.blocks[id];
+  for (const child of Object.values(node.blocks ?? {})) {
+    const found = findNode(child, id);
+    if (found) return found;
+  }
+  return undefined;
+}
 const AUTOSAVE_MS = 1500;
 
 export type EditorInit = {
@@ -53,6 +66,9 @@ const DEVICES: { id: Device; label: string; icon: typeof Monitor }[] = [
   { id: "tablet", label: "Tablet", icon: Tablet },
   { id: "mobile", label: "Mobile", icon: Smartphone },
 ];
+/** The preview device a style change is written for. */
+const STYLE_DEVICE: Record<Device, StyleDevice> = { desktop: "base", tablet: "tablet", mobile: "mobile" };
+const ZOOMS = [{ label: "Fit", value: 0 }, { label: "50%", value: 0.5 }, { label: "75%", value: 0.75 }, { label: "100%", value: 1 }, { label: "125%", value: 1.25 }];
 
 /** The product or collection a product or collection page shows: the store's own in "store" mode, sample content in "demo". */
 function resourceFor(kind: ThemeKind, data: PreviewData): Record<string, unknown> | undefined {
@@ -72,13 +88,21 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [state, setState] = useState<EditorState>(() => createState(init.pageId, init.docs));
+  // The latest state, updated synchronously by `commit`, so a burst of edits or an edit during a save never works from a stale copy.
+  const stateRef = useRef(state);
+  const historyRef = useRef<History>(emptyHistory());
+  const [history, setHistory] = useState<History>(emptyHistory);
+  const commit = useCallback((fn: (s: EditorState) => EditorState): EditorState => {
+    const next = fn(stateRef.current);
+    stateRef.current = next;
+    setState(next);
+    return next;
+  }, []);
+  const [zoom, setZoom] = useState(0);
+  const [focusSetting, setFocusSetting] = useState<{ key: string; nonce: number } | null>(null);
   // The merchant's real catalogue by default; demo content only on request, and never saved anywhere.
   const [previewMode, setPreviewMode] = useState<PreviewMode>("store");
   const preview = useMemo(() => previewData(init.data, previewMode), [init.data, previewMode]);
-  const stateRef = useRef(state);
-  useEffect(() => {
-    stateRef.current = state;
-  }, [state]);
   // What the server round trip is doing; the visible status below is derived from this and the document state.
   const [saveState, setSaveState] = useState<"idle" | "saving" | "error" | "conflict">("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -152,7 +176,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
         }
         const saved = result.data!;
         setServerProblems((prev) => ({ ...prev, [doc.templateId]: {} }));
-        setState((prev) => markSaved(prev, doc.templateId, saved.revision, saved.document, json));
+        commit((prev) => markSaved(prev, doc.templateId, saved.revision, saved.document, json));
       }
       retries.current = 0;
       setSaveState("idle");
@@ -164,7 +188,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
     } finally {
       saving.current = false;
     }
-  }, []);
+  }, [commit]);
 
   useEffect(() => {
     // Debounced autosave. A failed save retries a few times with a growing pause, then waits for the merchant.
@@ -187,10 +211,50 @@ export function EditorShell({ init }: { init: EditorInit }) {
   }, []);
 
   // ---- edits ---------------------------------------------------------------------------------------------------
-  const edit = useCallback((fn: (s: EditorState) => EditorState) => {
-    setState((prev) => fn(prev));
-    setSaveState((s) => (s === "error" ? "idle" : s));
-  }, []);
+  /** Applies an edit and records an undo step for it. Edits with the same `key` in quick succession are one step. */
+  const edit = useCallback(
+    (fn: (s: EditorState) => EditorState, key?: string) => {
+      const before = stateRef.current;
+      const after = commit(fn);
+      if (after.docs !== before.docs) {
+        historyRef.current = record(historyRef.current, before, key);
+        setHistory(historyRef.current);
+      }
+      setSaveState((s) => (s === "error" ? "idle" : s));
+    },
+    [commit],
+  );
+
+  const stepHistory = useCallback(
+    (direction: "undo" | "redo") => {
+      const result = (direction === "undo" ? undo : redo)(historyRef.current, stateRef.current);
+      if (!result) return;
+      historyRef.current = result.history;
+      setHistory(result.history);
+      commit(() => result.state);
+      setSaveState((s) => (s === "error" ? "idle" : s));
+    },
+    [commit],
+  );
+
+  useEffect(() => {
+    // Ctrl/Cmd+Z, Shift+Ctrl/Cmd+Z and Ctrl+Y, unless a text field has focus (it keeps its own undo).
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.isContentEditable || /^(input|textarea|select)$/i.test(el.tagName))) return;
+      const k = e.key.toLowerCase();
+      if (k === "z") {
+        e.preventDefault();
+        stepHistory(e.shiftKey ? "redo" : "undo");
+      } else if (k === "y") {
+        e.preventDefault();
+        stepHistory("redo");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [stepHistory]);
 
   const actions: SectionActions = useMemo(
     () => ({
@@ -214,19 +278,41 @@ export function EditorShell({ init }: { init: EditorInit }) {
     [edit],
   );
 
+  /** What the theme lets the merchant style, and the look it comes from. */
+  const adapter = useMemo(() => {
+    const themeId = Object.values(state.docs).find((d) => d.kind === "theme_settings")?.templateId;
+    return adapterForLook(lookOf(themeId ? state.docs[themeId].document : null));
+    // Only the theme document decides this; page edits never change the look.
+  }, [state.docs]);
+
   const onPreviewSelect = useCallback(
-    (target: { sectionId: string; blockId?: string }) => {
+    (target: ClickTarget) => {
       const s = stateRef.current;
       const order = [s.pageId, ...Object.keys(s.docs).filter((id) => id !== s.pageId)];
       const docId = order.find((id) => (s.docs[id].document as { sections?: Record<string, unknown> }).sections?.[target.sectionId]);
-      if (docId) {
-        edit((prev) => select(prev, { docId, sectionId: target.sectionId, blockId: target.blockId }));
-        setLeftTab("sections");
-        setMobileTab("settings");
-      }
+      if (!docId) return;
+      edit((prev) => select(prev, { docId, sectionId: target.sectionId, blockId: target.blockId }));
+      setLeftTab("sections");
+      setMobileTab("settings");
+      // Clicked text or a picture: jump to the setting that holds it (the block first, then its section).
+      const section = (s.docs[docId].document as { sections: Record<string, ComponentNode> }).sections[target.sectionId];
+      const block = target.blockId ? findNode(section, target.blockId) : undefined;
+      const element = block ?? section;
+      const descriptors = (block ? registry.blocks[block.type] : registry.sections[section.type])?.settings ?? [];
+      const key = findSettingForClick([{ descriptors, settings: element.settings }], target);
+      setFocusSetting(key ? { key, nonce: Date.now() } : null);
     },
     [edit],
   );
+
+  const onStyle = useCallback(
+    (docId: string, sectionId: string, blockId: string | undefined, device: StyleDevice, key: StyleKeyType, value: unknown) =>
+      edit((s) => setElementStyle(s, docId, sectionId, blockId, device, key, value), `style:${docId}:${sectionId}:${blockId ?? ""}:${device}:${key}`),
+    [edit],
+  );
+  const onResetStyle = useCallback((docId: string, sectionId: string, blockId: string | undefined) => edit((s) => resetElementStyle(s, docId, sectionId, blockId)), [edit]);
+  const clearFocus = useCallback(() => setFocusSetting(null), []);
+  const onSelectParent = useCallback((docId: string, sectionId: string) => edit((s) => select(s, { docId, sectionId })), [edit]);
 
   // ---- pages, conflicts, restore -------------------------------------------------------------------------------
   const loadDoc = useCallback(async (id: string): Promise<boolean> => {
@@ -236,13 +322,13 @@ export function EditorShell({ init }: { init: EditorInit }) {
       return false;
     }
     const t = result.data!;
-    setState((prev) =>
+    commit((prev) =>
       prev.docs[id]
         ? replaceDoc(prev, id, t.revision, t.document)
         : { ...prev, docs: { ...prev.docs, [id]: { templateId: id, kind: t.kind, name: t.name, revision: t.revision, document: t.document, saved: JSON.stringify(t.document) } } },
     );
     return true;
-  }, []);
+  }, [commit]);
 
   const switchPage = async (id: string) => {
     if (id === state.pageId) return;
@@ -251,7 +337,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
       setLoadingPage(false);
       return;
     }
-    setState((prev) => ({ ...prev, pageId: id, selection: null }));
+    commit((prev) => ({ ...prev, pageId: id, selection: null }));
     setLoadingPage(false);
   };
 
@@ -260,12 +346,16 @@ export function EditorShell({ init }: { init: EditorInit }) {
     await Promise.all(Object.keys(stateRef.current.docs).map(loadDoc));
     setServerProblems({});
     setSaveState("idle");
+    historyRef.current = emptyHistory();
+    setHistory(historyRef.current);
     setLoadingPage(false);
     toast.success("Loaded the latest version");
   };
 
   const afterRestore = async (templateId: string) => {
     await loadDoc(templateId);
+    historyRef.current = emptyHistory();
+    setHistory(historyRef.current);
     setVersionsOpen(false);
     void queryClient.invalidateQueries({ queryKey: themeKeys.templates });
   };
@@ -297,6 +387,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const unpublished = (templates.data ?? []).some((t) => t.status === "active" && t.publicationState !== "published") || dirtyCount > 0;
   const selection = state.selection;
   const selectedSectionId = selection && "sectionId" in selection && selection.docId === state.pageId ? selection.sectionId : null;
+  const selectedBlockId = selection && "blockId" in selection && selection.docId === state.pageId ? (selection.blockId ?? null) : null;
   const frameProps = {
     data: preview,
     theme: themeDocId ? state.docs[themeDocId].document : null,
@@ -322,13 +413,22 @@ export function EditorShell({ init }: { init: EditorInit }) {
           ))}
         </NativeSelect>
         <SaveIndicator status={status} />
+        <div className="flex items-center" role="group" aria-label="History">
+          <Button variant="ghost" size="icon-sm" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)" disabled={!canUndo(history) || !canEdit} onClick={() => stepHistory("undo")}><Undo2 aria-hidden /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label="Redo (Ctrl+Shift+Z)" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo(history) || !canEdit} onClick={() => stepHistory("redo")}><Redo2 aria-hidden /></Button>
+        </div>
         <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="ml-auto hidden md:inline-flex" />
         <div className="hidden items-center rounded-md border p-0.5 md:flex" role="group" aria-label="Preview size">
           {DEVICES.map(({ id, label, icon: Icon }) => (
             <Button key={id} size="icon-sm" variant={device === id ? "secondary" : "ghost"} aria-label={label} aria-pressed={device === id} onClick={() => setDevice(id)}><Icon aria-hidden /></Button>
           ))}
         </div>
-        <Button variant="ghost" size="sm" onClick={() => setVersionsOpen(true)} aria-label="Version history"><History aria-hidden /><span className="hidden lg:inline">History</span></Button>
+        <NativeSelect aria-label="Zoom" value={String(zoom)} onChange={(e) => setZoom(Number(e.target.value))} className="hidden h-8 w-20 text-xs md:block">
+          {ZOOMS.map((z) => (
+            <option key={z.label} value={String(z.value)}>{z.label}</option>
+          ))}
+        </NativeSelect>
+        <Button variant="ghost" size="sm" onClick={() => setVersionsOpen(true)} aria-label="Version history"><HistoryIcon aria-hidden /><span className="hidden lg:inline">History</span></Button>
         <Button variant="outline" size="sm" onClick={() => setPreviewing(true)}><Eye aria-hidden /><span className="hidden sm:inline">Preview</span></Button>
         {init.canManage ? (
           <Button size="sm" onClick={() => setPublishOpen(true)} disabled={status === "conflict" || status === "invalid" || publish.isPending}>
@@ -372,6 +472,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
         </aside>
 
         <main className={cn("min-h-0 overflow-auto bg-muted/50 p-3 lg:block sm:p-5", mobileTab === "preview" ? "block" : "hidden")} aria-label="Live preview">
+          <SelectionPath state={state} onSelect={(docId, sectionId, blockId) => actions.select(docId, sectionId, blockId)} />
           <div className="mb-2 flex flex-col items-center gap-1.5">
             <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="md:hidden" />
             <PreviewModeNote mode={previewMode} storeHasProducts={hasStoreProducts(init.data)} className="text-center" />
@@ -380,7 +481,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             {loadingPage ? (
               <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
             ) : (
-              <ThemeFrame document={page.document as unknown as TemplateDocument} device={device} mode="editor" onSelect={onPreviewSelect} selectedSectionId={selectedSectionId} {...frameProps} />
+              <ThemeFrame document={page.document as unknown as TemplateDocument} device={device} mode="editor" onSelect={onPreviewSelect} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} zoom={zoom || null} {...frameProps} />
             )}
           </div>
         </main>
@@ -393,8 +494,15 @@ export function EditorShell({ init }: { init: EditorInit }) {
             themeDocId={themeDocId}
             disabled={!canEdit}
             problems={problems}
-            onSetting={(docId, sectionId, blockId, key, value) => edit((s) => setSetting(s, docId, sectionId, blockId, key, value))}
-            onThemeSetting={(docId, group, key, value) => edit((s) => setThemeSetting(s, docId, group, key, value))}
+            onSetting={(docId, sectionId, blockId, key, value) => edit((s) => setSetting(s, docId, sectionId, blockId, key, value), `set:${docId}:${sectionId}:${blockId ?? ""}:${key}`)}
+            onThemeSetting={(docId, group, key, value) => edit((s) => setThemeSetting(s, docId, group, key, value), `theme:${docId}:${group}.${key}`)}
+            adapter={adapter}
+            styleDevice={STYLE_DEVICE[device]}
+            onStyle={onStyle}
+            onResetStyle={onResetStyle}
+            onSelectParent={onSelectParent}
+            focusSetting={focusSetting}
+            onFocusConsumed={clearFocus}
           />
           </CollectionChoicesContext.Provider>
         </aside>
@@ -470,3 +578,24 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
   );
 }
 
+
+/** Where the selection sits in the page (Section > Block), each part clickable, so a nested element can be left for its parent. */
+function SelectionPath({ state, onSelect }: { state: EditorState; onSelect: (docId: string, sectionId: string, blockId?: string) => void }) {
+  const sel = state.selection;
+  if (!sel || !("sectionId" in sel)) return null;
+  const section = (state.docs[sel.docId]?.document as { sections?: Record<string, ComponentNode> } | undefined)?.sections?.[sel.sectionId];
+  if (!section) return null;
+  const block = sel.blockId ? findNode(section, sel.blockId) : undefined;
+  const sectionName = registry.sections[section.type]?.name ?? section.type;
+  return (
+    <nav aria-label="Selected element" className="mb-2 flex items-center justify-center gap-1 text-xs">
+      <Button type="button" size="xs" variant={block ? "ghost" : "secondary"} aria-current={block ? undefined : "true"} onClick={() => onSelect(sel.docId, sel.sectionId)}>{sectionName}</Button>
+      {block ? (
+        <>
+          <ChevronRight className="size-3 text-muted-foreground" aria-hidden />
+          <Button type="button" size="xs" variant="secondary" aria-current="true">{registry.blocks[block.type]?.name ?? block.type}</Button>
+        </>
+      ) : null}
+    </nav>
+  );
+}

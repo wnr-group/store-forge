@@ -5,6 +5,7 @@ import { ImagePlaceholder, resolveImage } from "../../ui";
 import { RichText } from "../../richtext-renderer";
 import type { SectionProps } from "..";
 import { BAND_Y, HEADLINE_FONT, SHELL, SportEyebrow } from "./ui";
+import { blockMarkers } from "../../markers";
 
 const GRID: Record<number, string> = {
   1: "grid-cols-1",
@@ -64,7 +65,7 @@ export function SportMulticolumn({ node, context, sectionId }: SectionProps) {
               </>
             );
             return (
-              <li key={id} className={cn("group min-w-0", !anyImage && "rounded-[1rem] bg-[var(--surface)] p-7")} {...(isPreview ? { "data-sf-block": id } : {})}>
+              <li key={id} className={cn("group min-w-0", !anyImage && "rounded-[1rem] bg-[var(--surface)] p-7")} {...blockMarkers(id, isPreview, blocks[id])}>
                 {href ? (
                   <Link href={href} className="block outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
                     {body}

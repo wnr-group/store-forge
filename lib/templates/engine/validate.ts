@@ -2,6 +2,7 @@ import type { z } from "zod";
 import { TEMPLATE_KINDS, type ComponentNode, type TemplateDocument, type TemplateKind } from "../document";
 import { LIMITS } from "../limits";
 import { compileSettings } from "./compile";
+import { elementStyleSchema, STYLE_SETTING_KEY } from "../../editor/style";
 import type { BlockDefinition, ComponentRegistry, SectionDefinition } from "./descriptors";
 import { checkImageShape, scanImageValues } from "./image-scan";
 import { getRootSchema } from "./root-schema";
@@ -217,7 +218,18 @@ function validateKnownKind(
 
   /** Validates a registered component's settings against its compiled descriptors (tenant-aware). */
   function checkSettings(def: SectionDefinition | BlockDefinition, settings: ComponentNode["settings"], nodePath: string) {
-    const res = getCompiledSchema(def, tenantId).safeParse(settings || {});
+    // Visual-editor style overrides live in every component's settings under one reserved key, validated by their own strict
+    // schema (lib/editor/style.ts) rather than by the component's descriptors.
+    const { [STYLE_SETTING_KEY]: style, ...ownSettings } = (settings || {}) as Record<string, unknown>;
+    if (style !== undefined) {
+      const styleResult = elementStyleSchema.safeParse(style);
+      if (!styleResult.success) {
+        for (const err of styleResult.error.issues) {
+          issues.push({ path: `${nodePath}.settings.${[STYLE_SETTING_KEY, ...err.path].join(".")}`, code: "INVALID_SETTING", message: err.message, level: "error" });
+        }
+      }
+    }
+    const res = getCompiledSchema(def, tenantId).safeParse(ownSettings);
     if (res.success) return;
     for (const err of res.error.issues) {
       const path = `${nodePath}.settings.${err.path.join(".")}`;

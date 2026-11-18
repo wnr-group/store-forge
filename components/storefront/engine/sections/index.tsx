@@ -21,6 +21,8 @@ import { RelatedProductsSection } from "./related-products";
 import { PromotionalBannerSection } from "./promotional-banner";
 import { LogoListSection } from "./logo-list";
 import { lookSection } from "../looks";
+import { hasStyleOverrides, UNWRAPPED_SECTIONS } from "@/lib/editor/render";
+import { overrideValue } from "@/lib/editor/style";
 import { CartPageSection } from "@/components/storefront/cart/cart-page";
 import { WishlistPageSection } from "@/components/storefront/wishlist/wishlist-page";
 
@@ -81,5 +83,14 @@ export function renderSectionComponent(
     return null;
   }
 
-  return <Component key={sectionId} node={node} context={context} sectionId={sectionId} />;
+  const rendered = <Component node={node} context={context} sectionId={sectionId} />;
+  // A section with style overrides sits in a box the generated stylesheet can reach (see lib/editor/render.ts).
+  if (sectionId && !UNWRAPPED_SECTIONS.has(node.type) && hasStyleOverrides(node)) {
+    return (
+      <div key={sectionId} data-sf-ov={overrideValue(sectionId)}>
+        {rendered}
+      </div>
+    );
+  }
+  return React.cloneElement(rendered, { key: sectionId });
 }

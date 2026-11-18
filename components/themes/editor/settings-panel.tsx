@@ -1,7 +1,10 @@
 "use client";
 
-import { MousePointerClick } from "lucide-react";
-import { useMemo } from "react";
+import { CornerLeftUp, MousePointerClick } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import type { ThemeEditorAdapter } from "@/lib/editor/adapter";
+import { readStyle, type StyleDevice, type StyleKey } from "@/lib/editor/style";
 import { isSettingVisible } from "@/lib/templates/engine/descriptor-check";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { SettingDescriptor } from "@/lib/templates/engine/descriptors";
@@ -9,6 +12,7 @@ import { getRegistry } from "@/lib/templates/registry/index";
 import { themeSettingDescriptors } from "@/lib/templates/registry/theme-settings";
 import type { EditorState } from "@/lib/themes/editor/state";
 import { SettingField } from "./setting-field";
+import { StylePanel } from "./style-panel";
 
 const registry = getRegistry();
 
@@ -30,9 +34,20 @@ type Props = {
   onThemeSetting: (docId: string, group: string, key: string, value: unknown) => void;
   themeDocId: string | null;
   mode: "section" | "theme";
+  /** What the active theme lets merchants style (see lib/editor/adapter.ts). */
+  adapter: ThemeEditorAdapter;
+  /** The device being previewed, so style changes are written for it. */
+  styleDevice: StyleDevice;
+  onStyle: (docId: string, sectionId: string, blockId: string | undefined, device: StyleDevice, key: StyleKey, value: unknown) => void;
+  onResetStyle: (docId: string, sectionId: string, blockId: string | undefined) => void;
+  onSelectParent: (docId: string, sectionId: string) => void;
+  /** A setting to jump to (set when text or a picture is clicked in the preview). `nonce` makes a repeat click count. */
+  focusSetting: { key: string; nonce: number } | null;
+  /** Called once the jump has been made, so a later selection does not repeat it. */
+  onFocusConsumed: () => void;
 };
 
-export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode }: Props) {
+export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed }: Props) {
   if (mode === "theme") {
     return themeDocId && state.docs[themeDocId] ? (
       <ThemeSettings doc={state.docs[themeDocId].document} disabled={disabled} problems={problems[themeDocId] ?? {}} onChange={(group, key, value) => onThemeSetting(themeDocId, group, key, value)} />
@@ -43,41 +58,129 @@ export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSet
 
   const sel = state.selection;
   if (!sel || !("sectionId" in sel)) {
-    return <Empty title="Select a section" text="Click a section in the preview or in the list to edit its content and style." />;
+    return <Empty title="Select an element" text="Click anything in the preview, or pick a section from the list, to edit its content and style." />;
   }
   const doc = state.docs[sel.docId]?.document as { sections?: Record<string, ComponentNode> } | undefined;
   const section = doc?.sections?.[sel.sectionId];
-  if (!section) return <Empty title="Select a section" text="That section is no longer on the page." />;
+  if (!section) return <Empty title="Select an element" text="That section is no longer on the page." />;
   const node = sel.blockId ? findBlock(section, sel.blockId) : section;
-  if (!node) return <Empty title="Select a section" text="That block is no longer on the page." />;
-  const def = sel.blockId ? registry.blocks[node.type] : registry.sections[node.type];
-  const sectionProblems = problems[sel.docId] ?? {};
-  const base = sel.blockId ? `sections.${sel.sectionId}.blocks.${sel.blockId}.settings` : `sections.${sel.sectionId}.settings`;
+  if (!node) return <Empty title="Select an element" text="That block is no longer on the page." />;
+  return (
+    <ElementEditor
+      key={`${sel.docId}:${sel.sectionId}:${sel.blockId ?? ""}`}
+      docId={sel.docId}
+      sectionId={sel.sectionId}
+      blockId={sel.blockId}
+      section={section}
+      node={node}
+      disabled={disabled}
+      problems={problems[sel.docId] ?? {}}
+      onSetting={onSetting}
+      adapter={adapter}
+      styleDevice={styleDevice}
+      onStyle={onStyle}
+      onResetStyle={onResetStyle}
+      onSelectParent={onSelectParent}
+      focusSetting={focusSetting}
+      onFocusConsumed={onFocusConsumed}
+    />
+  );
+}
 
+type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "styleDevice" | "onStyle" | "onResetStyle" | "onSelectParent" | "focusSetting" | "onFocusConsumed"> & {
+  docId: string;
+  sectionId: string;
+  blockId: string | undefined;
+  section: ComponentNode;
+  node: ComponentNode;
+  problems: Record<string, string>;
+};
+
+/** The selected section or block: a Content tab (its own settings) and a Style tab (what the theme's adapter allows). */
+function ElementEditor({ docId, sectionId, blockId, section, node, disabled, problems, onSetting, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed }: ElementEditorProps) {
+  const [tab, setTab] = useState<"content" | "style">("content");
+  const content = useRef<HTMLDivElement>(null);
+  const def = blockId ? registry.blocks[node.type] : registry.sections[node.type];
+  const base = blockId ? `sections.${sectionId}.blocks.${blockId}.settings` : `sections.${sectionId}.settings`;
+  const spec = blockId ? adapter.block(node.type, section.type) : adapter.section(node.type);
+
+  // Clicking text or a picture in the preview jumps to the content setting that holds it. The Content tab is shown while rendering
+  // (not from an effect); the effect then moves focus to the field once, and clears the request.
+  const [seen, setSeen] = useState<number | null>(null);
+  if (focusSetting && focusSetting.nonce !== seen) {
+    setSeen(focusSetting.nonce);
+    if (tab !== "content") setTab("content");
+  }
+  useEffect(() => {
+    if (!focusSetting) return;
+    const frame = requestAnimationFrame(() => {
+      const target = content.current?.querySelector<HTMLElement>(`[data-setting-id="${CSS.escape(focusSetting.key)}"]`);
+      target?.scrollIntoView({ block: "center", behavior: "smooth" });
+      target?.querySelector<HTMLElement>("input, textarea, select, button")?.focus({ preventScroll: true });
+      onFocusConsumed();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [focusSetting, onFocusConsumed]);
+
+  const parentName = registry.sections[section.type]?.name ?? section.type;
   return (
     <div className="space-y-4 p-4">
-      <header>
+      <header className="space-y-1">
+        {blockId ? (
+          <Button type="button" variant="ghost" size="xs" className="-ml-2" onClick={() => onSelectParent(docId, sectionId)}>
+            <CornerLeftUp aria-hidden /> Select {parentName}
+          </Button>
+        ) : null}
         <h2 className="text-sm font-semibold">{def?.name ?? node.type}</h2>
-        {def?.description ? <p className="text-xs text-muted-foreground">{def.description}</p> : null}
-        {sel.blockId ? <p className="mt-1 text-xs text-muted-foreground">Block in {registry.sections[section.type]?.name ?? section.type}</p> : null}
+        <p className="text-xs text-muted-foreground">
+          {blockId ? `Block in ${parentName}` : "Section"}
+          {def?.description ? `. ${def.description}` : ""}
+        </p>
       </header>
-      {def && def.settings.length > 0 ? (
-        <div className="space-y-4">
-          {def.settings
-            .filter((d) => isSettingVisible(d, node.settings))
-            .map((d) => (
-              <SettingField
-                key={`${sel.docId}:${sel.sectionId}:${sel.blockId ?? ""}:${d.id}`}
-                descriptor={d}
-                value={node.settings?.[d.id]}
-                disabled={disabled}
-                error={sectionProblems[`${base}.${d.id}`]}
-                onChange={(value) => onSetting(sel.docId, sel.sectionId, sel.blockId, d.id, value)}
-              />
-            ))}
+
+      <div className="flex gap-1 rounded-md border p-0.5" role="tablist" aria-label={`${def?.name ?? node.type} settings`}>
+        {(["content", "style"] as const).map((t) => (
+          <Button key={t} type="button" size="sm" variant={tab === t ? "secondary" : "ghost"} className="flex-1 capitalize" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>
+            {t}
+          </Button>
+        ))}
+      </div>
+
+      {tab === "content" ? (
+        <div ref={content} role="tabpanel" aria-label="Content">
+          {def && def.settings.length > 0 ? (
+            <div className="space-y-4">
+              {def.settings
+                .filter((d) => isSettingVisible(d, node.settings))
+                .map((d) => (
+                  <div key={`${docId}:${sectionId}:${blockId ?? ""}:${d.id}`} data-setting-id={d.id} className="rounded-md">
+                    <SettingField descriptor={d} value={node.settings?.[d.id]} disabled={disabled} error={problems[`${base}.${d.id}`]} onChange={(value) => onSetting(docId, sectionId, blockId, d.id, value)} />
+                  </div>
+                ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">This {blockId ? "block" : "section"} has no content settings of its own. {def?.accepts?.length ? "Add blocks to it from the list on the left." : ""}</p>
+          )}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">This {sel.blockId ? "block" : "section"} has no settings of its own. {def?.accepts?.length ? "Add blocks to it from the list on the left." : ""}</p>
+        <div role="tabpanel" aria-label="Style">
+          {spec ? (
+            <StylePanel
+              spec={spec}
+              style={readStyle(node.settings)}
+              device={styleDevice}
+              disabled={disabled}
+              onChange={(key, value) => onStyle(docId, sectionId, blockId, styleDevice, key, value)}
+              onResetAll={() => onResetStyle(docId, sectionId, blockId)}
+            />
+          ) : (
+            <p className="rounded-md bg-muted/60 px-3 py-2 text-sm text-muted-foreground">
+              {blockId
+                ? `${adapter.name} draws this block as part of its section, so it has no style controls of its own. Change its content here, or style the whole section.`
+                : `${adapter.name} keeps this section as it is. Its colours and fonts come from Theme settings.`}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
@@ -113,7 +216,7 @@ function ThemeSettings({ doc, disabled, problems, onChange }: { doc: Record<stri
     <div className="space-y-6 p-4">
       <header>
         <h2 className="text-sm font-semibold">Theme settings</h2>
-        <p className="text-xs text-muted-foreground">These apply to every page of your store and update the preview immediately.</p>
+        <p className="text-xs text-muted-foreground">These apply to every page of your store and update the preview immediately. Elements inherit them until you change them under Style.</p>
       </header>
       {groups.map(([group, descriptors]) => (
         <fieldset key={group} className="space-y-4">

@@ -11,6 +11,7 @@ import { renderSectionComponent } from "./sections";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { resolveBinding } from "@/lib/templates/engine/bindings";
 import { themeToStyle } from "@/lib/templates/engine/theme-style";
+import { documentsCss } from "@/lib/editor/render";
 import { lookHasCart } from "./looks";
 import { CartProvider } from "@/components/storefront/cart/cart-provider";
 import { CartChrome } from "@/components/storefront/cart/cart-drawer";
@@ -130,6 +131,10 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
 
   // Extract accent color and hero heading for layout header styling
   const heroSection = sections["hero"];
+  // Style overrides the merchant set in the visual editor, as one stylesheet for the page and its shared groups. The CSS is
+  // built only from validated values and contains nothing a text node would escape (see lib/editor/style.ts).
+  const overrideCss = documentsCss([doc, groupHeader, groupFooter, groupAnnouncement]);
+
   const accentColor = (heroSection?.settings?.accentColor as string) || null;
   const classicHeading = (heroSection?.settings?.heading as string) || store.name;
 
@@ -153,6 +158,7 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
   return withCart(
     <StorefrontContext.Provider value={enrichedContext}>
       <div className={themed ? "sf-theme flex min-h-dvh flex-col bg-background text-foreground" : "flex min-h-dvh flex-col"} style={themed ? themeStyle : undefined}>
+        {overrideCss ? <style>{overrideCss}</style> : null}
         {/* Optional Announcement Group */}
         {groupAnnouncement ? (
           <div>

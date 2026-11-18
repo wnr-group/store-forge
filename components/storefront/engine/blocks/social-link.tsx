@@ -1,5 +1,6 @@
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
+import { blockMarkers } from "../markers";
 
 interface SocialLinkBlockProps {
   node: ComponentNode;
@@ -12,7 +13,7 @@ export function SocialLinkBlock({ node, context, blockId }: SocialLinkBlockProps
   const url = (node.settings?.url as string) ?? "https://instagram.com";
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   const networkNames: Record<string, string> = {
     facebook: "Facebook",

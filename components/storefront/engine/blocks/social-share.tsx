@@ -1,5 +1,6 @@
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext, ProductDetailData } from "../types";
+import { blockMarkers } from "../markers";
 
 interface SocialShareBlockProps {
   node: ComponentNode;
@@ -13,7 +14,7 @@ export function SocialShareBlock({ node, context, blockId }: SocialShareBlockPro
   const showLabels = Boolean(node.settings?.showLabels ?? true);
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   const shareText = encodeURIComponent(product?.name ?? "Check out this product");
   const shareUrl = encodeURIComponent("https://storeforge.test");

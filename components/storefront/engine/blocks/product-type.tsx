@@ -1,5 +1,6 @@
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext, ProductDetailData } from "../types";
+import { blockMarkers } from "../markers";
 
 interface ProductTypeBlockProps {
   node: ComponentNode;
@@ -15,7 +16,7 @@ export function ProductTypeBlock({ node, context, blockId }: ProductTypeBlockPro
   const type = product?.type;
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   if (!type) return null;
 
