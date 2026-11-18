@@ -6,12 +6,12 @@ import { SectionCard } from "@/components/shared/section-card";
 import { StatusBadge, type Tone } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/config/app";
+import { formatDateTime } from "@/lib/format-date";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { RANGES, type Analytics } from "@/services/analytics.service";
 import { SalesChart } from "./sales-chart-lazy";
 
-const dateTime = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 const TONES: Record<string, Tone> = { paid: "active", fulfilled: "active", pending: "warning", cancelled: "draft", refunded: "danger" };
 
 function Stat({ label, value, hint, delta }: { label: string; value: string; hint?: string; delta?: number | null }) {
@@ -50,10 +50,10 @@ export function RangeTabs({ range, basePath }: { range: number; basePath: string
   );
 }
 
-type Props = { data: Analytics; currency: string; detailed?: boolean };
+type Props = { data: Analytics; currency: string; /** The store's timezone, for the order times. */ timezone: string; detailed?: boolean };
 
 /** Everything here is computed from the store's real orders; with none, the empty state is shown instead of charts. */
-export function AnalyticsView({ data, currency, detailed = false }: Props) {
+export function AnalyticsView({ data, currency, timezone, detailed = false }: Props) {
   const delta = data.previousSalesMinor > 0 ? ((data.totalSalesMinor - data.previousSalesMinor) / data.previousSalesMinor) * 100 : null;
   const window = `last ${data.range} days`;
 
@@ -122,7 +122,7 @@ export function AnalyticsView({ data, currency, detailed = false }: Props) {
                   <span className="min-w-0">
                     <span className="font-mono text-[13px] font-medium tabular-nums">#{o.orderNumber}</span>
                     <span className="ml-2 text-muted-foreground">{o.customerName ?? "Guest"}</span>
-                    <span className="block text-xs text-muted-foreground">{dateTime.format(o.placedAt)}</span>
+                    <span className="block text-xs text-muted-foreground">{formatDateTime(o.placedAt, timezone)}</span>
                   </span>
                   <span className="flex shrink-0 flex-col items-end gap-1">
                     <span className="tabular-nums">{formatMoney(o.totalMinor, currency)}</span>

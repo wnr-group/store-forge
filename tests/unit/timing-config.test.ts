@@ -12,7 +12,6 @@ const COARSE_BUDGET_ALLOW_LIST: Record<string, string> = {
   "tests/unit/engine-richtext.test.ts": "single 100 ms budget on a small input that parses in about 1 ms",
   "tests/unit/engine-audit-bindings.test.ts": "best-of-N against 100 ms for a few-ms operation",
   "tests/unit/engine-value-limits.test.ts": "500 ms budget on pathological-input guards that finish in a few ms",
-  "tests/integration/storefront-roundtrips.test.ts": "coarse budget on PGlite storefront page loader [AC-SF-014] [AC-SF-020]",
 };
 
 function walk(dir: string): string[] {
@@ -28,8 +27,8 @@ async function loadConfig(file: string) {
 }
 
 describe("Timing test isolation [AC-ENG-011] [AC-ENG-020]", () => {
-  it("lists two existing, repo-relative timing files [AC-ENG-020]", () => {
-    expect(TIMING_TEST_FILES.length).toBe(2);
+  it("lists the existing, repo-relative timing files [AC-ENG-020]", () => {
+    expect(TIMING_TEST_FILES.length).toBe(1);
     for (const file of TIMING_TEST_FILES) {
       expect(file).not.toContain("\\");
       expect(existsSync(path.join(root, file))).toBe(true);
