@@ -29,7 +29,8 @@ registerEditorAdapter(
     id: "maison",
     name: "Maison",
     looks: ["boutique"],
-    blockSections: ["collapsible-content", "footer", "header", "hero", "image-banner", "image-with-text", "logo-list", "multicolumn", "promotional-banner", "testimonials"],
+    // Sections Maison draws through the engine's blocks (its own hero, header, promotional banner) or marks itself (testimonials).
+    blockSections: ["collapsible-content", "collection-banner", "footer", "header", "hero", "image-banner", "image-with-text", "logo-list", "main-product", "multicolumn", "promotional-banner", "testimonials"],
   }),
 );
 registerEditorAdapter(
@@ -37,6 +38,7 @@ registerEditorAdapter(
     id: "marketplace",
     name: "Marketplace",
     looks: ["market"],
+    // Marketplace draws its own header, footer and banners but marks the promotional banner's blocks itself.
     blockSections: ["collapsible-content", "hero", "image-banner", "image-with-text", "logo-list", "main-product", "multicolumn", "promotional-banner", "testimonials"],
   }),
 );

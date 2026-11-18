@@ -31,6 +31,10 @@ A look that draws a section itself, reading its blocks as plain data, cannot sty
 
 A new theme: implement `ThemeEditorAdapter` (or call `createEngineAdapter`) and `registerEditorAdapter` it.
 
+## Text and fonts (all looks)
+
+`settings._text` replaces any exact piece of text in a section and can give it its own font, size, weight and colour (`lib/editor/text.ts`, `components/storefront/engine/text-overrides.tsx`). Sections get Heading font and Body font through the theme's `--sf-font-*` variables. Both work in every look, because they act on the rendered text, not on a look's components.
+
 ## Undo and redo
 
 `lib/themes/editor/history.ts`: snapshots of the open documents taken before each edit (documents are immutable, so a snapshot is a set of references). Edits with the same key within 900 ms (a slider drag, typing) are one step; 100 steps are kept. Ctrl/Cmd+Z, Shift+Ctrl/Cmd+Z, Ctrl+Y, and toolbar buttons. Restoring a published version clears the history.

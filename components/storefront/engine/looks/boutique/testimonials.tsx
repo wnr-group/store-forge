@@ -3,6 +3,7 @@ import { SECTION_Y } from "../../ui";
 import type { SectionProps } from "..";
 import { DisplayHeading, Eyebrow } from "./eyebrow";
 import { SHELL } from "./shell";
+import { blockMarkers } from "../../markers";
 
 const GRID: Record<number, string> = {
   1: "grid-cols-1 max-w-2xl",
@@ -52,7 +53,7 @@ export function BoutiqueTestimonials({ node, context, sectionId }: SectionProps)
             const product = (block.settings?.company as string) ?? "";
             const meta = [place, product ? `on ${product}` : ""].filter(Boolean).join(" · ");
             return (
-              <li key={id} className="flex min-w-0 flex-col rounded-[1.375rem] border border-border bg-white p-6 sm:p-8" {...(isPreview ? { "data-sf-block": id } : {})}>
+              <li key={id} className="flex min-w-0 flex-col rounded-[1.375rem] border border-border bg-white p-6 sm:p-8" {...blockMarkers(id, isPreview, blocks[id])}>
                 <p className="flex gap-1 text-[15px] leading-none" role="img" aria-label={`Rated ${rating} out of 5`}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <span key={n} aria-hidden className={n <= rating ? "text-accent" : "text-border"}>
