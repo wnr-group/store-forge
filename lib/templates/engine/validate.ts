@@ -3,6 +3,7 @@ import { TEMPLATE_KINDS, type ComponentNode, type TemplateDocument, type Templat
 import { LIMITS } from "../limits";
 import { compileSettings } from "./compile";
 import { elementStyleSchema, STYLE_SETTING_KEY } from "../../editor/style";
+import { TEXT_SETTING_KEY, textOverridesSchema } from "../../editor/text";
 import type { BlockDefinition, ComponentRegistry, SectionDefinition } from "./descriptors";
 import { checkImageShape, scanImageValues } from "./image-scan";
 import { getRootSchema } from "./root-schema";
@@ -220,7 +221,15 @@ function validateKnownKind(
   function checkSettings(def: SectionDefinition | BlockDefinition, settings: ComponentNode["settings"], nodePath: string) {
     // Visual-editor style overrides live in every component's settings under one reserved key, validated by their own strict
     // schema (lib/editor/style.ts) rather than by the component's descriptors.
-    const { [STYLE_SETTING_KEY]: style, ...ownSettings } = (settings || {}) as Record<string, unknown>;
+    const { [STYLE_SETTING_KEY]: style, [TEXT_SETTING_KEY]: texts, ...ownSettings } = (settings || {}) as Record<string, unknown>;
+    if (texts !== undefined) {
+      const textResult = textOverridesSchema.safeParse(texts);
+      if (!textResult.success) {
+        for (const err of textResult.error.issues) {
+          issues.push({ path: `${nodePath}.settings.${[TEXT_SETTING_KEY, ...err.path].join(".")}`, code: "INVALID_SETTING", message: err.message, level: "error" });
+        }
+      }
+    }
     if (style !== undefined) {
       const styleResult = elementStyleSchema.safeParse(style);
       if (!styleResult.success) {

@@ -23,6 +23,8 @@ import { LogoListSection } from "./logo-list";
 import { lookSection } from "../looks";
 import { hasStyleOverrides, UNWRAPPED_SECTIONS } from "@/lib/editor/render";
 import { overrideValue } from "@/lib/editor/style";
+import { readTextOverrides } from "@/lib/editor/text";
+import { TextOverrides } from "../text-overrides";
 import { CartPageSection } from "@/components/storefront/cart/cart-page";
 import { WishlistPageSection } from "@/components/storefront/wishlist/wishlist-page";
 
@@ -83,14 +85,13 @@ export function renderSectionComponent(
     return null;
   }
 
-  const rendered = <Component node={node} context={context} sectionId={sectionId} />;
+  let out: React.ReactNode = <Component node={node} context={context} sectionId={sectionId} />;
   // A section with style overrides sits in a box the generated stylesheet can reach (see lib/editor/render.ts).
   if (sectionId && !UNWRAPPED_SECTIONS.has(node.type) && hasStyleOverrides(node)) {
-    return (
-      <div key={sectionId} data-sf-ov={overrideValue(sectionId)}>
-        {rendered}
-      </div>
-    );
+    out = <div data-sf-ov={overrideValue(sectionId)}>{out}</div>;
   }
-  return React.cloneElement(rendered, { key: sectionId });
+  // Replaced words (see lib/editor/text.ts). The wrapper has no box, so it is safe around a sticky header too.
+  const texts = readTextOverrides(node.settings);
+  if (texts.length > 0) out = <TextOverrides overrides={texts}>{out}</TextOverrides>;
+  return <React.Fragment key={sectionId}>{out}</React.Fragment>;
 }

@@ -13,6 +13,7 @@ import { themeSettingDescriptors } from "@/lib/templates/registry/theme-settings
 import type { EditorState } from "@/lib/themes/editor/state";
 import { SettingField } from "./setting-field";
 import { StylePanel } from "./style-panel";
+import { TextOnPage } from "./text-on-page";
 
 const registry = getRegistry();
 
@@ -45,9 +46,12 @@ type Props = {
   focusSetting: { key: string; nonce: number } | null;
   /** Called once the jump has been made, so a later selection does not repeat it. */
   onFocusConsumed: () => void;
+  /** Text clicked in the preview that no setting holds, and the handler that replaces it. */
+  clickedText: { text: string; nonce: number } | null;
+  onText: (docId: string, sectionId: string, from: string, to: string | undefined) => void;
 };
 
-export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed }: Props) {
+export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText }: Props) {
   if (mode === "theme") {
     return themeDocId && state.docs[themeDocId] ? (
       <ThemeSettings doc={state.docs[themeDocId].document} disabled={disabled} problems={problems[themeDocId] ?? {}} onChange={(group, key, value) => onThemeSetting(themeDocId, group, key, value)} />
@@ -83,11 +87,13 @@ export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSet
       onSelectParent={onSelectParent}
       focusSetting={focusSetting}
       onFocusConsumed={onFocusConsumed}
+      clickedText={clickedText}
+      onText={onText}
     />
   );
 }
 
-type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "styleDevice" | "onStyle" | "onResetStyle" | "onSelectParent" | "focusSetting" | "onFocusConsumed"> & {
+type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "styleDevice" | "onStyle" | "onResetStyle" | "onSelectParent" | "focusSetting" | "onFocusConsumed" | "clickedText" | "onText"> & {
   docId: string;
   sectionId: string;
   blockId: string | undefined;
@@ -97,7 +103,7 @@ type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "st
 };
 
 /** The selected section or block: a Content tab (its own settings) and a Style tab (what the theme's adapter allows). */
-function ElementEditor({ docId, sectionId, blockId, section, node, disabled, problems, onSetting, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed }: ElementEditorProps) {
+function ElementEditor({ docId, sectionId, blockId, section, node, disabled, problems, onSetting, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText }: ElementEditorProps) {
   const [tab, setTab] = useState<"content" | "style">("content");
   const content = useRef<HTMLDivElement>(null);
   const def = blockId ? registry.blocks[node.type] : registry.sections[node.type];
@@ -147,7 +153,8 @@ function ElementEditor({ docId, sectionId, blockId, section, node, disabled, pro
       </div>
 
       {tab === "content" ? (
-        <div ref={content} role="tabpanel" aria-label="Content">
+        <div ref={content} role="tabpanel" aria-label="Content" className="space-y-4">
+          <TextOnPage section={section} clicked={clickedText} disabled={disabled} onChange={(from, to) => onText(docId, sectionId, from, to)} />
           {def && def.settings.length > 0 ? (
             <div className="space-y-4">
               {def.settings

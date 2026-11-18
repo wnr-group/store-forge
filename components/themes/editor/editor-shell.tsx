@@ -15,13 +15,14 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { ROUTES } from "@/config/app";
 import { adapterForLook, lookOf } from "@/lib/editor/adapters";
 import { findSettingForClick } from "@/lib/editor/locate";
+import { originalOf, readTextOverrides } from "@/lib/editor/text";
 import type { StyleDevice, StyleKey as StyleKeyType } from "@/lib/editor/style";
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import { validateDocument } from "@/lib/templates/engine/validate";
 import { getRegistry } from "@/lib/templates/registry/index";
 import {
   addBlock, addSection, createBlockNode, createState, dirtyDocs, duplicateSection, isDirty, markSaved, moveBlock, moveSection, removeBlock, removeSection,
-  replaceDoc, resetElementStyle, select, setElementStyle, setSetting, setThemeSetting, toggleSection, type EditorDoc, type EditorState,
+  replaceDoc, resetElementStyle, select, setElementStyle, setSetting, setTextOverride, setThemeSetting, toggleSection, type EditorDoc, type EditorState,
 } from "@/lib/themes/editor/state";
 import { canRedo, canUndo, emptyHistory, record, redo, undo, type History } from "@/lib/themes/editor/history";
 import { ActionError, themeKeys, usePublishTheme, useTemplates } from "@/lib/themes/queries";
@@ -100,6 +101,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
   }, []);
   const [zoom, setZoom] = useState(0);
   const [focusSetting, setFocusSetting] = useState<{ key: string; nonce: number } | null>(null);
+  const [clickedText, setClickedText] = useState<{ text: string; nonce: number } | null>(null);
   // The merchant's real catalogue by default; demo content only on request, and never saved anywhere.
   const [previewMode, setPreviewMode] = useState<PreviewMode>("store");
   const preview = useMemo(() => previewData(init.data, previewMode), [init.data, previewMode]);
@@ -301,6 +303,9 @@ export function EditorShell({ init }: { init: EditorInit }) {
       const descriptors = (block ? registry.blocks[block.type] : registry.sections[section.type])?.settings ?? [];
       const key = findSettingForClick([{ descriptors, settings: element.settings }], target);
       setFocusSetting(key ? { key, nonce: Date.now() } : null);
+      // Text no setting holds (the theme writes it into its own components): offer it for replacement in the panel.
+      const shown = target.text ? originalOf(readTextOverrides(section.settings), target.text) : "";
+      setClickedText(!key && target.text ? { text: shown, nonce: Date.now() } : null);
     },
     [edit],
   );
@@ -311,6 +316,10 @@ export function EditorShell({ init }: { init: EditorInit }) {
     [edit],
   );
   const onResetStyle = useCallback((docId: string, sectionId: string, blockId: string | undefined) => edit((s) => resetElementStyle(s, docId, sectionId, blockId)), [edit]);
+  const onText = useCallback(
+    (docId: string, sectionId: string, from: string, to: string | undefined) => edit((s) => setTextOverride(s, docId, sectionId, from, to), `text:${docId}:${sectionId}:${from}`),
+    [edit],
+  );
   const clearFocus = useCallback(() => setFocusSetting(null), []);
   const onSelectParent = useCallback((docId: string, sectionId: string) => edit((s) => select(s, { docId, sectionId })), [edit]);
 
@@ -503,6 +512,8 @@ export function EditorShell({ init }: { init: EditorInit }) {
             onSelectParent={onSelectParent}
             focusSetting={focusSetting}
             onFocusConsumed={clearFocus}
+            clickedText={clickedText}
+            onText={onText}
           />
           </CollectionChoicesContext.Provider>
         </aside>

@@ -12,7 +12,16 @@ export type Device = "desktop" | "tablet" | "mobile";
 export const DEVICE_WIDTH: Record<Device, number> = { desktop: 1280, tablet: 820, mobile: 390 };
 
 /** `texts`: the text of the clicked element and of its text-bearing ancestors, innermost first. */
-export type ClickTarget = { sectionId: string; blockId?: string; texts?: string[]; image?: string };
+export type ClickTarget = { sectionId: string; blockId?: string; texts?: string[]; image?: string; /** The exact piece of text under the pointer. */ text?: string };
+
+/** The text node under the pointer (one word group, as the page draws it), or undefined when the click is not on text. */
+function textUnderPointer(event: React.MouseEvent, target: HTMLElement): string | undefined {
+  const doc = target.ownerDocument as Document & { caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node } | null; caretRangeFromPoint?: (x: number, y: number) => Range | null };
+  const node = doc.caretPositionFromPoint?.(event.clientX, event.clientY)?.offsetNode ?? doc.caretRangeFromPoint?.(event.clientX, event.clientY)?.startContainer ?? null;
+  if (node && node.nodeType === Node.TEXT_NODE && target.contains(node)) return (node as Text).data.trim().slice(0, 300) || undefined;
+  const own = target.children.length === 0 ? target.textContent?.trim() : undefined;
+  return own ? own.slice(0, 300) : undefined;
+}
 
 /** The picture a clicked `<img>` shows, as a storage path or theme asset name (the optimiser's wrapper url is unwrapped). */
 function imageSource(img: HTMLImageElement | null): string | undefined {
@@ -175,7 +184,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
       const t = el.textContent?.trim();
       if (t) texts.push(t.slice(0, 600));
     }
-    onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock, texts, image: imageSource(target.closest("img")) });
+    onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock, texts, image: imageSource(target.closest("img")), text: textUnderPointer(event, target) });
   };
 
   const handleOver = (event: React.MouseEvent) => {
