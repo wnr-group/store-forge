@@ -43,6 +43,10 @@ A new theme: implement `ThemeEditorAdapter` (or call `createEngineAdapter`) and 
 
 Clicking text or a picture in the preview selects its section or block and jumps to the content setting whose value it shows (`lib/editor/locate.ts`). Hover and selection outlines work for blocks as well as sections; the path above the preview selects a parent; the preview has Fit/50/75/100/125% zoom.
 
+## Editing on the page
+
+With the Inspector on, double-clicking text in the preview edits it in place (`components/themes/inline-edit.ts`). Enter or clicking away keeps it, Esc puts the old words back. Where it is saved is decided by `lib/editor/inline.ts`: the content setting that holds the words (so the sidebar shows the same change), else a text replacement for the section. Text made of several parts (a headline with a coloured word) cannot be edited in place and points to the sidebar.
+
 ## Known limits
 
 - Style controls exist only where the look puts the style hook on the element (see the adapter table above). In Stride that is the hero buttons, product-page blocks, multi-column cards, and every section as a whole except the header.

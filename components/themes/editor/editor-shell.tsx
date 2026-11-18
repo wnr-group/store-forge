@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { NativeSelect } from "@/components/ui/native-select";
 import { ROUTES } from "@/config/app";
 import { adapterForLook, lookOf } from "@/lib/editor/adapters";
+import { applyInlineEdit, locateInlineEdit } from "@/lib/editor/inline";
 import { findSettingForClick } from "@/lib/editor/locate";
 import { originalOf, readTextOverrides } from "@/lib/editor/text";
 import { PAGE_KEYS, PAGE_LABELS, routeForHref, withPageContent } from "@/lib/storefront/pages";
@@ -316,6 +317,21 @@ export function EditorShell({ init }: { init: EditorInit }) {
     [edit],
   );
 
+  /** Text edited directly on the page: saved where the text lives (see lib/editor/inline.ts). */
+  const onEditText = useCallback(
+    (e: { sectionId: string; blockId?: string; original: string; value: string }) => {
+      const s = stateRef.current;
+      const docId = [s.pageId, ...Object.keys(s.docs).filter((id) => id !== s.pageId)].find((id) => (s.docs[id].document as { sections?: Record<string, unknown> }).sections?.[e.sectionId]);
+      if (!docId) return;
+      const section = (s.docs[docId].document as { sections: Record<string, ComponentNode> }).sections[e.sectionId];
+      const blockId = e.blockId && findNode(section, e.blockId) ? e.blockId : undefined;
+      const target = locateInlineEdit(section, blockId, registry, e.original);
+      edit((st) => applyInlineEdit(st, docId, e.sectionId, target, e.value), `inline:${docId}:${e.sectionId}:${blockId ?? ""}:${target.from}`);
+    },
+    [edit],
+  );
+  const onEditBlocked = useCallback(() => toast.message("This text is made of several parts. Select it and change it in the sidebar."), []);
+
   const onStyle = useCallback(
     (docId: string, sectionId: string, blockId: string | undefined, device: StyleDevice, key: StyleKeyType, value: unknown) =>
       edit((s) => setElementStyle(s, docId, sectionId, blockId, device, key, value), `style:${docId}:${sectionId}:${blockId ?? ""}:${device}:${key}`),
@@ -586,6 +602,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
         </aside>
 
         <main className={cn("min-h-0 overflow-auto bg-muted/50 p-3 lg:block sm:p-5", mobileTab === "preview" ? "block" : "hidden")} aria-label="Live preview">
+          {inspector ? <p className="mb-1.5 text-center text-xs text-muted-foreground">Double-click any text to edit it right here. Enter saves, Esc cancels.</p> : null}
           <SelectionPath state={state} onSelect={(docId, sectionId, blockId) => actions.select(docId, sectionId, blockId)} />
           <div className="mb-2 flex flex-col items-center gap-1.5">
             <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="md:hidden" />
@@ -595,7 +612,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             {loadingPage ? (
               <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
             ) : (
-              <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} zoom={zoom || null} {...frameProps} />
+              <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} onEditText={onEditText} onEditBlocked={onEditBlocked} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} zoom={zoom || null} {...frameProps} />
             )}
           </div>
         </main>

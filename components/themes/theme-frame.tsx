@@ -7,6 +7,7 @@ import type { RenderMode } from "@/components/storefront/engine/types";
 import type { TemplateDocument } from "@/lib/templates/document";
 import type { PreviewStoreData } from "@/lib/themes/types";
 import { cn } from "@/lib/utils";
+import { beginInlineEdit, canEditInPlace, textNodeUnderPointer } from "./inline-edit";
 
 export type Device = "desktop" | "tablet" | "mobile";
 export const DEVICE_WIDTH: Record<Device, number> = { desktop: 1280, tablet: 820, mobile: 390 };
@@ -50,6 +51,10 @@ export type ThemeFrameProps = {
   onSelect?: (target: ClickTarget) => void;
   /** Double click on a link, in editor mode: the link's address. */
   onNavigate?: (href: string) => void;
+  /** Inspector on: double-clicking text edits it in place; this receives the old and new words once the merchant is done. */
+  onEditText?: (edit: { sectionId: string; blockId?: string; original: string; value: string }) => void;
+  /** Double-clicked text that is made of several parts and cannot be edited in place. */
+  onEditBlocked?: () => void;
   /** Inspector on (default): a click selects what is under the pointer. Off: the page behaves like the live store, and a click on a link opens the page it leads to. */
   inspector?: boolean;
   selectedSectionId?: string | null;
@@ -122,9 +127,12 @@ function DeviceScreen({ width, height, scale, left, children }: { width: number;
  * space available. Nothing here is a mock-up, so what the merchant sees is what the storefront renders. Links and forms
  * inside never navigate; in editor mode a click selects the section or block under the pointer instead.
  */
-export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, inspector = true, selectedSectionId, selectedBlockId, zoom, resource, className }: ThemeFrameProps) {
+export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, onEditText, onEditBlocked, inspector = true, selectedSectionId, selectedBlockId, zoom, resource, className }: ThemeFrameProps) {
   const outer = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ sectionId: string; blockId?: string } | null>(null);
+  // The text being edited in place, so a change of mode or a closed preview ends the edit cleanly.
+  const endEdit = useRef<(() => void) | null>(null);
+  useEffect(() => () => endEdit.current?.(), []);
   const [available, setAvailable] = useState(0);
   const [viewport, setViewport] = useState(0);
 
@@ -180,6 +188,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     const target = event.target as HTMLElement;
     // Nothing in a preview may navigate away or submit.
     if (target.closest("a, button, form, input, select, textarea, summary")) event.preventDefault();
+    if (target.closest("[data-sf-inline-editing]")) return;
     if (!editing || !onSelect) return;
     // Inspector off: browse like the live store. Links open their page; buttons do what they do; nothing is selected.
     if (!inspector) {
@@ -198,9 +207,25 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock, texts, image: imageSource(target.closest("img")), text: textUnderPointer(event, target) });
   };
 
+  /** Double-click on text: edit it right there. Enter keeps it, Escape puts the old words back. */
   const handleDoubleClick = (event: React.MouseEvent) => {
-    const href = (event.target as HTMLElement).closest("a")?.getAttribute("href");
-    if (href && onNavigate) onNavigate(href);
+    const target = event.target as HTMLElement;
+    if (!onEditText || target.closest("[data-sf-inline-editing]")) return;
+    const node = textNodeUnderPointer(event, target);
+    const element = node?.parentElement;
+    const section = element?.closest<HTMLElement>("[data-sf-section]");
+    if (!node || !element || !section) return;
+    if (!canEditInPlace(node)) {
+      onEditBlocked?.();
+      return;
+    }
+    event.preventDefault();
+    endEdit.current?.();
+    const blockId = element.closest<HTMLElement>("[data-sf-block]")?.dataset.sfBlock;
+    endEdit.current = beginInlineEdit(node, (result) => {
+      endEdit.current = null;
+      if (result) onEditText({ sectionId: section.dataset.sfSection!, blockId, original: result.original, value: result.value });
+    });
   };
 
   const handleOver = (event: React.MouseEvent) => {
@@ -222,7 +247,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     <>
       <div
         onClickCapture={handleClick}
-        onDoubleClickCapture={inspecting ? handleDoubleClick : undefined}
+        onDoubleClick={inspecting ? handleDoubleClick : undefined}
         onMouseOver={inspecting ? handleOver : undefined}
         onMouseLeave={inspecting ? () => setHover(null) : undefined}
         className={cn("sf-frame", !isolated && "origin-top-left")}
