@@ -7,6 +7,7 @@ import type { RenderMode } from "@/components/storefront/engine/types";
 import type { TemplateDocument } from "@/lib/templates/document";
 import type { PreviewStoreData } from "@/lib/themes/types";
 import { cn } from "@/lib/utils";
+import { SelectionOverlay, type Pick } from "./selection-overlay";
 import { beginInlineEdit, canEditInPlace, textNodeUnderPointer } from "./inline-edit";
 
 export type Device = "desktop" | "tablet" | "mobile";
@@ -60,6 +61,8 @@ export type ThemeFrameProps = {
   selectedSectionId?: string | null;
   /** The selected block inside that section, outlined instead of the section. */
   selectedBlockId?: string | null;
+  /** The name shown on the tag of a selected or hovered element ("Hero", "Heading" ...). */
+  labelFor?: (pick: { sectionId: string; blockId?: string }) => string;
   /** A fixed scale (1 = 100%). Without it the page is scaled to fit the space. */
   zoom?: number | null;
   /** The product or collection a product or collection page shows. */
@@ -102,6 +105,7 @@ function DeviceScreen({ width, height, scale, left, children }: { width: number;
     doc.body.className = window.document.body.className;
     const root = doc.createElement("div");
     root.id = "sf-screen-root";
+    root.style.position = "relative";
     doc.body.appendChild(root);
     setMount(root);
     // Shown once the styles are in (or after a moment), so the page never flashes unstyled.
@@ -127,11 +131,12 @@ function DeviceScreen({ width, height, scale, left, children }: { width: number;
  * space available. Nothing here is a mock-up, so what the merchant sees is what the storefront renders. Links and forms
  * inside never navigate; in editor mode a click selects the section or block under the pointer instead.
  */
-export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, onEditText, onEditBlocked, inspector = true, selectedSectionId, selectedBlockId, zoom, resource, className }: ThemeFrameProps) {
+export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, onEditText, onEditBlocked, inspector = true, selectedSectionId, selectedBlockId, labelFor, zoom, resource, className }: ThemeFrameProps) {
   const outer = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ sectionId: string; blockId?: string } | null>(null);
   // The text being edited in place, so a change of mode or a closed preview ends the edit cleanly.
   const endEdit = useRef<(() => void) | null>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
   useEffect(() => () => endEdit.current?.(), []);
   const [available, setAvailable] = useState(0);
   const [viewport, setViewport] = useState(0);
@@ -183,6 +188,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
   const scale = zoom ? Math.max(0.25, Math.min(2, zoom)) : fit;
   const editing = mode === "editor";
   const inspecting = editing && inspector;
+  const selected: Pick | null = selectedSectionId ? { sectionId: selectedSectionId, blockId: selectedBlockId ?? undefined } : null;
 
   const handleClick = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement;
@@ -246,6 +252,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
   const body = (
     <>
       <div
+        ref={pageRef}
         onClickCapture={handleClick}
         onDoubleClick={inspecting ? handleDoubleClick : undefined}
         onMouseOver={inspecting ? handleOver : undefined}
@@ -261,22 +268,8 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
       {/* A preview shows the finished page at once: the scroll reveals and entrance animations of a live storefront are switched off
           here (and every transition in a gallery thumbnail), so nothing waits to scroll into view or keeps animating. */}
       <style>{`.sf-frame [data-sf-reveal],.sf-frame [data-sf-reveal] .sf-word,.sf-frame .sf-up,.sf-frame .sf-hero-word{animation:none!important;transition:none!important;opacity:1!important;translate:none!important}.sf-frame[data-static] *{animation:none!important;transition:none!important}`}</style>
-      {/* Selection and hover outlines. Ids come from the document's own node ids; CSS.escape keeps them inert. The selected block
-          is outlined instead of its section; hover outlines the innermost block or section under the pointer. */}
-      {inspecting && selectedSectionId ? (
-        <style>
-          {selectedBlockId
-            ? `.sf-frame [data-sf-block="${CSS.escape(selectedBlockId)}"]{outline:2px solid var(--editor-accent,#2563eb)!important;outline-offset:2px}.sf-frame [data-sf-section="${CSS.escape(selectedSectionId)}"]{outline:1px dashed var(--editor-accent,#2563eb);outline-offset:-1px}`
-            : `.sf-frame [data-sf-section="${CSS.escape(selectedSectionId)}"]{outline:2px solid var(--editor-accent,#2563eb);outline-offset:-2px}`}
-        </style>
-      ) : null}
-      {inspecting && hover ? (
-        <style>
-          {hover.blockId
-            ? `.sf-frame [data-sf-block="${CSS.escape(hover.blockId)}"]{outline:1px dashed #2563eb;outline-offset:2px}`
-            : `.sf-frame [data-sf-section="${CSS.escape(hover.sectionId)}"]{outline:1px dashed #2563eb;outline-offset:-1px}`}
-        </style>
-      ) : null}
+      {/* Selection and hover borders, drawn above the page (see selection-overlay.tsx). */}
+      {inspecting ? <SelectionOverlay frame={pageRef} selected={selected} hover={hover} labelFor={labelFor} /> : null}
       {inspecting ? <style>{`.sf-frame[data-editing] [data-sf-section],.sf-frame[data-editing] [data-sf-block]{cursor:pointer}`}</style> : null}
     </>
   );

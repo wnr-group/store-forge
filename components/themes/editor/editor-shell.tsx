@@ -332,6 +332,18 @@ export function EditorShell({ init }: { init: EditorInit }) {
   );
   const onEditBlocked = useCallback(() => toast.message("This text is made of several parts. Select it and change it in the sidebar."), []);
 
+  /** The name on a selected or hovered element's tag: the block's name, else the section's. */
+  const labelFor = useCallback((pick: { sectionId: string; blockId?: string }) => {
+    const s = stateRef.current;
+    for (const id of [s.pageId, ...Object.keys(s.docs).filter((d) => d !== s.pageId)]) {
+      const section = (s.docs[id].document as { sections?: Record<string, ComponentNode> }).sections?.[pick.sectionId];
+      if (!section) continue;
+      const block = pick.blockId ? findNode(section, pick.blockId) : undefined;
+      return block ? (registry.blocks[block.type]?.name ?? block.type) : (registry.sections[section.type]?.name ?? section.type);
+    }
+    return "";
+  }, []);
+
   const onStyle = useCallback(
     (docId: string, sectionId: string, blockId: string | undefined, device: StyleDevice, key: StyleKeyType, value: unknown) =>
       edit((s) => setElementStyle(s, docId, sectionId, blockId, device, key, value), `style:${docId}:${sectionId}:${blockId ?? ""}:${device}:${key}`),
@@ -612,7 +624,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             {loadingPage ? (
               <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
             ) : (
-              <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} onEditText={onEditText} onEditBlocked={onEditBlocked} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} zoom={zoom || null} {...frameProps} />
+              <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} onEditText={onEditText} onEditBlocked={onEditBlocked} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} labelFor={labelFor} zoom={zoom || null} {...frameProps} />
             )}
           </div>
         </main>
