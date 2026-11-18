@@ -4,6 +4,7 @@ import { ProductForm } from "@/components/products/product-form";
 import { PageHeader } from "@/components/shared/page-header";
 import { ROUTES } from "@/config/app";
 import { canManageCatalog } from "@/lib/auth/permissions";
+import { orderCategories } from "@/lib/categories/hierarchy";
 import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { listCategories } from "@/services/category.service";
 import { listCollections } from "@/services/collection.service";
@@ -20,7 +21,7 @@ export default async function NewProductPage() {
       <ProductForm
         mode="create"
         currency={store?.currency ?? "INR"}
-        categories={categories.map((c) => ({ id: c.id, label: c.parentName ? `${c.parentName} › ${c.name}` : c.name }))}
+        categories={orderCategories(categories).map((c) => ({ id: c.id, label: c.label }))}
         collections={collections.map((c) => ({ id: c.id, name: c.name }))}
         canDelete={false}
       />
