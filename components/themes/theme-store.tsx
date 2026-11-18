@@ -21,6 +21,7 @@ import { hasStoreProducts, previewData, type PreviewData, type PreviewMode } fro
 import { INDUSTRY_LABELS, THEME_INDUSTRIES, type PreviewStoreData, type ThemeIndustry, type ThemeSummary } from "@/lib/themes/types";
 import { cn } from "@/lib/utils";
 import { PreviewModeNote, PreviewModeSwitch } from "./preview-mode-switch";
+import { PreviewLoader, useImagesReady } from "./preview-loader";
 import { ThemeFrame, type Device } from "./theme-frame";
 
 const PAGE_SIZE = 9;
@@ -199,15 +200,19 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
 
 function CurrentThemeCard({ loading, theme, updateAvailable, data, canManage }: { loading: boolean; theme: ThemeSummary | null; updateAvailable: boolean; data: PreviewStoreData; canManage: boolean }) {
   const detail = useThemeDetail(theme?.slug ?? null);
+  const [imagesRef, imagesReady] = useImagesReady(Boolean(theme && detail.data?.documents.index));
   if (loading) return <Skeleton className="h-28 w-full rounded-lg" />;
   return (
     <section aria-labelledby="current-theme" className="flex flex-col gap-4 rounded-lg border bg-card p-4 sm:flex-row sm:items-center">
-      <div className="w-full shrink-0 overflow-hidden rounded-md border bg-muted sm:w-44" aria-hidden inert>
+      <div className="relative w-full shrink-0 overflow-hidden rounded-md border bg-muted sm:w-44">
+        <div aria-hidden inert ref={imagesRef}>
         {theme && detail.data?.documents.index ? (
           <ThemeFrame document={detail.data.documents.index as unknown as TemplateDocument} theme={detail.data.documents.theme_settings} groups={groupsOf(detail.data.documents)} data={data} cropHeight={110} className="pointer-events-none" />
         ) : (
           <div className="flex h-[110px] items-center justify-center text-muted-foreground"><Palette className="size-6" /></div>
         )}
+        </div>
+        {theme && !detail.isError && !imagesReady ? <PreviewLoader ready={false} label="Loading" /> : null}
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Current theme</p>
@@ -239,19 +244,22 @@ function ThemeCard({ theme, data, canManage, onPreview, onApply }: { theme: Them
   const [frameRef, near] = useNearScreen<HTMLDivElement>();
   const detail = useThemeDetail(near ? theme.slug : null);
   const doc = detail.data?.documents.index as unknown as TemplateDocument | undefined;
+  // The layout draws at once but its photos arrive later: a loader stays over the preview until they are in.
+  const [imagesRef, imagesReady] = useImagesReady(Boolean(doc));
   return (
     <motion.article initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card shadow-xs transition-shadow hover:shadow-md">
       {/* The live frame holds the storefront's own buttons, so it cannot sit inside a button: it is inert and a sibling button covers it. */}
       <div ref={frameRef} className="relative w-full overflow-hidden border-b bg-muted">
-        <div inert aria-hidden="true">
+        <div inert aria-hidden="true" ref={imagesRef}>
           {doc ? (
             <ThemeFrame document={doc} theme={detail.data?.documents.theme_settings} groups={groupsOf(detail.data!.documents)} data={data} cropHeight={300} className="pointer-events-none" />
           ) : detail.isError ? (
             <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">Preview unavailable</div>
           ) : (
-            <Skeleton className="h-[300px] w-full rounded-none" />
+            <div className="h-[300px] w-full" />
           )}
         </div>
+        {detail.isError ? null : <PreviewLoader ready={imagesReady} />}
         <button type="button" onClick={onPreview} aria-label={`Preview ${theme.name}`} className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/30 to-transparent pb-3 opacity-0 outline-none transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
           <span className="rounded-md bg-white/95 px-3 py-1.5 text-xs font-medium text-neutral-900 shadow-sm">Preview theme</span>
         </button>
@@ -286,6 +294,7 @@ function PreviewDialog({ slug, data, canManage, applying, isCurrent, onClose, on
   const [device, setDevice] = useState<Device>("desktop");
   const theme = detail.data;
   const ready = useAfterOpen(slug !== null);
+  const [imagesRef, imagesReady] = useImagesReady(Boolean(theme?.documents.index && ready), 9000);
   return (
     <Dialog open={slug !== null} onOpenChange={(open) => { if (!open) onClose(); }}>
       {/* Fade only: no zoom, so the large preview does not scale in. */}
@@ -315,13 +324,16 @@ function PreviewDialog({ slug, data, canManage, applying, isCurrent, onClose, on
           <PreviewModeNote mode={data.mode} storeHasProducts={data.store.products.length > 0 || data.mode === "demo"} className="mb-3" />
           {theme?.documents.index && ready ? (
             // Keyed by theme only: changing the device just rescales the frame, it does not rebuild the whole page.
-            <motion.div key={slug} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className={cn("mx-auto overflow-hidden rounded-md border bg-white shadow-sm", device === "desktop" ? "w-full" : device === "tablet" ? "w-[820px] max-w-full" : "w-[390px] max-w-full")}>
-              <ThemeFrame document={theme.documents.index as unknown as TemplateDocument} theme={theme.documents.theme_settings} groups={groupsOf(theme.documents)} data={data} device={device === "desktop" ? "desktop" : device} />
+            <motion.div key={slug} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className={cn("relative mx-auto overflow-hidden rounded-md border bg-white shadow-sm", device === "desktop" ? "w-full" : device === "tablet" ? "w-[820px] max-w-full" : "w-[390px] max-w-full")}>
+              <div ref={imagesRef}>
+                <ThemeFrame document={theme.documents.index as unknown as TemplateDocument} theme={theme.documents.theme_settings} groups={groupsOf(theme.documents)} data={data} device={device === "desktop" ? "desktop" : device} />
+              </div>
+              <PreviewLoader ready={imagesReady} />
             </motion.div>
           ) : detail.isError ? (
             <div className="flex h-60 items-center justify-center text-sm text-muted-foreground"><Laptop className="mr-2 size-4" aria-hidden /> This preview could not be loaded.</div>
           ) : (
-            <Skeleton className="mx-auto h-[70dvh] w-full max-w-5xl" />
+            <div className="relative mx-auto h-[70dvh] w-full max-w-5xl overflow-hidden rounded-md"><PreviewLoader ready={false} label="Loading theme preview" /></div>
           )}
         </div>
       </DialogContent>
