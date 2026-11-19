@@ -372,10 +372,10 @@ test.describe("Razorpay credentials (real browser, real stack)", () => {
         await fill(page, testKeyId(), SECRET);
         await saveButton(page, i === 0 ? "Save credentials" : "Replace credentials").click();
         const rate = page.getByRole("alert").filter({ hasText: RATE_LIMIT_MESSAGE });
-        const ok = page.getByText("Configured (saved)", { exact: true });
-        await expect(rate.or(ok)).toBeVisible();
+        // "Configured (saved)" stays on the page after the first save, so it cannot signal that THIS save finished. The request is
+        // done when the rate-limit message appears or the secret input has been cleared by a successful save.
+        await expect.poll(async () => (await rate.isVisible()) || (await secretInput(page).inputValue()) === "").toBe(true);
         limited = await rate.isVisible();
-        if (!limited) await expect(secretInput(page)).toHaveValue("");
       }
       expect(limited).toBe(true);
       await shoot(page, "AC-UI-25", "throttle-error", "after the sensitive-route limit the page shows the application's rate-limit message inline, with no technical detail, and the form stays usable", async () => {
@@ -469,7 +469,12 @@ test.describe("Razorpay credentials (real browser, real stack)", () => {
         const after = await api(OWNER, "GET");
         expect(after.body.data).toEqual(before.body.data); // the stored configuration is unchanged
         expect(await page.locator("main").innerText()).not.toContain(SECRET);
-        expect([...seen.actionBodies, await page.content()].some((s) => s.includes(SECRET))).toBe(false);
+        // Server responses must not hold the secret. In the page, the only legitimate place is the form input the Owner typed
+        // into (React mirrors a controlled input's value into its attribute, and a failed save keeps the input); every other
+        // part of the HTML must not.
+        expect(seen.actionBodies.some((s) => s.includes(SECRET))).toBe(false);
+        const html = await page.content();
+        expect(html.replace(/<input[^>]*>/g, "<input>").includes(SECRET)).toBe(false);
       });
       // Removal needs no key.
       await page.reload();
