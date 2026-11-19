@@ -409,7 +409,11 @@ test.describe("Razorpay credentials (real browser, real stack)", () => {
         expect(results.otherTenantHeader.status).toBe(403);
         expect((await api(OWNER, "GET")).body.data).toMatchObject({ configured: false });
       });
+      // Leave a saved configuration behind: the keyless pass (API without its encryption key) starts from one, because it
+      // cannot save any more. The API still has its key here.
+      expect((await api(OWNER, "PUT", { keyId: testKeyId(), keySecret: SECRET })).status).toBe(200);
     });
+
     test("AC-REG-03: the Owner dashboard pages still open and render", { annotation: { type: "AC", description: "AC-REG-03" } }, async ({ page }) => {
       await login(page, OWNER);
       const pages: [string, string][] = [["/dashboard", "Overview"], ["/dashboard/products", "Products"], ["/dashboard/team", "Team members"], ["/dashboard/settings", "Settings"]];
