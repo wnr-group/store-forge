@@ -169,7 +169,15 @@ const PAYMENT_FILES = [
 ];
 
 describe("static checks [layer:STATIC]", () => {
-  it("AC-FE-15 [layer:STATIC]: the payments code has no direct database access", () => {
+  it("AC-REG-10 [layer:STATIC]: the Settings page and its components are byte-identical to the baseline", () => {
+    const settingsFiles = [...walk("app/(dashboard)/dashboard/settings"), ...walk("components/settings")];
+    const different = git("diff", "--name-only", "origin/main", "--", "app/(dashboard)/dashboard/settings", "components/settings").split("\n").filter(Boolean);
+    expect(settingsFiles.length).toBeGreaterThan(3);
+    expect(different).toEqual([]);
+  });
+
+  // The registry requires the FE layer for this row: a Vitest source check over the new code, like no-direct-db-static does repository-wide.
+  it("AC-FE-15 [layer:FE]: the payments code has no direct database access", () => {
     for (const f of PAYMENT_FILES) {
       const source = read(f);
       expect(source, f).not.toMatch(/from "(@\/lib\/db|drizzle-orm|postgres|pg|@supabase)/);

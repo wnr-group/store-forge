@@ -97,10 +97,20 @@ describe("regression and scope [layer:FE]", () => {
     expect(OWNER_NAV_ITEMS[OWNER_NAV_ITEMS.length - 1]).toMatchObject({ href: ROUTES.settings, label: "Settings", group: "Workspace" });
   });
 
-  it("AC-REG-02: the anonymous and customer storefront routes are still outside the protected area", () => {
+  it("AC-REG-01 AC-REG-02: the anonymous and customer storefront routes are still outside the protected area", () => {
     expect([...PROTECTED_PREFIXES]).toEqual([ROUTES.dashboard, ROUTES.admin, ROUTES.noWorkspace]);
     expect(ROUTES.payments.startsWith(ROUTES.dashboard)).toBe(true);
     for (const prefix of PROTECTED_PREFIXES) expect("/s/urban-nest-demo".startsWith(prefix)).toBe(false);
+  });
+
+  it("AC-REG-07: organization switching keeps its cookie name and the tenant-context entry points are unchanged", async () => {
+    const { ACTIVE_TENANT_COOKIE } = await import("@/config/app");
+    expect(ACTIVE_TENANT_COOKIE).toBe("sf_active_tenant");
+    // The module is read as text: importing it would pull in the server runtime. Its exported entry points are the contract.
+    const source = read("lib/tenant/context.ts");
+    for (const name of ["getUserTenants", "getActiveTenant", "getActiveStore", "requireTenantAccess", "requireTenantRole", "requireActiveTenant", "setActiveTenantCookie", "requireWorkspace"])
+      expect(source, name).toMatch(new RegExp(`export (async function|const) ${name}\\b`));
+    expect(git("diff", "--name-only", "origin/main", "--", "lib/tenant").split("\n").filter(Boolean)).toEqual([]);
   });
 });
 
