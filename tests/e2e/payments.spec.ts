@@ -416,11 +416,12 @@ test.describe("Razorpay credentials (real browser, real stack)", () => {
 
     test("AC-REG-03: the Owner dashboard pages still open and render", { annotation: { type: "AC", description: "AC-REG-03" } }, async ({ page }) => {
       await login(page, OWNER);
-      const pages: [string, string][] = [["/dashboard", "Overview"], ["/dashboard/products", "Products"], ["/dashboard/team", "Team members"], ["/dashboard/settings", "Settings"]];
+      // The Overview page's heading is the store's own name, so it is checked as "some heading", the others by their title.
+      const pages: [string, string | null][] = [["/dashboard", null], ["/dashboard/products", "Products"], ["/dashboard/team", "Team members"], ["/dashboard/settings", "Settings"]];
       for (const [path, heading] of pages) {
         await page.goto(path);
         await expect(page).toHaveURL(new RegExp(path.replace(/\//g, "\\/") + "$"));
-        await expect(page.getByRole("heading", { name: heading }).first()).toBeVisible();
+        await expect((heading ? page.getByRole("heading", { name: heading, exact: true }) : page.locator("main h1")).first()).toBeVisible();
       }
     });
 
