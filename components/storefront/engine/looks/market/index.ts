@@ -1,12 +1,15 @@
 import type { StorefrontLook } from "..";
 import { MarketAnnouncementBar } from "./announcement-bar";
+import { MarketCollapsibleContent } from "./collapsible-content";
 import { MarketCollectionBanner } from "./collection-banner";
 import { MarketCollectionList } from "./collection-list";
 import { MarketFeaturedCollection } from "./featured-collection";
 import { MarketFooter } from "./footer";
 import { MarketHeader } from "./header";
 import { MarketHero } from "./hero";
+import { MarketImageWithText } from "./image-with-text";
 import { MarketMainProduct } from "./main-product";
+import { MarketMulticolumn } from "./multicolumn";
 import { MarketProductGrid } from "./product-grid";
 import { MarketPromotionalBanner } from "./promotional-banner";
 import { MarketRelatedProducts } from "./related-products";
@@ -26,6 +29,9 @@ export const marketLook: StorefrontLook = {
     header: MarketHeader,
     footer: MarketFooter,
     hero: MarketHero,
+    "collapsible-content": MarketCollapsibleContent,
+    "image-with-text": MarketImageWithText,
+    multicolumn: MarketMulticolumn,
     "collection-list": MarketCollectionList,
     "featured-collection": MarketFeaturedCollection,
     "promotional-banner": MarketPromotionalBanner,
