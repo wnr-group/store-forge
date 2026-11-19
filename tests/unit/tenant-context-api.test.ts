@@ -55,14 +55,6 @@ vi.mock("@/lib/api/endpoints/organization-api", () => ({
 }));
 
 const org = (id: string, slug: string, role: string, permissions: Record<string, string> = {}) => ({ id, name: slug, slug, role, permissions, joinedAt: "2026-01-01T00:00:00.000Z" });
-const code = async (p: Promise<unknown>) => {
-  try {
-    await p;
-    return "no error";
-  } catch (e) {
-    return (e as { digest?: string }).digest ?? (e as AppError).code ?? String(e);
-  }
-};
 
 beforeEach(() => {
   h.user = { id: "u1" };

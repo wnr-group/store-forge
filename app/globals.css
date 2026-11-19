@@ -415,3 +415,77 @@
     background-color: var(--sf-tint);
   }
 }
+
+/*
+ * Merchant dashboard scope. MerchantScope (components/dashboard/merchant-scope.tsx) sets data-area="merchant" on a wrapper
+ * and on <html> (menus and dialogs render in a portal outside the wrapper). Platform Admin and the login screen never set
+ * it, so they keep the global defaults above.
+ *  --control-h    One height for inputs, native selects and the search trigger. Input and NativeSelect fall back to their
+ *                 own default (32px / 36px) when it is unset.
+ *  --error-text   Error messages. WCAG AA needs 4.5:1 for this text. Light: --error is 3.9:1 on white, so the merchant text
+ *                 is #b83232 (5.3:1 or better on cards, the page and the error banners). Dark: --error (#e05252) measured
+ *                 only 4.41:1 on the dialog surface (4.19:1 on an error banner over it), so the merchant text is #e46666,
+ *                 the smallest lightening of the same hue and saturation that reaches 4.5:1 on every dark surface
+ *                 (page, card, dialog, muted, and the 5% error banners over each): 4.55:1 minimum.
+ * Only text changes: the --error token, border and background tints are untouched, and Admin and Login never carry the scope.
+ */
+[data-area="merchant"] {
+  --control-h: 2rem;
+  --error-text: #b83232;
+}
+.dark[data-area="merchant"],
+.dark [data-area="merchant"] {
+  --error-text: #e46666;
+}
+[data-area="merchant"] .text-error {
+  color: var(--error-text);
+}
+
+/*
+ * Merchant sidebar on short screens (the nav list scrolls inside [data-sidebar-scroll], see AppShell).
+ *  - Scroll cue: edge shadows that appear only on a side that has more content (the "local" covers hide them at the ends).
+ *  - Compact density below 830px of height, so an owner's full list fits at 800px without scrolling.
+ * Platform Admin never carries data-area="merchant", so its sidebar is unchanged.
+ */
+[data-area="merchant"] [data-sidebar-scroll] {
+  background:
+    linear-gradient(var(--sidebar) 30%, transparent) top / 100% 1.5rem no-repeat local,
+    linear-gradient(transparent, var(--sidebar) 70%) bottom / 100% 1.5rem no-repeat local,
+    linear-gradient(rgb(0 0 0 / 0.1), transparent) top / 100% 0.5rem no-repeat scroll,
+    linear-gradient(transparent, rgb(0 0 0 / 0.1)) bottom / 100% 0.5rem no-repeat scroll;
+}
+.dark[data-area="merchant"] [data-sidebar-scroll],
+.dark [data-area="merchant"] [data-sidebar-scroll] {
+  background:
+    linear-gradient(var(--sidebar) 30%, transparent) top / 100% 1.5rem no-repeat local,
+    linear-gradient(transparent, var(--sidebar) 70%) bottom / 100% 1.5rem no-repeat local,
+    linear-gradient(rgb(0 0 0 / 0.5), transparent) top / 100% 0.5rem no-repeat scroll,
+    linear-gradient(transparent, rgb(0 0 0 / 0.5)) bottom / 100% 0.5rem no-repeat scroll;
+}
+/* Skip link target: focus lands on <main> by script, so it needs no focus ring of its own. */
+[data-area="merchant"] main#main:focus {
+  outline: none;
+}
+
+/*
+ * Add team member dialog (merchant): the form is taller than a laptop viewport, so the actions stay pinned to the bottom of
+ * the dialog while the fields scroll. Platform Admin uses the same dialog and is not affected (no merchant scope).
+ */
+[data-area="merchant"] [data-dialog="add-member"] [data-slot="dialog-footer"] {
+  position: sticky;
+  bottom: -1rem;
+  z-index: 10;
+  background-color: color-mix(in oklab, var(--muted) 50%, var(--popover));
+  box-shadow: 0 -10px 14px -12px rgb(0 0 0 / 0.2);
+}
+@media (max-height: 830px) {
+  [data-area="merchant"] [data-sidebar-scroll] {
+    padding-block: 0.375rem;
+  }
+  [data-area="merchant"] [data-sidebar-scroll] nav a {
+    height: 2rem;
+  }
+  [data-area="merchant"] [data-sidebar-scroll] nav p {
+    padding-top: 0.625rem;
+  }
+}

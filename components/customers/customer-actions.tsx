@@ -8,6 +8,7 @@ import { deleteCustomerAction } from "@/app/(dashboard)/dashboard/customers/acti
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/config/app";
+import { useReturnFocus } from "@/lib/hooks/use-return-focus";
 import { CustomerDialog } from "./customer-dialog";
 
 type Customer = { id: string; fullName: string; email: string; phone: string | null; notes: string | null };
@@ -15,12 +16,13 @@ type Customer = { id: string; fullName: string; email: string; phone: string | n
 /** "Add customer" button for the list page. */
 export function AddCustomerButton() {
   const [open, setOpen] = useState(false);
+  const finalFocus = useReturnFocus(open);
   return (
     <>
       <Button onClick={() => setOpen(true)}>
         <Plus aria-hidden /> Add customer
       </Button>
-      {open ? <CustomerDialog open onOpenChange={setOpen} /> : null}
+      {open ? <CustomerDialog open onOpenChange={setOpen} finalFocus={finalFocus} /> : null}
     </>
   );
 }
@@ -29,6 +31,7 @@ export function AddCustomerButton() {
 export function CustomerDetailActions({ customer, canManage, canDelete }: { customer: Customer; canManage: boolean; canDelete: boolean }) {
   const router = useRouter();
   const [edit, setEdit] = useState(false);
+  const editFocus = useReturnFocus(edit);
   const [del, setDel] = useState(false);
   return (
     <>
@@ -42,7 +45,7 @@ export function CustomerDetailActions({ customer, canManage, canDelete }: { cust
           <Trash2 aria-hidden /> Delete
         </Button>
       ) : null}
-      {edit ? <CustomerDialog open onOpenChange={setEdit} customer={customer} /> : null}
+      {edit ? <CustomerDialog open onOpenChange={setEdit} customer={customer} finalFocus={editFocus} /> : null}
       <ConfirmDialog
         open={del}
         onOpenChange={setDel}

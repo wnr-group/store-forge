@@ -55,6 +55,9 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
 export type NavKey = "merchant" | "owner" | "admin";
 export const NAV_SETS: Record<NavKey, NavItem[]> = { merchant: NAV_ITEMS, owner: OWNER_NAV_ITEMS, admin: ADMIN_NAV_ITEMS };
 
+/** What `navKey`'s member can open: the same set the sidebar lists, minus the hrefs hidden for them (e.g. by `hiddenNavHrefs`). */
+export const visibleNavItems = (navKey: NavKey, hidden: readonly string[] = []): NavItem[] => NAV_SETS[navKey].filter((item) => !hidden.includes(item.href));
+
 export function isActive(pathname: string, item: Pick<NavItem, "href" | "exact">) {
   return item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
 }

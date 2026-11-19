@@ -58,7 +58,7 @@ export default async function DashboardPage() {
           </>
         }
       />
-      {data ? <AnalyticsView data={data} currency={store.currency} /> : null}
+      {data ? <AnalyticsView data={data} currency={store.currency} timezone={store.timezone} /> : null}
     </>
   );
 }

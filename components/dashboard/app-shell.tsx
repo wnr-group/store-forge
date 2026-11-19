@@ -51,7 +51,7 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
           <div className={cn("flex h-12 items-center border-b border-sidebar-border px-3", collapsed && "justify-center px-0")}>
             {collapsed ? <Logo href={homeHref} name={brandName} className="[&>span:last-child]:hidden" /> : <Logo href={homeHref} name={brandName} />}
           </div>
-          <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
+          <div data-sidebar-scroll className="flex-1 space-y-4 overflow-y-auto p-2.5">
             {collapsed ? switcher.compact : switcher.full}
             <SidebarNav navKey={navKey} hidden={hiddenNav} collapsed={collapsed} />
           </div>
@@ -75,7 +75,7 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
             <div className="flex h-12 items-center border-b border-sidebar-border px-3">
               <Logo href={homeHref} name={brandName} />
             </div>
-            <div className="flex-1 space-y-4 overflow-y-auto p-2.5">
+            <div data-sidebar-scroll className="flex-1 space-y-4 overflow-y-auto p-2.5">
               {switcher.full}
               <SidebarNav navKey={navKey} hidden={hiddenNav} onNavigate={() => setDrawer(false)} />
             </div>

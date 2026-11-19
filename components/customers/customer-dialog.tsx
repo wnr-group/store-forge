@@ -15,10 +15,10 @@ import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { customerInputSchema } from "@/lib/validations/catalog";
 
 type Customer = { id: string; fullName: string; email: string; phone: string | null; notes: string | null };
-type Props = { open: boolean; onOpenChange: (open: boolean) => void; customer?: Customer };
+type Props = { open: boolean; onOpenChange: (open: boolean) => void; customer?: Customer; /** Where focus goes when the dialog closes (see useReturnFocus). */ finalFocus?: React.ComponentProps<typeof DialogContent>["finalFocus"] };
 
 /** Create or edit a customer. Remount (key) per customer so the fields reset. */
-export function CustomerDialog({ open, onOpenChange, customer }: Props) {
+export function CustomerDialog({ open, onOpenChange, customer, finalFocus }: Props) {
   const router = useRouter();
   const [v, setV] = useState({ fullName: customer?.fullName ?? "", email: customer?.email ?? "", phone: customer?.phone ?? "", notes: customer?.notes ?? "" });
   const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
@@ -45,7 +45,7 @@ export function CustomerDialog({ open, onOpenChange, customer }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !pending && onOpenChange(o)}>
-      <DialogContent>
+      <DialogContent finalFocus={finalFocus}>
         <DialogHeader>
           <DialogTitle>{customer ? "Edit customer" : "Add customer"}</DialogTitle>
           <DialogDescription>Contact details for someone who buys from your store.</DialogDescription>
