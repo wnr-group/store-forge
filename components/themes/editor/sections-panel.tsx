@@ -4,7 +4,7 @@ import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, us
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ChevronDown, ChevronRight, Copy, Eye, EyeOff, GripVertical, Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
@@ -60,6 +60,8 @@ function Region({ region, state, actions, disabled }: { region: Region; state: E
   const doc = state.docs[docId].document as unknown as TemplateDocument;
   const order = doc.order ?? [];
   const [adding, setAdding] = useState(false);
+  // dnd-kit numbers its aria ids from a global counter, which differs between the server and the browser and breaks hydration.
+  const dndId = useId();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -74,7 +76,7 @@ function Region({ region, state, actions, disabled }: { region: Region; state: E
   return (
     <section aria-label={region.label}>
       <h3 className="mb-1.5 px-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{region.label}</h3>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+      <DndContext id={dndId} sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={order} strategy={verticalListSortingStrategy} disabled={!region.editable || disabled}>
           <ul className="space-y-1">
             {order.map((id) => (
