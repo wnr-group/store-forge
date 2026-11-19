@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, History as HistoryIcon, Loader2, Monitor, Palette, PanelLeft, Redo2, Rocket, Smartphone, SquareDashedMousePointer, Tablet, Undo2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, History as HistoryIcon, Loader2, Monitor, Package, Palette, PanelLeft, Redo2, Rocket, Smartphone, SquareDashedMousePointer, Tablet, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { getTemplateAction, saveDraftAction } from "@/app/(dashboard)/dashboard/templates/actions";
+import { getPresentationAction, getTemplateAction, loadProductPreviewAction, saveDraftAction, savePresentationDraftAction } from "@/app/(dashboard)/dashboard/templates/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -23,15 +23,28 @@ import type { PartStyleKey, StyleDevice, StyleKey as StyleKeyType } from "@/lib/
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import { validateDocument } from "@/lib/templates/engine/validate";
 import { getRegistry } from "@/lib/templates/registry/index";
+import { effectiveGalleryLayout, effectiveMediaPosition, presentationKey, validatePresentation, type GalleryLayout, type HideableBlock, type MediaPosition } from "@/lib/templates/product-presentation";
+import {
+  availableItems, createPresentationStore, dirtyEntries, entryFromDetail, hasPendingPublish, isEntryDirty, markEntrySaved, mergeLoadedProduct, previewPresentation, problemsFromFieldErrors, productActions, publishedMessage, putEntry, replaceEntry,
+  restoreDrafts, splitProductFieldErrors, summarizeWaiting,
+  setBlockHidden, setFocalPoint, setGalleryLayout, setMediaPosition, type PresentationStore,
+} from "@/lib/themes/editor/presentation-state";
 import {
   addBlock, addSection, createBlockNode, createState, dirtyDocs, duplicateSection, isDirty, markSaved, moveBlock, moveSection, removeBlock, removeSection,
-  replaceDoc, resetElementStyle, select, setElementStyle, setSetting, setTextOverride, setTextStyle, setThemeSetting, toggleSection, type EditorDoc, type EditorState,
+  replaceDoc, restoreDocs, resetElementStyle, select, setElementStyle, setSetting, setTextOverride, setTextStyle, setThemeSetting, toggleSection, type EditorDoc, type EditorState,
 } from "@/lib/themes/editor/state";
-import { canRedo, canUndo, emptyHistory, record, redo, undo, type History } from "@/lib/themes/editor/history";
-import { ActionError, themeKeys, usePublishTheme, useTemplates } from "@/lib/themes/queries";
+import { ActionError, themeKeys, useDraftChecks, usePresentationList, usePublishPresentation, usePublishTheme, useResetPresentation, useTemplates } from "@/lib/themes/queries";
 import { hasStoreProducts, previewData, type PreviewData, type PreviewMode } from "@/lib/themes/preview-data";
-import type { PreviewStoreData, TemplateSummary, ThemeKind } from "@/lib/themes/types";
+import type { PickerProduct, PreviewStoreData, ProductPreview, TemplateSummary, ThemeKind } from "@/lib/themes/types";
 import { cn } from "@/lib/utils";
+import { draftsToCheck } from "@/lib/themes/editor/draft-checks";
+import { createFlusher, saveFailureMessage, type FlushResult } from "@/lib/themes/editor/flusher";
+import { productLayoutState, publicationStatus, refetchTemplateStatesOnOpen, refreshTemplateStates } from "@/lib/themes/refresh";
+import { advanceHistory, canRedo, canUndo, clearHistory, mergeRestored, pruneHistory, redo, snapshotOf, undo, type Snapshot } from "@/lib/themes/editor/history";
+import { ProductCustomizer } from "./product-customizer";
+import { ProductPicker } from "./product-picker";
+import type { ProductStatus } from "./product-status";
+import { useHistoryStore } from "./use-history";
 import { SectionsPanel, type SectionActions } from "./sections-panel";
 import { CollectionChoicesContext } from "./setting-field";
 import { SettingsPanel } from "./settings-panel";
@@ -62,6 +75,10 @@ export type EditorInit = {
   pageId: string;
   docs: Omit<EditorDoc, "saved">[];
   data: PreviewStoreData;
+  /** The product the Product page preview starts with (a deep link, or the store's first product), loaded on the server. */
+  initialProduct?: ProductPreview | null;
+  /** Why that product could not be loaded, if it could not. */
+  initialProductError?: string | null;
 };
 
 type SaveStatus = "saved" | "unsaved" | "saving" | "error" | "conflict" | "invalid";
@@ -76,14 +93,17 @@ const DEVICES: { id: Device; label: string; icon: typeof Monitor }[] = [
 const STYLE_DEVICE: Record<Device, StyleDevice> = { desktop: "base", tablet: "tablet", mobile: "mobile" };
 const ZOOMS = [{ label: "Fit", value: 0 }, { label: "50%", value: 0.5 }, { label: "75%", value: 0.75 }, { label: "100%", value: 1 }, { label: "125%", value: 1.25 }];
 
+type PreviewProductState = { status: "idle" | "loading" | "ready" | "error"; productId: string | null; resource: Record<string, unknown> | null; error: string | null; presentationError: string | null };
+const NO_PRODUCT: PreviewProductState = { status: "idle", productId: null, resource: null, error: null, presentationError: null };
+type ProductTarget = { productId?: string; slug?: string };
+
+
 export function EditorShell({ init }: { init: EditorInit }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [state, setState] = useState<EditorState>(() => createState(init.pageId, init.docs));
   // The latest state, updated synchronously by `commit`, so a burst of edits or an edit during a save never works from a stale copy.
   const stateRef = useRef(state);
-  const historyRef = useRef<History>(emptyHistory());
-  const [history, setHistory] = useState<History>(emptyHistory);
   const commit = useCallback((fn: (s: EditorState) => EditorState): EditorState => {
     const next = fn(stateRef.current);
     stateRef.current = next;
@@ -107,14 +127,49 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [serverProblems, setServerProblems] = useState<Record<string, Record<string, string>>>({});
   const [device, setDevice] = useState<Device>("desktop");
-  const [leftTab, setLeftTab] = useState<"sections" | "theme">("sections");
+  const [leftTab, setLeftTab] = useState<"sections" | "theme" | "product">("sections");
   const [mobileTab, setMobileTab] = useState<"sections" | "preview" | "settings">("preview");
   const [previewing, setPreviewing] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
+  // True from the click on Publish until it has finished, including the time spent waiting for a save in progress.
+  const [publishing, setPublishing] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
   const saving = useRef(false);
   const retries = useRef(0);
+
+  // ---- per-product presentation: its own state, revisions and saves, apart from the template documents ----------
+  const [presStore, setPresStore] = useState<PresentationStore>(() =>
+    init.initialProduct?.presentation
+      ? putEntry(createPresentationStore(), entryFromDetail(init.initialProduct.presentation, { name: init.initialProduct.name, slug: init.initialProduct.slug }))
+      : createPresentationStore(),
+  );
+  const presRef = useRef(presStore);
+  useEffect(() => {
+    presRef.current = presStore;
+  }, [presStore]);
+  const [previewProduct, setPreviewProduct] = useState<PreviewProductState>(() =>
+    init.initialProduct
+      ? { status: "ready", productId: init.initialProduct.productId, resource: init.initialProduct.resource, error: null, presentationError: init.initialProduct.presentationError }
+      : init.initialProductError
+        ? { ...NO_PRODUCT, status: "error", error: init.initialProductError }
+        : NO_PRODUCT,
+  );
+  // The product being loaded after a pick: until it arrives nothing product-specific may act, so no action can reach the previous one.
+  const [loadingProduct, setLoadingProduct] = useState<{ id: string | null; name: string | null } | null>(null);
+  const [presServerProblems, setPresServerProblems] = useState<Record<string, Record<string, string>>>({});
+  const [presConflict, setPresConflict] = useState<string | null>(null);
+  const [presBusy, setPresBusy] = useState<"publishing" | "resetting" | null>(null);
+  const loadToken = useRef(0);
+  const lastTarget = useRef<ProductTarget | null>(null);
+  const presList = usePresentationList();
+  // Undo and redo over every draft being edited (pages, shared parts and product settings). Not part of what is saved.
+  const undoStack = useHistoryStore();
+  const lastSnap = useRef<Snapshot | null>(null);
+  const undoRef = useRef<() => void>(() => {});
+  const redoRef = useRef<() => void>(() => {});
+  const publishProduct = usePublishPresentation();
+  const resetProduct = useResetPresentation();
 
   const templates = useTemplates();
   const publish = usePublishTheme();
@@ -136,23 +191,33 @@ export function EditorShell({ init }: { init: EditorInit }) {
     }
     return out;
   }, [state, init.tenantId]);
-  const hasLocalProblems = Object.keys(localProblems).length > 0;
+  const presLocalProblems = useMemo(() => {
+    const out: Record<string, Record<string, string>> = {};
+    for (const e of dirtyEntries(presStore)) {
+      const found = validatePresentation(e.document);
+      if (Object.keys(found).length) out[e.productId] = found;
+    }
+    return out;
+  }, [presStore]);
+  const hasLocalProblems = Object.keys(localProblems).length > 0 || Object.keys(presLocalProblems).length > 0;
   const problems = useMemo(() => {
     const merged: Record<string, Record<string, string>> = { ...serverProblems };
     for (const [id, p] of Object.entries(localProblems)) merged[id] = { ...merged[id], ...p };
     return merged;
   }, [serverProblems, localProblems]);
 
-  const dirtyCount = dirtyDocs(state).length;
+  const dirtyCount = dirtyDocs(state).length + dirtyEntries(presStore).length;
   const status: SaveStatus =
     saveState === "conflict" ? "conflict" : saveState === "saving" ? "saving" : saveState === "error" ? "error" : hasLocalProblems ? "invalid" : dirtyCount > 0 ? "unsaved" : "saved";
 
   const canEdit = init.canManage && status !== "conflict";
 
   // ---- saving --------------------------------------------------------------------------------------------------
-  const flush = useCallback(async (): Promise<boolean> => {
-    if (saving.current) return false;
+  // One save run. It is started through `flusher`, which allows only one at a time and lets Publish wait for it.
+  const runFlush = useCallback(async (): Promise<FlushResult> => {
     saving.current = true;
+    // True once any page draft was saved in this run: the list of publication states is read again once, however this run ends.
+    let savedPage = false;
     setSaveState("saving");
     setSaveError(null);
     try {
@@ -164,8 +229,9 @@ export function EditorShell({ init }: { init: EditorInit }) {
         const result = await saveDraftAction({ id: doc.templateId, document: doc.document, expectedRevision: doc.revision });
         if (!result.ok) {
           if (result.code === "CONFLICT") {
+            setPresConflict(null);
             setSaveState("conflict");
-            return false;
+            return { ok: false, reason: "conflict" };
           }
           if (result.fieldErrors) {
             const mapped: Record<string, string> = {};
@@ -174,23 +240,70 @@ export function EditorShell({ init }: { init: EditorInit }) {
           }
           setSaveState("error");
           setSaveError(result.error);
-          return false;
+          return { ok: false, reason: result.fieldErrors ? "validation" : "error", message: result.error };
         }
         const saved = result.data!;
         setServerProblems((prev) => ({ ...prev, [doc.templateId]: {} }));
         commit((prev) => markSaved(prev, doc.templateId, saved.revision, saved.document, json));
+        savedPage = true;
+      }
+      // Product settings are saved after the pages, each with its own revision. A 409 here concerns that product only.
+      for (const entry of dirtyEntries(presRef.current)) {
+        const key = presentationKey(entry.document);
+        const result = await savePresentationDraftAction({ productId: entry.productId, document: entry.document, expectedRevision: entry.revision });
+        if (!result.ok) {
+          if (result.code === "CONFLICT") {
+            setPresConflict(entry.productId);
+            setSaveState("conflict");
+            return { ok: false, reason: "conflict" };
+          }
+          if (result.fieldErrors) {
+            const mapped = problemsFromFieldErrors(entry.productId, result.fieldErrors);
+            setPresServerProblems((prev) => ({ ...prev, [entry.productId]: mapped }));
+          }
+          setSaveState("error");
+          setSaveError(result.error);
+          return { ok: false, reason: result.fieldErrors ? "validation" : "error", message: result.error };
+        }
+        const savedEntry = result.data!;
+        setPresServerProblems((prev) => ({ ...prev, [entry.productId]: {} }));
+        setPresStore((prev) => markEntrySaved(prev, savedEntry, key));
       }
       retries.current = 0;
       setSaveState("idle");
-      return true;
+      return { ok: true };
     } catch {
       setSaveState("error");
       setSaveError("Your changes could not be saved. Check your connection.");
-      return false;
+      return { ok: false, reason: "error", message: "Your changes could not be saved. Check your connection." };
     } finally {
       saving.current = false;
+      // Saving moved the pages' publication state on the server (published -> published with changes). Product settings do not,
+      // so they never trigger this. Not awaited: it must not delay the end of the save.
+      if (savedPage) void refreshTemplateStates(queryClient);
     }
-  }, [commit]);
+  }, [commit, queryClient]);
+
+  // Created once; it always runs the latest save run.
+  const [flusher] = useState(() => createFlusher());
+  useEffect(() => {
+    flusher.setRun(runFlush);
+  }, [flusher, runFlush]);
+  /** Autosave and leaving: starts a save, or says false while one is already running (unchanged). Publishing waits instead: see flusher.settle. */
+  const flush = useCallback(async (): Promise<boolean> => {
+    if (flusher.isRunning()) return false;
+    return (await flusher.flush()).ok;
+  }, [flusher]);
+  /** Everything (pages, shared parts, product settings) is saved. */
+  const allSaved = () => dirtyDocs(stateRef.current).length === 0 && dirtyEntries(presRef.current).length === 0;
+  /** Product settings are saved. */
+  const productsSaved = () => dirtyEntries(presRef.current).length === 0;
+  /** The product page is edited here and not yet saved. */
+  const productPageDirty = () => {
+    const id = init.pages.find((p) => p.kind === "product")?.id;
+    const doc = id ? stateRef.current.docs[id] : undefined;
+    return doc ? isDirty(doc) : false;
+  };
 
   useEffect(() => {
     // Debounced autosave. A failed save retries a few times with a growing pause, then waits for the merchant.
@@ -202,38 +315,23 @@ export function EditorShell({ init }: { init: EditorInit }) {
       void flush();
     }, delay);
     return () => clearTimeout(timer);
-  }, [state, status, flush]);
+  }, [state, presStore, status, flush]);
 
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
-      if (dirtyDocs(stateRef.current).length > 0 || saving.current) e.preventDefault();
+      if (dirtyDocs(stateRef.current).length > 0 || dirtyEntries(presRef.current).length > 0 || saving.current) e.preventDefault();
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, []);
 
   // ---- edits ---------------------------------------------------------------------------------------------------
-  /** Applies an edit and records an undo step for it. Edits with the same `key` in quick succession are one step. */
+  /** Applies an edit. The undo history watches the committed drafts (see "undo and redo" below), so it records the step itself. */
   const edit = useCallback(
-    (fn: (s: EditorState) => EditorState, key?: string) => {
-      const before = stateRef.current;
-      const after = commit(fn);
-      if (after.docs !== before.docs) {
-        historyRef.current = record(historyRef.current, before, key);
-        setHistory(historyRef.current);
-      }
-      setSaveState((s) => (s === "error" ? "idle" : s));
-    },
-    [commit],
-  );
-
-  const stepHistory = useCallback(
-    (direction: "undo" | "redo") => {
-      const result = (direction === "undo" ? undo : redo)(historyRef.current, stateRef.current);
-      if (!result) return;
-      historyRef.current = result.history;
-      setHistory(result.history);
-      commit(() => result.state);
+    // `_key` is kept so callers can still name a burst of edits; the history now joins bursts by time (COALESCE_MS).
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (fn: (s: EditorState) => EditorState, _key?: string) => {
+      commit(fn);
       setSaveState((s) => (s === "error" ? "idle" : s));
     },
     [commit],
@@ -253,15 +351,15 @@ export function EditorShell({ init }: { init: EditorInit }) {
       const k = e.key.toLowerCase();
       if (k === "z") {
         e.preventDefault();
-        stepHistory(e.shiftKey ? "redo" : "undo");
+        (e.shiftKey ? redoRef : undoRef).current();
       } else if (k === "y") {
         e.preventDefault();
-        stepHistory("redo");
+        redoRef.current();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [stepHistory]);
+  }, []);
 
   const actions: SectionActions = useMemo(
     () => ({
@@ -360,6 +458,207 @@ export function EditorShell({ init }: { init: EditorInit }) {
   );
   const clearFocus = useCallback(() => setFocusSetting(null), []);
   const onSelectParent = useCallback((docId: string, sectionId: string) => edit((s) => select(s, { docId, sectionId })), [edit]);
+  // ---- undo and redo -------------------------------------------------------------------------------------------
+  // Every committed change to a draft is compared with the previous commit; a real edit becomes an undo step. Loading a page or
+  // product only adds a baseline, and a reload, a restored version or a reset clears the steps (they no longer describe the screen).
+  const { history, get: getHistory, set: setHistory } = undoStack;
+  useEffect(() => {
+    const current = snapshotOf(state.docs, presStore.entries);
+    const before = lastSnap.current;
+    // An edit becomes an undo step; a product replaced by the server prunes the steps that no longer apply (see advanceHistory).
+    setHistory(advanceHistory(getHistory(), before, current, Date.now()));
+    lastSnap.current = current;
+  }, [state.docs, presStore.entries, getHistory, setHistory]);
+
+  /**
+   * The server just replaced whole pages or shared parts (a reload after a conflict, a restored version). Their content is
+   * dropped from every undo step; steps of other pages and of products stay. The next commit becomes the new baseline.
+   */
+  const forgetDocsNow = useCallback(
+    (ids: readonly string[] | "all") => {
+      const current = lastSnap.current;
+      setHistory(current ? pruneHistory(getHistory(), current, { forgetDocs: ids }) : clearHistory(getHistory()));
+      lastSnap.current = null;
+    },
+    [getHistory, setHistory],
+  );
+
+  /** Puts the documents of a snapshot back as drafts. The baseline is set first, so applying a step is not recorded as an edit. */
+  const applySnapshot = useCallback((snap: Snapshot) => {
+    const now = lastSnap.current;
+    if (now) {
+      lastSnap.current = mergeRestored(now, snap);
+    }
+    commit((prev) => restoreDocs(prev, snap.docs));
+    // A product draft is put back only if it still belongs to the same server epoch (see restoreDrafts).
+    setPresStore((prev) => restoreDrafts(prev, snap.pres));
+    setSaveState((s) => (s === "error" ? "idle" : s));
+  }, [commit]);
+
+  const undoEdit = useCallback(() => {
+    if (!lastSnap.current) return;
+    const step = undo(getHistory(), lastSnap.current);
+    // The history is updated even when nothing could be undone: steps that cannot change anything are dropped, never shown as available.
+    setHistory(step.history);
+    if (step.snapshot) applySnapshot(step.snapshot);
+  }, [applySnapshot, getHistory, setHistory]);
+
+  const redoEdit = useCallback(() => {
+    if (!lastSnap.current) return;
+    const step = redo(getHistory(), lastSnap.current);
+    setHistory(step.history);
+    if (step.snapshot) applySnapshot(step.snapshot);
+  }, [applySnapshot, getHistory, setHistory]);
+
+  useEffect(() => {
+    undoRef.current = canEdit ? undoEdit : () => {};
+    redoRef.current = canEdit ? redoEdit : () => {};
+  }, [canEdit, undoEdit, redoEdit]);
+
+  // ---- product preview and product settings ------------------------------------------------------------------
+  const editPres = useCallback((fn: (s: PresentationStore) => PresentationStore) => {
+    setPresStore((prev) => fn(prev));
+    setSaveState((s) => (s === "error" ? "idle" : s));
+  }, []);
+
+  /** Keeps the address in step with the chosen product, so the page can be reloaded or shared. No navigation, no refetch. */
+  const syncProductParam = useCallback((id: string | null) => {
+    try {
+      const url = new URL(window.location.href);
+      if (id) url.searchParams.set("product", id);
+      else url.searchParams.delete("product");
+      window.history.replaceState(window.history.state, "", url);
+    } catch {
+      // Not essential.
+    }
+  }, []);
+
+  /** Loads one product (as the storefront renders it) and its settings. A newer pick wins over a slower earlier one. */
+  const loadProduct = useCallback(
+    async (target: ProductTarget, name: string | null = null) => {
+      const token = ++loadToken.current;
+      lastTarget.current = target;
+      setPreviewProduct((p) => ({ ...p, status: "loading", error: null }));
+      setLoadingProduct({ id: target.productId ?? null, name });
+      const result = await loadProductPreviewAction(target);
+      if (token !== loadToken.current) return;
+      setLoadingProduct(null);
+      if (!result.ok) {
+        setPreviewProduct((p) => ({ ...p, status: "error", error: result.error }));
+        toast.error(result.error);
+        return;
+      }
+      const loaded = result.data!;
+      // A copy with unsaved edits is kept as it is; otherwise the server's copy replaces whatever was here. When that copy
+      // differs from the one held (someone else saved) the entry moves to a new epoch, and the history prunes that product's
+      // steps by itself (advanceHistory): Undo can never bring older content back over the newer revision, and no stale step
+      // stays on offer. Other products' steps are untouched.
+      setPresStore((prev) => mergeLoadedProduct(prev, loaded));
+      setPreviewProduct({ status: "ready", productId: loaded.productId, resource: loaded.resource, error: null, presentationError: loaded.presentationError });
+      syncProductParam(loaded.productId);
+    },
+    [syncProductParam],
+  );
+
+  const onPickProduct = (p: PickerProduct) => {
+    if (p.id === previewProduct.productId && previewProduct.status === "ready") return;
+    void loadProduct({ productId: p.id }, p.name);
+    setMobileTab("settings");
+  };
+
+  const firstProductSlug = init.data.store.products[0]?.slug;
+
+  const reloadPresentation = async (productId: string) => {
+    const result = await getPresentationAction(productId);
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
+    setPresStore((prev) => replaceEntry(prev, result.data!));
+    setPresServerProblems((prev) => ({ ...prev, [productId]: {} }));
+    setPresConflict(null);
+    setSaveState("idle");
+    toast.success("Loaded the latest settings for this product");
+  };
+
+  /** After a publish: bring each loaded product's state (and live copy) up to date. Unsaved edits are never overwritten. */
+  const refreshEntries = async () => {
+    await Promise.all(
+      Object.values(presRef.current.entries)
+        .filter((e) => !isEntryDirty(e))
+        .map(async (e) => {
+          const result = await getPresentationAction(e.productId);
+          if (!result.ok) return;
+          // A copy that really changed on the server moves the entry to a new epoch and prunes its steps; a plain publish does not.
+          setPresStore((prev) => (prev.entries[e.productId] && !isEntryDirty(prev.entries[e.productId]) ? replaceEntry(prev, result.data!) : prev));
+        }),
+    );
+  };
+
+  const publishThisProduct = async () => {
+    const id = previewProduct.productId;
+    if (!id || !productActions({ loadStatus: previewProduct.status, canEdit, busy: presBusy !== null, entry: presRef.current.entries[id] ?? null }).publish) return;
+    setPresBusy("publishing");
+    try {
+      // A save already running (autosave) is waited for, not mistaken for a failed one; product edits made since are saved too.
+      if (hasLocalProblems && !productsSaved()) {
+        toast.error("Fix the highlighted problems before publishing.");
+        return;
+      }
+      const saved = await flusher.settle(productsSaved);
+      if (!saved.ok) {
+        toast.error(saveFailureMessage(saved));
+        return;
+      }
+      const entry = presRef.current.entries[id];
+      if (!entry || entry.revision < 1) {
+        toast.message("There is nothing to publish for this product yet.");
+        return;
+      }
+      const result = await publishProduct.mutateAsync({ productId: id, expectedRevision: entry.revision });
+      setPresStore((prev) => replaceEntry(prev, result));
+      // The shared layout is mentioned only when it is confirmed pending: read the list of pages afresh first (this joins a read
+      // already running) and say nothing about the layout if that cannot be confirmed.
+      await refreshTemplateStates(queryClient).catch(() => undefined);
+      const layout = productLayoutState({
+        templates: queryClient.getQueryData<TemplateSummary[]>(themeKeys.templates),
+        fetching: queryClient.isFetching({ queryKey: themeKeys.templates }) > 0,
+        failed: queryClient.getQueryState(themeKeys.templates)?.status === "error",
+        pageDocDirty: productPageDirty(),
+      });
+      toast.success(result.published ? "Product customization published successfully" : "Product customization was already up to date", {
+        description: layout === "pending" ? "The shared product page layout still has unpublished changes. Use the Publish button at the top to publish it separately." : entry.name,
+        action: { label: "View product", onClick: () => window.open(`/s/${init.storeSlug}/products/${entry.slug}`, "_blank", "noopener") },
+      });
+    } catch (error) {
+      if (error instanceof ActionError && error.code === "CONFLICT") {
+        setPresConflict(id);
+        setSaveState("conflict");
+      } else toast.error(error instanceof ActionError ? error.message : "Could not publish this product. Please try again.");
+    } finally {
+      setPresBusy(null);
+    }
+  };
+
+  const resetThisProduct = async () => {
+    const id = previewProduct.productId;
+    if (!id || !productActions({ loadStatus: previewProduct.status, canEdit, busy: presBusy !== null, entry: presRef.current.entries[id] ?? null }).reset) return;
+    setPresBusy("resetting");
+    try {
+      const result = await resetProduct.mutateAsync(id);
+      setPresStore((prev) => replaceEntry(prev, result));
+      setPresServerProblems((prev) => ({ ...prev, [id]: {} }));
+      if (presConflict === id) {
+        setPresConflict(null);
+        setSaveState("idle");
+      }
+      toast.success("This product is back to the store design", { description: "The live page changed straight away." });
+    } catch (error) {
+      toast.error(error instanceof ActionError ? error.message : "Could not reset this product. Please try again.");
+    } finally {
+      setPresBusy(null);
+    }
+  };
 
   // ---- pages, conflicts, restore -------------------------------------------------------------------------------
   const loadDoc = useCallback(async (id: string): Promise<boolean> => {
@@ -387,6 +686,12 @@ export function EditorShell({ init }: { init: EditorInit }) {
       return;
     }
     commit((prev) => ({ ...prev, pageId: id, selection: null }));
+    if (init.pages.find((p) => p.id === id)?.kind !== "product") {
+      setLeftTab((tab) => (tab === "product" ? "sections" : tab));
+      syncProductParam(null);
+    } else if (previewProduct.productId) syncProductParam(previewProduct.productId);
+    // The Product page opens on the store's first product, as it always did; the owner can pick another.
+    if (init.pages.find((p) => p.id === id)?.kind === "product" && previewProduct.status === "idle" && firstProductSlug) void loadProduct({ slug: firstProductSlug });
     setLoadingPage(false);
   };
 
@@ -456,47 +761,113 @@ export function EditorShell({ init }: { init: EditorInit }) {
     await Promise.all(Object.keys(stateRef.current.docs).filter((id) => !isVirtualId(id)).map(loadDoc));
     if (themeDocId) commit((s) => rebuildVirtualPages(s, themeDocId));
     setServerProblems({});
+    setPresConflict(null);
     setSaveState("idle");
-    historyRef.current = emptyHistory();
-    setHistory(historyRef.current);
     setLoadingPage(false);
+    forgetDocsNow("all");
     toast.success("Loaded the latest version");
   };
 
   const afterRestore = async (templateId: string) => {
     await loadDoc(templateId);
     if (themeDocId && templateId === themeDocId) commit((s) => rebuildVirtualPages(s, themeDocId));
-    historyRef.current = emptyHistory();
-    setHistory(historyRef.current);
+    forgetDocsNow([templateId]);
     setVersionsOpen(false);
-    void queryClient.invalidateQueries({ queryKey: themeKeys.templates });
+    void refreshTemplateStates(queryClient);
   };
 
   // ---- publish -------------------------------------------------------------------------------------------------
   const doPublish = async () => {
-    const ok = dirtyDocs(stateRef.current).length === 0 || (!hasLocalProblems && (await flush()));
-    if (!ok) {
+    setPublishing(true);
+    try {
+      await publishAll();
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const publishAll = async () => {
+    // A save already running (autosave) is waited for, not mistaken for a failed one. Edits typed meanwhile are saved too, a few
+    // passes at most; if they keep coming, publishing stops with a message rather than publish older text.
+    const saved: FlushResult = hasLocalProblems && !allSaved() ? { ok: false, reason: "validation" } : await flusher.settle(allSaved);
+    if (!saved.ok) {
       setPublishOpen(false);
-      toast.error("Fix the highlighted problems before publishing.");
+      toast.error(saveFailureMessage(saved));
       return;
     }
     try {
       const result = await publish.mutateAsync(undefined);
       setPublishOpen(false);
-      toast.success(result.published.length ? `Published ${result.published.length} ${result.published.length === 1 ? "page" : "pages"}` : "Your store is already up to date", {
+      toast.success(publishedMessage(result.published.length, result.productPresentations?.published ?? 0), {
         action: { label: "View store", onClick: () => window.open(`/s/${result.storeSlug}`, "_blank", "noopener") },
       });
+      void refreshEntries();
     } catch (error) {
+      // The API checks every product draft with the pages. When it names products, say which one and open it; anything else
+      // keeps the generic message.
+      const { byProduct } = error instanceof ActionError ? splitProductFieldErrors(error.fieldErrors) : { byProduct: {} as Record<string, Record<string, string>> };
+      const ids = Object.keys(byProduct);
+      if (ids.length > 0) {
+        setPresServerProblems((prev) => ({ ...prev, ...byProduct }));
+        setPublishOpen(false);
+        const first = ids[0];
+        const name = presRef.current.entries[first]?.name ?? null;
+        const message = Object.values(byProduct[first])[0];
+        const productPage = init.pages.find((p) => p.kind === "product");
+        toast.error(`${name ?? "A product"}: ${message}`, {
+          description: ids.length > 1 ? `${ids.length} products have settings to fix.` : "Open the product to see what needs fixing.",
+          action: {
+            label: "Open product",
+            onClick: () => {
+              void (async () => {
+                if (productPage && stateRef.current.pageId !== productPage.id) await switchPage(productPage.id);
+                setLeftTab("product");
+                setMobileTab("settings");
+                void loadProduct({ productId: first }, name);
+              })();
+            },
+          },
+        });
+        return;
+      }
       toast.error(error instanceof ActionError ? error.message : "Could not publish. Please try again.");
     }
   };
 
   const leave = async () => {
-    if (dirtyDocs(stateRef.current).length > 0 && !(await flush()) && !window.confirm("Some changes could not be saved. Leave anyway?")) return;
+    if ((dirtyDocs(stateRef.current).length > 0 || dirtyEntries(presRef.current).length > 0) && !(await flush()) && !window.confirm("Some changes could not be saved. Leave anyway?")) return;
     router.push(ROUTES.templates);
   };
 
-  const unpublished = (templates.data ?? []).some((t) => t.status === "active" && t.publicationState !== "published") || dirtyCount > 0;
+  // Products waiting to go live: a loaded product by its own state, any other by the API's list of customized products.
+  // A never-published row can hold an empty draft, which publishing ignores. The list cannot tell, so each such row is read once
+  // (remembered by product, revision and time) in chunks. Rows not read yet or that failed are "unverified": never guessed.
+  const presItems = presList.data?.items;
+  const draftRows = useMemo(() => draftsToCheck(presItems ?? [], new Set(Object.keys(presStore.entries))), [presItems, presStore.entries]);
+  const draftChecks = useDraftChecks(draftRows);
+  const { waiting: waitingProducts, unverified: unverifiedProducts } = useMemo(() => summarizeWaiting(presItems ?? [], presStore, draftChecks.checks), [presItems, presStore, draftChecks.checks]);
+  // What is known about the shared product-page layout, from the same list as the badge: never read as published while unknown.
+  const productPageId = init.pages.find((p) => p.kind === "product")?.id;
+  const layoutState = productLayoutState({
+    templates: templates.data,
+    fetching: templates.isFetching,
+    failed: templates.isError,
+    pageDocDirty: productPageId && state.docs[productPageId] ? isDirty(state.docs[productPageId]) : false,
+  });
+  const waitingPages = (templates.data ?? []).filter((t) => t.status === "active" && t.publicationState !== "published");
+  // Once the checks have settled, rows still unverified may be real drafts: say there are changes rather than claim all is published.
+  // True while the list of pages and their publication states is being read: what it says is not known yet.
+  const checkingPages = templates.isFetching;
+  const unpublished = waitingPages.length > 0 || waitingProducts.size > 0 || dirtyCount > 0 || (unverifiedProducts.size > 0 && !draftChecks.checking) || Boolean(presList.data?.truncated);
+  const publication = publicationStatus(unpublished, checkingPages);
+  const listStates = useMemo(() => new Map((presItems ?? []).map((r) => [r.productId, r.publicationState] as const)), [presItems]);
+  const statusOfProduct = (id: string): ProductStatus => {
+    const e = presStore.entries[id];
+    // A product whose only stored settings are an empty never-published draft is, for the owner, not customized.
+    if (e) return isEntryDirty(e) ? "unsaved" : e.publicationState === "draft" && !hasPendingPublish(e) && !e.unsupported ? "default" : e.publicationState;
+    if (draftChecks.checks.get(id) === "empty") return "default";
+    return listStates.get(id) ?? "default";
+  };
   const selection = state.selection;
   const selectedSectionId = selection && "sectionId" in selection && selection.docId === state.pageId ? selection.sectionId : null;
   const selectedBlockId = selection && "blockId" in selection && selection.docId === state.pageId ? (selection.blockId ?? null) : null;
@@ -506,6 +877,20 @@ export function EditorShell({ init }: { init: EditorInit }) {
     () => (virtualPage === "content" ? withPageContent(page.document as unknown as TemplateDocument, target.contentPage) : (page.document as unknown as TemplateDocument)),
     [virtualPage, page.document, target.contentPage],
   );
+  // The picked product as the storefront renders it, carrying the settings being edited (the draft), so the preview shows them at once.
+  const currentEntry = previewProduct.productId ? (presStore.entries[previewProduct.productId] ?? null) : null;
+  const productResource =
+    previewMode === "store" && previewProduct.resource
+      ? { ...previewProduct.resource, presentation: previewPresentation(presStore, previewProduct.productId, previewProduct.resource.presentation) }
+      : null;
+  const mainProduct = Object.values((page.document as { sections?: Record<string, { type: string; settings?: Record<string, unknown> }> }).sections ?? {}).find((s) => s.type === "main-product");
+  const inherited: { layout: GalleryLayout; mediaPosition: MediaPosition } = {
+    layout: effectiveGalleryLayout(mainProduct?.settings?.galleryLayout, null),
+    mediaPosition: effectiveMediaPosition(mainProduct?.settings?.mediaPosition, null),
+  };
+  // What the Product controls may do right now (nothing while another product is loading).
+  const productAct = productActions({ loadStatus: previewProduct.status, canEdit, busy: presBusy !== null, entry: currentEntry });
+  const productProblems = currentEntry ? { ...(presServerProblems[currentEntry.productId] ?? {}), ...(presLocalProblems[currentEntry.productId] ?? {}) } : {};
   const frameProps = {
     data: preview,
     theme: themeDocId ? state.docs[themeDocId].document : null,
@@ -514,7 +899,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
       footer: groupIds.footer ? (state.docs[groupIds.footer].document as unknown as TemplateDocument) : null,
       announcement: groupIds.announcement ? (state.docs[groupIds.announcement].document as unknown as TemplateDocument) : null,
     },
-    resource: virtualPage ? (virtualPage === "search" ? { products: preview.store.products } : undefined) : page.kind === "product" ? target.productResource : page.kind === "collection" ? target.collectionResource : undefined,
+    resource: virtualPage ? (virtualPage === "search" ? { products: preview.store.products } : undefined) : page.kind === "product" ? (productResource ?? target.productResource) : page.kind === "collection" ? target.collectionResource : undefined,
   };
 
   return (
@@ -544,10 +929,16 @@ export function EditorShell({ init }: { init: EditorInit }) {
         {isVirtualId(state.pageId) && init.canManage ? (
           <Button variant="ghost" size="sm" disabled={!canEdit} title="Remove your changes to this page and use the original layout" onClick={() => { if (themeDocId && window.confirm(`Put the ${PAGE_LABELS[virtualKey(state.pageId)]} page back to its original layout?`)) edit((s) => resetVirtualPage(s, themeDocId, virtualKey(state.pageId))); }}>Reset page</Button>
         ) : null}
+        {page.kind === "product" && previewMode === "store" && previewProduct.productId ? (
+          <Button variant="outline" size="sm" className="hidden max-w-44 sm:inline-flex" onClick={() => { setLeftTab("product"); setMobileTab("sections"); }} aria-label="Product being previewed. Open the Product tab">
+            {loadingProduct ? <Loader2 className="animate-spin" aria-hidden /> : <Package aria-hidden />}
+            <span className="truncate">{loadingProduct ? `Loading ${loadingProduct.name ?? "product"}…` : (currentEntry?.name ?? "Product")}</span>
+          </Button>
+        ) : null}
         <SaveIndicator status={status} />
         <div className="flex items-center" role="group" aria-label="History">
-          <Button variant="ghost" size="icon-sm" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)" disabled={!canUndo(history) || !canEdit} onClick={() => stepHistory("undo")}><Undo2 aria-hidden /></Button>
-          <Button variant="ghost" size="icon-sm" aria-label="Redo (Ctrl+Shift+Z)" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo(history) || !canEdit} onClick={() => stepHistory("redo")}><Redo2 aria-hidden /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)" disabled={!canUndo(history) || !canEdit} onClick={undoEdit}><Undo2 aria-hidden /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label="Redo (Ctrl+Shift+Z)" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo(history) || !canEdit} onClick={redoEdit}><Redo2 aria-hidden /></Button>
         </div>
         <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="ml-auto hidden md:inline-flex" />
         <div className="hidden items-center rounded-md border p-0.5 md:flex" role="group" aria-label="Preview size">
@@ -575,13 +966,21 @@ export function EditorShell({ init }: { init: EditorInit }) {
         <Button variant="ghost" size="sm" onClick={() => setVersionsOpen(true)} aria-label="Version history"><HistoryIcon aria-hidden /><span className="hidden lg:inline">History</span></Button>
         <Button variant="outline" size="sm" onClick={() => setPreviewing(true)}><Eye aria-hidden /><span className="hidden sm:inline">Preview</span></Button>
         {init.canManage ? (
-          <Button size="sm" onClick={() => setPublishOpen(true)} disabled={status === "conflict" || status === "invalid" || publish.isPending}>
+          <Button size="sm" onClick={() => { setPublishOpen(true); void refetchTemplateStatesOnOpen(queryClient); }} disabled={status === "conflict" || status === "invalid" || publish.isPending || publishing}>
             <Rocket aria-hidden /> Publish
           </Button>
         ) : null}
       </header>
 
-      {status === "conflict" ? (
+      {status === "conflict" && presConflict ? (
+        <Alert variant="destructive" className="rounded-none border-x-0">
+          <AlertTriangle aria-hidden />
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            Someone else changed the settings of {presStore.entries[presConflict]?.name ?? "this product"} while you were editing. Your unsaved changes to this product were not saved.
+            <Button size="sm" variant="outline" onClick={() => void reloadPresentation(presConflict)}>Load the latest settings</Button>
+          </AlertDescription>
+        </Alert>
+      ) : status === "conflict" ? (
         <Alert variant="destructive" className="rounded-none border-x-0">
           <AlertTriangle aria-hidden />
           <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
@@ -605,10 +1004,32 @@ export function EditorShell({ init }: { init: EditorInit }) {
           <div className="flex shrink-0 gap-1 border-b p-2" role="tablist">
             <Button size="sm" variant={leftTab === "sections" ? "secondary" : "ghost"} className="flex-1" role="tab" aria-selected={leftTab === "sections"} onClick={() => setLeftTab("sections")}><PanelLeft aria-hidden /> Sections</Button>
             <Button size="sm" variant={leftTab === "theme" ? "secondary" : "ghost"} className="flex-1" role="tab" aria-selected={leftTab === "theme"} onClick={() => { setLeftTab("theme"); setMobileTab("settings"); }}><Palette aria-hidden /> Theme</Button>
+            {page.kind === "product" ? (
+              <Button size="sm" variant={leftTab === "product" ? "secondary" : "ghost"} className="flex-1" role="tab" aria-selected={leftTab === "product"} onClick={() => { setLeftTab("product"); setMobileTab("settings"); }}><Package aria-hidden /> Product</Button>
+            ) : null}
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             {leftTab === "sections" ? (
               <SectionsPanel state={state} groupIds={groupIds} pageKind={page.kind} actions={actions} disabled={!canEdit} />
+            ) : leftTab === "product" ? (
+              previewMode === "demo" ? (
+                <div className="space-y-3 p-4">
+                  <p className="text-sm text-muted-foreground">You are looking at demo products. Switch to your own store to customize a real product.</p>
+                  <Button size="sm" variant="outline" onClick={() => setPreviewMode("store")}>Preview your store</Button>
+                </div>
+              ) : (
+                <>
+                  {previewProduct.status === "error" && previewProduct.error ? (
+                    <Alert variant="destructive" className="m-3 w-auto">
+                      <AlertDescription className="flex items-center justify-between gap-2">
+                        {previewProduct.error}
+                        <Button size="xs" variant="outline" onClick={() => lastTarget.current && void loadProduct(lastTarget.current)}>Try again</Button>
+                      </AlertDescription>
+                    </Alert>
+                  ) : null}
+                  <ProductPicker selectedProductId={previewProduct.productId} loadingProductId={loadingProduct?.id ?? null} disabled={presBusy !== null} onSelect={onPickProduct} statusOf={statusOfProduct} statusUnavailable={presList.isError} />
+                </>
+              )
             ) : (
               <p className="p-4 text-sm text-muted-foreground">Colours, fonts, spacing and buttons for the whole store are on the right. Changes show in the preview straight away.</p>
             )}
@@ -632,6 +1053,29 @@ export function EditorShell({ init }: { init: EditorInit }) {
         </main>
 
         <aside className={cn("min-h-0 overflow-y-auto border-l bg-card lg:block", mobileTab === "settings" ? "block" : "hidden")} aria-label="Settings">
+          {leftTab === "product" && previewMode === "store" ? (
+            <ProductCustomizer
+              load={{ status: previewProduct.status, error: previewProduct.error }}
+              layoutState={layoutState}
+              loadingName={loadingProduct ? (loadingProduct.name ?? "the product") : null}
+              entry={currentEntry}
+              unavailable={previewProduct.presentationError}
+              primaryImagePath={typeof previewProduct.resource?.image_path === "string" ? previewProduct.resource.image_path : null}
+              inherited={inherited}
+              available={availableItems(page.document)}
+              actions={productAct}
+              problems={productProblems}
+              busy={presBusy}
+              status={currentEntry ? statusOfProduct(currentEntry.productId) : "default"}
+              onLayout={(v) => currentEntry && productAct.edit && editPres((s) => setGalleryLayout(s, currentEntry.productId, v))}
+              onPosition={(v) => currentEntry && productAct.edit && editPres((s) => setMediaPosition(s, currentEntry.productId, v))}
+              onFocal={(v) => currentEntry && productAct.edit && editPres((s) => setFocalPoint(s, currentEntry.productId, v))}
+              onHidden={(block: HideableBlock, hidden: boolean) => currentEntry && productAct.edit && editPres((s) => setBlockHidden(s, currentEntry.productId, block, hidden))}
+              onPublish={() => void publishThisProduct()}
+              onResetAll={() => void resetThisProduct()}
+              onRetry={() => lastTarget.current && void loadProduct(lastTarget.current)}
+            />
+          ) : (
           <CollectionChoicesContext.Provider value={init.data.collections}>
           <SettingsPanel
             state={state}
@@ -653,6 +1097,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             onTextStyle={onTextStyle}
           />
           </CollectionChoicesContext.Provider>
+          )}
         </aside>
       </div>
 
@@ -691,20 +1136,93 @@ export function EditorShell({ init }: { init: EditorInit }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Publish your theme?</AlertDialogTitle>
             <AlertDialogDescription>
-              Your latest changes go live on your store now: every page, the header, the footer and your theme settings. Each page is saved as a numbered version you can restore later. Products, customers and orders are not affected.
+              Your latest changes go live on your store now: every page, the header, the footer, your theme settings and any product settings you have saved. Each page is saved as a numbered version you can restore later. Product details, customers and orders are not affected.
             </AlertDialogDescription>
+            <PublishSummary
+              pages={waitingPages.map((t) => PAGE_LABEL[t.kind] ?? t.name)}
+              products={[...waitingProducts].map((id) => presStore.entries[id]?.name ?? null)}
+              unsaved={dirtyCount}
+              unverified={unverifiedProducts.size}
+              checking={draftChecks.checking}
+              checkingPages={checkingPages}
+              skipped={draftChecks.skipped}
+              truncated={Boolean(presList.data?.truncated)}
+              onRetry={draftChecks.retry}
+            />
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={publish.isPending}>Not yet</AlertDialogCancel>
-            <AlertDialogAction disabled={publish.isPending} onClick={() => void doPublish()}>
-              {publish.isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Rocket aria-hidden />} Publish
+            <AlertDialogCancel disabled={publish.isPending || publishing}>Not yet</AlertDialogCancel>
+            <AlertDialogAction disabled={publish.isPending || publishing} onClick={() => void doPublish()}>
+              {publish.isPending || publishing ? <Loader2 className="animate-spin" aria-hidden /> : <Rocket aria-hidden />} Publish
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <p className="sr-only" aria-live="polite">{unpublished ? "You have changes that are not published." : "Everything is published."}</p>
-      <span className="fixed right-3 bottom-3 hidden xl:block">{unpublished ? <Badge variant="secondary">Changes not published</Badge> : <Badge variant="outline"><Check className="size-3" aria-hidden /> Published</Badge>}</span>
+      <p className="sr-only" aria-live="polite">{publication === "unpublished" ? "You have changes that are not published." : publication === "checking" ? "Checking publication status." : "Everything is published."}</p>
+      <span className="fixed right-3 bottom-3 hidden xl:block">
+        {publication === "unpublished" ? (
+          <Badge variant="secondary">Changes not published</Badge>
+        ) : publication === "checking" ? (
+          <Badge variant="outline"><Loader2 className="size-3 animate-spin" aria-hidden /> Checking publication status…</Badge>
+        ) : (
+          <Badge variant="outline"><Check className="size-3" aria-hidden /> Published</Badge>
+        )}
+      </span>
+    </div>
+  );
+}
+
+/** What is about to go live, so the owner is never surprised: pages and shared parts with unpublished changes, and customized products. */
+function PublishSummary({
+  pages,
+  products,
+  unsaved,
+  unverified,
+  checking,
+  checkingPages,
+  skipped,
+  truncated,
+  onRetry,
+}: {
+  pages: string[];
+  products: (string | null)[];
+  unsaved: number;
+  /** Never-published product drafts not yet known to be empty or real: not counted either way. */
+  unverified: number;
+  checking: boolean;
+  /** The list of pages and their publication states is being read again: what is pending may not be complete yet. */
+  checkingPages: boolean;
+  skipped: number;
+  /** The list of customized products was cut off (more than the pages read). */
+  truncated: boolean;
+  onRetry: () => void;
+}) {
+  const uncertain = unverified > 0 || truncated;
+  // "Nothing new" is only said once the state is known; while it is being read the answer is not yet known.
+  if (pages.length === 0 && products.length === 0 && unsaved === 0 && !uncertain && !checkingPages) return <p className="text-sm text-muted-foreground">There is nothing new to publish.</p>;
+  const named = products.filter((n): n is string => Boolean(n));
+  const others = products.length - named.length;
+  return (
+    <div className="mt-2 space-y-1.5 rounded-md border bg-muted/40 p-3 text-sm" aria-label="What will be published">
+      <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Will go live</p>
+      {pages.length > 0 ? <p>Pages and shared parts: {pages.join(", ")}</p> : null}
+      {products.length > 0 ? (
+        <p>
+          {products.length} {products.length === 1 ? "product" : "products"} with their own settings
+          {named.length > 0 ? `: ${named.slice(0, 5).join(", ")}${named.length > 5 ? "…" : ""}` : ""}
+          {others > 0 && named.length > 0 ? ` and ${others} more` : ""}
+        </p>
+      ) : null}
+      {pages.length === 0 && products.length === 0 && !uncertain && unsaved > 0 ? <p>Your latest edits.</p> : null}
+      {checkingPages ? <p className="flex items-center gap-1.5 text-muted-foreground"><Loader2 className="size-3.5 animate-spin" aria-hidden /> Checking publication status…</p> : null}
+      {unverified > 0 ? (
+        <p className="text-muted-foreground">
+          {checking ? `Checking ${unverified} more ${unverified === 1 ? "product" : "products"} with drafts…` : `${unverified} more ${unverified === 1 ? "product has a draft" : "products have drafts"} that could not be checked${skipped > 0 ? " (too many to check at once)" : ""}, so they may or may not go live.`}
+          {!checking ? <> <button type="button" onClick={onRetry} className="underline underline-offset-2">Check again</button></> : null}
+        </p>
+      ) : null}
+      {truncated ? <p className="text-muted-foreground">Your store has more customized products than are listed here, so others may also go live.</p> : null}
     </div>
   );
 }

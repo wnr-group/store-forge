@@ -81,6 +81,8 @@ export type PublishResult = {
   unchanged: number;
   storeSlug: string;
   publishedAt: string;
+  /** Only on a whole-theme publish, and only when the API supports product presentations: how many products went live. */
+  productPresentations?: { published: number };
 };
 
 /** Real store data the editor preview renders: the same shapes the public storefront gets. */
@@ -107,4 +109,49 @@ export type PreviewStoreData = {
   productPage?: Record<string, unknown> | null;
   /** The store's published content pages (About, Contact ...), so the editor can open and design them. */
   contentPages?: { title: string; slug: string; body: string }[];
+};
+
+/** Per-product presentation, as the StoreForge API returns it (`/store/product-presentations`). Dates are ISO strings. */
+export type PresentationState = "default" | "draft" | "published" | "published_with_changes";
+
+export type PresentationSummary = {
+  productId: string;
+  revision: number;
+  publicationState: PresentationState;
+  publishedAt: string | null;
+  updatedAt: string;
+};
+
+export type PresentationDetail = {
+  productId: string;
+  /** Sent back as `expectedRevision` when saving. 0 means the product has no customization yet. */
+  revision: number;
+  publicationState: PresentationState;
+  /** The draft. */
+  document: Record<string, unknown>;
+  /** What shoppers see now; null when never published. */
+  publishedDocument: Record<string, unknown> | null;
+  publishedAt: string | null;
+  updatedAt: string | null;
+};
+
+export type PresentationPublishResult = PresentationDetail & {
+  /** False when the draft already matched what shoppers see. */
+  published: boolean;
+};
+
+/** One row of the editor's product picker: an active product of the store, from the admin product list. */
+export type PickerProduct = { id: string; name: string; slug: string; imagePath: string | null };
+export type PickerPage = { items: PickerProduct[]; page: number; totalPages: number; total: number };
+
+/** A product loaded for the editor's product-page preview, with its own design settings. */
+export type ProductPreview = {
+  productId: string;
+  slug: string;
+  name: string;
+  /** The product as the product blocks read it (`toProductResource`): the same shape the live storefront renders. */
+  resource: Record<string, unknown>;
+  /** Draft and live settings with the revision; null when the API could not provide them (see `presentationError`). */
+  presentation: PresentationDetail | null;
+  presentationError: string | null;
 };

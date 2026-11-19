@@ -9,6 +9,7 @@ import { CONTAINER, ImagePlaceholder, RADIUS } from "../ui";
 import { cn } from "@/lib/utils";
 import { lookHasCart } from "../looks";
 import { AddToBag } from "@/components/storefront/cart/add-to-bag";
+import { effectiveGalleryLayout, effectiveMediaPosition, isHiddenFor, presentationOf } from "@/lib/templates/product-presentation";
 
 interface MainProductSectionProps {
   node: ComponentNode;
@@ -16,10 +17,20 @@ interface MainProductSectionProps {
   sectionId?: string;
 }
 
-/** The product's picture gallery beside its details. The gallery stacks above the details on phones. */
+/**
+ * The product's picture gallery beside its details. The gallery stacks above the details on phones.
+ *
+ * A product may carry its own presentation (gallery layout, media position, focal point, hidden blocks). It is applied
+ * here at render time only: the page document is never changed, so other products are unaffected. Precedence: the
+ * product's setting, then this section's setting, then the descriptor default.
+ */
 export function MainProductSection({ node, context, sectionId }: MainProductSectionProps) {
   const product = context.resource as ProductDetailData | undefined;
-  const mediaPosition = (node.settings?.mediaPosition as string) ?? "left";
+  const presentation = presentationOf(product);
+  const mediaPosition = effectiveMediaPosition(node.settings?.mediaPosition, presentation);
+  const stacked = effectiveGalleryLayout(node.settings?.galleryLayout, presentation) === "stacked";
+  const focal = presentation?.focalPoint;
+  const focalStyle = focal ? { objectPosition: `${focal.x}% ${focal.y}%` } : undefined;
   const [picked, setPicked] = useState<string | null>(null);
   // With a cart, the option the shopper picks is shared by the picker, the price and "Add to bag"; it starts on the first value of each option.
   const withCart = lookHasCart(context.theme);
@@ -32,9 +43,14 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
   const gallery = [...new Set([product?.image_path, ...(product?.images ?? [])].filter((p): p is string => Boolean(p)))];
   const shownPath = matchedVariant?.image_path ?? picked ?? gallery[0] ?? null;
   const imageUrl = shownPath ? publicImageUrl(shownPath) : null;
+  // The focal point belongs to the product's primary picture (the first one), wherever that picture is shown.
+  const primaryPath = gallery[0] ?? null;
+  // Stacked: every picture one under the other, a variant's own picture first.
+  const variantPath = matchedVariant?.image_path;
+  const stackedPaths = variantPath && gallery.includes(variantPath) ? [variantPath, ...gallery.filter((p) => p !== variantPath)] : gallery;
 
   const blocks = node.blocks ?? {};
-  const blockOrder = node.block_order ?? Object.keys(blocks);
+  const blockOrder = (node.block_order ?? Object.keys(blocks)).filter((id) => !isHiddenFor(presentation, blocks[id]?.type ?? ""));
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
@@ -44,31 +60,54 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
     <section className={cn(CONTAINER, "py-8 sm:py-12 lg:py-16")} {...sfProps}>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
         <div className={cn("space-y-3", mediaRight && "lg:order-2")}>
-          <div className={cn("relative aspect-[4/5] w-full overflow-hidden bg-muted", RADIUS)}>
-            {imageUrl ? (
-              <Image src={imageUrl} alt={product?.name ?? "Product image"} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" priority />
+          {stacked ? (
+            stackedPaths.length > 0 ? (
+              <ul className="space-y-3" aria-label="Product pictures" data-gallery="stacked">
+                {stackedPaths.map((path, i) => {
+                  const url = publicImageUrl(path);
+                  if (!url) return null;
+                  return (
+                    <li key={path} className={cn("relative aspect-[4/5] w-full overflow-hidden bg-muted", RADIUS)}>
+                      <Image src={url} alt={i === 0 ? (product?.name ?? "Product image") : ""} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" style={path === primaryPath ? focalStyle : undefined} priority={i === 0} />
+                    </li>
+                  );
+                })}
+              </ul>
             ) : (
-              <>
+              <div className={cn("relative aspect-[4/5] w-full overflow-hidden bg-muted", RADIUS)}>
                 <ImagePlaceholder className="absolute inset-0" />
                 <span className="sr-only">No product image</span>
-              </>
-            )}
-          </div>
-          {gallery.length > 1 ? (
-            <ul className="grid grid-cols-5 gap-2 sm:gap-3" aria-label="Product pictures">
-              {gallery.slice(0, 5).map((path, i) => {
-                const url = publicImageUrl(path);
-                if (!url) return null;
-                return (
-                  <li key={path}>
-                    <button type="button" onClick={() => setPicked(path)} aria-label={`Show picture ${i + 1}`} aria-pressed={shownPath === path} className={cn("relative block aspect-square w-full overflow-hidden border bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring", RADIUS, shownPath === path ? "border-foreground" : "border-transparent opacity-80 hover:opacity-100")}>
-                      <Image src={url} alt="" fill sizes="100px" className="object-cover" />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
+              </div>
+            )
+          ) : (
+            <>
+              <div className={cn("relative aspect-[4/5] w-full overflow-hidden bg-muted", RADIUS)}>
+                {imageUrl ? (
+                  <Image src={imageUrl} alt={product?.name ?? "Product image"} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" style={shownPath === primaryPath ? focalStyle : undefined} priority />
+                ) : (
+                  <>
+                    <ImagePlaceholder className="absolute inset-0" />
+                    <span className="sr-only">No product image</span>
+                  </>
+                )}
+              </div>
+              {gallery.length > 1 ? (
+                <ul className="grid grid-cols-5 gap-2 sm:gap-3" aria-label="Product pictures">
+                  {gallery.slice(0, 5).map((path, i) => {
+                    const url = publicImageUrl(path);
+                    if (!url) return null;
+                    return (
+                      <li key={path}>
+                        <button type="button" onClick={() => setPicked(path)} aria-label={`Show picture ${i + 1}`} aria-pressed={shownPath === path} className={cn("relative block aspect-square w-full overflow-hidden border bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring", RADIUS, shownPath === path ? "border-foreground" : "border-transparent opacity-80 hover:opacity-100")}>
+                          <Image src={url} alt="" fill sizes="100px" className="object-cover" style={path === primaryPath ? focalStyle : undefined} />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+            </>
+          )}
         </div>
 
         <div className={cn("flex flex-col space-y-4 lg:sticky lg:top-24 lg:self-start", mediaRight && "lg:order-1")}>

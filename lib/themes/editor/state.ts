@@ -4,6 +4,7 @@ import { addNode, duplicateNode, generateId, moveNode, removeNode } from "@/lib/
 import { isEmptyStyle, readStyle, STYLE_SETTING_KEY, withStyleValue, type StyleDevice, type StyleKey } from "@/lib/editor/style";
 import { readTextOverrides, TEXT_SETTING_KEY, withTextOverride, withTextStyle } from "@/lib/editor/text";
 import type { PartStyleKey } from "@/lib/editor/style";
+import { stableStringify, type SnapshotEntry } from "@/lib/themes/editor/history";
 import type { ThemeKind } from "@/lib/themes/types";
 
 /**
@@ -257,4 +258,36 @@ export function replaceDoc(state: EditorState, docId: string, revision: number, 
 export function sectionOrder(state: EditorState, docId: string): string[] {
   const d = state.docs[docId]?.document as { order?: string[] } | undefined;
   return d?.order ?? [];
+}
+
+/**
+ * Puts the pages and shared parts of an undo or redo step back as drafts (only those still being edited, and only when the
+ * content differs). The selection is cleared, because a restored page may no longer have the selected section.
+ */
+export function restoreDocs(state: EditorState, step: Record<string, SnapshotEntry>): EditorState {
+  let docs = state.docs;
+  for (const [id, saved] of Object.entries(step)) {
+    const doc = docs[id];
+    if (doc && stableStringify(doc.document) !== saved.key) docs = { ...docs, [id]: { ...doc, document: JSON.parse(saved.raw) as Record<string, unknown> } };
+  }
+  if (docs === state.docs) return state;
+  const next = { ...state, docs };
+  return { ...next, selection: selectionAfterRestore(next, state.selection) };
+}
+
+/** A selection that points at something an undo removed becomes no selection (or the section, if only the block went). */
+function selectionAfterRestore(state: EditorState, selection: Selection): Selection {
+  if (!selection) return null;
+  const doc = state.docs[selection.docId]?.document as { sections?: Record<string, { blocks?: Record<string, unknown> }> } | undefined;
+  if (!doc) return null;
+  if ("theme" in selection) return selection;
+  const section = doc.sections?.[selection.sectionId];
+  if (!section) return null;
+  if (selection.blockId && !hasBlockId(section, selection.blockId)) return { docId: selection.docId, sectionId: selection.sectionId };
+  return selection;
+}
+
+function hasBlockId(node: { blocks?: Record<string, unknown> }, id: string): boolean {
+  const blocks = (node.blocks ?? {}) as Record<string, { blocks?: Record<string, unknown> }>;
+  return id in blocks || Object.values(blocks).some((b) => hasBlockId(b, id));
 }
