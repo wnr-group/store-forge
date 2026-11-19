@@ -40,7 +40,8 @@ export type Capture = {
   testFile: string;
   /** Runs first; when it throws, nothing is written. */
   assert: () => void | Promise<void>;
-  content: () => string | Buffer | object;
+  /** May be async (a screenshot is taken here, after the assertion passed). */
+  content: () => string | Buffer | object | Promise<string | Buffer | object>;
 };
 
 export async function capture(c: Capture): Promise<{ written: boolean; file?: string }> {
@@ -49,7 +50,7 @@ export async function capture(c: Capture): Promise<{ written: boolean; file?: st
   if (process.env.QA_EVIDENCE !== "1") return { written: false };
   const list = sentinels();
   if (list.length === 0) throw new Error("QA_SENTINELS is required for an evidence run: no evidence is written without leak protection");
-  const produced = c.content();
+  const produced = await c.content();
   const bytes = typeof produced === "string" ? Buffer.from(produced, "utf8") : Buffer.isBuffer(produced) ? produced : Buffer.from(`${JSON.stringify(produced, null, 2)}\n`, "utf8");
   if (leaks(bytes, list) > 0) throw new Error(`evidence for ${c.acId} contains a leak sentinel; nothing was written`);
   const entry = {

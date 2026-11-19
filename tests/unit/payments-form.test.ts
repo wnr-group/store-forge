@@ -61,5 +61,14 @@ describe("the Payments form [layer:FE]", () => {
       expect(html).not.toMatch(/<button[^>]*>[^<]*(Verify|Connect|Test connection)/i);
     }
   });
+
+  it("AC-FE-16 [layer:FE]: the screen is built from the existing design system (shared settings section, form fields, ui buttons and badges)", async () => {
+    const html = await render(configured);
+    expect(html).toContain('data-slot="button"'); // components/ui/button
+    expect(html).toContain('data-slot="badge"'); // components/ui/badge
+    expect(html).toMatch(/<section class="grid gap-4 py-6 lg:grid-cols-\[15rem_minmax\(0,1fr\)\]/); // components/shared/settings-section
+    expect(html).toMatch(/id="pay-key-id-msg"/); // components/shared/form-field: accessible message slot
+    expect(html).toMatch(/aria-describedby="pay-key-secret-msg"/);
+  });
 });
 

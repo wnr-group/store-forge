@@ -126,7 +126,8 @@ export function PaymentConfigForm({ config }: { config: PaymentConfigView }) {
         title="Remove Razorpay credentials?"
         description="This permanently deletes the saved Key ID and Key Secret. You can enter new ones at any time."
         confirmLabel="Remove credentials"
-        onConfirm={() => removePaymentConfigAction()}
+        // A network failure rejects the action call; show it in the dialog instead of letting it reach an error boundary.
+        onConfirm={() => removePaymentConfigAction().catch(() => ({ ok: false as const, error: "Something went wrong. Please check your connection and try again." }))}
         successMessage="Razorpay credentials removed"
       />
     </>
