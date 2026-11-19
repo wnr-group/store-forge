@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { blockMarkers } from "../../markers";
 import type { SectionProps } from "..";
 import { HEADLINE_FONT, SHELL, SportEyebrow } from "./ui";
 
@@ -42,7 +43,7 @@ export function SportPromotionalBanner({ node, context, sectionId }: SectionProp
               if (b.type === "text") return <p key={id} className="max-w-lg whitespace-pre-line text-[16px] leading-7 text-white/85">{String(st.content ?? "")}</p>;
               if (b.type === "button") {
                 return (
-                  <div key={id} className="flex flex-wrap items-center gap-5">
+                  <div key={id} className="flex flex-wrap items-center gap-5" {...blockMarkers(id, isPreview, b)}>
                     <Link href={String(st.link ?? "/") || "/"} className="inline-flex h-14 items-center gap-2.5 rounded-full bg-accent px-8 text-[16px] font-semibold text-primary shadow-[0_14px_34px_-12px_rgba(251,200,38,0.8)] transition-all hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                       {String(st.label ?? "")}
                       <ArrowRight className="size-[18px]" strokeWidth={2} aria-hidden />

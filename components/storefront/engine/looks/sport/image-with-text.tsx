@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, RefreshCw, ShieldCheck, Star, Truck } from "lucide-react";
 import type { ComponentNode } from "@/lib/templates/document";
 import { cn } from "@/lib/utils";
+import { blockMarkers } from "../../markers";
 import { ImagePlaceholder, resolveImage } from "../../ui";
 import type { SectionProps } from "..";
 import { BAND_Y, HEADLINE_FONT, Highlighted, PILL_DARK, PILL_OUTLINE, PILL_YELLOW, SHELL, SportEyebrow } from "./ui";
@@ -112,7 +113,7 @@ export function SportImageWithText({ node, context, sectionId }: SectionProps) {
     } else if (b.type === "button") {
       const style = String(st.style ?? "primary");
       out.push(
-        <div key={id}>
+        <div key={id} {...blockMarkers(id, isPreview, b)}>
           <Link href={String(st.link ?? "/") || "/"} className={cn(style === "outline" ? PILL_OUTLINE : style === "secondary" ? PILL_YELLOW : PILL_DARK)}>
             {String(st.label ?? "")}
             <ArrowRight className="size-[18px]" strokeWidth={2} aria-hidden />

@@ -7,6 +7,7 @@ import { createEngineAdapter } from "./engine";
  *   hero          the call-to-action buttons (slides are the hero's own data and carry no style)
  *   main-product  the product page's title, price, description and other info blocks
  *   multicolumn   each column card
+ *   image-with-text, promotional-banner   the call-to-action button only (colour, corners, border, size)
  * Every section can still be styled as a whole (background, spacing, size, corners, opacity, visibility) except the sticky
  * header. Other blocks keep their content settings; style controls appear for them only when Stride draws them with the hook.
  */
@@ -15,6 +16,7 @@ registerEditorAdapter(
     id: "stride",
     name: "Stride",
     looks: ["sport"],
-    blockSections: ["hero", "main-product", "multicolumn"],
+    blockSections: ["hero", "image-with-text", "main-product", "multicolumn", "promotional-banner"],
+    blockTypes: { "image-with-text": ["button"], "promotional-banner": ["button"] },
   }),
 );

@@ -222,6 +222,8 @@ export type CssTarget = {
   style: ElementStyle;
   /** Text properties also reach the text elements inside (blocks), not only inherit (sections). */
   textScope: boolean;
+  /** A button block: its look (colour, corners, border, size) is applied to the button inside the wrapper, not to the wrapper. */
+  control?: boolean;
 };
 
 function declarations(values: StyleValues, only?: (key: StyleKey) => boolean): string[] {
@@ -288,15 +290,27 @@ function declarations(values: StyleValues, only?: (key: StyleKey) => boolean): s
         break;
     }
   }
-  if (v.borderWidth !== undefined && (v.borderWidth as number) > 0) out.push("border-style:solid");
-  if (v.borderRadius !== undefined && (v.borderRadius as number) > 0) out.push("overflow:hidden");
+  if (v.borderWidth !== undefined && (v.borderWidth as number) > 0 && (!only || only("borderWidth"))) out.push("border-style:solid");
+  if (v.borderRadius !== undefined && (v.borderRadius as number) > 0 && (!only || only("borderRadius"))) out.push("overflow:hidden");
   return out;
 }
 
-function rulesFor(id: string, values: StyleValues, textScope: boolean): string {
+/** A button block's wrapper keeps only its place on the page; everything visual belongs to the button inside it. */
+const WRAPPER_KEYS = new Set<StyleKey>(["marginTop", "marginBottom", "textAlign", "opacity", "hidden"]);
+const CONTROL_TAGS = "a,button";
+
+function rulesFor(id: string, values: StyleValues, textScope: boolean, control: boolean): string {
   const attr = `[data-sf-ov=${overrideValue(id)}]`;
   const self = attr + attr;
   const rules: string[] = [];
+  if (control) {
+    const wrapper = declarations(values, (k) => WRAPPER_KEYS.has(k));
+    // Three attribute selectors outrank the theme's own hover and focus classes, so a chosen colour holds on hover too.
+    const button = declarations(values, (k) => !WRAPPER_KEYS.has(k));
+    if (wrapper.length) rules.push(`${self}{${wrapper.join(";")}}`);
+    if (button.length) rules.push(`${self}${attr} :where(${CONTROL_TAGS}){${button.join(";")}}`);
+    return rules.join("");
+  }
   const own = declarations(values);
   if (own.length) rules.push(`${self}{${own.join(";")}}`);
   if (textScope) {
@@ -318,9 +332,9 @@ export function elementCss(targets: readonly CssTarget[]): string {
     if (!SAFE_ID.test(t.id)) continue;
     const style = parseElementStyle(t.style);
     if (!style) continue;
-    if (style.base) base += rulesFor(t.id, style.base, t.textScope);
-    if (style.tablet) tablet += rulesFor(t.id, style.tablet, t.textScope);
-    if (style.mobile) mobile += rulesFor(t.id, style.mobile, t.textScope);
+    if (style.base) base += rulesFor(t.id, style.base, t.textScope, !!t.control);
+    if (style.tablet) tablet += rulesFor(t.id, style.tablet, t.textScope, !!t.control);
+    if (style.mobile) mobile += rulesFor(t.id, style.mobile, t.textScope, !!t.control);
   }
   const css = base + (tablet ? `@media (max-width:1279px){${tablet}}` : "") + (mobile ? `@media (max-width:767px){${mobile}}` : "");
   // Defence in depth: nothing above can produce these, but a stylesheet that a text node would escape, or that could close its

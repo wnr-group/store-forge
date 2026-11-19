@@ -97,6 +97,21 @@ describe("elementCss", () => {
     expect(elementCss([{ id: "a", textScope: false, style }])).not.toContain(":where(");
   });
 
+  it("paints a button block's own button, and leaves only its place on the page to the wrapper", () => {
+    const style: ElementStyle = { base: { backgroundColor: "#ff0000", borderRadius: 4, borderWidth: 2, marginTop: 8, hidden: false } };
+    const css = elementCss([{ id: "btn", textScope: true, control: true, style }]);
+    expect(css).toContain("[data-sf-ov=o_btn][data-sf-ov=o_btn]{margin-top:8px;display:block}");
+    expect(css).toContain(":where(a,button){background-color:#ff0000;border-radius:4px;border-width:2px;border-style:solid;overflow:hidden}");
+    expect(css.split("[data-sf-ov=o_btn][data-sf-ov=o_btn]{")[1].split("}")[0]).not.toContain("background-color");
+  });
+
+  it("marks button blocks (not other blocks) as controls", () => {
+    const d = { sections: { s: { type: "image-with-text", settings: {}, block_order: ["b", "h"], blocks: { b: { type: "button", settings: { _style: { base: { backgroundColor: "#000000" } } }, blocks: {}, block_order: [] }, h: { type: "heading", settings: { _style: { base: { color: "#000000" } } }, blocks: {}, block_order: [] } } } } };
+    const targets = collectCssTargets([d as never]);
+    expect(targets.find((x) => x.id === "b")?.control).toBe(true);
+    expect(targets.find((x) => x.id === "h")?.control).toBe(false);
+  });
+
   it("a visible override restores display, so a hidden-by-default rule can be undone per device", () => {
     expect(elementCss([{ id: "a", textScope: false, style: { mobile: { hidden: false } } }])).toContain("display:block");
   });

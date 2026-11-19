@@ -47,6 +47,8 @@ export type EngineAdapterConfig = {
   /** Sections whose blocks are drawn through the engine's block renderer, so a block's style reaches the page. */
   blockSections: readonly string[];
   addableSections?: readonly string[];
+  /** Sections where only some block types carry the style hook (the look draws the rest itself): section type -> those block types. */
+  blockTypes?: Readonly<Record<string, readonly string[]>>;
 };
 
 /**
@@ -62,6 +64,10 @@ export function createEngineAdapter(config: EngineAdapterConfig): ThemeEditorAda
     looks: config.looks,
     addableSections: config.addableSections,
     section: (type) => (UNWRAPPED_SECTIONS.has(type) ? HEADER : SECTION),
-    block: (type, sectionType) => (withBlocks.has(sectionType) ? (BLOCKS[type] ?? null) : null),
+    block: (type, sectionType) => {
+      if (!withBlocks.has(sectionType)) return null;
+      const only = config.blockTypes?.[sectionType];
+      return only && !only.includes(type) ? null : (BLOCKS[type] ?? null);
+    },
   };
 }

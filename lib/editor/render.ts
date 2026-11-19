@@ -8,7 +8,7 @@ export const hasStyleOverrides = (node: Pick<ComponentNode, "settings"> | undefi
 
 function collectBlocks(blocks: Record<string, ComponentNode> | undefined, out: CssTarget[]) {
   for (const [id, block] of Object.entries(blocks ?? {})) {
-    if (hasStyleOverrides(block)) out.push({ id, style: readStyle(block.settings), textScope: true });
+    if (hasStyleOverrides(block)) out.push({ id, style: readStyle(block.settings), textScope: true, control: block.type === "button" });
     collectBlocks(block.blocks, out);
   }
 }
