@@ -442,10 +442,19 @@ test.describe("Razorpay credentials (real browser, real stack)", () => {
       } catch {
         /* nothing written yet */
       }
-      if (process.env.QA_WEB_LOG) files.push(process.env.QA_WEB_LOG);
+      // The frontend server's own terminal output. It must PROVE it captured this run's traffic (the Server Action POST request lines),
+      // otherwise an empty file would pass; and the dev server's "ƒ action(arguments)" lines must be absent (that line carried the secret).
+      const webLogPath = process.env.QA_WEB_LOG ?? "";
+      const webLog = webLogPath ? readFileSync(webLogPath, "utf8") : "";
+      if (webLogPath) files.push(webLogPath);
+      const actionRequestLines = (webLog.match(/POST \/dashboard\/payments/g) ?? []).length;
+      const argumentLines = (webLog.match(/ƒ \w+Action\(/g) ?? []).length;
       const bad = files.filter((f) => leaks(readFileSync(f)) > 0).length;
-      await record("AC-SEC-08", "logs", `the frontend server log and ${files.length} artifacts were scanned for the run's sentinels: ${bad} files held one`, `files scanned: ${files.length} (including the frontend server log when provided)\nfiles holding a sentinel: ${bad}\n`, async () => {
-        expect(files.length).toBeGreaterThan(0);
+      await record("AC-SEC-08", "logs", `the frontend server log (${webLog.length} bytes, ${actionRequestLines} Server Action request lines, ${argumentLines} argument lines) and ${files.length - 1} artifacts were scanned for the run's sentinels: ${bad} files held one`, `frontend server log bytes: ${webLog.length}\nServer Action request lines in it (proves it captured this run): ${actionRequestLines}\nServer Action argument lines in it (must be 0): ${argumentLines}\nfiles scanned (artifacts plus the server log): ${files.length}\nfiles holding a sentinel: ${bad}\n`, async () => {
+        expect(webLogPath).not.toBe("");
+        expect(actionRequestLines).toBeGreaterThanOrEqual(4);
+        expect(argumentLines).toBe(0);
+        expect(files.length).toBeGreaterThan(1);
         expect(bad).toBe(0);
       });
     });
