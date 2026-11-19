@@ -168,7 +168,8 @@ const PAYMENT_FILES = [
   "components/payments/payment-config-form.tsx", ...walk("app/(dashboard)/dashboard/payments"),
 ];
 
-describe("static checks [layer:STATIC]", () => {
+// No layer tag on the block: the tool takes the FIRST [layer:X] in a test's full name, and these tests carry their own (STATIC or FE).
+describe("static checks", () => {
   it("AC-REG-10 [layer:STATIC]: the Settings page and its components are byte-identical to the baseline", () => {
     const settingsFiles = [...walk("app/(dashboard)/dashboard/settings"), ...walk("components/settings")];
     const different = git("diff", "--name-only", "origin/main", "--", "app/(dashboard)/dashboard/settings", "components/settings").split("\n").filter(Boolean);
