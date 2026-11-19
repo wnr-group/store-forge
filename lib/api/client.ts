@@ -77,7 +77,7 @@ function fieldErrors(details: unknown): Record<string, string> | undefined {
 export function toAppError(status: number, body: ApiEnvelope<unknown> | null): AppError {
   const code = CODE_BY_STATUS[status] ?? "UNKNOWN";
   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
-  return new AppError(code, message, fieldErrors(body?.error?.details));
+  return new AppError(code, message, fieldErrors(body?.error?.details), body?.error?.code);
 }
 
 export type ApiResult<T> = { data: T; meta?: PageMeta };
