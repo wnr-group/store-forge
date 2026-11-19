@@ -95,7 +95,8 @@ describe("generated pages as theme-stored documents", () => {
     expect(routeForHref("/")).toEqual({ page: "home" });
     expect(routeForHref("/products/blue-shirt")).toEqual({ page: "product", slug: "blue-shirt" });
     expect(routeForHref("/collections/sale/")).toEqual({ page: "collection", slug: "sale" });
-    expect(routeForHref("/about")).toEqual({ page: "content", slug: "about" });
+    expect(routeForHref("/about")).toEqual({ page: "about" });
+    expect(routeForHref("/shipping")).toEqual({ page: "content", slug: "shipping" });
     expect(routeForHref("/search?q=a")).toEqual({ page: "search" });
     expect(routeForHref("/login")).toBeNull();
     expect(routeForHref("https://example.com")).toBeNull();

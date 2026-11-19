@@ -415,7 +415,9 @@ export function EditorShell({ init }: { init: EditorInit }) {
   /** Following a link in the preview: opens the page it leads to, as the live store would. */
   const navigateHref = (href: string) => {
     if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
-    const route = routeForHref(href);
+    const found = routeForHref(href);
+    // A page the store wrote under Pages (named about or contact) is what the live store shows at that address, so it wins here too.
+    const route = found && (found.page === "about" || found.page === "contact") && target.contentPages.some((p) => p.slug === found.page) ? ({ page: "content", slug: found.page } as const) : found;
     if (!route) {
       toast.message(/^https?:/i.test(href) ? "That link leaves your store." : "Sign-in and account pages have no design to edit here.");
       return;

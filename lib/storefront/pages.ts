@@ -6,12 +6,15 @@ import { cartDocument, collectionsDocument, pageDocument, productListDocument, w
  * kept inside the theme document, `settings.pages[key]`, as a whole page document, so it is saved, published, versioned and
  * restored together with the theme. A page nobody edited keeps its generated default.
  *
- * `content` is the one layout shared by every content page (About, Contact, anything written under Pages). Its `content`
+ * `content` is the one layout shared by every content page (anything written under Pages). Its `content`
  * section is a frame: the page's own title and text are put into it when the page is shown (`withPageContent`).
+ *
+ * `about` and `contact` are whole designed pages a theme can ship (Maison does). They are shown at /about and /contact only when
+ * the theme has saved a design for them and the store has not written a content page of the same name under Pages.
  */
 
 export const PAGES_GROUP = "pages";
-export const PAGE_KEYS = ["products", "collections", "search", "cart", "wishlist", "content"] as const;
+export const PAGE_KEYS = ["products", "collections", "search", "cart", "wishlist", "content", "about", "contact"] as const;
 export type PageKey = (typeof PAGE_KEYS)[number];
 
 export const PAGE_LABELS: Record<PageKey, string> = {
@@ -21,6 +24,8 @@ export const PAGE_LABELS: Record<PageKey, string> = {
   cart: "Cart",
   wishlist: "Wishlist",
   content: "Content pages (About, Contact ...)",
+  about: "About page",
+  contact: "Contact page",
 };
 
 export const isPageKey = (value: unknown): value is PageKey => typeof value === "string" && (PAGE_KEYS as readonly string[]).includes(value);
@@ -59,6 +64,10 @@ export function defaultPageDocument(key: PageKey): TemplateDocument {
       return wishlistDocument();
     case "content":
       return withPageContent(pageDocument("", ""), null);
+    case "about":
+      return pageDocument("About us", "Tell your customers who you are, how you started and what you stand for.");
+    case "contact":
+      return pageDocument("Contact us", "Tell your customers how to reach you.");
   }
 }
 
@@ -96,14 +105,16 @@ export function withSearchTerm(doc: TemplateDocument, term: string, note: string
 export type StoreRoute =
   | { page: "home"; slug?: undefined }
   | { page: "product" | "collection" | "content"; slug: string }
-  | { page: "products" | "collections" | "search" | "cart" | "wishlist"; slug?: undefined };
+  | { page: "products" | "collections" | "search" | "cart" | "wishlist" | "about" | "contact"; slug?: undefined };
 
-const GENERATED: Record<string, "products" | "collections" | "search" | "cart" | "wishlist"> = {
+const GENERATED: Record<string, "products" | "collections" | "search" | "cart" | "wishlist" | "about" | "contact"> = {
   products: "products",
   collections: "collections",
   search: "search",
   cart: "cart",
   wishlist: "wishlist",
+  about: "about",
+  contact: "contact",
 };
 
 /** Single-segment paths that are not content pages. */
