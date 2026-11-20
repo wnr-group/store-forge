@@ -5,6 +5,7 @@ import { EditorShell, type EditorInit } from "@/components/themes/editor/editor-
 import { ROUTES } from "@/config/app";
 import { canManageStore } from "@/lib/auth/permissions";
 import { toFailure } from "@/lib/errors";
+import { storefrontHost } from "@/lib/tenant/host";
 import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { ThemeQueryProvider } from "@/lib/themes/queries";
 import type { ProductPreview, ThemeKind } from "@/lib/themes/types";
@@ -59,6 +60,7 @@ export default async function ThemeEditorPage({ searchParams }: Props) {
     tenantId: active.tenant.id,
     canManage: canManageStore(active),
     storeSlug: data.store.slug,
+    storeHost: storefrontHost(data.store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, active.tenant.publicId),
     themeName: current.theme?.name ?? null,
     pages: pages.map((p) => ({ id: p.id, kind: p.kind, name: p.name })),
     pageId: chosen.id,

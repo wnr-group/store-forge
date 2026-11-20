@@ -70,6 +70,8 @@ export type EditorInit = {
   tenantId: string;
   canManage: boolean;
   storeSlug: string;
+  /** The store's public address for display, e.g. "urban-nest-zqkod2.store-forge.com". */
+  storeHost: string;
   themeName: string | null;
   pages: Pick<TemplateSummary, "id" | "kind" | "name">[];
   pageId: string;
@@ -1020,9 +1022,9 @@ export function EditorShell({ init }: { init: EditorInit }) {
 
         <main className={cn("min-h-0 min-w-0 flex-col bg-muted/50 lg:flex", mobileTab === "preview" ? "flex" : "hidden")} aria-label="Live preview">
           <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-card/80 px-3 py-2 backdrop-blur">
-            <div className="hidden min-w-0 items-center gap-1.5 rounded-full border bg-background px-3 py-1 font-mono text-[11px] text-muted-foreground xl:flex" title="Your store address">
+            <div className="hidden min-w-0 items-center gap-1.5 rounded-full border bg-background px-3 py-1 font-mono text-[11px] text-muted-foreground lg:flex" title="Your store address">
               <Globe className="size-3 shrink-0" aria-hidden />
-              <span className="truncate">/s/{init.storeSlug}</span>
+              <span className="truncate">{init.storeHost}</span>
             </div>
             <div className="mx-auto hidden items-center rounded-lg border bg-background p-0.5 md:flex" role="group" aria-label="Preview size">
               {DEVICES.map(({ id, label, icon: Icon, width }) => (
