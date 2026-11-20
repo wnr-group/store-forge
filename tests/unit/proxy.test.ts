@@ -53,17 +53,21 @@ describe("proxy route protection (authenticated)", () => {
   });
 });
 
-/** The public storefront endpoint of the API: store slug -> public id (the only thing the proxy reads from it). */
+/** What the API knows: store slug -> tenant public id. A stored address (stores.subdomain) is `${slug}-${publicId}`. */
 const STORES: Record<string, string> = { urban: "zqkod2", "urban-nest": "abc123", "mart-com": "mk9x2t", "acme-store": "k9m2x1", acme: "store" };
 
 describe("tenant subdomains (proxy)", () => {
   const withHost = (host: string, path = "/") => new NextRequest(`http://${host}${path}`, { headers: { host } });
+  const found = (data: object) => new Response(JSON.stringify({ success: true, data }), { status: 200 });
+  const missing = () => new Response(JSON.stringify({ success: false }), { status: 404 });
   const api = vi.fn(async (url: string) => {
+    if (url.includes("/public/hosts/")) {
+      const label = decodeURIComponent(url.split("/public/hosts/")[1]);
+      const slug = Object.keys(STORES).find((s) => `${s}-${STORES[s]}` === label);
+      return slug ? found({ slug, publicId: STORES[slug] }) : missing();
+    }
     const slug = decodeURIComponent(url.split("/public/storefronts/")[1]);
-    const publicId = STORES[slug];
-    return publicId
-      ? new Response(JSON.stringify({ success: true, data: { slug, publicId } }), { status: 200 })
-      : new Response(JSON.stringify({ success: false }), { status: 404 });
+    return STORES[slug] ? found({ slug, publicId: STORES[slug] }) : missing();
   });
   beforeEach(() => {
     vi.stubEnv("NEXT_PUBLIC_ROOT_DOMAIN", "lvh.me:3000");
