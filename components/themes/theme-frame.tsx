@@ -274,7 +274,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
           here (and every transition in a gallery thumbnail), so nothing waits to scroll into view or keeps animating. */}
       <style>{`.sf-frame [data-sf-reveal],.sf-frame [data-sf-reveal] .sf-word,.sf-frame .sf-up,.sf-frame .sf-hero-word{animation:none!important;transition:none!important;opacity:1!important;translate:none!important}.sf-frame[data-static] *{animation:none!important;transition:none!important}`}</style>
       {/* Selection and hover borders, drawn above the page (see selection-overlay.tsx). */}
-      {inspecting ? <SelectionOverlay frame={pageRef} selected={selected} hover={hover} labelFor={labelFor} card={cardTools} /> : null}
+      {inspecting ? <SelectionOverlay frame={pageRef} selected={selected} hover={hover} labelFor={labelFor} card={cardTools} scale={scale} /> : null}
       {inspecting ? <style>{`.sf-frame[data-editing] [data-sf-section],.sf-frame[data-editing] [data-sf-block]{cursor:pointer}`}</style> : null}
     </>
   );

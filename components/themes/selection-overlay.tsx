@@ -41,7 +41,9 @@ const same = (a: Box | null, b: Box | null) => (a === null || b === null ? a ===
  * above the page, so no section's overflow can clip them and they never change the page's own layout. The layer sits in the
  * preview window, which scrolls as one page, so a box only needs measuring again when something resizes or moves.
  */
-export function SelectionOverlay({ frame, selected, hover, labelFor, card }: { frame: React.RefObject<HTMLElement | null>; selected: Pick | null; hover: Pick | null; labelFor?: (pick: Pick) => string; card?: CardTools | null }) {
+export function SelectionOverlay({ frame, selected, hover, labelFor, card, scale = 1 }: { frame: React.RefObject<HTMLElement | null>; selected: Pick | null; hover: Pick | null; labelFor?: (pick: Pick) => string; card?: CardTools | null; /** How much the preview is scaled (1 = 100%). The tags and the + bar are drawn at 1 / scale so they stay readable when the page is shrunk to fit. */ scale?: number }) {
+  // One screen pixel in the preview's own pixels.
+  const u = 1 / Math.max(0.1, scale);
   const layer = useRef<HTMLDivElement>(null);
   const [boxes, setBoxes] = useState<{ selected: Box | null; hover: Box | null; card: Box | null }>({ selected: null, hover: null, card: null });
   const [layerWidth, setLayerWidth] = useState(0);
@@ -108,7 +110,7 @@ export function SelectionOverlay({ frame, selected, hover, labelFor, card }: { f
     if (!box || !pick || box.width === 0 || box.height === 0) return null;
     const isSelected = kind === "selected";
     const label = labelFor?.(pick);
-    const above = box.top >= 22;
+    const above = box.top >= 26 * u;
     return (
       <div
         key={kind}
@@ -119,8 +121,8 @@ export function SelectionOverlay({ frame, selected, hover, labelFor, card }: { f
           width: box.width,
           height: box.height,
           boxSizing: "border-box",
-          border: `${isSelected ? 2 : 1}px solid ${isSelected ? BLUE : "rgba(37,99,235,.65)"}`,
-          boxShadow: isSelected ? "0 0 0 1px rgba(255,255,255,.7), inset 0 0 0 1px rgba(255,255,255,.35)" : undefined,
+          border: `${(isSelected ? 2 : 1) * u}px solid ${isSelected ? BLUE : "rgba(37,99,235,.65)"}`,
+          boxShadow: isSelected ? `0 0 0 ${u}px rgba(255,255,255,.7), inset 0 0 0 ${u}px rgba(255,255,255,.35)` : undefined,
           background: isSelected ? "transparent" : "rgba(37,99,235,.06)",
           transition: "top 90ms ease-out, left 90ms ease-out, width 90ms ease-out, height 90ms ease-out",
         }}
@@ -129,14 +131,16 @@ export function SelectionOverlay({ frame, selected, hover, labelFor, card }: { f
           <span
             style={{
               position: "absolute",
-              left: -2,
-              top: above ? -22 : 0,
-              maxWidth: Math.max(80, box.width + 40),
+              left: -2 * u,
+              ...(above ? { bottom: "100%" } : { top: 0 }),
+              transform: `scale(${u})`,
+              transformOrigin: above ? "left bottom" : "left top",
+              maxWidth: Math.max(96, box.width * scale + 40),
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
-              padding: "0 7px",
-              font: "600 11px/20px system-ui, -apple-system, 'Segoe UI', sans-serif",
+              padding: "0 9px",
+              font: "600 13px/24px system-ui, -apple-system, 'Segoe UI', sans-serif",
               color: "#fff",
               background: isSelected ? BLUE : "rgba(37,99,235,.8)",
               borderRadius: above ? "4px 4px 4px 0" : "0 0 4px 0",
@@ -153,7 +157,7 @@ export function SelectionOverlay({ frame, selected, hover, labelFor, card }: { f
     <div ref={layer} aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 2147483000 }}>
       {outline(boxes.hover, hover, "hover")}
       {outline(boxes.selected, selected, "selected")}
-      {card && boxes.card && boxes.card.width > 0 ? <CardToolbar key={cardKey} box={boxes.card} layerWidth={layerWidth} tools={card} frame={frame} /> : null}
+      {card && boxes.card && boxes.card.width > 0 ? <CardToolbar key={cardKey} box={boxes.card} layerWidth={layerWidth} tools={card} frame={frame} u={u} /> : null}
     </div>
   );
 }
@@ -165,7 +169,7 @@ const MENU_W = 244;
  * elements (name, price, picture ...); picking one adds it to the card, picking a shown one takes it away. Drawn in the overlay,
  * so it never changes the page's own layout; only the bar and the menu take clicks.
  */
-function CardToolbar({ box, layerWidth, tools, frame }: { box: Box; layerWidth: number; tools: CardTools; frame: React.RefObject<HTMLElement | null> }) {
+function CardToolbar({ box, layerWidth, tools, frame, u }: { box: Box; layerWidth: number; tools: CardTools; frame: React.RefObject<HTMLElement | null>; /** One screen pixel in the preview's own pixels. */ u: number }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
 
@@ -187,30 +191,31 @@ function CardToolbar({ box, layerWidth, tools, frame }: { box: Box; layerWidth: 
     };
   }, [open, frame]);
 
-  const barTop = box.top >= 40 ? box.top - 36 : box.top + 8;
+  // Positions are in the preview's pixels, sizes on screen: the bar and the menu are scaled by u (see SelectionOverlay).
+  const barTop = box.top >= 46 * u ? box.top - 40 * u : box.top + 8 * u;
   const centre = box.left + box.width / 2;
-  const menuLeft = Math.max(8, Math.min(centre - MENU_W / 2, (layerWidth || centre * 2) - MENU_W - 8));
+  const menuLeft = Math.max(8 * u, Math.min(centre - (MENU_W * u) / 2, (layerWidth || centre * 2) - MENU_W * u - 8 * u));
   const font = "system-ui, -apple-system, 'Segoe UI', sans-serif";
 
   return (
     <>
-      <div style={{ position: "absolute", top: box.top, left: box.left, width: box.width, height: box.height, boxSizing: "border-box", border: `2px solid ${BLUE}`, boxShadow: "0 0 0 1px rgba(255,255,255,.7)" }} />
+      <div style={{ position: "absolute", top: box.top, left: box.left, width: box.width, height: box.height, boxSizing: "border-box", border: `${2 * u}px solid ${BLUE}`, boxShadow: `0 0 0 ${u}px rgba(255,255,255,.7)` }} />
       <div ref={wrap} style={{ pointerEvents: "auto", font: `500 12px/1 ${font}` }}>
-        <div style={{ position: "absolute", top: barTop, left: centre, transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 4, padding: "3px 3px 3px 10px", background: BLUE, color: "#fff", borderRadius: 999, boxShadow: "0 4px 14px rgba(37,99,235,.35)", whiteSpace: "nowrap" }}>
-          <span style={{ font: `600 11px/20px ${font}` }}>{tools.title}</span>
+        <div style={{ position: "absolute", top: barTop, left: centre, transform: `translateX(-50%) scale(${u})`, transformOrigin: "50% 0", display: "flex", alignItems: "center", gap: 6, padding: "4px 4px 4px 12px", background: BLUE, color: "#fff", borderRadius: 999, boxShadow: "0 4px 14px rgba(37,99,235,.35)", whiteSpace: "nowrap" }}>
+          <span style={{ font: `600 13px/24px ${font}` }}>{tools.title}</span>
           <button
             type="button"
             aria-label={`Edit this and choose what the ${tools.title.toLowerCase()} shows`}
             aria-expanded={open}
             title={`Edit this and choose what the ${tools.title.toLowerCase()} shows`}
             onClick={() => setOpen((v) => !v)}
-            style={{ display: "grid", placeItems: "center", width: 24, height: 24, border: 0, borderRadius: 999, background: "#fff", color: BLUE, font: `700 17px/1 ${font}`, cursor: "pointer", paddingBottom: 1 }}
+            style={{ display: "grid", placeItems: "center", width: 28, height: 28, border: 0, borderRadius: 999, background: "#fff", color: BLUE, font: `700 20px/1 ${font}`, cursor: "pointer", paddingBottom: 1 }}
           >
             {open ? "\u00d7" : "+"}
           </button>
         </div>
         {open ? (
-          <div role="menu" aria-label={`${tools.title} elements`} style={{ position: "absolute", top: barTop + 34, left: menuLeft, width: MENU_W, padding: 6, background: "#fff", color: "#111827", border: "1px solid rgba(17,24,39,.12)", borderRadius: 12, boxShadow: "0 14px 40px rgba(17,24,39,.22)" }}>
+          <div role="menu" aria-label={`${tools.title} elements`} style={{ position: "absolute", top: barTop + 38 * u, left: menuLeft, width: MENU_W, transform: `scale(${u})`, transformOrigin: "0 0", padding: 6, background: "#fff", color: "#111827", border: "1px solid rgba(17,24,39,.12)", borderRadius: 12, boxShadow: "0 14px 40px rgba(17,24,39,.22)" }}>
             <div style={{ padding: "6px 8px 6px", font: `600 10px/1 ${font}`, letterSpacing: ".08em", textTransform: "uppercase", color: "#6b7280" }}>{tools.menuTitle}</div>
             {tools.items.map((item) => {
               const row = { display: "flex", alignItems: "center", gap: 2, borderRadius: 8 } as const;
