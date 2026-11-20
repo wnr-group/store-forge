@@ -3,7 +3,7 @@
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronDown, ChevronRight, Copy, Eye, EyeOff, GripVertical, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Eye, EyeOff, GripVertical, Plus, Trash2 } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -123,7 +123,7 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
   if (!node) return null;
   return (
     <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={cn("group/row rounded-lg transition-colors", selected ? "bg-primary/10" : "hover:bg-muted/70", isDragging && "z-10 bg-card opacity-90 shadow-lg ring-1 ring-border")}>
-      <div className="flex items-center gap-0.5 p-1">
+      <div className="relative flex items-center gap-0.5 p-1">
         {sortable ? (
           <button type="button" className="flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground/60 hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed" aria-label={`Drag ${name} to reorder`} disabled={disabled} {...attributes} {...listeners}>
             <GripVertical className="size-4" aria-hidden />
@@ -131,7 +131,7 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
         ) : (
           <span className="w-1.5" />
         )}
-        <button type="button" onClick={() => actions.select(docId, id)} className={cn("min-w-0 flex-1 truncate rounded px-1.5 py-1.5 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring", selected ? "font-medium text-primary" : "text-foreground/90", hidden && "text-muted-foreground line-through")} aria-current={selected || undefined}>
+        <button type="button" onClick={() => actions.select(docId, id)} className={cn("min-w-0 flex-1 rounded px-1.5 py-1.5 text-left text-sm leading-snug break-words outline-none focus-visible:ring-2 focus-visible:ring-ring", selected ? "font-medium text-primary" : "text-foreground/90", hidden && "text-muted-foreground line-through")} aria-current={selected || undefined}>
           {name}
         </button>
         {!sortable ? <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">Global</span> : blocks.length > 0 ? <span className={cn("shrink-0 px-1 text-[10px] text-muted-foreground", expanded && "hidden")}>{blocks.length}</span> : null}
@@ -140,15 +140,13 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
             {expanded ? <ChevronDown className="size-4" aria-hidden /> : <ChevronRight className="size-4" aria-hidden />}
           </button>
         ) : null}
-        <div className={cn("flex shrink-0 items-center transition-opacity lg:opacity-0 lg:group-focus-within/row:opacity-100 lg:group-hover/row:opacity-100", (selected || hidden) && "lg:opacity-100")}>
+        {/* On large screens the buttons float over the end of the row on hover, so they never take room from the name. */}
+        <div className="flex shrink-0 items-center transition-opacity lg:pointer-events-none lg:absolute lg:top-1/2 lg:right-1 lg:-translate-y-1/2 lg:rounded-md lg:bg-card lg:opacity-0 lg:shadow-sm lg:ring-1 lg:ring-border lg:group-focus-within/row:pointer-events-auto lg:group-focus-within/row:opacity-100 lg:group-hover/row:pointer-events-auto lg:group-hover/row:opacity-100">
         <Button size="icon-xs" variant="ghost" aria-label={hidden ? `Show ${name}` : `Hide ${name}`} aria-pressed={hidden} disabled={disabled} onClick={() => actions.toggle(docId, id)}>
           {hidden ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
         </Button>
         {canRemove ? (
-          <>
-            <Button size="icon-xs" variant="ghost" aria-label={`Duplicate ${name}`} disabled={disabled} onClick={() => actions.duplicate(docId, id)}><Copy aria-hidden /></Button>
-            <Button size="icon-xs" variant="ghost" aria-label={`Remove ${name}`} disabled={disabled} onClick={() => actions.remove(docId, id)} className="hover:text-destructive"><Trash2 aria-hidden /></Button>
-          </>
+          <Button size="icon-xs" variant="ghost" aria-label={`Remove ${name}`} disabled={disabled} onClick={() => actions.remove(docId, id)} className="hover:text-destructive"><Trash2 aria-hidden /></Button>
         ) : null}
         </div>
       </div>
@@ -161,7 +159,7 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
               const blockSelected = sel !== null && "blockId" in sel && sel.blockId === blockId;
               return (
                 <li key={blockId} className={cn("flex items-center gap-0.5 rounded-md px-1.5", blockSelected ? "bg-primary/15 text-primary" : "hover:bg-muted")}>
-                  <button type="button" onClick={() => actions.select(docId, id, blockId)} className="min-w-0 flex-1 truncate py-1.5 text-left text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-current={blockSelected || undefined}>
+                  <button type="button" onClick={() => actions.select(docId, id, blockId)} className="min-w-0 flex-1 py-1.5 text-left text-[13px] leading-snug break-words outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-current={blockSelected || undefined}>
                     {registry.blocks[block?.type ?? ""]?.name ?? block?.type}
                   </button>
                   <Button size="icon-xs" variant="ghost" aria-label="Move block up" disabled={disabled || index === 0} onClick={() => actions.moveBlock(docId, id, blockId, index - 1)}><ChevronDown className="rotate-180" aria-hidden /></Button>
