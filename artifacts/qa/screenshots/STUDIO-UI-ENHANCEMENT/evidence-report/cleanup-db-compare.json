@@ -1,0 +1,233 @@
+{
+ "ok": false,
+ "tables": {
+  "admin_audit_logs": {
+   "before": 0,
+   "after": 0,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "categories": {
+   "before": 8,
+   "after": 8,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "collection_products": {
+   "before": 33,
+   "after": 33,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "collections": {
+   "before": 6,
+   "after": 6,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "customers": {
+   "before": 28,
+   "after": 28,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "inventory_adjustments": {
+   "before": 166,
+   "after": 166,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "memberships": {
+   "before": 6,
+   "after": 3,
+   "removed": 3,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "order_items": {
+   "before": 94,
+   "after": 94,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "orders": {
+   "before": 46,
+   "after": 46,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "platform_admins": {
+   "before": 1,
+   "after": 1,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "platform_settings": {
+   "before": 1,
+   "after": 1,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "product_images": {
+   "before": 0,
+   "after": 0,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "product_options": {
+   "before": 16,
+   "after": 16,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "product_variants": {
+   "before": 57,
+   "after": 57,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "products": {
+   "before": 26,
+   "after": 26,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "profiles": {
+   "before": 7,
+   "after": 4,
+   "removed": 3,
+   "added": 0,
+   "changed": 0,
+   "ok": false
+  },
+  "rate_limits": {
+   "before": 42,
+   "after": 42,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "store_pages": {
+   "before": 0,
+   "after": 0,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "store_template_settings": {
+   "before": 0,
+   "after": 0,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "store_themes": {
+   "before": 0,
+   "after": 0,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "stores": {
+   "before": 1,
+   "after": 1,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "template_assignments": {
+   "before": 0,
+   "after": 0,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "template_engine_cutover": {
+   "before": 1,
+   "after": 1,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "template_versions": {
+   "before": 0,
+   "after": 0,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "templates": {
+   "before": 0,
+   "after": 0,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "tenants": {
+   "before": 1,
+   "after": 1,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  },
+  "themes": {
+   "before": 0,
+   "after": 0,
+   "removed": 0,
+   "added": 0,
+   "changed": 0,
+   "ok": true
+  }
+ },
+ "authUsers": {
+  "before": 7,
+  "after": 4,
+  "removed": [
+   "e2e-restricted-1794996667472@demo.test",
+   "e2e-restricted-1794995650527@demo.test",
+   "e2e-restricted-1794988215322@demo.test"
+  ],
+  "added": 0,
+  "changed": 0,
+  "ok": true
+ }
+}

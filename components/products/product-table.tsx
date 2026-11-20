@@ -24,14 +24,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROUTES } from "@/config/app";
+import { formatDate } from "@/lib/format-date";
 import { formatMoney } from "@/lib/money";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
 import type { ProductRow } from "@/services/product.service";
 
-type Props = { rows: ProductRow[]; currency: string; canManage: boolean; canDelete: boolean };
-
-const dateFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
+type Props = { rows: ProductRow[]; currency: string; /** The store's timezone, for the "Updated" dates. */ timezone: string; canManage: boolean; canDelete: boolean };
 
 function Thumb({ path, name }: { path: string | null; name: string }) {
   const src = publicImageUrl(path);
@@ -52,7 +51,7 @@ function StockCell({ row }: { row: ProductRow }) {
   return <span className="tabular-nums">{row.stock} in stock{variants}</span>;
 }
 
-export function ProductTable({ rows, currency, canManage, canDelete }: Props) {
+export function ProductTable({ rows, currency, timezone, canManage, canDelete }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirm, setConfirm] = useState<{ ids: string[]; label: string } | null>(null);
@@ -154,7 +153,7 @@ export function ProductTable({ rows, currency, canManage, canDelete }: Props) {
                 <TableCell><StockCell row={r} /></TableCell>
                 <TableCell className="text-right tabular-nums">{r.hasVariants ? "From " : ""}{formatMoney(r.priceMinor, currency)}</TableCell>
                 <TableCell className="hidden text-muted-foreground lg:table-cell">{r.categoryName ?? "—"}</TableCell>
-                <TableCell className="hidden text-muted-foreground xl:table-cell">{dateFmt.format(r.updatedAt)}</TableCell>
+                <TableCell className="hidden text-muted-foreground xl:table-cell">{formatDate(r.updatedAt, timezone)}</TableCell>
                 <TableCell>
                   <RowMenu row={r} canManage={canManage} canDelete={canDelete} onStatus={setStatus} onDuplicate={duplicate} onDelete={() => setConfirm({ ids: [r.id], label: `"${r.name}"` })} />
                 </TableCell>

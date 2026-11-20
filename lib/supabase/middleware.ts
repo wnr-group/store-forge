@@ -24,8 +24,9 @@ const REFRESH_MARGIN_SECONDS = 60;
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
-  let isSignedIn: boolean;
-  ({ response, isSignedIn } = await sessionViaApi(request, response));
+  const session = await sessionViaApi(request, response);
+  response = session.response;
+  const { isSignedIn } = session;
 
   const { pathname, search } = request.nextUrl;
 

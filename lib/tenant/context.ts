@@ -3,7 +3,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ACTIVE_TENANT_COOKIE, ROUTES } from "@/config/app";
-import { can, type Permission, type Role } from "@/lib/auth/permissions";
+import { can, type Permission } from "@/lib/auth/permissions";
 import { isPlatformAdmin } from "@/lib/auth/platform";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { AppError } from "@/lib/errors";

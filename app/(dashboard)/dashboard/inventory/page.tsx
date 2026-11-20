@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Pagination } from "@/components/shared/pagination";
 import { ROUTES } from "@/config/app";
 import { canManageCatalog } from "@/lib/auth/permissions";
+import { formatDateTime } from "@/lib/format-date";
 import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { listAdjustments, listInventory } from "@/services/inventory.service";
 
@@ -19,12 +20,11 @@ const querySchema = z.object({
   page: z.coerce.number().int().min(1).max(10_000).catch(1).default(1),
 });
 
-const when = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
-
 export default async function InventoryPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const raw = await searchParams;
   const query = querySchema.parse(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])));
-  const { active } = await requireWorkspaceCan("catalog:view");
+  const { active, store } = await requireWorkspaceCan("catalog:view");
+  const timezone = store?.timezone ?? "UTC";
   const [result, history] = await Promise.all([listInventory(query), listAdjustments(10)]);
   const filtered = Boolean(query.q) || query.stock !== "all";
 
@@ -76,7 +76,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
                 <span className="text-right tabular-nums">
                   <span className={h.delta > 0 ? "text-success-text" : "text-destructive"}>{h.delta > 0 ? `+${h.delta}` : h.delta}</span>
                   <span className="text-muted-foreground"> → {h.quantityAfter}</span>
-                  <span className="block text-xs text-muted-foreground">{when.format(h.createdAt)}</span>
+                  <span className="block text-xs text-muted-foreground">{formatDateTime(h.createdAt, timezone)}</span>
                 </span>
               </li>
             ))}

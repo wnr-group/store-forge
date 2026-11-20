@@ -9,13 +9,13 @@ import { SectionCard } from "@/components/shared/section-card";
 import { StatusBadge, type Tone } from "@/components/shared/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { canDeleteCustomers, canManageCustomers } from "@/lib/auth/permissions";
+import { formatDate } from "@/lib/format-date";
 import { formatMoney } from "@/lib/money";
 import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { getCustomer } from "@/services/customer.service";
 
 export const metadata: Metadata = { title: "Customer" };
 
-const date = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
 const TONES: Record<string, Tone> = { paid: "active", fulfilled: "active", pending: "warning", cancelled: "draft", refunded: "danger" };
 
 export default async function CustomerPage({ params }: { params: Promise<{ id: string }> }) {
@@ -26,12 +26,13 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
   if (!data) notFound();
   const { customer: c, orders } = data;
   const currency = store?.currency ?? "INR";
+  const timezone = store?.timezone ?? "UTC";
 
   return (
     <>
       <PageHeader
         title={c.fullName}
-        description={`Customer since ${date.format(c.createdAt)}`}
+        description={`Customer since ${formatDate(c.createdAt, timezone)}`}
         actions={<CustomerDetailActions customer={{ id: c.id, fullName: c.fullName, email: c.email, phone: c.phone, notes: c.notes }} canManage={canManageCustomers(active)} canDelete={canDeleteCustomers(active)} />}
       />
       <div className="grid gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
@@ -47,7 +48,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <div><dt className="text-muted-foreground">Orders</dt><dd className="text-lg font-semibold tabular-nums">{c.orderCount}</dd></div>
               <div><dt className="text-muted-foreground">Total spent</dt><dd className="text-lg font-semibold tabular-nums">{formatMoney(c.totalSpentMinor, currency)}</dd></div>
-              <div className="col-span-2"><dt className="text-muted-foreground">Last order</dt><dd>{c.lastOrderAt ? date.format(c.lastOrderAt) : "—"}</dd></div>
+              <div className="col-span-2"><dt className="text-muted-foreground">Last order</dt><dd>{c.lastOrderAt ? formatDate(c.lastOrderAt, timezone) : "—"}</dd></div>
             </dl>
           </SectionCard>
         </div>
@@ -63,7 +64,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                 {orders.map((o) => (
                   <TableRow key={o.id}>
                     <TableCell className="font-mono text-[13px] font-medium tabular-nums">#{o.orderNumber}</TableCell>
-                    <TableCell className="text-muted-foreground">{date.format(o.placedAt)}</TableCell>
+                    <TableCell className="text-muted-foreground">{formatDate(o.placedAt, timezone)}</TableCell>
                     <TableCell><StatusBadge tone={TONES[o.status] ?? "neutral"}><span className="capitalize">{o.status}</span></StatusBadge></TableCell>
                     <TableCell className="text-right tabular-nums">{formatMoney(o.totalMinor, o.currency)}</TableCell>
                   </TableRow>

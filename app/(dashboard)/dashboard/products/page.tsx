@@ -11,6 +11,7 @@ import { ROUTES } from "@/config/app";
 import { canDeleteCatalog, canManageCatalog } from "@/lib/auth/permissions";
 import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { productListQuerySchema } from "@/lib/validations/catalog";
+import { orderCategories } from "@/lib/categories/hierarchy";
 import { listCategories } from "@/services/category.service";
 import { listProducts } from "@/services/product.service";
 
@@ -51,7 +52,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               {
                 key: "category",
                 label: "Category",
-                options: [{ value: "all", label: "All categories" }, { value: "none", label: "Uncategorised" }, ...categories.map((c) => ({ value: c.id, label: c.name }))],
+                options: [{ value: "all", label: "All categories" }, { value: "none", label: "Uncategorised" }, ...orderCategories(categories).map((c) => ({ value: c.id, label: c.label }))],
               },
               {
                 key: "stock",
@@ -78,7 +79,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
             <EmptyState icon={SearchX} title="No products match" description="Try a different search or clear the filters." />
           ) : (
             <>
-              <ProductTable rows={result.items} currency={currency} canManage={canManage} canDelete={canDeleteCatalog(active)} />
+              <ProductTable rows={result.items} currency={currency} timezone={store?.timezone ?? "UTC"} canManage={canManage} canDelete={canDeleteCatalog(active)} />
               <Pagination page={result.page} pageSize={result.pageSize} total={result.total} basePath={ROUTES.products} params={{ q: query.q, status: query.status, category: query.category, stock: query.stock, sort: raw.sort as string | undefined, dir: raw.dir as string | undefined }} />
             </>
           )}

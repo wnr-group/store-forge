@@ -17,7 +17,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <PageHeader title="Analytics" description={`Sales and orders in ${store?.currency ?? "your currency"}, by day in ${store?.timezone ?? "UTC"}.`} actions={<RangeTabs range={range} basePath={ROUTES.analytics} />} />
-      <AnalyticsView data={data} currency={store?.currency ?? "INR"} detailed />
+      <AnalyticsView data={data} currency={store?.currency ?? "INR"} timezone={store?.timezone ?? "UTC"} detailed />
     </>
   );
 }
