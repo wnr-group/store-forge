@@ -49,3 +49,15 @@ export function withAddedProducts<T extends PreviewStoreData>(data: T, added: Ad
   const rows: PreviewProduct[] = fresh.map((a) => ({ name: a.name, slug: a.slug, short_description: a.shortDescription.trim() ? a.shortDescription : null, price_minor: a.priceMinor, compare_at_price_minor: a.compareAtPriceMinor, image_path: a.imagePath }));
   return { ...data, store: { ...data.store, products: [...rows, ...data.store.products] } };
 }
+
+/** What the editor knows about a collection edited from a card: the fields a collection card shows, as they were saved. */
+export type CardCollectionEdit = { id: string; name: string; description: string; imagePath: string | null };
+
+/**
+ * The preview data with collections edited from a card shown as saved, so a card changes the moment the save finishes. Demo
+ * collections are never touched. Returns the same object when nothing applies.
+ */
+export function withCollectionEdits<T extends PreviewStoreData>(data: T, edits: Record<string, CardCollectionEdit>): T {
+  if (Object.keys(edits).length === 0) return data;
+  return { ...data, collections: data.collections.map((c) => (edits[c.id] ? { ...c, name: edits[c.id].name, description: edits[c.id].description.trim() ? edits[c.id].description : null, image_path: edits[c.id].imagePath } : c)) };
+}

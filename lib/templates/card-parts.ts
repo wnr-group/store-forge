@@ -62,3 +62,54 @@ export function readCardParts(settings: Record<string, unknown> | undefined, des
 
 /** Every part on, with the description as the card has always had it. For a card shown outside a section (the legacy markup). */
 export const ALL_CARD_PARTS: CardParts = readCardParts(undefined, true);
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Collection cards (a store's categories on the storefront: "Shop by category", "Collections", room and aisle tiles)
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**
+ * The parts of a collection card a merchant can show or hide. The product count is the section's existing "Show Product Count"
+ * setting; the picture and the name are new toggles. A hidden picture leaves the card's plain tinted panel in its place.
+ */
+export const COLLECTION_CARD_PARTS = [
+  { key: "image", setting: "showImage", label: "Picture", help: "The collection's picture." },
+  { key: "title", setting: "showTitle", label: "Name", help: "The name of the collection." },
+  { key: "count", setting: "showProductCount", label: "Product count", help: "How many products it holds." },
+] as const;
+
+export type CollectionCardPartKey = (typeof COLLECTION_CARD_PARTS)[number]["key"];
+export type CollectionCardParts = Record<CollectionCardPartKey, boolean>;
+
+export const COLLECTION_CARD_SECTION_TYPES: readonly string[] = ["collection-list"];
+
+/** The new toggles only: the product count already has its own setting on the section. */
+export const collectionCardPartSettings: SettingDescriptor[] = COLLECTION_CARD_PARTS.filter((p) => p.key !== "count").map((p) => ({
+  id: p.setting,
+  type: "toggle",
+  label: p.label,
+  help: p.help,
+  group: CARD_SETTING_GROUP,
+  default: true,
+}));
+
+/** Whether a collection card shows its product count when the merchant has not chosen: what each look always did. */
+export const countOnByDefault = (look: string | undefined): boolean => look !== "market" && look !== "sport";
+
+/** What a section's settings say about each part of its collection cards; `countDefault` is what the look does without a choice. */
+export function readCollectionCardParts(settings: Record<string, unknown> | undefined, countDefault = true): CollectionCardParts {
+  const out = {} as CollectionCardParts;
+  for (const p of COLLECTION_CARD_PARTS) {
+    const v = settings?.[p.setting];
+    out[p.key] = typeof v === "boolean" ? v : p.key === "count" ? countDefault : true;
+  }
+  return out;
+}
+
+/** What kind of card a section draws, if it draws cards the editor can pick. */
+export type CardKind = "product" | "collection";
+export function cardKindOf(sectionType: string | undefined): CardKind | null {
+  if (!sectionType) return null;
+  if (CARD_SECTION_TYPES.includes(sectionType)) return "product";
+  if (COLLECTION_CARD_SECTION_TYPES.includes(sectionType)) return "collection";
+  return null;
+}

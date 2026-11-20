@@ -8,7 +8,7 @@ import { useId, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
-import { hasProductCards } from "@/lib/templates/card-parts";
+import { cardKindOf } from "@/lib/templates/card-parts";
 import { LIMITS } from "@/lib/templates/limits";
 import { getRegistry } from "@/lib/templates/registry/index";
 import { sectionTypesFor } from "@/lib/themes/editor/catalog";
@@ -113,7 +113,8 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
   const def = node ? registry.sections[node.type] : undefined;
   const name = def?.name ?? node?.type ?? id;
   const blocks = node?.block_order ?? [];
-  const hasCards = hasProductCards(node?.type);
+  const cardKind = cardKindOf(node?.type);
+  const hasCards = cardKind !== null;
   const expanded = selected || open;
   const hidden = Boolean(node?.disabled);
   const acceptable = useMemo(() => (def?.accepts ?? []).filter((t) => registry.blocks[t]), [def]);
@@ -153,7 +154,7 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
       </div>
       {expanded && (blocks.length > 0 || acceptable.length > 0 || hasCards) ? (
         <div className="mb-1 ml-5 border-l pr-1 pb-1 pl-1.5">
-          {hasCards ? <CardElements className="mb-1.5" settings={node.settings} context={cardContext} disabled={disabled} onChange={(key, value) => actions.setSetting(docId, id, key, value)} /> : null}
+          {cardKind ? <CardElements kind={cardKind} className="mb-1.5" settings={node.settings} context={cardContext} disabled={disabled} onChange={(key, value) => actions.setSetting(docId, id, key, value)} /> : null}
           <ul className="space-y-0.5">
             {blocks.map((blockId, index) => {
               const block = node.blocks[blockId];

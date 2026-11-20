@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
+import { readCollectionCardParts } from "@/lib/templates/card-parts";
 import { ImagePlaceholder } from "../../ui";
 import type { SectionProps } from "..";
 import { PANEL, PanelHeader, TILE_COLOURS, WRAP } from "./ui";
@@ -19,7 +20,8 @@ export function MarketCollectionList({ node, context, sectionId }: SectionProps)
   const eyebrow = (node.settings?.eyebrow as string) ?? "";
   const columns = (node.settings?.columns as number) ?? 6;
   const showViewAll = Boolean(node.settings?.showViewAll ?? true);
-  const showCount = Boolean(node.settings?.showProductCount ?? false);
+  const parts = readCollectionCardParts(node.settings, false);
+  const showCount = parts.count;
   const tiles = node.settings?.layout !== "grid" && node.settings?.layout !== "editorial";
   const all = context.collections ?? [];
   const collections = tiles ? all : all.slice(0, 16);
@@ -44,11 +46,11 @@ export function MarketCollectionList({ node, context, sectionId }: SectionProps)
             const img = publicImageUrl(col.image_path);
             return (
               <li key={col.slug || col.id} className="min-w-0">
-                <Link href={`/collections/${col.slug}`} className="group flex h-full flex-col items-center gap-2 rounded-lg border border-border/80 bg-white p-2.5 shadow-sm transition-all hover:border-secondary/50 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary">
+                <Link href={`/collections/${col.slug}`} data-sf-card="" data-sf-collection={col.id} className="group flex h-full flex-col items-center gap-2 rounded-lg border border-border/80 bg-white p-2.5 shadow-sm transition-all hover:border-secondary/50 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary">
                   <span className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-lg text-[15px] font-bold text-white" style={{ background: TILE_COLOURS[i % TILE_COLOURS.length] }}>
-                    {img ? <Image src={img} alt="" fill sizes="44px" className="object-cover" /> : col.name.slice(0, 1).toUpperCase()}
+                    {img && parts.image ? <Image src={img} alt="" fill sizes="44px" className="object-cover" /> : col.name.slice(0, 1).toUpperCase()}
                   </span>
-                  <span className="line-clamp-2 text-center text-[11px] font-medium leading-tight text-primary group-hover:text-secondary">{col.name}</span>
+                  {parts.title ? <span className="line-clamp-2 text-center text-[11px] font-medium leading-tight text-primary group-hover:text-secondary">{col.name}</span> : null}
                 </Link>
               </li>
             );
@@ -68,11 +70,11 @@ export function MarketCollectionList({ node, context, sectionId }: SectionProps)
             const count = showCount && typeof col.product_count === "number" ? `${col.product_count} ${col.product_count === 1 ? "item" : "items"}` : null;
             return (
               <li key={col.slug || col.id} className="min-w-0">
-                <Link href={`/collections/${col.slug}`} className="group block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary">
+                <Link href={`/collections/${col.slug}`} data-sf-card="" data-sf-collection={col.id} className="group block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary">
                   <span className="relative block aspect-square overflow-hidden rounded-md border border-border bg-white transition-colors group-hover:border-secondary">
-                    {img ? <Image src={img} alt="" fill sizes="(min-width: 1024px) 16vw, 45vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
+                    {img && parts.image ? <Image src={img} alt="" fill sizes="(min-width: 1024px) 16vw, 45vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
                   </span>
-                  <span className="mt-1.5 block text-[13px] font-semibold text-primary group-hover:text-secondary">{col.name}</span>
+                  {parts.title ? <span className="mt-1.5 block text-[13px] font-semibold text-primary group-hover:text-secondary">{col.name}</span> : null}
                   {count ? <span className="block text-xs text-muted-foreground">{count}</span> : null}
                 </Link>
               </li>

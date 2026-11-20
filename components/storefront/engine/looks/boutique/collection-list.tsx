@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
+import { readCollectionCardParts } from "@/lib/templates/card-parts";
 import { ImagePlaceholder, SECTION_Y } from "../../ui";
 import { SHELL } from "./shell";
 import type { SectionProps } from "..";
@@ -20,7 +21,8 @@ export function BoutiqueCollectionList({ node, context, sectionId }: SectionProp
   const title = (node.settings?.title as string) ?? "Collections";
   const eyebrow = (node.settings?.eyebrow as string) ?? "";
   const columns = Math.min(6, Math.max(2, (node.settings?.columns as number) ?? 6));
-  const showCount = Boolean(node.settings?.showProductCount ?? true);
+  const parts = readCollectionCardParts(node.settings, true);
+  const showCount = parts.count;
   const collections = context.collections ?? [];
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
@@ -40,18 +42,20 @@ export function BoutiqueCollectionList({ node, context, sectionId }: SectionProp
             const img = publicImageUrl(col.image_path);
             return (
               <li key={col.slug || col.id} className="min-w-0">
-                <Link href={`/collections/${col.slug}`} className="group block outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+                <Link href={`/collections/${col.slug}`} data-sf-card="" data-sf-collection={col.id} className="group block outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-[1.375rem] bg-muted">
-                    {img ? (
+                    {img && parts.image ? (
                       <Image src={img} alt="" fill priority={i < 3} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" className="object-cover transition-transform duration-500 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.05] motion-reduce:transition-none" />
                     ) : (
                       <ImagePlaceholder className="absolute inset-0" />
                     )}
                   </div>
                   <div className="mt-3 px-1">
-                    <h3 className="text-lg leading-tight tracking-[-0.01em] text-foreground" style={{ fontFamily: "var(--sf-font-heading)", fontWeight: "var(--sf-font-heading-weight, 500)" }}>
-                      {col.name}
-                    </h3>
+                    {parts.title ? (
+                      <h3 className="text-lg leading-tight tracking-[-0.01em] text-foreground" style={{ fontFamily: "var(--sf-font-heading)", fontWeight: "var(--sf-font-heading-weight, 500)" }}>
+                        {col.name}
+                      </h3>
+                    ) : null}
                     {showCount && typeof col.product_count === "number" ? (
                       <p className="mt-0.5 text-[12px] text-muted-foreground">
                         {col.product_count} {col.product_count === 1 ? "piece" : "pieces"}

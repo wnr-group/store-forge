@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
+import { readCollectionCardParts } from "@/lib/templates/card-parts";
 import { ImagePlaceholder } from "../../ui";
 import type { SectionProps } from "..";
 import { rise, tintStyle } from "./reveal";
@@ -28,7 +29,8 @@ export function SportCollectionList({ node, context, sectionId }: SectionProps) 
   const eyebrow = (node.settings?.eyebrow as string) ?? "";
   const columns = (node.settings?.columns as number) ?? 4;
   const showViewAll = Boolean(node.settings?.showViewAll ?? true);
-  const showCount = Boolean(node.settings?.showProductCount ?? false);
+  const parts = readCollectionCardParts(node.settings, false);
+  const showCount = parts.count;
   const layout = node.settings?.layout === "grid" ? "overlay" : node.settings?.layout === "editorial" ? "editorial" : "compact";
   const all = context.collections ?? [];
   // The big-card and editorial layouts are a short, featured selection: as many cards as columns. Compact shows every collection.
@@ -63,13 +65,15 @@ export function SportCollectionList({ node, context, sectionId }: SectionProps) 
               if (layout === "overlay") {
                 return (
                   <li key={col.slug || col.id} className="min-w-0" {...rise(i)}>
-                    <Link href={href} className={cn(link, "sf-tint block rounded-[1.75rem] p-2")} style={tintStyle(i + 2)}>
+                    <Link href={href} data-sf-card="" data-sf-collection={col.id} className={cn(link, "sf-tint block rounded-[1.75rem] p-2")} style={tintStyle(i + 2)}>
                       <div className="relative aspect-[3/4] overflow-hidden rounded-[1.25rem] bg-[var(--surface)]">
-                        {img ? <Image src={img} alt="" fill priority={i < 4} sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
+                        {img && parts.image ? <Image src={img} alt="" fill priority={i < 4} sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
                         <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/65 to-transparent" />
-                        <p className="absolute inset-x-6 bottom-6 text-balance text-[1.5rem] font-extrabold uppercase italic leading-none tracking-[-0.02em] text-white sm:text-[1.875rem]" style={HEADLINE_FONT}>
-                          {col.name}
-                        </p>
+                        {parts.title ? (
+                          <p className="absolute inset-x-6 bottom-6 text-balance text-[1.5rem] font-extrabold uppercase italic leading-none tracking-[-0.02em] text-white sm:text-[1.875rem]" style={HEADLINE_FONT}>
+                            {col.name}
+                          </p>
+                        ) : null}
                       </div>
                       <p className="mt-3.5 inline-flex items-center gap-2 px-1 text-[15px] font-medium text-primary">
                         Shop now <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" strokeWidth={2} aria-hidden />
@@ -81,13 +85,13 @@ export function SportCollectionList({ node, context, sectionId }: SectionProps) 
               if (layout === "editorial") {
                 return (
                   <li key={col.slug || col.id} className={cn("min-w-0", i % 2 === 1 && "lg:mt-10")} {...rise(i)}>
-                    <Link href={href} className={link}>
+                    <Link href={href} data-sf-card="" data-sf-collection={col.id} className={link}>
                       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-                        {img ? <Image src={img} alt="" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
+                        {img && parts.image ? <Image src={img} alt="" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
                       </div>
                       <div className="flex items-center justify-between gap-3 border-t-2 border-primary pt-3.5">
                         <p className="text-[15px] font-bold uppercase tracking-[0.02em] text-primary">
-                          {col.name}
+                          {parts.title ? col.name : null}
                           {count ? <span className="ml-2 font-medium normal-case tracking-normal text-muted-foreground">{count}</span> : null}
                         </p>
                         <ArrowRight className="size-5 shrink-0 text-primary transition-transform duration-200 group-hover:translate-x-1" strokeWidth={1.5} aria-hidden />
@@ -98,12 +102,12 @@ export function SportCollectionList({ node, context, sectionId }: SectionProps) 
               }
               return (
                 <li key={col.slug || col.id} className="min-w-0" {...rise(i)}>
-                  <Link href={href} className={cn(link, "sf-tint block rounded-[1.75rem] p-2")} style={tintStyle(i)}>
+                  <Link href={href} data-sf-card="" data-sf-collection={col.id} className={cn(link, "sf-tint block rounded-[1.75rem] p-2")} style={tintStyle(i)}>
                     <div className="relative aspect-[4/5] overflow-hidden rounded-[1.25rem] bg-[var(--surface)]">
-                      {img ? <Image src={img} alt="" fill priority={i < 6} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
+                      {img && parts.image ? <Image src={img} alt="" fill priority={i < 6} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" />}
                     </div>
                     <p className="mt-3.5 flex items-center justify-between gap-2 px-1.5 text-[17px] font-semibold text-primary">
-                      <span className="truncate">{col.name}</span>
+                      {parts.title ? <span className="truncate">{col.name}</span> : <span />}
                       <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" strokeWidth={1.75} aria-hidden />
                     </p>
                     {count ? <p className="px-1.5 text-[13px] text-muted-foreground">{count}</p> : null}

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ThemeEditorAdapter } from "@/lib/editor/adapter";
 import { readStyle, type PartStyleKey, type StyleDevice, type StyleKey } from "@/lib/editor/style";
-import { CARD_SETTING_GROUP, hasProductCards } from "@/lib/templates/card-parts";
+import { CARD_SETTING_GROUP, cardKindOf } from "@/lib/templates/card-parts";
 import { isSettingVisible } from "@/lib/templates/engine/descriptor-check";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { SettingDescriptor } from "@/lib/templates/engine/descriptors";
@@ -191,8 +191,8 @@ function ElementEditor({ docId, sectionId, blockId, section, node, disabled, pro
       {tab === "content" ? (
         <div ref={content} role="tabpanel" aria-label="Content" className="space-y-4">
           <TextOnPage section={section} clicked={clickedText} disabled={disabled} onChange={(from, to) => onText(docId, sectionId, from, to)} onStyle={(from, key, value) => onTextStyle(docId, sectionId, from, key, value)} />
-          {!blockId && hasProductCards(node.type) ? (
-            <CardElements settings={node.settings} context={cardContext} disabled={disabled} onChange={(key, value) => onSetting(docId, sectionId, undefined, key, value)} />
+          {!blockId && cardKindOf(node.type) ? (
+            <CardElements kind={cardKindOf(node.type)!} settings={node.settings} context={cardContext} disabled={disabled} onChange={(key, value) => onSetting(docId, sectionId, undefined, key, value)} />
           ) : null}
           {def && def.settings.length > 0 ? (
             <div className="space-y-4">

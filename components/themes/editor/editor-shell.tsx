@@ -16,8 +16,8 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { ROUTES } from "@/config/app";
 import { adapterForLook, lookOf } from "@/lib/editor/adapters";
 import { formatMoney } from "@/lib/money";
-import { withAddedProducts, withProductEdits, type AddedProduct, type CardProductEdit } from "@/lib/themes/editor/product-edits";
-import { CARD_PARTS, availableCardParts, descriptionOnByDefault, hasProductCards, readCardParts, type CardPartKey } from "@/lib/templates/card-parts";
+import { withAddedProducts, withCollectionEdits, withProductEdits, type AddedProduct, type CardCollectionEdit, type CardProductEdit } from "@/lib/themes/editor/product-edits";
+import { CARD_PARTS, COLLECTION_CARD_PARTS, availableCardParts, cardKindOf, countOnByDefault, descriptionOnByDefault, readCardParts, readCollectionCardParts, type CardPartKey } from "@/lib/templates/card-parts";
 import { isHomeTheme } from "@/lib/templates/engine/theme-style";
 import { applyInlineEdit, locateInlineEdit } from "@/lib/editor/inline";
 import { findSettingForClick } from "@/lib/editor/locate";
@@ -55,6 +55,7 @@ import { CollectionChoicesContext } from "./setting-field";
 import { SettingsPanel } from "./settings-panel";
 import { usePreviewTarget, type TargetKind } from "./use-preview-target";
 import { PREVIEW_OPEN_EVENT } from "@/components/storefront/cart/use-quick-add";
+import { CollectionQuickEdit, type CardCollectionRef, type CollectionEditField } from "./collection-quick-edit";
 import { ProductQuickEdit, type CardProductRef, type QuickEditField } from "./product-quick-edit";
 import { QuickCreate, type CreateKind } from "./quick-create";
 import { VersionsSheet } from "./versions-sheet";
@@ -74,6 +75,7 @@ function findNode(node: ComponentNode, id: string): ComponentNode | undefined {
 }
 const AUTOSAVE_MS = 1500;
 /** The field of the product a card element edits; the badge and the quick add buttons are only shown or hidden. */
+const COLLECTION_EDIT_FIELD: Partial<Record<"image" | "title" | "count", CollectionEditField>> = { image: "image", title: "name" };
 const EDIT_FIELD: Partial<Record<CardPartKey, QuickEditField>> = { image: "image", title: "name", description: "shortDescription", price: "price", comparePrice: "price" };
 
 export type EditorInit = {
@@ -126,10 +128,13 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const [focusSetting, setFocusSetting] = useState<{ key: string; nonce: number } | null>(null);
   const [clickedText, setClickedText] = useState<{ text: string; nonce: number } | null>(null);
   // The product card picked on the page (its section and its position among that section's cards). Not part of the saved design.
-  const [pickedCard, setPickedCard] = useState<{ sectionId: string; index: number; product?: string } | null>(null);
+  const [pickedCard, setPickedCard] = useState<{ sectionId: string; index: number; product?: string; collection?: string } | null>(null);
   // The product being edited from its card (a dialog), and products already saved from a card, shown at once in the preview.
   const [editingProduct, setEditingProduct] = useState<{ product: CardProductRef; field: QuickEditField } | null>(null);
   const [productEdits, setProductEdits] = useState<Record<string, CardProductEdit>>({});
+  // The same for a collection card: the collection being edited (a dialog) and collections already saved from a card.
+  const [editingCollection, setEditingCollection] = useState<{ collection: CardCollectionRef; field: CollectionEditField } | null>(null);
+  const [collectionEdits, setCollectionEdits] = useState<Record<string, CardCollectionEdit>>({});
   // Adding a product, a category or a collection from the editor (a dialog), and products added so far, listed at once in the preview.
   const [creating, setCreating] = useState<CreateKind | null>(null);
   const [addedProducts, setAddedProducts] = useState<AddedProduct[]>([]);
@@ -137,8 +142,8 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const [previewMode, setPreviewMode] = useState<PreviewMode>("store");
   const preview = useMemo(() => {
     const data = previewData(init.data, previewMode);
-    return previewMode === "store" ? withAddedProducts(withProductEdits(data, productEdits), addedProducts) : data;
-  }, [init.data, previewMode, productEdits, addedProducts]);
+    return previewMode === "store" ? withCollectionEdits(withAddedProducts(withProductEdits(data, productEdits), addedProducts), collectionEdits) : data;
+  }, [init.data, previewMode, productEdits, addedProducts, collectionEdits]);
   // Browsing inside the editor: which product, collection or content page is shown, links that open pages, and a way back.
   const target = usePreviewTarget(preview);
   // Inspector on: clicking selects and edits. Off: the preview works like the live store (links open pages, buttons work).
@@ -431,7 +436,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
       const known = (s.docs[docId].document as { sections: Record<string, ComponentNode> }).sections[target.sectionId];
       const blockId = target.blockId && known && findNode(known, target.blockId) ? target.blockId : undefined;
       edit((prev) => select(prev, { docId, sectionId: target.sectionId, blockId }));
-      setPickedCard(target.card !== undefined && !blockId && hasProductCards(known?.type) ? { sectionId: target.sectionId, index: target.card, product: target.product } : null);
+      setPickedCard(target.card !== undefined && !blockId && cardKindOf(known?.type) ? { sectionId: target.sectionId, index: target.card, product: target.product, collection: target.collection } : null);
       setLeftTab("sections");
       setMobileTab("settings");
       // Clicked text or a picture: jump to the setting that holds it (the block first, then its section).
@@ -442,7 +447,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
       const key = findSettingForClick([{ descriptors, settings: element.settings }], target);
       setFocusSetting(key ? { key, nonce: Date.now() } : null);
       // A product card's name and price come from the product, not from a setting: nothing to replace here.
-      if (target.card !== undefined && hasProductCards(known?.type)) return void setClickedText(null);
+      if (target.card !== undefined && cardKindOf(known?.type)) return void setClickedText(null);
       // Text no setting holds (the theme writes it into its own components): offer it for replacement in the panel.
       const shown = target.text ? originalOf(readTextOverrides(section.settings), target.text) : "";
       setClickedText(!key && target.text ? { text: shown, nonce: Date.now() } : null);
@@ -912,12 +917,16 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const pickedProduct = pickedCard?.product
     ? ([...preview.store.products, ...Object.values(preview.collectionProducts ?? {}).flat()].find((p) => p.slug === pickedCard.product) ?? null)
     : null;
+  const pickedCollection = pickedCard?.collection ? (preview.collections.find((c) => c.id === pickedCard.collection) ?? null) : null;
+  const cardKind = pickedSection ? cardKindOf(pickedSection.type) : null;
   const cardTools: CardTools | null =
-    pickedCard && pickedSection && hasProductCards(pickedSection.type)
+    pickedCard && pickedSection && cardKind === "product"
       ? {
           sectionId: pickedCard.sectionId,
           index: pickedCard.index,
           disabled: !canEdit,
+          title: "Product card",
+          menuTitle: "Edit product",
           items: availableCardParts(cardContext.look).map((key) => {
             const part = CARD_PARTS.find((p) => p.key === key)!;
             const shown = pickedProduct;
@@ -932,8 +941,32 @@ export function EditorShell({ init }: { init: EditorInit }) {
             const edit = pickedProduct && previewMode === "store" ? EDIT_FIELD[key] : undefined;
             return { key: part.setting, label: part.label, help: part.help, on: readCardParts(pickedSection.settings, cardContext.descriptionDefault)[key], value, edit };
           }),
-          onAddProduct: previewMode === "store" && init.canManage ? () => setCreating("product") : undefined,
+          addLabel: "Add a new product",
+          onAdd: previewMode === "store" && init.canManage ? () => setCreating("product") : undefined,
           onEdit: (field) => pickedProduct && setEditingProduct({ product: { slug: pickedProduct.slug, name: pickedProduct.name }, field: field as QuickEditField }),
+          onToggle: (setting, on) => actions.setSetting(state.pageId, pickedCard.sectionId, setting, on),
+        }
+      : pickedCard && pickedSection && cardKind === "collection"
+      ? {
+          sectionId: pickedCard.sectionId,
+          index: pickedCard.index,
+          disabled: !canEdit,
+          title: "Collection card",
+          menuTitle: "Edit collection",
+          items: COLLECTION_CARD_PARTS.map((part) => {
+            const shown = pickedCollection;
+            const value =
+              part.key === "title" ? shown?.name
+              : part.key === "image" ? (shown?.image_path ? "Change the picture" : "Add a picture")
+              : part.key === "count" ? (typeof shown?.product_count === "number" ? `${shown.product_count} ${shown.product_count === 1 ? "product" : "products"}` : undefined)
+              : undefined;
+            // Only a real collection can be edited; demo collections are samples. The count is only shown or hidden.
+            const edit = pickedCollection && previewMode === "store" ? COLLECTION_EDIT_FIELD[part.key] : undefined;
+            return { key: part.setting, label: part.label, help: part.help, on: readCollectionCardParts(pickedSection.settings, countOnByDefault(cardContext.look))[part.key], value, edit };
+          }),
+          addLabel: "Add a new collection",
+          onAdd: previewMode === "store" && init.canManage ? () => setCreating("collection") : undefined,
+          onEdit: (field) => pickedCollection && setEditingCollection({ collection: { id: pickedCollection.id, name: pickedCollection.name }, field: field as CollectionEditField }),
           onToggle: (setting, on) => actions.setSetting(state.pageId, pickedCard.sectionId, setting, on),
         }
       : null;
@@ -1240,6 +1273,17 @@ export function EditorShell({ init }: { init: EditorInit }) {
             const p = created.product;
             setAddedProducts((prev) => [{ slug: p.slug, name: p.name, shortDescription: p.shortDescription, priceMinor: p.priceMinor, compareAtPriceMinor: p.compareAtPriceMinor, imagePath: p.imagePath }, ...prev.filter((x) => x.slug !== p.slug)]);
           }
+          router.refresh();
+        }}
+      />
+
+      <CollectionQuickEdit
+        target={editingCollection?.collection ?? null}
+        field={editingCollection?.field ?? "name"}
+        canEdit={init.canManage}
+        onClose={() => setEditingCollection(null)}
+        onSaved={(saved) => {
+          setCollectionEdits((prev) => ({ ...prev, [saved.id]: { id: saved.id, name: saved.name, description: saved.description, imagePath: saved.imagePath } }));
           router.refresh();
         }}
       />

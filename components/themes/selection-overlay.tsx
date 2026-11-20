@@ -17,8 +17,12 @@ export type CardTools = {
   onToggle: (key: string, on: boolean) => void;
   /** Opens the product's own details (name, price, picture ...) with this field first. */
   onEdit: (field: string) => void;
-  /** Adds a new product to the store; left out where adding is not possible (demo products, no access). */
-  onAddProduct?: () => void;
+  /** What the card is called ("Product card", "Collection card") and what the menu heads ("Edit product" ...). */
+  title: string;
+  menuTitle: string;
+  /** Adds a new one to the store ("Add a new product"); left out where adding is not possible (demo, no access). */
+  addLabel?: string;
+  onAdd?: () => void;
 };
 
 const BLUE = "#2563eb";
@@ -193,12 +197,12 @@ function CardToolbar({ box, layerWidth, tools, frame }: { box: Box; layerWidth: 
       <div style={{ position: "absolute", top: box.top, left: box.left, width: box.width, height: box.height, boxSizing: "border-box", border: `2px solid ${BLUE}`, boxShadow: "0 0 0 1px rgba(255,255,255,.7)" }} />
       <div ref={wrap} style={{ pointerEvents: "auto", font: `500 12px/1 ${font}` }}>
         <div style={{ position: "absolute", top: barTop, left: centre, transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 4, padding: "3px 3px 3px 10px", background: BLUE, color: "#fff", borderRadius: 999, boxShadow: "0 4px 14px rgba(37,99,235,.35)", whiteSpace: "nowrap" }}>
-          <span style={{ font: `600 11px/20px ${font}` }}>Product card</span>
+          <span style={{ font: `600 11px/20px ${font}` }}>{tools.title}</span>
           <button
             type="button"
-            aria-label="Edit this product and choose what its card shows"
+            aria-label={`Edit this and choose what the ${tools.title.toLowerCase()} shows`}
             aria-expanded={open}
-            title="Edit this product and choose what its card shows"
+            title={`Edit this and choose what the ${tools.title.toLowerCase()} shows`}
             onClick={() => setOpen((v) => !v)}
             style={{ display: "grid", placeItems: "center", width: 24, height: 24, border: 0, borderRadius: 999, background: "#fff", color: BLUE, font: `700 17px/1 ${font}`, cursor: "pointer", paddingBottom: 1 }}
           >
@@ -206,8 +210,8 @@ function CardToolbar({ box, layerWidth, tools, frame }: { box: Box; layerWidth: 
           </button>
         </div>
         {open ? (
-          <div role="menu" aria-label="Product card elements" style={{ position: "absolute", top: barTop + 34, left: menuLeft, width: MENU_W, padding: 6, background: "#fff", color: "#111827", border: "1px solid rgba(17,24,39,.12)", borderRadius: 12, boxShadow: "0 14px 40px rgba(17,24,39,.22)" }}>
-            <div style={{ padding: "6px 8px 6px", font: `600 10px/1 ${font}`, letterSpacing: ".08em", textTransform: "uppercase", color: "#6b7280" }}>Edit product</div>
+          <div role="menu" aria-label={`${tools.title} elements`} style={{ position: "absolute", top: barTop + 34, left: menuLeft, width: MENU_W, padding: 6, background: "#fff", color: "#111827", border: "1px solid rgba(17,24,39,.12)", borderRadius: 12, boxShadow: "0 14px 40px rgba(17,24,39,.22)" }}>
+            <div style={{ padding: "6px 8px 6px", font: `600 10px/1 ${font}`, letterSpacing: ".08em", textTransform: "uppercase", color: "#6b7280" }}>{tools.menuTitle}</div>
             {tools.items.map((item) => {
               const row = { display: "flex", alignItems: "center", gap: 2, borderRadius: 8 } as const;
               const main = { display: "block", minWidth: 0, flex: 1, padding: "8px", border: 0, borderRadius: 8, background: "transparent", textAlign: "left", cursor: "pointer", font: `400 13px/1.25 ${font}`, color: "inherit" } as const;
@@ -248,16 +252,16 @@ function CardToolbar({ box, layerWidth, tools, frame }: { box: Box; layerWidth: 
                 </div>
               );
             })}
-            {tools.onAddProduct ? (
+            {tools.onAdd ? (
               <button
                 type="button"
                 onClick={() => {
                   setOpen(false);
-                  tools.onAddProduct?.();
+                  tools.onAdd?.();
                 }}
                 style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "center", gap: 6, margin: "6px 0 2px", padding: "9px 8px", border: `1px dashed ${BLUE}`, borderRadius: 8, background: "rgba(37,99,235,.05)", color: BLUE, cursor: "pointer", font: `600 12.5px/1 ${font}` }}
               >
-                <span aria-hidden style={{ font: "700 16px/1 system-ui" }}>+</span> Add a new product
+                <span aria-hidden style={{ font: "700 16px/1 system-ui" }}>+</span> {tools.addLabel}
               </button>
             ) : null}
           </div>

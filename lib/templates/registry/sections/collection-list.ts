@@ -1,4 +1,5 @@
 import type { SectionDefinition } from "../../engine/descriptors";
+import { collectionCardPartSettings } from "../../card-parts";
 
 export const collectionListSection: SectionDefinition = {
   type: "collection-list",
@@ -50,5 +51,6 @@ export const collectionListSection: SectionDefinition = {
       label: "Show Product Count",
       default: true,
     },
+    ...collectionCardPartSettings,
   ],
 };

@@ -14,7 +14,7 @@ export type Device = "desktop" | "tablet" | "mobile";
 export const DEVICE_WIDTH: Record<Device, number> = { desktop: 1280, tablet: 820, mobile: 390 };
 
 /** `texts`: the text of the clicked element and of its text-bearing ancestors, innermost first. */
-export type ClickTarget = { sectionId: string; blockId?: string; texts?: string[]; image?: string; /** The exact piece of text under the pointer. */ text?: string; /** The product card under the pointer: its position among the cards of the section. */ card?: number; /** The address (slug) of that card's product. */ product?: string };
+export type ClickTarget = { sectionId: string; blockId?: string; texts?: string[]; image?: string; /** The exact piece of text under the pointer. */ text?: string; /** The product card under the pointer: its position among the cards of the section. */ card?: number; /** The address (slug) of that card's product. */ product?: string; /** The id of that card's collection. */ collection?: string };
 
 /** The text node under the pointer (one word group, as the page draws it), or undefined when the click is not on text. */
 function textUnderPointer(event: React.MouseEvent, target: HTMLElement): string | undefined {
@@ -215,7 +215,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
     }
     const card = block ? null : target.closest<HTMLElement>("[data-sf-card]");
     const cardIndex = card && section.contains(card) ? Array.from(section.querySelectorAll("[data-sf-card]")).indexOf(card) : -1;
-    onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock, texts, image: imageSource(target.closest("img")), text: textUnderPointer(event, target), card: cardIndex >= 0 ? cardIndex : undefined, product: cardIndex >= 0 ? card?.dataset.sfProduct : undefined });
+    onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock, texts, image: imageSource(target.closest("img")), text: textUnderPointer(event, target), card: cardIndex >= 0 ? cardIndex : undefined, product: cardIndex >= 0 ? card?.dataset.sfProduct : undefined, collection: cardIndex >= 0 ? card?.dataset.sfCollection : undefined });
   };
 
   /** Double-click on text: edit it right there. Enter keeps it, Escape puts the old words back. */

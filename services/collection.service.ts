@@ -68,3 +68,31 @@ export async function deleteCollection(id: string): Promise<void> {
 }
 
 export type { CollectionInput };
+
+/** What the editor's card dialog edits for a collection: the few fields a collection card shows. */
+export type CollectionQuickEdit = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  imagePath: string | null;
+  productCount: number;
+};
+
+const toQuickEdit = (c: CollectionApi): CollectionQuickEdit => ({ id: c.id, slug: c.slug, name: c.name, description: c.description ?? "", imagePath: c.imagePath, productCount: c.productCount });
+
+/** Reads a collection for the editor's "edit collection" dialog. */
+export async function getCollectionForQuickEdit(id: string): Promise<CollectionQuickEdit> {
+  const { tenant } = await requireActiveTenant();
+  return toQuickEdit(await getCollectionApi(tenant.id, id));
+}
+
+/**
+ * The whole collection as the update expects it, with the card's fields changed: the update replaces the collection, so its status,
+ * address and products are sent back as they are. Not validated here: the caller runs it through the collection schema first.
+ */
+export async function buildCollectionQuickEditValues(patch: { id: string; name: string; description: string; imagePath: string | null }): Promise<Record<string, unknown>> {
+  const { tenant } = await requireActiveTenant("catalog:manage");
+  const d = await getCollectionApi(tenant.id, patch.id);
+  return { name: patch.name, slug: d.slug, description: patch.description, status: d.status, imagePath: patch.imagePath ?? d.imagePath, productIds: d.productIds };
+}
