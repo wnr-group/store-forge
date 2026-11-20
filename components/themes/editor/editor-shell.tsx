@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, FolderTree, Globe, History as HistoryIcon, Layers, LayoutGrid, Loader2, Monitor, Package, Palette, Plus, Redo2, Rocket, Smartphone, SlidersHorizontal, SquareDashedMousePointer, Tablet, Undo2, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowLeftToLine, ChevronRight, CircleAlert, Eye, FolderTree, Globe, History as HistoryIcon, Layers, LayoutGrid, Loader2, Monitor, Package, Palette, Plus, Redo2, Rocket, Smartphone, SlidersHorizontal, SquareDashedMousePointer, Tablet, Undo2, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getPresentationAction, getTemplateAction, loadProductPreviewAction, saveDraftAction, savePresentationDraftAction } from "@/app/(dashboard)/dashboard/templates/actions";
@@ -16,6 +16,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { ROUTES } from "@/config/app";
 import { adapterForLook, lookOf } from "@/lib/editor/adapters";
 import { formatMoney } from "@/lib/money";
+import { deploymentFromResult, deploymentFromTemplates, timeAgo, type Deployment } from "@/lib/themes/editor/deployment";
 import { withAddedProducts, withCollectionEdits, withProductEdits, type AddedProduct, type CardCollectionEdit, type CardProductEdit } from "@/lib/themes/editor/product-edits";
 import { CARD_PARTS, COLLECTION_CARD_PARTS, availableCardParts, cardKindOf, countOnByDefault, descriptionOnByDefault, readCardParts, readCollectionCardParts, type CardPartKey } from "@/lib/templates/card-parts";
 import { isHomeTheme } from "@/lib/templates/engine/theme-style";
@@ -57,6 +58,7 @@ import { usePreviewTarget, type TargetKind } from "./use-preview-target";
 import { PREVIEW_OPEN_EVENT } from "@/components/storefront/cart/use-quick-add";
 import { CollectionQuickEdit, type CardCollectionRef, type CollectionEditField } from "./collection-quick-edit";
 import { ProductQuickEdit, type CardProductRef, type QuickEditField } from "./product-quick-edit";
+import { DeploymentDialog } from "./deployment-dialog";
 import { QuickCreate, type CreateKind } from "./quick-create";
 import { VersionsSheet } from "./versions-sheet";
 import { PreviewModeNote, PreviewModeSwitch } from "../preview-mode-switch";
@@ -84,6 +86,8 @@ export type EditorInit = {
   storeSlug: string;
   /** The store's public address for display, e.g. "urban-nest-zqkod2.store-forge.com". */
   storeHost: string;
+  /** The address that opens the live store (https://...), or null where no root domain is configured. */
+  storeUrl: string | null;
   themeName: string | null;
   pages: Pick<TemplateSummary, "id" | "kind" | "name">[];
   pageId: string;
@@ -137,6 +141,9 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const [collectionEdits, setCollectionEdits] = useState<Record<string, CardCollectionEdit>>({});
   // Adding a product, a category or a collection from the editor (a dialog), and products added so far, listed at once in the preview.
   const [creating, setCreating] = useState<CreateKind | null>(null);
+  // The deployment dialog: opened by a finished publish ("publish", showing what just went live) or from the status bar ("live").
+  const [deploymentOpen, setDeploymentOpen] = useState<"publish" | "live" | null>(null);
+  const [lastPublish, setLastPublish] = useState<Deployment | null>(null);
   const [addedProducts, setAddedProducts] = useState<AddedProduct[]>([]);
   // The merchant's real catalogue by default; demo content only on request, and never saved anywhere.
   const [previewMode, setPreviewMode] = useState<PreviewMode>("store");
@@ -838,9 +845,15 @@ export function EditorShell({ init }: { init: EditorInit }) {
     try {
       const result = await publish.mutateAsync(undefined);
       setPublishOpen(false);
-      toast.success(publishedMessage(result.published.length, result.productPresentations?.published ?? 0), {
-        action: { label: "View store", onClick: () => window.open(`/s/${result.storeSlug}`, "_blank", "noopener") },
-      });
+      if (result.published.length > 0 || (result.productPresentations?.published ?? 0) > 0) {
+        // Something went live: show it, with the store's address and a preview, instead of a toast that disappears.
+        setLastPublish(deploymentFromResult(result));
+        setDeploymentOpen("publish");
+      } else {
+        toast.success(publishedMessage(0, 0), {
+          action: { label: "View store", onClick: () => window.open(init.storeUrl ?? `/s/${result.storeSlug}`, "_blank", "noopener") },
+        });
+      }
       void refreshEntries();
     } catch (error) {
       // The API checks every product draft with the pages. When it names products, say which one and open it; anything else
@@ -900,6 +913,8 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const checkingPages = templates.isFetching;
   const unpublished = waitingPages.length > 0 || waitingProducts.size > 0 || dirtyCount > 0 || (unverifiedProducts.size > 0 && !draftChecks.checking) || Boolean(presList.data?.truncated);
   const publication = publicationStatus(unpublished, checkingPages);
+  const liveDeployment = useMemo(() => deploymentFromTemplates(templates.data ?? []), [templates.data]);
+  const liveSince = liveDeployment?.publishedAt ?? null;
   const listStates = useMemo(() => new Map((presItems ?? []).map((r) => [r.productId, r.publicationState] as const)), [presItems]);
   const statusOfProduct = (id: string): ProductStatus => {
     const e = presStore.entries[id];
@@ -1261,6 +1276,26 @@ export function EditorShell({ init }: { init: EditorInit }) {
         </DialogContent>
       </Dialog>
 
+      <DeploymentDialog
+        open={deploymentOpen !== null}
+        onClose={() => setDeploymentOpen(null)}
+        deployment={deploymentOpen === "publish" ? lastPublish : liveDeployment}
+        host={init.storeHost}
+        url={init.storeUrl ?? `/s/${init.storeSlug}`}
+        preview={deploymentOpen ? <ThemeFrame document={frameDocument} device="desktop" mode="preview" cropHeight={288} {...frameProps} /> : null}
+        pendingChanges={deploymentOpen === "publish" ? dirtyCount > 0 : publication === "unpublished"}
+        canPublish={init.canManage && status !== "conflict" && status !== "invalid"}
+        onPublish={() => {
+          setDeploymentOpen(null);
+          setPublishOpen(true);
+          void refetchTemplateStatesOnOpen(queryClient);
+        }}
+        onHistory={() => {
+          setDeploymentOpen(null);
+          setVersionsOpen(true);
+        }}
+      />
+
       <QuickCreate
         kind={creating}
         canEdit={init.canManage}
@@ -1334,13 +1369,23 @@ export function EditorShell({ init }: { init: EditorInit }) {
       <footer className="flex h-8 shrink-0 items-center justify-between gap-3 border-t bg-card px-3 text-xs text-muted-foreground sm:px-4">
         <SaveIndicator status={status} dirty={dirtyCount} />
         <span className="flex items-center gap-3">
-          {publication === "unpublished" ? (
-            <Badge variant="secondary">Changes not published</Badge>
-          ) : publication === "checking" ? (
-            <Badge variant="outline"><Loader2 className="size-3 animate-spin" aria-hidden /> Checking publication status…</Badge>
-          ) : (
-            <Badge variant="outline"><Check className="size-3" aria-hidden /> Published</Badge>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              setDeploymentOpen("live");
+              void refetchTemplateStatesOnOpen(queryClient);
+            }}
+            title="See what is live on your store"
+            className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {publication === "unpublished" ? (
+              <Badge variant="secondary" className="cursor-pointer gap-1.5"><span className="size-1.5 rounded-full bg-amber-500" aria-hidden /> Changes not published</Badge>
+            ) : publication === "checking" ? (
+              <Badge variant="outline" className="cursor-pointer"><Loader2 className="size-3 animate-spin" aria-hidden /> Checking publication status…</Badge>
+            ) : (
+              <Badge variant="outline" className="cursor-pointer gap-1.5"><span className="size-1.5 rounded-full bg-emerald-500" aria-hidden /> Live{liveSince ? ` · ${timeAgo(liveSince)}` : ""}</Badge>
+            )}
+          </button>
           <span className="hidden font-mono text-[11px] xl:inline">{init.themeName ?? "Your storefront"}</span>
         </span>
       </footer>

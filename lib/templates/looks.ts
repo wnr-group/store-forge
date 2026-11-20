@@ -31,3 +31,11 @@ export const LOOK_TINT: Record<LookId, "auto" | "secondary"> = { standard: "auto
 export function isLookId(value: unknown): value is LookId {
   return typeof value === "string" && (LOOK_IDS as readonly string[]).includes(value);
 }
+
+/**
+ * The theme a look is named after in LOOK_LABELS ("Sport (Stride)" is "Stride"). The standard look has no such name: many themes
+ * share it, so a published design in the standard look cannot be told apart by its look alone.
+ */
+export function lookThemeName(look: LookId): string | null {
+  return /\(([^)]+)\)/.exec(LOOK_LABELS[look])?.[1] ?? null;
+}

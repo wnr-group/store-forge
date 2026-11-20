@@ -22,6 +22,7 @@ import { INDUSTRY_LABELS, THEME_INDUSTRIES, type PreviewStoreData, type ThemeInd
 import { cn } from "@/lib/utils";
 import { PreviewModeNote, PreviewModeSwitch } from "./preview-mode-switch";
 import { PreviewLoader, useImagesReady } from "./preview-loader";
+import { PublishStatus, type DeployedDesign } from "./publish-status";
 import { ThemeFrame, type Device } from "./theme-frame";
 
 const PAGE_SIZE = 9;
@@ -62,9 +63,9 @@ function useAfterOpen(active: boolean, delay = 220) {
   return active && ready;
 }
 
-type Props = { canManage: boolean; data: PreviewStoreData };
+type Props = { canManage: boolean; data: PreviewStoreData; /** The published design, shown as the deployment preview. */ deployed: DeployedDesign | null; /** The store's address for display and the address that opens it. */ storeHost: string; storeUrl: string };
 
-export function ThemeStore({ canManage, data }: Props) {
+export function ThemeStore({ canManage, data, deployed, storeHost, storeUrl }: Props) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [industry, setIndustry] = useState<ThemeIndustry | undefined>();
@@ -107,6 +108,8 @@ export function ThemeStore({ canManage, data }: Props) {
   return (
     <div className="space-y-6">
       <CurrentThemeCard loading={current.isLoading} theme={currentTheme} updateAvailable={current.data?.updateAvailable ?? false} data={preview} canManage={canManage} />
+
+      <PublishStatus templates={templates.data} loading={templates.isLoading} failed={templates.isError} onRetry={() => void templates.refetch()} host={storeHost} url={storeUrl} canManage={canManage} deployed={deployed} theme={currentTheme} appliedVersion={current.data?.appliedVersion ?? null} data={data} />
 
       {!canManage ? (
         <Alert>
