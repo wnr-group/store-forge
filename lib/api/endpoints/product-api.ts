@@ -104,3 +104,7 @@ export const bulkProductStatusApi = async (organizationId: string, ids: string[]
 
 export const duplicateProductApi = async (organizationId: string, id: string) =>
   (await apiRequest<ProductDetailApi>(`/products/${id}/duplicate`, { method: "POST", organizationId })).data;
+
+export type ProductImportRowApi = { row: number } & Record<string, unknown>;
+export const importProductsApi = async (organizationId: string, rows: ProductImportRowApi[]) =>
+  (await apiRequest<{ count: number }>("/products/import", { method: "POST", json: { rows }, organizationId, timeoutMs: 60_000 })).data;

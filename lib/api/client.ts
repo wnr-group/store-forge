@@ -73,11 +73,17 @@ function fieldErrors(details: unknown): Record<string, string> | undefined {
   return entries.length ? Object.fromEntries(entries) : undefined;
 }
 
+/** Error codes whose `details` are passed through as typed, structured data (everything else keeps only flat field errors). */
+const STRUCTURED_DETAIL_CODES = new Set(["PRODUCT_IMPORT_INVALID"]);
+
 /** Turns a failed response into the `AppError` the pages and server actions already know how to show. */
 export function toAppError(status: number, body: ApiEnvelope<unknown> | null): AppError {
+  // The body parser answers 413 before the API can build its message, so the text is written here.
+  if (status === 413) return new AppError("VALIDATION", "The request is too large. Shorten long descriptions or split the file into smaller imports.");
   const code = CODE_BY_STATUS[status] ?? "UNKNOWN";
   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
-  return new AppError(code, message, fieldErrors(body?.error?.details));
+  const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+  return new AppError(code, message, fieldErrors(body?.error?.details), structured);
 }
 
 export type ApiResult<T> = { data: T; meta?: PageMeta };
