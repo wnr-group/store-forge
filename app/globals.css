@@ -176,7 +176,7 @@
 /*
  * StoreForge design tokens (Linear-inspired workspace theme). Colours are defined once here; components use the
  * semantic Tailwind names (bg-card, text-muted-foreground, bg-sidebar...). Surfaces are white on a very light gray
- * workspace, text is neutral charcoal, and the single indigo accent marks primary actions, links, focus and selection.
+ * workspace, text is neutral charcoal, and the single deep green accent marks primary actions, links, focus and selection.
  * `-text` variants are darker shades of the status colours for small text, which the fills cannot reach 4.5:1
  * contrast with on white.
  */
@@ -188,10 +188,10 @@
   --card-foreground: #25262b;
   --popover: #ffffff;
   --popover-foreground: #25262b;
-  --primary: #635bff;
-  --primary-hover: #5249e8;
+  --primary: #0f7b62;
+  --primary-hover: #0b6551;
   --primary-foreground: #ffffff;
-  --link: #5249e8;
+  --link: #0b6551;
   --secondary: #f3f4f6;
   --secondary-foreground: #25262b;
   --muted: #f3f4f6;
@@ -208,8 +208,8 @@
   --info-text: #1f62bd;
   --border: #e5e7eb;
   --input: #d1d5db;
-  --ring: #635bff;
-  --chart-1: #635bff;
+  --ring: #0f7b62;
+  --chart-1: #0f7b62;
   --chart-2: #9ca3af;
   --chart-3: #d1d5db;
   --chart-4: #6b7280;
@@ -217,12 +217,12 @@
   --radius: 0.5rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #4b5563;
-  --sidebar-primary: #635bff;
+  --sidebar-primary: #0f7b62;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f1f2f4;
   --sidebar-accent-foreground: #25262b;
   --sidebar-border: #e5e7eb;
-  --sidebar-ring: #635bff;
+  --sidebar-ring: #0f7b62;
 }
 
 .dark {
@@ -233,10 +233,10 @@
   --card-foreground: #e8e9eb;
   --popover: #1c1d20;
   --popover-foreground: #e8e9eb;
-  --primary: #7a73ff;
-  --primary-hover: #8d87ff;
-  --primary-foreground: #0f0e1a;
-  --link: #a5a0ff;
+  --primary: #2fb58f;
+  --primary-hover: #44c7a2;
+  --primary-foreground: #08140f;
+  --link: #7fe0bf;
   --secondary: #222327;
   --secondary-foreground: #e8e9eb;
   --muted: #222327;
@@ -253,20 +253,20 @@
   --info-text: #7fb2f4;
   --border: #2a2b2f;
   --input: #3a3c41;
-  --ring: #a5a0ff;
-  --chart-1: #8d87ff;
+  --ring: #7fe0bf;
+  --chart-1: #44c7a2;
   --chart-2: #7b7f88;
   --chart-3: #4a4c52;
   --chart-4: #9ca0a8;
   --chart-5: #34363a;
   --sidebar: #141517;
   --sidebar-foreground: #a8acb3;
-  --sidebar-primary: #7a73ff;
-  --sidebar-primary-foreground: #0f0e1a;
+  --sidebar-primary: #2fb58f;
+  --sidebar-primary-foreground: #08140f;
   --sidebar-accent: #222327;
   --sidebar-accent-foreground: #e8e9eb;
   --sidebar-border: #25262a;
-  --sidebar-ring: #a5a0ff;
+  --sidebar-ring: #7fe0bf;
 }
 
 @layer base {
