@@ -63,8 +63,8 @@ export function StylePanel({ spec, style, inherited = [], device, disabled, onCh
         <span className="font-medium text-foreground">Editing for {DEVICE_NAME[device]}.</span> {DEVICE_NOTE[device]}
       </p>
       {groups.map(({ id, fields }) => (
-        <fieldset key={id} className="space-y-4">
-          <legend className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{CAPABILITY_LABELS[id]}</legend>
+        <fieldset key={id} className="space-y-4 rounded-xl border bg-background/60 p-3.5">
+          <legend className="-ml-1 px-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{CAPABILITY_LABELS[id]}</legend>
           {fields.map((field) => {
             const resolved = resolveStyleValue(layers, field.key, device);
             const own = style[device]?.[field.key] !== undefined;

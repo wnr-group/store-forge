@@ -489,3 +489,44 @@
     padding-top: 0.625rem;
   }
 }
+
+/*
+ * Theme editor palette: warm paper surfaces with a deep green accent (mint selection, green Publish). Scoped to the editor
+ * root so the rest of the dashboard keeps its own colours.
+ */
+.sf-editor {
+  --background: #f4f3ee;
+  --foreground: #1c211e;
+  --card: #fdfdfb;
+  --card-foreground: #1c211e;
+  --primary: #0f7b62;
+  --primary-hover: #0b6551;
+  --primary-foreground: #ffffff;
+  --secondary: #eeece5;
+  --secondary-foreground: #1c211e;
+  --muted: #eeece5;
+  --muted-foreground: #6a716c;
+  --accent: #e4f2ec;
+  --accent-foreground: #0b6551;
+  --border: #e4e1d8;
+  --input: #dcd9ce;
+  --ring: #0f7b62;
+}
+.dark .sf-editor {
+  --background: #131614;
+  --foreground: #e8ece9;
+  --card: #1a1d1b;
+  --card-foreground: #e8ece9;
+  --primary: #2fb58f;
+  --primary-hover: #44c7a2;
+  --primary-foreground: #08140f;
+  --secondary: #242826;
+  --secondary-foreground: #e8ece9;
+  --muted: #242826;
+  --muted-foreground: #98a09a;
+  --accent: #1f3a31;
+  --accent-foreground: #7fe0bf;
+  --border: #2a2f2c;
+  --input: #343a36;
+  --ring: #2fb58f;
+}

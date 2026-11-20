@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, History as HistoryIcon, Loader2, Monitor, Package, Palette, PanelLeft, Redo2, Rocket, Smartphone, SquareDashedMousePointer, Tablet, Undo2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, Globe, History as HistoryIcon, Layers, Loader2, Monitor, Package, Palette, Redo2, Rocket, Smartphone, SlidersHorizontal, SquareDashedMousePointer, Tablet, Undo2, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getPresentationAction, getTemplateAction, loadProductPreviewAction, saveDraftAction, savePresentationDraftAction } from "@/app/(dashboard)/dashboard/templates/actions";
@@ -84,10 +84,10 @@ export type EditorInit = {
 type SaveStatus = "saved" | "unsaved" | "saving" | "error" | "conflict" | "invalid";
 
 const PAGE_LABEL: Partial<Record<ThemeKind, string>> = { index: "Home page", product: "Product page", collection: "Collection page" };
-const DEVICES: { id: Device; label: string; icon: typeof Monitor }[] = [
-  { id: "desktop", label: "Desktop", icon: Monitor },
-  { id: "tablet", label: "Tablet", icon: Tablet },
-  { id: "mobile", label: "Mobile", icon: Smartphone },
+const DEVICES: { id: Device; label: string; icon: typeof Monitor; width: number }[] = [
+  { id: "desktop", label: "Desktop", icon: Monitor, width: 1280 },
+  { id: "tablet", label: "Tablet", icon: Tablet, width: 820 },
+  { id: "mobile", label: "Mobile", icon: Smartphone, width: 390 },
 ];
 /** The preview device a style change is written for. */
 const STYLE_DEVICE: Record<Device, StyleDevice> = { desktop: "base", tablet: "tablet", mobile: "mobile" };
@@ -872,6 +872,9 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const selectedSectionId = selection && "sectionId" in selection && selection.docId === state.pageId ? selection.sectionId : null;
   const selectedBlockId = selection && "blockId" in selection && selection.docId === state.pageId ? (selection.blockId ?? null) : null;
   const virtualPage = isVirtualId(state.pageId) ? virtualKey(state.pageId) : null;
+  const sectionCount = (page.document as { order?: string[] }).order?.length ?? 0;
+  // Duplicate and delete for the selected element, shown in the inspector header (only on the page being edited, never shared parts).
+  const editableSelection = selection && "sectionId" in selection && selection.docId === state.pageId ? selection : null;
   // A content page is shown with the title and text of the page being previewed in its shared layout.
   const frameDocument = useMemo(
     () => (virtualPage === "content" ? withPageContent(page.document as unknown as TemplateDocument, target.contentPage) : (page.document as unknown as TemplateDocument)),
@@ -903,14 +906,15 @@ export function EditorShell({ init }: { init: EditorInit }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background text-foreground" role="application" aria-label="Theme editor">
-      <header className="flex h-12 shrink-0 items-center gap-2 border-b bg-card px-2 sm:px-3">
-        <Button variant="ghost" size="sm" onClick={() => void leave()} aria-label="Back to themes"><ArrowLeft aria-hidden /><span className="hidden sm:inline">Themes</span></Button>
-        <div className="hidden min-w-0 items-center gap-2 border-l pl-3 sm:flex">
-          <Palette className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-          <span className="truncate text-sm font-medium">{init.themeName ?? "Your storefront"}</span>
+    <div className="sf-editor fixed inset-0 z-50 flex flex-col bg-background text-foreground" role="application" aria-label="Theme editor">
+      <header className="flex h-14 shrink-0 items-center gap-1.5 border-b bg-card px-2 sm:gap-2 sm:px-4">
+        <Button variant="ghost" size="icon" onClick={() => void leave()} aria-label="Back to themes" title="Back to themes"><ArrowLeft aria-hidden /></Button>
+        <div className="hidden min-w-0 items-center gap-2.5 sm:flex">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground" aria-hidden>{(init.themeName ?? "S").charAt(0).toUpperCase()}</span>
+          <span className="max-w-40 truncate text-sm font-semibold tracking-tight">{init.themeName ?? "Your storefront"}</span>
+          <span className="text-muted-foreground/50" aria-hidden>/</span>
         </div>
-        <NativeSelect aria-label="Page to edit" value={state.pageId} disabled={loadingPage} onChange={(e) => void goTo(e.target.value)} className="h-8 w-36 text-xs sm:w-44">
+        <NativeSelect aria-label="Page to edit" value={state.pageId} disabled={loadingPage} onChange={(e) => void goTo(e.target.value)} className="h-8 w-32 border-transparent bg-muted/70 text-xs font-medium hover:bg-muted sm:w-40">
           <optgroup label="Pages">
             {init.pages.map((p) => (
               <option key={p.id} value={p.id}>{PAGE_LABEL[p.kind] ?? p.name}</option>
@@ -935,41 +939,19 @@ export function EditorShell({ init }: { init: EditorInit }) {
             <span className="truncate">{loadingProduct ? `Loading ${loadingProduct.name ?? "product"}…` : (currentEntry?.name ?? "Product")}</span>
           </Button>
         ) : null}
-        <SaveIndicator status={status} />
-        <div className="flex items-center" role="group" aria-label="History">
-          <Button variant="ghost" size="icon-sm" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)" disabled={!canUndo(history) || !canEdit} onClick={undoEdit}><Undo2 aria-hidden /></Button>
-          <Button variant="ghost" size="icon-sm" aria-label="Redo (Ctrl+Shift+Z)" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo(history) || !canEdit} onClick={redoEdit}><Redo2 aria-hidden /></Button>
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center rounded-lg border bg-background p-0.5" role="group" aria-label="History">
+            <Button variant="ghost" size="icon-sm" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)" disabled={!canUndo(history) || !canEdit} onClick={undoEdit}><Undo2 aria-hidden /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Redo (Ctrl+Shift+Z)" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo(history) || !canEdit} onClick={redoEdit}><Redo2 aria-hidden /></Button>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => setVersionsOpen(true)} aria-label="Version history"><HistoryIcon aria-hidden /><span className="hidden lg:inline">History</span></Button>
+          <Button variant="outline" size="sm" onClick={() => setPreviewing(true)}><Eye aria-hidden /><span className="hidden sm:inline">Preview</span></Button>
+          {init.canManage ? (
+            <Button size="sm" className="px-3.5 shadow-sm" onClick={() => { setPublishOpen(true); void refetchTemplateStatesOnOpen(queryClient); }} disabled={status === "conflict" || status === "invalid" || publish.isPending || publishing}>
+              <Rocket aria-hidden /> Publish
+            </Button>
+          ) : null}
         </div>
-        <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="ml-auto hidden md:inline-flex" />
-        <div className="hidden items-center rounded-md border p-0.5 md:flex" role="group" aria-label="Preview size">
-          {DEVICES.map(({ id, label, icon: Icon }) => (
-            <Button key={id} size="icon-sm" variant={device === id ? "secondary" : "ghost"} aria-label={label} aria-pressed={device === id} onClick={() => setDevice(id)}><Icon aria-hidden /></Button>
-          ))}
-        </div>
-        <Button
-          variant={inspector ? "default" : "ghost"}
-          size="icon-sm"
-          aria-label="Inspector"
-          aria-pressed={inspector}
-          aria-keyshortcuts="I"
-          title={inspector ? "Inspector on: click anything to select and edit it. Turn off to browse like your store (press I)." : "Inspector off: links open pages and buttons work. Turn on to select and edit (press I)."}
-          className={inspector ? undefined : "text-muted-foreground"}
-          onClick={() => setInspector((v) => !v)}
-        >
-          <SquareDashedMousePointer aria-hidden />
-        </Button>
-        <NativeSelect aria-label="Zoom" value={String(zoom)} onChange={(e) => setZoom(Number(e.target.value))} className="hidden h-8 w-20 text-xs md:block">
-          {ZOOMS.map((z) => (
-            <option key={z.label} value={String(z.value)}>{z.label}</option>
-          ))}
-        </NativeSelect>
-        <Button variant="ghost" size="sm" onClick={() => setVersionsOpen(true)} aria-label="Version history"><HistoryIcon aria-hidden /><span className="hidden lg:inline">History</span></Button>
-        <Button variant="outline" size="sm" onClick={() => setPreviewing(true)}><Eye aria-hidden /><span className="hidden sm:inline">Preview</span></Button>
-        {init.canManage ? (
-          <Button size="sm" onClick={() => { setPublishOpen(true); void refetchTemplateStatesOnOpen(queryClient); }} disabled={status === "conflict" || status === "invalid" || publish.isPending || publishing}>
-            <Rocket aria-hidden /> Publish
-          </Button>
-        ) : null}
       </header>
 
       {status === "conflict" && presConflict ? (
@@ -993,65 +975,100 @@ export function EditorShell({ init }: { init: EditorInit }) {
         <Alert className="rounded-none border-x-0"><AlertDescription>You can look around but not change anything. Editing needs access to store settings.</AlertDescription></Alert>
       ) : null}
 
-      <div className="flex shrink-0 gap-1 border-b p-1 lg:hidden" role="tablist" aria-label="Editor panels">
-        {(["sections", "preview", "settings"] as const).map((t) => (
-          <Button key={t} size="sm" variant={mobileTab === t ? "secondary" : "ghost"} className="flex-1 capitalize" role="tab" aria-selected={mobileTab === t} onClick={() => setMobileTab(t)}>{t}</Button>
-        ))}
-      </div>
-
-      <div className="grid min-h-0 flex-1 lg:grid-cols-[300px_minmax(0,1fr)_320px]">
-        <aside className={cn("min-h-0 flex-col overflow-hidden border-r bg-card lg:flex", mobileTab === "sections" ? "flex" : "hidden")} aria-label="Page structure">
-          <div className="flex shrink-0 gap-1 border-b p-2" role="tablist">
-            <Button size="sm" variant={leftTab === "sections" ? "secondary" : "ghost"} className="flex-1" role="tab" aria-selected={leftTab === "sections"} onClick={() => setLeftTab("sections")}><PanelLeft aria-hidden /> Sections</Button>
-            <Button size="sm" variant={leftTab === "theme" ? "secondary" : "ghost"} className="flex-1" role="tab" aria-selected={leftTab === "theme"} onClick={() => { setLeftTab("theme"); setMobileTab("settings"); }}><Palette aria-hidden /> Theme</Button>
-            {page.kind === "product" ? (
-              <Button size="sm" variant={leftTab === "product" ? "secondary" : "ghost"} className="flex-1" role="tab" aria-selected={leftTab === "product"} onClick={() => { setLeftTab("product"); setMobileTab("settings"); }}><Package aria-hidden /> Product</Button>
-            ) : null}
+      <div className="grid min-h-0 flex-1 lg:grid-cols-[320px_minmax(0,1fr)_320px] xl:grid-cols-[336px_minmax(0,1fr)_352px]">
+        <aside className={cn("min-h-0 flex-col overflow-hidden border-r bg-card lg:flex lg:flex-row", mobileTab === "sections" ? "flex" : "hidden")} aria-label="Page structure">
+          <div className="flex shrink-0 gap-1 border-b bg-muted/40 p-1.5 lg:w-[68px] lg:flex-col lg:border-r lg:border-b-0 lg:p-2" role="tablist" aria-label="Editor tools">
+            <RailTab active={leftTab === "sections"} icon={Layers} label="Sections" onClick={() => setLeftTab("sections")} />
+            <RailTab active={leftTab === "theme"} icon={Palette} label="Theme" onClick={() => { setLeftTab("theme"); setMobileTab("settings"); }} />
+            {page.kind === "product" ? <RailTab active={leftTab === "product"} icon={Package} label="Product" onClick={() => { setLeftTab("product"); setMobileTab("settings"); }} /> : null}
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {leftTab === "sections" ? (
-              <SectionsPanel state={state} groupIds={groupIds} pageKind={page.kind} actions={actions} disabled={!canEdit} />
-            ) : leftTab === "product" ? (
-              previewMode === "demo" ? (
-                <div className="space-y-3 p-4">
-                  <p className="text-sm text-muted-foreground">You are looking at demo products. Switch to your own store to customize a real product.</p>
-                  <Button size="sm" variant="outline" onClick={() => setPreviewMode("store")}>Preview your store</Button>
-                </div>
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <div className="shrink-0 border-b px-4 py-3">
+              <h2 className="text-sm font-semibold tracking-tight">{leftTab === "sections" ? PAGE_LABEL[page.kind] ?? page.name : leftTab === "theme" ? "Theme" : "Products"}</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {leftTab === "sections" ? `${sectionCount} ${sectionCount === 1 ? "section" : "sections"} · drag to reorder` : leftTab === "theme" ? "Store-wide colours, fonts and buttons" : "Pick a product to customise"}
+              </p>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {leftTab === "sections" ? (
+                <SectionsPanel state={state} groupIds={groupIds} pageKind={page.kind} actions={actions} disabled={!canEdit} />
+              ) : leftTab === "product" ? (
+                previewMode === "demo" ? (
+                  <div className="space-y-3 p-4">
+                    <p className="text-sm text-muted-foreground">You are looking at demo products. Switch to your own store to customize a real product.</p>
+                    <Button size="sm" variant="outline" onClick={() => setPreviewMode("store")}>Preview your store</Button>
+                  </div>
+                ) : (
+                  <>
+                    {previewProduct.status === "error" && previewProduct.error ? (
+                      <Alert variant="destructive" className="m-3 w-auto">
+                        <AlertDescription className="flex items-center justify-between gap-2">
+                          {previewProduct.error}
+                          <Button size="xs" variant="outline" onClick={() => lastTarget.current && void loadProduct(lastTarget.current)}>Try again</Button>
+                        </AlertDescription>
+                      </Alert>
+                    ) : null}
+                    <ProductPicker selectedProductId={previewProduct.productId} loadingProductId={loadingProduct?.id ?? null} disabled={presBusy !== null} onSelect={onPickProduct} statusOf={statusOfProduct} statusUnavailable={presList.isError} />
+                  </>
+                )
               ) : (
-                <>
-                  {previewProduct.status === "error" && previewProduct.error ? (
-                    <Alert variant="destructive" className="m-3 w-auto">
-                      <AlertDescription className="flex items-center justify-between gap-2">
-                        {previewProduct.error}
-                        <Button size="xs" variant="outline" onClick={() => lastTarget.current && void loadProduct(lastTarget.current)}>Try again</Button>
-                      </AlertDescription>
-                    </Alert>
-                  ) : null}
-                  <ProductPicker selectedProductId={previewProduct.productId} loadingProductId={loadingProduct?.id ?? null} disabled={presBusy !== null} onSelect={onPickProduct} statusOf={statusOfProduct} statusUnavailable={presList.isError} />
-                </>
-              )
-            ) : (
-              <p className="p-4 text-sm text-muted-foreground">Colours, fonts, spacing and buttons for the whole store are on the right. Changes show in the preview straight away.</p>
-            )}
+                <p className="p-4 text-sm text-muted-foreground">Colours, fonts, spacing and buttons for the whole store are on the right. Changes show in the preview straight away.</p>
+              )}
+            </div>
           </div>
         </aside>
 
-        <main className={cn("min-h-0 overflow-auto bg-muted/50 p-3 lg:block sm:p-5", mobileTab === "preview" ? "block" : "hidden")} aria-label="Live preview">
-          {inspector ? <p className="mb-1.5 text-center text-xs text-muted-foreground">Double-click any text to edit it right here. Enter saves, Esc cancels.</p> : null}
-          <SelectionPath state={state} onSelect={(docId, sectionId, blockId) => actions.select(docId, sectionId, blockId)} />
-          <div className="mb-2 flex flex-col items-center gap-1.5">
-            <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="md:hidden" />
-            <PreviewModeNote mode={previewMode} storeHasProducts={hasStoreProducts(init.data)} className="text-center" />
+        <main className={cn("min-h-0 min-w-0 flex-col bg-muted/50 lg:flex", mobileTab === "preview" ? "flex" : "hidden")} aria-label="Live preview">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-card/80 px-3 py-2 backdrop-blur">
+            <div className="hidden min-w-0 items-center gap-1.5 rounded-full border bg-background px-3 py-1 font-mono text-[11px] text-muted-foreground xl:flex" title="Your store address">
+              <Globe className="size-3 shrink-0" aria-hidden />
+              <span className="truncate">/s/{init.storeSlug}</span>
+            </div>
+            <div className="mx-auto hidden items-center rounded-lg border bg-background p-0.5 md:flex" role="group" aria-label="Preview size">
+              {DEVICES.map(({ id, label, icon: Icon, width }) => (
+                <button key={id} type="button" aria-label={label} title={label} aria-pressed={device === id} onClick={() => setDevice(id)} className={cn("flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[11px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring", device === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
+                  <Icon className="size-3.5" aria-hidden />
+                  <span className="hidden font-mono lg:inline">{width}</span>
+                </button>
+              ))}
+            </div>
+            <div className="ml-auto flex items-center gap-2 md:ml-0">
+              <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="hidden bg-background md:inline-flex" />
+              <NativeSelect aria-label="Zoom" value={String(zoom)} onChange={(e) => setZoom(Number(e.target.value))} className="hidden h-8 w-20 rounded-lg bg-background text-xs md:block">
+                {ZOOMS.map((z) => (
+                  <option key={z.label} value={String(z.value)}>{z.label}</option>
+                ))}
+              </NativeSelect>
+              <Button
+                variant={inspector ? "default" : "outline"}
+                size="icon-sm"
+                aria-label="Inspector"
+                aria-pressed={inspector}
+                aria-keyshortcuts="I"
+                title={inspector ? "Inspector on: click anything to select and edit it. Turn off to browse like your store (press I)." : "Inspector off: links open pages and buttons work. Turn on to select and edit (press I)."}
+                className={inspector ? undefined : "text-muted-foreground"}
+                onClick={() => setInspector((v) => !v)}
+              >
+                <SquareDashedMousePointer aria-hidden />
+              </Button>
+            </div>
           </div>
-          <div className={cn("mx-auto overflow-hidden rounded-md border bg-white shadow-sm transition-[max-width] duration-200", device === "desktop" ? "max-w-[1280px]" : device === "tablet" ? "max-w-[820px]" : "max-w-[390px]")}>
-            {loadingPage ? (
-              <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
-            ) : (
-              <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} onEditText={onEditText} onEditBlocked={onEditBlocked} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} labelFor={labelFor} zoom={zoom || null} {...frameProps} />
-            )}
+          <div className="min-h-0 flex-1 overflow-auto bg-[radial-gradient(color-mix(in_oklch,var(--foreground)_14%,transparent)_1px,transparent_1px)] [background-size:20px_20px] p-3 sm:p-6">
+            {inspector ? <p className="mb-2 text-center text-xs text-muted-foreground">Double-click any text to edit it right here. Enter saves, Esc cancels.</p> : null}
+            <SelectionPath state={state} onSelect={(docId, sectionId, blockId) => actions.select(docId, sectionId, blockId)} />
+            <div className="mb-3 flex flex-col items-center gap-1.5">
+              <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="bg-background md:hidden" />
+              <PreviewModeNote mode={previewMode} storeHasProducts={hasStoreProducts(init.data)} className="text-center" />
+            </div>
+            <div className={cn("mx-auto overflow-hidden rounded-xl border bg-white shadow-[0_1px_2px_rgb(0_0_0/0.05),0_18px_48px_-16px_rgb(0_0_0/0.22)] ring-1 ring-black/5 transition-[max-width] duration-300 ease-out", device === "desktop" ? "max-w-[1280px]" : device === "tablet" ? "max-w-[820px]" : "max-w-[390px]")}>
+              {loadingPage ? (
+                <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
+              ) : (
+                <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} onEditText={onEditText} onEditBlocked={onEditBlocked} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} labelFor={labelFor} zoom={zoom || null} {...frameProps} />
+              )}
+            </div>
           </div>
         </main>
-
         <aside className={cn("min-h-0 overflow-y-auto border-l bg-card lg:block", mobileTab === "settings" ? "block" : "hidden")} aria-label="Settings">
           {leftTab === "product" && previewMode === "store" ? (
             <ProductCustomizer
@@ -1095,6 +1112,8 @@ export function EditorShell({ init }: { init: EditorInit }) {
             clickedText={clickedText}
             onText={onText}
             onTextStyle={onTextStyle}
+            onDuplicate={editableSelection && !editableSelection.blockId ? () => actions.duplicate(editableSelection.docId, editableSelection.sectionId) : undefined}
+            onRemove={editableSelection ? () => (editableSelection.blockId ? actions.removeBlock(editableSelection.docId, editableSelection.sectionId, editableSelection.blockId) : actions.remove(editableSelection.docId, editableSelection.sectionId)) : undefined}
           />
           </CollectionChoicesContext.Provider>
           )}
@@ -1160,15 +1179,27 @@ export function EditorShell({ init }: { init: EditorInit }) {
       </AlertDialog>
 
       <p className="sr-only" aria-live="polite">{publication === "unpublished" ? "You have changes that are not published." : publication === "checking" ? "Checking publication status." : "Everything is published."}</p>
-      <span className="fixed right-3 bottom-3 hidden xl:block">
-        {publication === "unpublished" ? (
-          <Badge variant="secondary">Changes not published</Badge>
-        ) : publication === "checking" ? (
-          <Badge variant="outline"><Loader2 className="size-3 animate-spin" aria-hidden /> Checking publication status…</Badge>
-        ) : (
-          <Badge variant="outline"><Check className="size-3" aria-hidden /> Published</Badge>
-        )}
-      </span>
+      <footer className="flex h-8 shrink-0 items-center justify-between gap-3 border-t bg-card px-3 text-xs text-muted-foreground sm:px-4">
+        <SaveIndicator status={status} dirty={dirtyCount} />
+        <span className="flex items-center gap-3">
+          {publication === "unpublished" ? (
+            <Badge variant="secondary">Changes not published</Badge>
+          ) : publication === "checking" ? (
+            <Badge variant="outline"><Loader2 className="size-3 animate-spin" aria-hidden /> Checking publication status…</Badge>
+          ) : (
+            <Badge variant="outline"><Check className="size-3" aria-hidden /> Published</Badge>
+          )}
+          <span className="hidden font-mono text-[11px] xl:inline">{init.themeName ?? "Your storefront"}</span>
+        </span>
+      </footer>
+      <nav className="grid shrink-0 grid-cols-3 gap-1 border-t bg-card p-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] lg:hidden" role="tablist" aria-label="Editor panels">
+        {([["sections", "Sections", Layers], ["preview", "Preview", Eye], ["settings", "Settings", SlidersHorizontal]] as const).map(([t, label, Icon]) => (
+          <button key={t} type="button" role="tab" aria-selected={mobileTab === t} onClick={() => setMobileTab(t)} className={cn("flex flex-col items-center gap-0.5 rounded-lg py-1.5 text-[11px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring", mobileTab === t ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted")}>
+            <Icon className="size-[18px]" aria-hidden />
+            {label}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
@@ -1227,10 +1258,28 @@ function PublishSummary({
   );
 }
 
-function SaveIndicator({ status }: { status: SaveStatus }) {
+function RailTab({ active, icon: Icon, label, onClick }: { active: boolean; icon: LucideIcon; label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={cn(
+        "flex flex-1 flex-col items-center gap-1 rounded-lg px-1 py-2 text-[10px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-none",
+        active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+      )}
+    >
+      <Icon className="size-[18px]" aria-hidden />
+      {label}
+    </button>
+  );
+}
+
+function SaveIndicator({ status, dirty = 0 }: { status: SaveStatus; dirty?: number }) {
   const map: Record<SaveStatus, { text: string; tone: string; icon: React.ReactNode }> = {
-    saved: { text: "All changes saved", tone: "text-muted-foreground", icon: <Check className="size-3.5" aria-hidden /> },
-    unsaved: { text: "Unsaved changes", tone: "text-muted-foreground", icon: <span className="size-1.5 rounded-full bg-amber-500" aria-hidden /> },
+    saved: { text: "All changes saved", tone: "text-muted-foreground", icon: <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden /> },
+    unsaved: { text: dirty > 0 ? `Saving soon · ${dirty} unsaved` : "Unsaved changes", tone: "text-muted-foreground", icon: <span className="size-1.5 rounded-full bg-amber-500" aria-hidden /> },
     saving: { text: "Saving…", tone: "text-muted-foreground", icon: <Loader2 className="size-3.5 animate-spin" aria-hidden /> },
     error: { text: "Not saved", tone: "text-destructive", icon: <CircleAlert className="size-3.5" aria-hidden /> },
     conflict: { text: "Out of date", tone: "text-destructive", icon: <AlertTriangle className="size-3.5" aria-hidden /> },
@@ -1238,7 +1287,7 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
   };
   const s = map[status];
   return (
-    <span role="status" className={cn("hidden items-center gap-1.5 text-xs md:flex", s.tone)}>
+    <span role="status" className={cn("flex items-center gap-1.5 text-xs", s.tone)}>
       {s.icon}{s.text}
     </span>
   );

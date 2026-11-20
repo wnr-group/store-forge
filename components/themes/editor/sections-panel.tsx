@@ -49,7 +49,7 @@ export function SectionsPanel({ state, groupIds, pageKind, actions, disabled }: 
     { label: "Footer", docId: groupIds.footer, kind: "group_footer", editable: false },
   ];
   return (
-    <div className="space-y-5 p-3">
+    <div className="space-y-5 p-3 sm:p-3.5">
       {regions.map((r) => (r.docId && state.docs[r.docId] ? <Region key={r.kind} region={r} state={state} actions={actions} disabled={disabled} /> : null))}
     </div>
   );
@@ -75,10 +75,10 @@ function Region({ region, state, actions, disabled }: { region: Region; state: E
 
   return (
     <section aria-label={region.label}>
-      <h3 className="mb-1.5 px-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{region.label}</h3>
+      <h3 className="mb-1.5 px-1.5 text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">{region.label}</h3>
       <DndContext id={dndId} sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={order} strategy={verticalListSortingStrategy} disabled={!region.editable || disabled}>
-          <ul className="space-y-1">
+          <ul className="space-y-0.5">
             {order.map((id) => (
               <SectionRow key={id} id={id} node={doc.sections[id]} docId={docId} state={state} actions={actions} sortable={region.editable} canRemove={region.editable} disabled={disabled} />
             ))}
@@ -88,7 +88,7 @@ function Region({ region, state, actions, disabled }: { region: Region; state: E
       {order.length === 0 ? <p className="px-1 py-2 text-xs text-muted-foreground">Nothing here yet.</p> : null}
       {region.editable ? (
         <>
-          <Button variant="outline" size="sm" className="mt-2 w-full justify-start" disabled={disabled || atLimit} onClick={() => setAdding(true)}>
+          <Button variant="outline" size="lg" className="mt-2 w-full border-dashed bg-transparent text-muted-foreground shadow-none hover:border-primary/50 hover:bg-primary/5 hover:text-primary" disabled={disabled || atLimit} onClick={() => setAdding(true)}>
             <Plus aria-hidden /> Add section
           </Button>
           {atLimit ? <p className="mt-1 px-1 text-xs text-muted-foreground">A page can have up to {LIMITS.maxSectionsPerTemplate} sections.</p> : null}
@@ -114,23 +114,25 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
 
   if (!node) return null;
   return (
-    <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={cn("rounded-md border bg-card", selected && "border-primary ring-1 ring-primary", isDragging && "z-10 opacity-80 shadow-md")}>
-      <div className="flex items-center gap-1 p-1">
+    <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={cn("group/row rounded-lg transition-colors", selected ? "bg-primary/10" : "hover:bg-muted/70", isDragging && "z-10 bg-card opacity-90 shadow-lg ring-1 ring-border")}>
+      <div className="flex items-center gap-0.5 p-1">
         {sortable ? (
-          <button type="button" className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground hover:bg-muted active:cursor-grabbing disabled:cursor-not-allowed" aria-label={`Drag ${name} to reorder`} disabled={disabled} {...attributes} {...listeners}>
+          <button type="button" className="flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground/60 hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed" aria-label={`Drag ${name} to reorder`} disabled={disabled} {...attributes} {...listeners}>
             <GripVertical className="size-4" aria-hidden />
           </button>
         ) : (
-          <span className="w-1" />
+          <span className="w-1.5" />
         )}
-        <button type="button" onClick={() => actions.select(docId, id)} className={cn("min-w-0 flex-1 truncate rounded px-1.5 py-1 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring", hidden && "text-muted-foreground line-through")} aria-current={selected || undefined}>
+        <button type="button" onClick={() => actions.select(docId, id)} className={cn("min-w-0 flex-1 truncate rounded px-1.5 py-1.5 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring", selected ? "font-medium text-primary" : "text-foreground/90", hidden && "text-muted-foreground line-through")} aria-current={selected || undefined}>
           {name}
         </button>
+        {!sortable ? <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">Global</span> : blocks.length > 0 ? <span className={cn("shrink-0 px-1 text-[10px] text-muted-foreground", expanded && "hidden")}>{blocks.length}</span> : null}
         {blocks.length > 0 ? (
           <button type="button" onClick={() => setOpen(!open)} aria-expanded={expanded} aria-label={expanded ? `Hide ${name} blocks` : `Show ${name} blocks`} className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted">
             {expanded ? <ChevronDown className="size-4" aria-hidden /> : <ChevronRight className="size-4" aria-hidden />}
           </button>
         ) : null}
+        <div className={cn("flex shrink-0 items-center transition-opacity lg:opacity-0 lg:group-focus-within/row:opacity-100 lg:group-hover/row:opacity-100", (selected || hidden) && "lg:opacity-100")}>
         <Button size="icon-xs" variant="ghost" aria-label={hidden ? `Show ${name}` : `Hide ${name}`} aria-pressed={hidden} disabled={disabled} onClick={() => actions.toggle(docId, id)}>
           {hidden ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
         </Button>
@@ -140,16 +142,17 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
             <Button size="icon-xs" variant="ghost" aria-label={`Remove ${name}`} disabled={disabled} onClick={() => actions.remove(docId, id)} className="hover:text-destructive"><Trash2 aria-hidden /></Button>
           </>
         ) : null}
+        </div>
       </div>
       {expanded && (blocks.length > 0 || acceptable.length > 0) ? (
-        <div className="border-t bg-muted/30 p-1.5">
+        <div className="mb-1 ml-5 border-l pr-1 pb-1 pl-1.5">
           <ul className="space-y-0.5">
             {blocks.map((blockId, index) => {
               const block = node.blocks[blockId];
               const blockSelected = sel !== null && "blockId" in sel && sel.blockId === blockId;
               return (
-                <li key={blockId} className={cn("flex items-center gap-0.5 rounded px-1", blockSelected && "bg-primary/10")}>
-                  <button type="button" onClick={() => actions.select(docId, id, blockId)} className="min-w-0 flex-1 truncate py-1 text-left text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-current={blockSelected || undefined}>
+                <li key={blockId} className={cn("flex items-center gap-0.5 rounded-md px-1.5", blockSelected ? "bg-primary/15 text-primary" : "hover:bg-muted")}>
+                  <button type="button" onClick={() => actions.select(docId, id, blockId)} className="min-w-0 flex-1 truncate py-1.5 text-left text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-current={blockSelected || undefined}>
                     {registry.blocks[block?.type ?? ""]?.name ?? block?.type}
                   </button>
                   <Button size="icon-xs" variant="ghost" aria-label="Move block up" disabled={disabled || index === 0} onClick={() => actions.moveBlock(docId, id, blockId, index - 1)}><ChevronDown className="rotate-180" aria-hidden /></Button>

@@ -1,8 +1,9 @@
 "use client";
 
-import { CornerLeftUp, MousePointerClick } from "lucide-react";
+import { ChevronRight, Copy, MousePointerClick, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { ThemeEditorAdapter } from "@/lib/editor/adapter";
 import { readStyle, type PartStyleKey, type StyleDevice, type StyleKey } from "@/lib/editor/style";
 import { isSettingVisible } from "@/lib/templates/engine/descriptor-check";
@@ -50,9 +51,12 @@ type Props = {
   clickedText: { text: string; nonce: number } | null;
   onText: (docId: string, sectionId: string, from: string, to: string | undefined) => void;
   onTextStyle: (docId: string, sectionId: string, from: string, key: PartStyleKey, value: unknown) => void;
+  /** Duplicate and delete for the selected element; left out where the element cannot be copied or removed (shared header, footer). */
+  onDuplicate?: () => void;
+  onRemove?: () => void;
 };
 
-export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle }: Props) {
+export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle, onDuplicate, onRemove }: Props) {
   if (mode === "theme") {
     return themeDocId && state.docs[themeDocId] ? (
       <ThemeSettings doc={state.docs[themeDocId].document} disabled={disabled} problems={problems[themeDocId] ?? {}} onChange={(group, key, value) => onThemeSetting(themeDocId, group, key, value)} />
@@ -91,11 +95,13 @@ export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSet
       clickedText={clickedText}
       onText={onText}
       onTextStyle={onTextStyle}
+      onDuplicate={onDuplicate}
+      onRemove={onRemove}
     />
   );
 }
 
-type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "styleDevice" | "onStyle" | "onResetStyle" | "onSelectParent" | "focusSetting" | "onFocusConsumed" | "clickedText" | "onText" | "onTextStyle"> & {
+type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "styleDevice" | "onStyle" | "onResetStyle" | "onSelectParent" | "focusSetting" | "onFocusConsumed" | "clickedText" | "onText" | "onTextStyle" | "onDuplicate" | "onRemove"> & {
   docId: string;
   sectionId: string;
   blockId: string | undefined;
@@ -105,7 +111,7 @@ type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "st
 };
 
 /** The selected section or block: a Content tab (its own settings) and a Style tab (what the theme's adapter allows). */
-function ElementEditor({ docId, sectionId, blockId, section, node, disabled, problems, onSetting, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle }: ElementEditorProps) {
+function ElementEditor({ docId, sectionId, blockId, section, node, disabled, problems, onSetting, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle, onDuplicate, onRemove }: ElementEditorProps) {
   const [tab, setTab] = useState<"content" | "style">("content");
   const content = useRef<HTMLDivElement>(null);
   const def = blockId ? registry.blocks[node.type] : registry.sections[node.type];
@@ -131,29 +137,53 @@ function ElementEditor({ docId, sectionId, blockId, section, node, disabled, pro
   }, [focusSetting, onFocusConsumed]);
 
   const parentName = registry.sections[section.type]?.name ?? section.type;
+  const title = def?.name ?? node.type;
   return (
-    <div className="space-y-4 p-4">
-      <header className="space-y-1">
-        {blockId ? (
-          <Button type="button" variant="ghost" size="xs" className="-ml-2" onClick={() => onSelectParent(docId, sectionId)}>
-            <CornerLeftUp aria-hidden /> Select {parentName}
-          </Button>
-        ) : null}
-        <h2 className="text-sm font-semibold">{def?.name ?? node.type}</h2>
-        <p className="text-xs text-muted-foreground">
+    <div>
+      <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur">
+        <div className="flex items-start justify-between gap-2 px-4 pt-3 pb-1">
+          <div className="min-w-0">
+            <nav aria-label="Selected element" className="flex min-w-0 items-center gap-1 text-[11px] text-muted-foreground">
+              <span>Page</span>
+              <ChevronRight className="size-3 shrink-0" aria-hidden />
+              {blockId ? (
+                <>
+                  <button type="button" className="truncate rounded underline-offset-2 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring" onClick={() => onSelectParent(docId, sectionId)}>{parentName}</button>
+                  <ChevronRight className="size-3 shrink-0" aria-hidden />
+                </>
+              ) : null}
+              <span className="truncate font-medium text-foreground/80">{title}</span>
+            </nav>
+            <h2 className="mt-1 truncate text-base font-semibold tracking-tight">{title}</h2>
+          </div>
+          {onDuplicate || onRemove ? (
+            <div className="-mr-1 flex shrink-0 items-center">
+              {onDuplicate ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`Duplicate ${title}`} title="Duplicate" disabled={disabled} onClick={onDuplicate}><Copy aria-hidden /></Button> : null}
+              {onRemove ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`Remove ${title}`} title="Remove" disabled={disabled} onClick={onRemove} className="hover:bg-destructive/10 hover:text-destructive"><Trash2 aria-hidden /></Button> : null}
+            </div>
+          ) : null}
+        </div>
+        <p className="line-clamp-2 px-4 pb-2 text-xs text-muted-foreground">
           {blockId ? `Block in ${parentName}` : "Section"}
           {def?.description ? `. ${def.description}` : ""}
         </p>
+        <div className="flex gap-5 px-4" role="tablist" aria-label={`${title} settings`}>
+          {(["content", "style"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="tab"
+              aria-selected={tab === t}
+              onClick={() => setTab(t)}
+              className={cn("-mb-px border-b-2 pt-1 pb-2.5 text-sm font-medium capitalize transition-colors outline-none focus-visible:text-foreground", tab === t ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </header>
 
-      <div className="flex gap-1 rounded-md border p-0.5" role="tablist" aria-label={`${def?.name ?? node.type} settings`}>
-        {(["content", "style"] as const).map((t) => (
-          <Button key={t} type="button" size="sm" variant={tab === t ? "secondary" : "ghost"} className="flex-1 capitalize" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>
-            {t}
-          </Button>
-        ))}
-      </div>
-
+      <div className="space-y-4 p-4">
       {tab === "content" ? (
         <div ref={content} role="tabpanel" aria-label="Content" className="space-y-4">
           <TextOnPage section={section} clicked={clickedText} disabled={disabled} onChange={(from, to) => onText(docId, sectionId, from, to)} onStyle={(from, key, value) => onTextStyle(docId, sectionId, from, key, value)} />
@@ -191,6 +221,7 @@ function ElementEditor({ docId, sectionId, blockId, section, node, disabled, pro
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -207,7 +238,7 @@ function findBlock(node: ComponentNode, blockId: string): ComponentNode | undefi
 function Empty({ title, text }: { title: string; text: string }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center">
-      <span className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground"><MousePointerClick className="size-5" aria-hidden /></span>
+      <span className="flex size-12 items-center justify-center rounded-2xl border bg-muted/60 text-muted-foreground"><MousePointerClick className="size-5" aria-hidden /></span>
       <h2 className="text-sm font-semibold">{title}</h2>
       <p className="max-w-56 text-xs text-muted-foreground">{text}</p>
     </div>
@@ -222,14 +253,14 @@ function ThemeSettings({ doc, disabled, problems, onChange }: { doc: Record<stri
     return [...out.entries()];
   }, []);
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-5 p-4">
       <header>
-        <h2 className="text-sm font-semibold">Theme settings</h2>
+        <h2 className="text-base font-semibold tracking-tight">Theme settings</h2>
         <p className="text-xs text-muted-foreground">These apply to every page of your store and update the preview immediately. Elements inherit them until you change them under Style.</p>
       </header>
       {groups.map(([group, descriptors]) => (
-        <fieldset key={group} className="space-y-4">
-          <legend className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{GROUP_LABELS[group] ?? group}</legend>
+        <fieldset key={group} className="space-y-4 rounded-xl border bg-background/60 p-3.5">
+          <legend className="-ml-1 px-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{GROUP_LABELS[group] ?? group}</legend>
           {descriptors.map((d) => (
             <SettingField key={`${group}.${d.id}`} descriptor={d} value={settings[group]?.[d.id]} disabled={disabled} error={problems[`settings.${group}.${d.id}`]} onChange={(value) => onChange(group, d.id, value)} />
           ))}
