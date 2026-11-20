@@ -34,3 +34,18 @@ export function withProductEdits<T extends PreviewStoreData>(data: T, edits: Rec
     collectionProducts: data.collectionProducts ? Object.fromEntries(Object.entries(data.collectionProducts).map(([k, v]) => [k, map(v)])) : data.collectionProducts,
   };
 }
+
+/** A product just added from the editor, as the preview lists it. */
+export type AddedProduct = { slug: string; name: string; shortDescription: string; priceMinor: number; compareAtPriceMinor: number | null; imagePath: string | null };
+
+/**
+ * The preview data with products added from the editor listed first (the store lists newest first), until the page's own data has
+ * them too. A slug already in the list is not added twice. Returns the same object when there is nothing to add.
+ */
+export function withAddedProducts<T extends PreviewStoreData>(data: T, added: AddedProduct[]): T {
+  const known = new Set(data.store.products.map((p) => p.slug));
+  const fresh = added.filter((a) => !known.has(a.slug));
+  if (fresh.length === 0) return data;
+  const rows: PreviewProduct[] = fresh.map((a) => ({ name: a.name, slug: a.slug, short_description: a.shortDescription.trim() ? a.shortDescription : null, price_minor: a.priceMinor, compare_at_price_minor: a.compareAtPriceMinor, image_path: a.imagePath }));
+  return { ...data, store: { ...data.store, products: [...rows, ...data.store.products] } };
+}

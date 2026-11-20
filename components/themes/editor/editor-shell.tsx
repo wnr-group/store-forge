@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, Globe, History as HistoryIcon, Layers, Loader2, Monitor, Package, Palette, Redo2, Rocket, Smartphone, SlidersHorizontal, SquareDashedMousePointer, Tablet, Undo2, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowLeftToLine, Check, ChevronRight, CircleAlert, Eye, FolderTree, Globe, History as HistoryIcon, Layers, LayoutGrid, Loader2, Monitor, Package, Palette, Plus, Redo2, Rocket, Smartphone, SlidersHorizontal, SquareDashedMousePointer, Tablet, Undo2, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getPresentationAction, getTemplateAction, loadProductPreviewAction, saveDraftAction, savePresentationDraftAction } from "@/app/(dashboard)/dashboard/templates/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { ROUTES } from "@/config/app";
 import { adapterForLook, lookOf } from "@/lib/editor/adapters";
 import { formatMoney } from "@/lib/money";
-import { withProductEdits, type CardProductEdit } from "@/lib/themes/editor/product-edits";
+import { withAddedProducts, withProductEdits, type AddedProduct, type CardProductEdit } from "@/lib/themes/editor/product-edits";
 import { CARD_PARTS, availableCardParts, descriptionOnByDefault, hasProductCards, readCardParts, type CardPartKey } from "@/lib/templates/card-parts";
 import { isHomeTheme } from "@/lib/templates/engine/theme-style";
 import { applyInlineEdit, locateInlineEdit } from "@/lib/editor/inline";
@@ -55,6 +56,7 @@ import { SettingsPanel } from "./settings-panel";
 import { usePreviewTarget, type TargetKind } from "./use-preview-target";
 import { PREVIEW_OPEN_EVENT } from "@/components/storefront/cart/use-quick-add";
 import { ProductQuickEdit, type CardProductRef, type QuickEditField } from "./product-quick-edit";
+import { QuickCreate, type CreateKind } from "./quick-create";
 import { VersionsSheet } from "./versions-sheet";
 import { PreviewModeNote, PreviewModeSwitch } from "../preview-mode-switch";
 import type { CardTools } from "../selection-overlay";
@@ -128,12 +130,15 @@ export function EditorShell({ init }: { init: EditorInit }) {
   // The product being edited from its card (a dialog), and products already saved from a card, shown at once in the preview.
   const [editingProduct, setEditingProduct] = useState<{ product: CardProductRef; field: QuickEditField } | null>(null);
   const [productEdits, setProductEdits] = useState<Record<string, CardProductEdit>>({});
+  // Adding a product, a category or a collection from the editor (a dialog), and products added so far, listed at once in the preview.
+  const [creating, setCreating] = useState<CreateKind | null>(null);
+  const [addedProducts, setAddedProducts] = useState<AddedProduct[]>([]);
   // The merchant's real catalogue by default; demo content only on request, and never saved anywhere.
   const [previewMode, setPreviewMode] = useState<PreviewMode>("store");
   const preview = useMemo(() => {
     const data = previewData(init.data, previewMode);
-    return previewMode === "store" ? withProductEdits(data, productEdits) : data;
-  }, [init.data, previewMode, productEdits]);
+    return previewMode === "store" ? withAddedProducts(withProductEdits(data, productEdits), addedProducts) : data;
+  }, [init.data, previewMode, productEdits, addedProducts]);
   // Browsing inside the editor: which product, collection or content page is shown, links that open pages, and a way back.
   const target = usePreviewTarget(preview);
   // Inspector on: clicking selects and edits. Off: the preview works like the live store (links open pages, buttons work).
@@ -927,6 +932,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             const edit = pickedProduct && previewMode === "store" ? EDIT_FIELD[key] : undefined;
             return { key: part.setting, label: part.label, help: part.help, on: readCardParts(pickedSection.settings, cardContext.descriptionDefault)[key], value, edit };
           }),
+          onAddProduct: previewMode === "store" && init.canManage ? () => setCreating("product") : undefined,
           onEdit: (field) => pickedProduct && setEditingProduct({ product: { slug: pickedProduct.slug, name: pickedProduct.name }, field: field as QuickEditField }),
           onToggle: (setting, on) => actions.setSetting(state.pageId, pickedCard.sectionId, setting, on),
         }
@@ -1092,6 +1098,18 @@ export function EditorShell({ init }: { init: EditorInit }) {
               ))}
             </div>
             <div className="ml-auto flex items-center gap-2 md:ml-0">
+              {init.canManage ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={<Button variant="outline" size="sm" aria-label="Add a product, category or collection" />}>
+                    <Plus aria-hidden /><span className="hidden sm:inline">Add</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-60">
+                    <DropdownMenuItem onClick={() => setCreating("product")}><Package aria-hidden /> Product</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setCreating("category")}><FolderTree aria-hidden /> Category</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setCreating("collection")}><LayoutGrid aria-hidden /> Collection</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
               <PreviewModeSwitch mode={previewMode} onChange={setPreviewMode} className="hidden bg-background md:inline-flex" />
               <NativeSelect aria-label="Zoom" value={String(zoom)} onChange={(e) => setZoom(Number(e.target.value))} className="hidden h-8 w-20 rounded-lg bg-background text-xs md:block">
                 {ZOOMS.map((z) => (
@@ -1207,6 +1225,22 @@ export function EditorShell({ init }: { init: EditorInit }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      <QuickCreate
+        kind={creating}
+        canEdit={init.canManage}
+        currency={init.data.store.currency}
+        collections={init.data.collections.map((c) => ({ id: c.id, name: c.name }))}
+        onClose={() => setCreating(null)}
+        onCreated={(created) => {
+          // A new product that shoppers can see is listed in the preview straight away; everything else shows once the page's data is read again.
+          if (created.kind === "product" && created.active) {
+            const p = created.product;
+            setAddedProducts((prev) => [{ slug: p.slug, name: p.name, shortDescription: p.shortDescription, priceMinor: p.priceMinor, compareAtPriceMinor: p.compareAtPriceMinor, imagePath: p.imagePath }, ...prev.filter((x) => x.slug !== p.slug)]);
+          }
+          router.refresh();
+        }}
+      />
 
       <ProductQuickEdit
         target={editingProduct?.product ?? null}

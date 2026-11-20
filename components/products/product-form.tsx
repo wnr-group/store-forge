@@ -8,6 +8,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { createProductAction, deleteProductsAction, updateProductAction } from "@/app/(dashboard)/dashboard/products/actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { useReportFormState, type FormState } from "@/components/shared/embedded-form";
 import { FormField } from "@/components/shared/form-field";
 import { SectionCard } from "@/components/shared/section-card";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -54,6 +55,11 @@ type Props = {
   collections: { id: string; name: string }[];
   initial?: ProductDetail;
   canDelete: boolean;
+  /**
+   * Set when the form is shown in a dialog (the theme editor) instead of on its own page: a created product is reported here rather
+   * than opening its page, and Cancel calls `onCancel` instead of going to the product list. Nothing else about the form changes.
+   */
+  embedded?: { onCreated: (id: string, status: "draft" | "active") => void; onCancel: () => void; onStateChange?: (state: FormState) => void };
 };
 
 function toValues(currency: string, d?: ProductDetail): Values {
@@ -93,13 +99,14 @@ function toValues(currency: string, d?: ProductDetail): Values {
   };
 }
 
-export function ProductForm({ mode, currency, categories, collections, initial, canDelete }: Props) {
+export function ProductForm({ mode, currency, categories, collections, initial, canDelete, embedded }: Props) {
   const router = useRouter();
   const [productId] = useState(() => initial?.product.id ?? uuid());
   const defaults = useMemo(() => toValues(currency, initial), [currency, initial]);
-  const { register, control, setValue, getValues } = useForm<Values>({ defaultValues: defaults });
+  const { register, control, setValue, getValues, formState } = useForm<Values>({ defaultValues: defaults });
   const { errors, formError, setFormError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  useReportFormState(embedded?.onStateChange, formState.isDirty, pending);
 
   const v = useWatch({ control }) as Values;
   const hasVariants = v.variants.length > 0 || v.options.length > 0;
@@ -157,7 +164,10 @@ export function ProductForm({ mode, currency, categories, collections, initial, 
       }
       toast.success(mode === "create" ? "Product created" : "Changes saved");
       setValue("images", getValues("images").map((i) => ({ ...i, saved: i.status === "done" })));
-      if (mode === "create") router.replace(`${ROUTES.products}/${productId}`);
+      if (mode === "create") {
+        if (embedded) embedded.onCreated(productId, payload.status);
+        else router.replace(`${ROUTES.products}/${productId}`);
+      }
       else router.refresh();
     });
   }
@@ -331,12 +341,16 @@ export function ProductForm({ mode, currency, categories, collections, initial, 
         </div>
       </div>
 
-      <div className="sticky bottom-0 z-20 -mx-3 mt-6 border-t bg-background sm:-mx-6">
-        <div className="flex items-center justify-end gap-2 px-3 py-3 sm:px-6">
+      <div className={cn("sticky bottom-0 z-20 mt-6 border-t bg-background", embedded ? "-mx-4 -mb-4" : "-mx-3 sm:-mx-6")}>
+        <div className={cn("flex items-center justify-end gap-2 py-3", embedded ? "px-4" : "px-3 sm:px-6")}>
           {uploading ? <span className="mr-auto text-xs text-muted-foreground">Waiting for uploads to finish…</span> : null}
-          <Link href={ROUTES.products} className={cn(buttonVariants({ variant: "outline" }), "h-9")}>
-            {mode === "create" ? "Cancel" : "Back"}
-          </Link>
+          {embedded ? (
+            <Button type="button" variant="outline" className="h-9" onClick={embedded.onCancel} disabled={pending}>Cancel</Button>
+          ) : (
+            <Link href={ROUTES.products} className={cn(buttonVariants({ variant: "outline" }), "h-9")}>
+              {mode === "create" ? "Cancel" : "Back"}
+            </Link>
+          )}
           <Button type="submit" className="h-9" disabled={pending || uploading}>
             {pending ? <Loader2 className="animate-spin" aria-hidden /> : null}
             {pending ? "Saving…" : mode === "create" ? "Create product" : "Save changes"}

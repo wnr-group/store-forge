@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { withProductEdits, type CardProductEdit } from "@/lib/themes/editor/product-edits";
+import { withAddedProducts, withProductEdits, type CardProductEdit } from "@/lib/themes/editor/product-edits";
 import type { PreviewStoreData } from "@/lib/themes/types";
 
 const product = (slug: string, name: string) => ({ name, slug, short_description: "old", price_minor: 1000, compare_at_price_minor: null, image_path: "a.jpg" });
@@ -25,5 +25,24 @@ describe("products edited from a card", () => {
 
   it("returns the same object when nothing was edited", () => {
     expect(withProductEdits(data, {})).toBe(data);
+  });
+});
+
+describe("products added from the editor", () => {
+  const added = { slug: "three", name: "Three", shortDescription: "", priceMinor: 500, compareAtPriceMinor: null, imagePath: null };
+
+  it("lists a new product first, as the newest", () => {
+    const out = withAddedProducts(data, [added]);
+    expect(out.store.products.map((p) => p.slug)).toEqual(["three", "one", "two"]);
+    expect(out.store.products[0]).toMatchObject({ name: "Three", price_minor: 500, short_description: null });
+  });
+
+  it("does not list a product twice once the page data has it", () => {
+    const out = withAddedProducts(data, [{ ...added, slug: "one" }]);
+    expect(out).toBe(data);
+  });
+
+  it("returns the same object when nothing was added", () => {
+    expect(withAddedProducts(data, [])).toBe(data);
   });
 });

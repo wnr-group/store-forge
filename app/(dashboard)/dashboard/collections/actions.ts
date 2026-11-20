@@ -6,7 +6,7 @@ import { ROUTES } from "@/config/app";
 import { run } from "@/lib/actions/run";
 import { collectionInputSchema } from "@/lib/validations/catalog";
 import { parseInput } from "@/lib/validations/parse";
-import { createCollection, deleteCollection, updateCollection } from "@/services/collection.service";
+import { createCollection, deleteCollection, listProductOptions, updateCollection } from "@/services/collection.service";
 import { invalidateStorefront } from "@/lib/storefront/cache";
 
 const refresh = async () => {
@@ -35,3 +35,7 @@ export async function deleteCollectionAction(id: unknown) {
   });
 }
 
+/** The store's products (id and name) for the product picker of the collection form. */
+export async function listProductOptionsAction() {
+  return run(async () => listProductOptions());
+}

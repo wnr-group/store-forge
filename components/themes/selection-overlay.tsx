@@ -17,6 +17,8 @@ export type CardTools = {
   onToggle: (key: string, on: boolean) => void;
   /** Opens the product's own details (name, price, picture ...) with this field first. */
   onEdit: (field: string) => void;
+  /** Adds a new product to the store; left out where adding is not possible (demo products, no access). */
+  onAddProduct?: () => void;
 };
 
 const BLUE = "#2563eb";
@@ -246,6 +248,18 @@ function CardToolbar({ box, layerWidth, tools, frame }: { box: Box; layerWidth: 
                 </div>
               );
             })}
+            {tools.onAddProduct ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  tools.onAddProduct?.();
+                }}
+                style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "center", gap: 6, margin: "6px 0 2px", padding: "9px 8px", border: `1px dashed ${BLUE}`, borderRadius: 8, background: "rgba(37,99,235,.05)", color: BLUE, cursor: "pointer", font: `600 12.5px/1 ${font}` }}
+              >
+                <span aria-hidden style={{ font: "700 16px/1 system-ui" }}>+</span> Add a new product
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>

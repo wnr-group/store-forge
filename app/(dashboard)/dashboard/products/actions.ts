@@ -60,6 +60,11 @@ export async function duplicateProductAction(id: unknown) {
   });
 }
 
+/** A product by id, as the editor shows it on a card: used right after one is added from the editor. */
+export async function readQuickEditAction(id: unknown) {
+  return run(async () => readQuickEdit(parseInput(z.uuid(), id)));
+}
+
 const quickLookupSchema = z.object({ slug: z.string().min(1).max(200), name: z.string().max(300) });
 
 /** The product behind a card in the theme editor, with the few fields the card shows. */

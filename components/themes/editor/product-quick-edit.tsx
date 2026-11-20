@@ -13,8 +13,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useReportFormState, type FormState } from "@/components/shared/embedded-form";
 import { ROUTES } from "@/config/app";
 import type { QuickEditProduct } from "@/services/product.service";
+import { useDiscardGuard } from "./discard-guard";
 
 /** The product a card shows: its address and name, which is all the card carries. */
 export type CardProductRef = { slug: string; name: string };
@@ -40,8 +42,12 @@ export function ProductQuickEdit({ target, field, canEdit, onClose, onSaved }: {
     },
   });
 
+  // Esc, a click outside and Cancel ask first when something was changed; a finished save closes without asking.
+  const guard = useDiscardGuard(onClose);
+
   return (
-    <Dialog open={Boolean(target)} onOpenChange={(open) => { if (!open) onClose(); }}>
+    <>
+    <Dialog open={Boolean(target)} onOpenChange={(open) => { if (!open) guard.requestClose(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit product</DialogTitle>
@@ -57,14 +63,16 @@ export function ProductQuickEdit({ target, field, canEdit, onClose, onSaved }: {
             </AlertDescription>
           </Alert>
         ) : (
-          <QuickEditForm key={query.data.id} product={query.data} field={field} canEdit={canEdit} onClose={onClose} onSaved={onSaved} />
+          <QuickEditForm key={query.data.id} product={query.data} field={field} canEdit={canEdit} onCancel={guard.requestClose} onDone={guard.closeNow} onStateChange={guard.report} onSaved={onSaved} />
         )}
       </DialogContent>
     </Dialog>
+    {guard.confirm}
+    </>
   );
 }
 
-function QuickEditForm({ product, field, canEdit, onClose, onSaved }: { product: QuickEditProduct; field: QuickEditField; canEdit: boolean; onClose: () => void; onSaved: (product: QuickEditProduct) => void }) {
+function QuickEditForm({ product, field, canEdit, onCancel, onDone, onStateChange, onSaved }: { product: QuickEditProduct; field: QuickEditField; canEdit: boolean; onCancel: () => void; onDone: () => void; onStateChange: (state: FormState) => void; onSaved: (product: QuickEditProduct) => void }) {
   const [name, setName] = useState(product.name);
   const [shortDescription, setShortDescription] = useState(product.shortDescription);
   const [price, setPrice] = useState(product.price);
@@ -80,6 +88,7 @@ function QuickEditForm({ product, field, canEdit, onClose, onSaved }: { product:
   const newPath = images[0]?.status === "done" && images[0].path !== product.imagePath ? images[0].path : null;
   const changed = name !== product.name || shortDescription !== product.shortDescription || price !== product.price || compareAtPrice !== product.compareAtPrice || newPath !== null;
   const disabled = !canEdit || saving;
+  useReportFormState(onStateChange, changed || uploading, saving);
 
   async function save() {
     if (failed) return setError("Remove the picture that failed to upload, or upload it again.");
@@ -95,7 +104,7 @@ function QuickEditForm({ product, field, canEdit, onClose, onSaved }: { product:
       }
       toast.success("Product updated", { description: result.data!.name });
       onSaved(result.data!);
-      onClose();
+      onDone();
     } catch {
       setError("Could not save the product. Check your connection and try again.");
     } finally {
@@ -149,7 +158,7 @@ function QuickEditForm({ product, field, canEdit, onClose, onSaved }: { product:
           Full product page <ExternalLink className="size-3" aria-hidden />
         </Link>
         <span className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={saving}>Cancel</Button>
           <Button type="submit" disabled={disabled || uploading || !changed}>
             {saving ? <Loader2 className="animate-spin" aria-hidden /> : null} Save
           </Button>
