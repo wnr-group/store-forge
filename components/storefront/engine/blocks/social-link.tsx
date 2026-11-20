@@ -1,6 +1,7 @@
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { blockMarkers } from "../markers";
+import { SocialIcon } from "./social-icons";
 
 interface SocialLinkBlockProps {
   node: ComponentNode;
@@ -21,7 +22,6 @@ export function SocialLinkBlock({ node, context, blockId }: SocialLinkBlockProps
     x: "X",
     twitter: "Twitter",
     pinterest: "Pinterest",
-    tiktok: "TikTok",
     youtube: "YouTube",
     linkedin: "LinkedIn",
   };
@@ -33,9 +33,10 @@ export function SocialLinkBlock({ node, context, blockId }: SocialLinkBlockProps
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      className="inline-flex items-center gap-1.5 rounded-full border border-current/20 px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-current/50 hover:text-foreground"
       {...sfProps}
     >
+      <SocialIcon network={network} className="size-4 shrink-0" />
       <span>{displayName}</span>
     </a>
   );
