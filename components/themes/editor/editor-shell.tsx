@@ -1004,7 +1004,21 @@ export function EditorShell({ init }: { init: EditorInit }) {
             <span className="truncate">{loadingProduct ? `Loading ${loadingProduct.name ?? "product"}…` : (currentEntry?.name ?? "Product")}</span>
           </Button>
         ) : null}
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <div className="hidden min-w-0 flex-1 items-center justify-center gap-3 md:flex">
+          <div className="hidden min-w-0 items-center gap-1.5 rounded-full border bg-background px-3 py-1 font-mono text-[11px] text-muted-foreground xl:flex" title={init.storeHost}>
+            <Globe className="size-3 shrink-0" aria-hidden />
+            <span className="max-w-[22rem] truncate">{init.storeHost}</span>
+          </div>
+          <div className="flex shrink-0 items-center rounded-lg border bg-background p-0.5" role="group" aria-label="Preview size">
+            {DEVICES.map(({ id, label, icon: Icon, width }) => (
+              <button key={id} type="button" aria-label={label} title={`${label} (${width}px)`} aria-pressed={device === id} onClick={() => setDevice(id)} className={cn("flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[11px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring", device === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
+                <Icon className="size-3.5" aria-hidden />
+                <span className="hidden font-mono lg:inline">{width}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2 md:ml-0">
           <div className="flex items-center rounded-lg border bg-background p-0.5" role="group" aria-label="History">
             <Button variant="ghost" size="icon-sm" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)" disabled={!canUndo(history) || !canEdit} onClick={undoEdit}><Undo2 aria-hidden /></Button>
             <Button variant="ghost" size="icon-sm" aria-label="Redo (Ctrl+Shift+Z)" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo(history) || !canEdit} onClick={redoEdit}><Redo2 aria-hidden /></Button>
@@ -1085,19 +1099,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
 
         <main className={cn("min-h-0 min-w-0 flex-col bg-muted/50 lg:flex", mobileTab === "preview" ? "flex" : "hidden")} aria-label="Live preview">
           <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-card/80 px-3 py-2 backdrop-blur">
-            <div className="hidden min-w-0 items-center gap-1.5 rounded-full border bg-background px-3 py-1 font-mono text-[11px] text-muted-foreground lg:flex" title="Your store address">
-              <Globe className="size-3 shrink-0" aria-hidden />
-              <span className="truncate">{init.storeHost}</span>
-            </div>
-            <div className="mx-auto hidden items-center rounded-lg border bg-background p-0.5 md:flex" role="group" aria-label="Preview size">
-              {DEVICES.map(({ id, label, icon: Icon, width }) => (
-                <button key={id} type="button" aria-label={label} title={label} aria-pressed={device === id} onClick={() => setDevice(id)} className={cn("flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[11px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring", device === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
-                  <Icon className="size-3.5" aria-hidden />
-                  <span className="hidden font-mono lg:inline">{width}</span>
-                </button>
-              ))}
-            </div>
-            <div className="ml-auto flex items-center gap-2 md:ml-0">
+            <div className="ml-auto flex items-center gap-2">
               {init.canManage ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger render={<Button variant="outline" size="sm" aria-label="Add a product, category or collection" />}>
