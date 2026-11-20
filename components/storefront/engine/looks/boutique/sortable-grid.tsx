@@ -8,6 +8,7 @@ import { inBand, priceBands, type PriceBand } from "@/lib/storefront/price-bands
 import { cn } from "@/lib/utils";
 import { gridColumns, type CardProduct } from "../../ui";
 import { BoutiqueProductCard } from "./product-card";
+import type { CardParts } from "@/lib/templates/card-parts";
 
 const SORTS = [
   { value: "featured", label: "Featured" },
@@ -42,7 +43,7 @@ function bandLabel(band: PriceBand, currency: string): string {
  * The product listing with its filters: collection tabs (links to each collection, the current one highlighted), price
  * bands worked out from this list, an in-stock filter and sorting. It only narrows and reorders what the store sent.
  */
-export function SortableGrid({ products, currency, columns, basePath, linked, collections = [], activeCollection = null }: { products: CardProduct[]; currency: string; columns: number; basePath: string; linked: boolean; collections?: Tab[]; activeCollection?: string | null }) {
+export function SortableGrid({ products, currency, columns, basePath, linked, collections = [], activeCollection = null, parts }: { parts?: CardParts; products: CardProduct[]; currency: string; columns: number; basePath: string; linked: boolean; collections?: Tab[]; activeCollection?: string | null }) {
   const [sort, setSort] = useState<Sort>("featured");
   const [inStock, setInStock] = useState(false);
   const [bandId, setBandId] = useState<string | null>(null);
@@ -138,7 +139,7 @@ export function SortableGrid({ products, currency, columns, basePath, linked, co
         <ul className={cn("grid gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:gap-x-6", gridColumns(columns))}>
           {shown.map((p, i) => (
             <li key={p.slug} className="min-w-0">
-              <BoutiqueProductCard product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} priority={i < 4} />
+              <BoutiqueProductCard product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} priority={i < 4} parts={parts} />
             </li>
           ))}
         </ul>

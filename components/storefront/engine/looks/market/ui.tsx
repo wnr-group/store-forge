@@ -48,11 +48,11 @@ const MAIN = { sm: "text-sm", md: "text-base", lg: "text-xl", xl: "text-3xl" } a
 const SUB = { sm: "text-[11px]", md: "text-xs", lg: "text-sm", xl: "text-base" } as const;
 
 /** Price, the struck-through compare-at price and the discount in green. */
-export function Price({ minor, compareAt, currency, size = "md", className }: { minor: number; compareAt?: number | null; currency: string; size?: keyof typeof MAIN; className?: string }) {
-  const off = discount(minor, compareAt);
+export function Price({ minor, compareAt, currency, size = "md", className, showPrice = true, showCompare = true }: { minor: number; compareAt?: number | null; currency: string; size?: keyof typeof MAIN; className?: string; showPrice?: boolean; showCompare?: boolean }) {
+  const off = showCompare ? discount(minor, compareAt) : 0;
   return (
     <span className={cn("flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5", className)}>
-      <span className={cn("font-semibold tracking-tight tabular-nums text-primary", MAIN[size])}>{formatBagPrice(minor, currency)}</span>
+      {showPrice ? <span className={cn("font-semibold tracking-tight tabular-nums text-primary", MAIN[size])}>{formatBagPrice(minor, currency)}</span> : null}
       {off > 0 ? (
         <>
           <span className={cn("text-muted-foreground line-through tabular-nums", SUB[size])}>{formatBagPrice(compareAt!, currency)}</span>

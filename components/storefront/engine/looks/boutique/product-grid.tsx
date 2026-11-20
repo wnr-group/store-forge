@@ -4,6 +4,7 @@ import { SHELL } from "./shell";
 import type { SectionProps } from "..";
 import { DisplayHeading, Eyebrow } from "./eyebrow";
 import { SortableGrid } from "./sortable-grid";
+import { readCardParts } from "@/lib/templates/card-parts";
 
 /** Boutique product listing: every product of the store, or of the collection being shown, with sorting. */
 export function BoutiqueProductGrid({ node, context, sectionId }: SectionProps) {
@@ -26,7 +27,7 @@ export function BoutiqueProductGrid({ node, context, sectionId }: SectionProps) 
       {products.length === 0 ? (
         <EmptyProducts mode={context.mode} title={collection ? "Nothing in this collection yet" : undefined} />
       ) : (
-        <SortableGrid products={products} currency={store.currency ?? "INR"} columns={columns} basePath={String(context.basePath ?? "")} linked={linked} collections={(context.collections ?? []).map((c) => ({ slug: c.slug, name: c.name }))} activeCollection={collection ? ((collection as { slug?: string }).slug ?? null) : null} />
+        <SortableGrid parts={readCardParts(node.settings, true)} products={products} currency={store.currency ?? "INR"} columns={columns} basePath={String(context.basePath ?? "")} linked={linked} collections={(context.collections ?? []).map((c) => ({ slug: c.slug, name: c.name }))} activeCollection={collection ? ((collection as { slug?: string }).slug ?? null) : null} />
       )}
     </section>
   );

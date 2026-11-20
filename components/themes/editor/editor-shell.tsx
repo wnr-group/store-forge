@@ -14,6 +14,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { NativeSelect } from "@/components/ui/native-select";
 import { ROUTES } from "@/config/app";
 import { adapterForLook, lookOf } from "@/lib/editor/adapters";
+import { formatMoney } from "@/lib/money";
+import { withProductEdits, type CardProductEdit } from "@/lib/themes/editor/product-edits";
+import { CARD_PARTS, availableCardParts, descriptionOnByDefault, hasProductCards, readCardParts, type CardPartKey } from "@/lib/templates/card-parts";
+import { isHomeTheme } from "@/lib/templates/engine/theme-style";
 import { applyInlineEdit, locateInlineEdit } from "@/lib/editor/inline";
 import { findSettingForClick } from "@/lib/editor/locate";
 import { originalOf, readTextOverrides } from "@/lib/editor/text";
@@ -50,8 +54,10 @@ import { CollectionChoicesContext } from "./setting-field";
 import { SettingsPanel } from "./settings-panel";
 import { usePreviewTarget, type TargetKind } from "./use-preview-target";
 import { PREVIEW_OPEN_EVENT } from "@/components/storefront/cart/use-quick-add";
+import { ProductQuickEdit, type CardProductRef, type QuickEditField } from "./product-quick-edit";
 import { VersionsSheet } from "./versions-sheet";
 import { PreviewModeNote, PreviewModeSwitch } from "../preview-mode-switch";
+import type { CardTools } from "../selection-overlay";
 import { ThemeFrame, type ClickTarget, type Device } from "../theme-frame";
 
 const registry = getRegistry();
@@ -65,6 +71,8 @@ function findNode(node: ComponentNode, id: string): ComponentNode | undefined {
   return undefined;
 }
 const AUTOSAVE_MS = 1500;
+/** The field of the product a card element edits; the badge and the quick add buttons are only shown or hidden. */
+const EDIT_FIELD: Partial<Record<CardPartKey, QuickEditField>> = { image: "image", title: "name", description: "shortDescription", price: "price", comparePrice: "price" };
 
 export type EditorInit = {
   tenantId: string;
@@ -115,9 +123,17 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const [zoom, setZoom] = useState(0);
   const [focusSetting, setFocusSetting] = useState<{ key: string; nonce: number } | null>(null);
   const [clickedText, setClickedText] = useState<{ text: string; nonce: number } | null>(null);
+  // The product card picked on the page (its section and its position among that section's cards). Not part of the saved design.
+  const [pickedCard, setPickedCard] = useState<{ sectionId: string; index: number; product?: string } | null>(null);
+  // The product being edited from its card (a dialog), and products already saved from a card, shown at once in the preview.
+  const [editingProduct, setEditingProduct] = useState<{ product: CardProductRef; field: QuickEditField } | null>(null);
+  const [productEdits, setProductEdits] = useState<Record<string, CardProductEdit>>({});
   // The merchant's real catalogue by default; demo content only on request, and never saved anywhere.
   const [previewMode, setPreviewMode] = useState<PreviewMode>("store");
-  const preview = useMemo(() => previewData(init.data, previewMode), [init.data, previewMode]);
+  const preview = useMemo(() => {
+    const data = previewData(init.data, previewMode);
+    return previewMode === "store" ? withProductEdits(data, productEdits) : data;
+  }, [init.data, previewMode, productEdits]);
   // Browsing inside the editor: which product, collection or content page is shown, links that open pages, and a way back.
   const target = usePreviewTarget(preview);
   // Inspector on: clicking selects and edits. Off: the preview works like the live store (links open pages, buttons work).
@@ -365,7 +381,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
 
   const actions: SectionActions = useMemo(
     () => ({
-      select: (docId, sectionId, blockId) => { edit((s) => select(s, { docId, sectionId, blockId })); setLeftTab("sections"); setMobileTab("settings"); },
+      select: (docId, sectionId, blockId) => { edit((s) => select(s, { docId, sectionId, blockId })); setPickedCard(null); setLeftTab("sections"); setMobileTab("settings"); },
       toggle: (docId, sectionId) => edit((s) => toggleSection(s, docId, sectionId)),
       duplicate: (docId, sectionId) => edit((s) => duplicateSection(s, docId, sectionId)),
       remove: (docId, sectionId) => edit((s) => removeSection(s, docId, sectionId)),
@@ -381,6 +397,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
       },
       removeBlock: (docId, sectionId, blockId) => edit((s) => removeBlock(s, docId, sectionId, blockId)),
       moveBlock: (docId, sectionId, blockId, toIndex) => edit((s) => moveBlock(s, docId, sectionId, blockId, toIndex, registry)),
+      setSetting: (docId, sectionId, key, value) => edit((s) => setSetting(s, docId, sectionId, undefined, key, value), `set:${docId}:${sectionId}::${key}`),
     }),
     [edit],
   );
@@ -392,6 +409,14 @@ export function EditorShell({ init }: { init: EditorInit }) {
     // Only the theme document decides this; page edits never change the look.
   }, [state.docs]);
 
+  /** What the theme means for product cards: which elements the cards of its look can show, and what they do without a choice. */
+  const cardContext = useMemo(() => {
+    const themeId = Object.values(state.docs).find((d) => d.kind === "theme_settings")?.templateId;
+    const themeDoc = themeId ? state.docs[themeId].document : null;
+    const look = lookOf(themeDoc);
+    return { look, descriptionDefault: descriptionOnByDefault(look, isHomeTheme(themeDoc)) };
+  }, [state.docs]);
+
   const onPreviewSelect = useCallback(
     (target: ClickTarget) => {
       const s = stateRef.current;
@@ -401,6 +426,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
       const known = (s.docs[docId].document as { sections: Record<string, ComponentNode> }).sections[target.sectionId];
       const blockId = target.blockId && known && findNode(known, target.blockId) ? target.blockId : undefined;
       edit((prev) => select(prev, { docId, sectionId: target.sectionId, blockId }));
+      setPickedCard(target.card !== undefined && !blockId && hasProductCards(known?.type) ? { sectionId: target.sectionId, index: target.card, product: target.product } : null);
       setLeftTab("sections");
       setMobileTab("settings");
       // Clicked text or a picture: jump to the setting that holds it (the block first, then its section).
@@ -410,6 +436,8 @@ export function EditorShell({ init }: { init: EditorInit }) {
       const descriptors = (block ? registry.blocks[block.type] : registry.sections[section.type])?.settings ?? [];
       const key = findSettingForClick([{ descriptors, settings: element.settings }], target);
       setFocusSetting(key ? { key, nonce: Date.now() } : null);
+      // A product card's name and price come from the product, not from a setting: nothing to replace here.
+      if (target.card !== undefined && hasProductCards(known?.type)) return void setClickedText(null);
       // Text no setting holds (the theme writes it into its own components): offer it for replacement in the panel.
       const shown = target.text ? originalOf(readTextOverrides(section.settings), target.text) : "";
       setClickedText(!key && target.text ? { text: shown, nonce: Date.now() } : null);
@@ -874,6 +902,35 @@ export function EditorShell({ init }: { init: EditorInit }) {
   const selectedSectionId = selection && "sectionId" in selection && selection.docId === state.pageId ? selection.sectionId : null;
   const selectedBlockId = selection && "blockId" in selection && selection.docId === state.pageId ? (selection.blockId ?? null) : null;
   const virtualPage = isVirtualId(state.pageId) ? virtualKey(state.pageId) : null;
+  // The + bar over a picked product card: only while that card's section is still the selection, and never for a block inside it.
+  const pickedSection = pickedCard && pickedCard.sectionId === selectedSectionId && !selectedBlockId ? (page.document as { sections?: Record<string, ComponentNode> }).sections?.[pickedCard.sectionId] : undefined;
+  const pickedProduct = pickedCard?.product
+    ? ([...preview.store.products, ...Object.values(preview.collectionProducts ?? {}).flat()].find((p) => p.slug === pickedCard.product) ?? null)
+    : null;
+  const cardTools: CardTools | null =
+    pickedCard && pickedSection && hasProductCards(pickedSection.type)
+      ? {
+          sectionId: pickedCard.sectionId,
+          index: pickedCard.index,
+          disabled: !canEdit,
+          items: availableCardParts(cardContext.look).map((key) => {
+            const part = CARD_PARTS.find((p) => p.key === key)!;
+            const shown = pickedProduct;
+            const value =
+              key === "title" ? shown?.name
+              : key === "description" ? (shown?.short_description ?? "")
+              : key === "price" ? (shown ? formatMoney(shown.price_minor, preview.store.currency) : undefined)
+              : key === "comparePrice" ? (shown?.compare_at_price_minor ? formatMoney(shown.compare_at_price_minor, preview.store.currency) : "")
+              : key === "image" ? (shown?.image_path ? "Change the picture" : "Add a picture")
+              : undefined;
+            // Only a real product can be edited; demo products are samples.
+            const edit = pickedProduct && previewMode === "store" ? EDIT_FIELD[key] : undefined;
+            return { key: part.setting, label: part.label, help: part.help, on: readCardParts(pickedSection.settings, cardContext.descriptionDefault)[key], value, edit };
+          }),
+          onEdit: (field) => pickedProduct && setEditingProduct({ product: { slug: pickedProduct.slug, name: pickedProduct.name }, field: field as QuickEditField }),
+          onToggle: (setting, on) => actions.setSetting(state.pageId, pickedCard.sectionId, setting, on),
+        }
+      : null;
   const sectionCount = (page.document as { order?: string[] }).order?.length ?? 0;
   // Duplicate and delete for the selected element, shown in the inspector header (only on the page being edited, never shared parts).
   const editableSelection = selection && "sectionId" in selection && selection.docId === state.pageId ? selection : null;
@@ -993,7 +1050,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
               {leftTab === "sections" ? (
-                <SectionsPanel state={state} groupIds={groupIds} pageKind={page.kind} actions={actions} disabled={!canEdit} />
+                <SectionsPanel state={state} groupIds={groupIds} pageKind={page.kind} actions={actions} disabled={!canEdit} cardContext={cardContext} />
               ) : leftTab === "product" ? (
                 previewMode === "demo" ? (
                   <div className="space-y-3 p-4">
@@ -1066,7 +1123,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
               {loadingPage ? (
                 <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
               ) : (
-                <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} onEditText={onEditText} onEditBlocked={onEditBlocked} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} labelFor={labelFor} zoom={zoom || null} {...frameProps} />
+                <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} onEditText={onEditText} onEditBlocked={onEditBlocked} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} labelFor={labelFor} zoom={zoom || null} cardTools={cardTools} {...frameProps} />
               )}
             </div>
           </div>
@@ -1105,6 +1162,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             onSetting={(docId, sectionId, blockId, key, value) => edit((s) => setSetting(s, docId, sectionId, blockId, key, value), `set:${docId}:${sectionId}:${blockId ?? ""}:${key}`)}
             onThemeSetting={(docId, group, key, value) => edit((s) => setThemeSetting(s, docId, group, key, value), `theme:${docId}:${group}.${key}`)}
             adapter={adapter}
+            cardContext={cardContext}
             styleDevice={STYLE_DEVICE[device]}
             onStyle={onStyle}
             onResetStyle={onResetStyle}
@@ -1149,6 +1207,18 @@ export function EditorShell({ init }: { init: EditorInit }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ProductQuickEdit
+        target={editingProduct?.product ?? null}
+        field={editingProduct?.field ?? "name"}
+        canEdit={init.canManage}
+        onClose={() => setEditingProduct(null)}
+        onSaved={(saved) => {
+          setProductEdits((prev) => ({ ...prev, [saved.slug]: { slug: saved.slug, name: saved.name, shortDescription: saved.shortDescription, priceMinor: saved.priceMinor, compareAtPriceMinor: saved.compareAtPriceMinor, imagePath: saved.imagePath } }));
+          // The page's own data (the product lists the preview is built from) is read again in the background.
+          router.refresh();
+        }}
+      />
 
       <VersionsSheet open={versionsOpen} onClose={() => setVersionsOpen(false)} templateId={isVirtualId(state.pageId) && themeDocId ? themeDocId : state.pageId} pageName={isVirtualId(state.pageId) ? "Theme settings and other pages" : (PAGE_LABEL[page.kind] ?? page.name)} canManage={init.canManage} hasUnsavedChanges={isDirty(page) || (themeDocId ? isDirty(state.docs[themeDocId]) : false)} onRestored={(id) => void afterRestore(id)} />
 

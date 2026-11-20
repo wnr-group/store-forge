@@ -1,4 +1,5 @@
 import type { SectionDefinition } from "../../engine/descriptors";
+import { cardPartSettings } from "../../card-parts";
 
 export const featuredCollectionSection: SectionDefinition = {
   type: "featured-collection",
@@ -57,5 +58,6 @@ export const featuredCollectionSection: SectionDefinition = {
       label: "Show View All Link",
       default: true,
     },
+    ...cardPartSettings,
   ],
 };

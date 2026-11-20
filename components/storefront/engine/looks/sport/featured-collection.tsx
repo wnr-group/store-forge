@@ -1,5 +1,6 @@
 import { resolveCollection } from "@/lib/storefront/featured";
 import { cn } from "@/lib/utils";
+import { readCardParts } from "@/lib/templates/card-parts";
 import { EmptyProducts, gridColumns, type CardProduct } from "../../ui";
 import type { SectionProps } from "..";
 import { BAND_Y, SHELL, SportEyebrow, SportTitle, ViewAll } from "./ui";
@@ -19,6 +20,7 @@ export function SportFeaturedCollection({ node, context, sectionId }: SectionPro
   const columns = (node.settings?.columns as number) ?? 4;
   const showViewAll = Boolean(node.settings?.showViewAll ?? true);
   const dark = node.settings?.tone === "dark";
+  const parts = readCardParts(node.settings, true);
   const tone = dark ? "dark" : "light";
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
@@ -46,7 +48,7 @@ export function SportFeaturedCollection({ node, context, sectionId }: SectionPro
           <ul className={cn("grid gap-x-4 gap-y-9 sm:gap-x-6", gridColumns(columns))}>
             {products.map((p, i) => (
               <li key={p.slug} className="min-w-0" {...rise(i)}>
-                <SportProductCard product={p} currency={currency} href={`/products/${p.slug}`} tone={tone} priority={i < 4} />
+                <SportProductCard product={p} currency={currency} href={`/products/${p.slug}`} tone={tone} priority={i < 4} parts={parts} />
               </li>
             ))}
           </ul>

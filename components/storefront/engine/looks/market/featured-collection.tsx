@@ -5,9 +5,10 @@ import { EmptyProducts, type CardProduct } from "../../ui";
 import type { SectionProps } from "..";
 import { MarketProductCard } from "./product-card";
 import { PANEL, PanelHeader, WRAP } from "./ui";
+import { readCardParts, type CardParts } from "@/lib/templates/card-parts";
 
 /** A horizontally scrolling row of product cards on a white panel with a title and "See all": the marketplace "shelf". */
-export function MarketShelf({ title, subtitle, href, products, currency, deal, sfProps }: { title: string; subtitle?: string; href?: string | null; products: CardProduct[]; currency: string; deal?: boolean; sfProps?: { "data-sf-section"?: string } }) {
+export function MarketShelf({ title, subtitle, href, products, currency, deal, sfProps, parts }: { parts?: CardParts; title: string; subtitle?: string; href?: string | null; products: CardProduct[]; currency: string; deal?: boolean; sfProps?: { "data-sf-section"?: string } }) {
   return (
     <section className={cn(WRAP, "py-2")} {...sfProps}>
       <div className={cn(PANEL, deal && "border-accent/30 bg-accent/[0.06]")}>
@@ -16,7 +17,7 @@ export function MarketShelf({ title, subtitle, href, products, currency, deal, s
           <ul className="flex snap-x gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {products.map((p, i) => (
               <li key={p.slug} className="w-[172px] shrink-0 snap-start sm:w-[196px]">
-                <MarketProductCard product={p} currency={currency} href={`/products/${p.slug}`} priority={i < 4} />
+                <MarketProductCard product={p} currency={currency} href={`/products/${p.slug}`} priority={i < 4} parts={parts} />
               </li>
             ))}
           </ul>
@@ -59,5 +60,5 @@ export function MarketFeaturedCollection({ node, context, sectionId }: SectionPr
       </section>
     );
   }
-  return <MarketShelf title={title} subtitle={eyebrow || undefined} href={showViewAll ? (matched ? `/collections/${matched.slug}` : "/products") : null} products={products} currency={store.currency ?? "INR"} deal={deal} sfProps={sfProps} />;
+  return <MarketShelf title={title} subtitle={eyebrow || undefined} href={showViewAll ? (matched ? `/collections/${matched.slug}` : "/products") : null} products={products} currency={store.currency ?? "INR"} deal={deal} sfProps={sfProps} parts={readCardParts(node.settings, false)} />;
 }

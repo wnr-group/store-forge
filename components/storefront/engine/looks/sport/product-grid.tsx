@@ -3,6 +3,7 @@ import { EmptyProducts, type CardProduct } from "../../ui";
 import type { SectionProps } from "..";
 import { SportListing } from "./listing";
 import { SHELL } from "./ui";
+import { readCardParts } from "@/lib/templates/card-parts";
 
 /** Sport product listing section: every product of the store (or of the collection being shown) with filters, search and sort. */
 export function SportProductGrid({ node, context, sectionId }: SectionProps) {
@@ -19,7 +20,7 @@ export function SportProductGrid({ node, context, sectionId }: SectionProps) {
       {products.length === 0 ? (
         <EmptyProducts mode={context.mode} title={resource ? "Nothing in this collection yet" : undefined} />
       ) : (
-        <SportListing products={products} currency={store.currency ?? "INR"} columns={columns} basePath={String(context.basePath ?? "")} linked={linked} collections={(context.collections ?? []).map((c) => ({ slug: c.slug, name: c.name }))} activeCollection={resource?.slug ?? null} />
+        <SportListing parts={readCardParts(node.settings, true)} products={products} currency={store.currency ?? "INR"} columns={columns} basePath={String(context.basePath ?? "")} linked={linked} collections={(context.collections ?? []).map((c) => ({ slug: c.slug, name: c.name }))} activeCollection={resource?.slug ?? null} />
       )}
     </section>
   );

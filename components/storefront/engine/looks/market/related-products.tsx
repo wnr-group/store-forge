@@ -4,6 +4,7 @@ import type { ProductDetailData } from "../../types";
 import type { SectionProps } from "..";
 import { MarketShelf } from "./featured-collection";
 import { PANEL, PanelHeader, WRAP } from "./ui";
+import { readCardParts } from "@/lib/templates/card-parts";
 
 /** Market "more from ..." shelf. Same selection rules as the engine related products: only products that share this product collection or category. */
 export function MarketRelatedProducts({ node, context, sectionId }: SectionProps) {
@@ -37,5 +38,5 @@ export function MarketRelatedProducts({ node, context, sectionId }: SectionProps
       </section>
     );
   }
-  return <MarketShelf title={heading} href="/products" products={related} currency={store.currency ?? "INR"} sfProps={sfProps} />;
+  return <MarketShelf title={heading} href="/products" products={related} currency={store.currency ?? "INR"} sfProps={sfProps} parts={readCardParts(node.settings, false)} />;
 }

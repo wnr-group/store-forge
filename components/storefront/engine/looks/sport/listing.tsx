@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { gridColumns, type CardProduct } from "../../ui";
 import { sortProducts } from "../boutique/sortable-grid";
 import { SportProductCard } from "./product-card";
+import type { CardParts } from "@/lib/templates/card-parts";
 
 const SORTS = [
   { value: "featured", label: "Featured" },
@@ -33,7 +34,7 @@ export function toMinor(input: string, digits: number): number | null {
  * menu and the product grid. It only narrows and reorders the products the store already sent; on phones the filters fold
  * into one "Filters" disclosure above the grid.
  */
-export function SportListing({ products, currency, columns, basePath, linked, collections, activeCollection }: { products: CardProduct[]; currency: string; columns: number; basePath: string; linked: boolean; collections: { slug: string; name: string }[]; activeCollection: string | null }) {
+export function SportListing({ products, currency, columns, basePath, linked, collections, activeCollection, parts }: { parts?: CardParts; products: CardProduct[]; currency: string; columns: number; basePath: string; linked: boolean; collections: { slug: string; name: string }[]; activeCollection: string | null }) {
   const digits = currencyDigits(currency);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("featured");
@@ -158,7 +159,7 @@ export function SportListing({ products, currency, columns, basePath, linked, co
           <ul className={cn("grid gap-x-4 gap-y-9 sm:gap-x-5", gridColumns(Math.min(columns, 4)).replace("lg:grid-cols-4", "md:grid-cols-3 xl:grid-cols-4"))}>
             {shown.map((p, i) => (
               <li key={p.slug} className="min-w-0">
-                <SportProductCard product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} priority={i < 4} />
+                <SportProductCard product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} priority={i < 4} parts={parts} />
               </li>
             ))}
           </ul>

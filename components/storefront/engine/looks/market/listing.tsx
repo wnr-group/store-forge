@@ -11,6 +11,7 @@ import { sortProducts } from "../boutique/sortable-grid";
 import { toMinor } from "../sport/listing";
 import { MarketProductCard } from "./product-card";
 import { PANEL, btnAccent, btnOutline } from "./ui";
+import type { CardParts } from "@/lib/templates/card-parts";
 
 const SORTS = [
   { value: "featured", label: "Featured" },
@@ -29,7 +30,7 @@ const GROUP_TITLE = "text-[13px] font-semibold text-primary";
  * result count, a sort menu, a grid / list switch, removable filter chips and the products. It only narrows and reorders
  * the products the store already sent; on phones the filters open as a panel under the bar.
  */
-export function MarketListing({ products, currency, columns, basePath, linked, collections, activeCollection }: { products: CardProduct[]; currency: string; columns: number; basePath: string; linked: boolean; collections: { slug: string; name: string }[]; activeCollection: string | null }) {
+export function MarketListing({ products, currency, columns, basePath, linked, collections, activeCollection, gridParts, listParts }: { gridParts?: CardParts; listParts?: CardParts; products: CardProduct[]; currency: string; columns: number; basePath: string; linked: boolean; collections: { slug: string; name: string }[]; activeCollection: string | null }) {
   const digits = currencyDigits(currency);
   const [sort, setSort] = useState<Sort>("featured");
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -201,7 +202,7 @@ export function MarketListing({ products, currency, columns, basePath, linked, c
             <ul className={cn("grid grid-cols-2 gap-3 sm:grid-cols-3", columns >= 4 ? "xl:grid-cols-4" : columns === 3 ? "xl:grid-cols-3" : "")}>
               {shown.map((p, i) => (
                 <li key={p.slug} className="min-w-0">
-                  <MarketProductCard product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} priority={i < 4} />
+                  <MarketProductCard product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} priority={i < 4} parts={gridParts} />
                 </li>
               ))}
             </ul>
@@ -209,7 +210,7 @@ export function MarketListing({ products, currency, columns, basePath, linked, c
             <ul className="space-y-3">
               {shown.map((p) => (
                 <li key={p.slug}>
-                  <MarketProductCard layout="list" product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} />
+                  <MarketProductCard layout="list" product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} parts={listParts} />
                 </li>
               ))}
             </ul>

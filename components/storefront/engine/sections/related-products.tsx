@@ -3,6 +3,7 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { ProductDetailData, RenderContext } from "../types";
 import { CONTAINER, GRID_GAP, ProductCard, SECTION_Y, SectionHeading, gridColumns, type CardProduct } from "../ui";
 import { cn } from "@/lib/utils";
+import { readCardParts } from "@/lib/templates/card-parts";
 import { HIDEABLE_SECTION, isHiddenFor, presentationOf } from "@/lib/templates/product-presentation";
 
 interface RelatedProductsSectionProps {
@@ -22,6 +23,7 @@ export function RelatedProductsSection({ node, context, sectionId }: RelatedProd
   if (isHiddenFor(presentationOf(current), HIDEABLE_SECTION)) return null;
   const heading = (node.settings?.heading as string) ?? "You May Also Like";
   const productsToShow = (node.settings?.productsToShow as number) ?? 4;
+  const parts = readCardParts(node.settings, false);
   const columns = (node.settings?.columns as number) ?? 4;
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
@@ -57,7 +59,7 @@ export function RelatedProductsSection({ node, context, sectionId }: RelatedProd
       <ul className={cn("grid", gridColumns(columns), GRID_GAP)}>
         {related.map((p) => (
           <li key={p.slug}>
-            <ProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} />
+            <ProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} parts={parts} />
           </li>
         ))}
       </ul>

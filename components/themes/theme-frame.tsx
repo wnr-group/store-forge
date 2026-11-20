@@ -7,14 +7,14 @@ import type { RenderMode } from "@/components/storefront/engine/types";
 import type { TemplateDocument } from "@/lib/templates/document";
 import type { PreviewStoreData } from "@/lib/themes/types";
 import { cn } from "@/lib/utils";
-import { SelectionOverlay, type Pick } from "./selection-overlay";
+import { SelectionOverlay, type CardTools, type Pick } from "./selection-overlay";
 import { beginInlineEdit, canEditInPlace, textNodeUnderPointer } from "./inline-edit";
 
 export type Device = "desktop" | "tablet" | "mobile";
 export const DEVICE_WIDTH: Record<Device, number> = { desktop: 1280, tablet: 820, mobile: 390 };
 
 /** `texts`: the text of the clicked element and of its text-bearing ancestors, innermost first. */
-export type ClickTarget = { sectionId: string; blockId?: string; texts?: string[]; image?: string; /** The exact piece of text under the pointer. */ text?: string };
+export type ClickTarget = { sectionId: string; blockId?: string; texts?: string[]; image?: string; /** The exact piece of text under the pointer. */ text?: string; /** The product card under the pointer: its position among the cards of the section. */ card?: number; /** The address (slug) of that card's product. */ product?: string };
 
 /** The text node under the pointer (one word group, as the page draws it), or undefined when the click is not on text. */
 function textUnderPointer(event: React.MouseEvent, target: HTMLElement): string | undefined {
@@ -65,6 +65,8 @@ export type ThemeFrameProps = {
   labelFor?: (pick: { sectionId: string; blockId?: string }) => string;
   /** A fixed scale (1 = 100%). Without it the page is scaled to fit the space. */
   zoom?: number | null;
+  /** The product card picked on the page and the menu (+) that adds or removes its elements. */
+  cardTools?: CardTools | null;
   /** The product or collection a product or collection page shows. */
   resource?: Record<string, unknown>;
   className?: string;
@@ -131,7 +133,7 @@ function DeviceScreen({ width, height, scale, left, children }: { width: number;
  * space available. Nothing here is a mock-up, so what the merchant sees is what the storefront renders. Links and forms
  * inside never navigate; in editor mode a click selects the section or block under the pointer instead.
  */
-export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, onEditText, onEditBlocked, inspector = true, selectedSectionId, selectedBlockId, labelFor, zoom, resource, className }: ThemeFrameProps) {
+export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, onEditText, onEditBlocked, inspector = true, selectedSectionId, selectedBlockId, labelFor, zoom, resource, cardTools, className }: ThemeFrameProps) {
   const outer = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ sectionId: string; blockId?: string } | null>(null);
   // The text being edited in place, so a change of mode or a closed preview ends the edit cleanly.
@@ -188,7 +190,8 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
   const scale = zoom ? Math.max(0.25, Math.min(2, zoom)) : fit;
   const editing = mode === "editor";
   const inspecting = editing && inspector;
-  const selected: Pick | null = selectedSectionId ? { sectionId: selectedSectionId, blockId: selectedBlockId ?? undefined } : null;
+  // With a product card picked, the card carries the border (and the + bar) instead of the whole section around it.
+  const selected: Pick | null = selectedSectionId && !cardTools ? { sectionId: selectedSectionId, blockId: selectedBlockId ?? undefined } : null;
 
   const handleClick = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement;
@@ -210,7 +213,9 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
       const t = el.textContent?.trim();
       if (t) texts.push(t.slice(0, 600));
     }
-    onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock, texts, image: imageSource(target.closest("img")), text: textUnderPointer(event, target) });
+    const card = block ? null : target.closest<HTMLElement>("[data-sf-card]");
+    const cardIndex = card && section.contains(card) ? Array.from(section.querySelectorAll("[data-sf-card]")).indexOf(card) : -1;
+    onSelect({ sectionId: section.dataset.sfSection!, blockId: block?.dataset.sfBlock, texts, image: imageSource(target.closest("img")), text: textUnderPointer(event, target), card: cardIndex >= 0 ? cardIndex : undefined, product: cardIndex >= 0 ? card?.dataset.sfProduct : undefined });
   };
 
   /** Double-click on text: edit it right there. Enter keeps it, Escape puts the old words back. */
@@ -269,7 +274,7 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
           here (and every transition in a gallery thumbnail), so nothing waits to scroll into view or keeps animating. */}
       <style>{`.sf-frame [data-sf-reveal],.sf-frame [data-sf-reveal] .sf-word,.sf-frame .sf-up,.sf-frame .sf-hero-word{animation:none!important;transition:none!important;opacity:1!important;translate:none!important}.sf-frame[data-static] *{animation:none!important;transition:none!important}`}</style>
       {/* Selection and hover borders, drawn above the page (see selection-overlay.tsx). */}
-      {inspecting ? <SelectionOverlay frame={pageRef} selected={selected} hover={hover} labelFor={labelFor} /> : null}
+      {inspecting ? <SelectionOverlay frame={pageRef} selected={selected} hover={hover} labelFor={labelFor} card={cardTools} /> : null}
       {inspecting ? <style>{`.sf-frame[data-editing] [data-sf-section],.sf-frame[data-editing] [data-sf-block]{cursor:pointer}`}</style> : null}
     </>
   );

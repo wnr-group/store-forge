@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { resolveCollection } from "@/lib/storefront/featured";
 import { cn } from "@/lib/utils";
+import { readCardParts } from "@/lib/templates/card-parts";
 import { EmptyProducts, SECTION_Y, gridColumns, type CardProduct } from "../../ui";
 import { SHELL } from "./shell";
 import type { SectionProps } from "..";
@@ -20,6 +21,7 @@ export function BoutiqueFeaturedCollection({ node, context, sectionId }: Section
   const columns = (node.settings?.columns as number) ?? 4;
   const showViewAll = Boolean(node.settings?.showViewAll ?? true);
   const tone = node.settings?.tone === "dark" ? "dark" : "light";
+  const parts = readCardParts(node.settings, true);
   const dark = tone === "dark";
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
@@ -59,7 +61,7 @@ export function BoutiqueFeaturedCollection({ node, context, sectionId }: Section
           <ul className={cn("grid gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:gap-x-6", gridColumns(columns))}>
             {products.map((p, i) => (
               <li key={p.slug} className="min-w-0">
-                <BoutiqueProductCard product={p} currency={currency} href={`/products/${p.slug}`} tone={tone} priority={i < 4} />
+                <BoutiqueProductCard product={p} currency={currency} href={`/products/${p.slug}`} tone={tone} priority={i < 4} parts={parts} />
               </li>
             ))}
           </ul>

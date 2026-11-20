@@ -3,6 +3,7 @@ import { EmptyProducts, type CardProduct } from "../../ui";
 import type { SectionProps } from "..";
 import { MarketListing } from "./listing";
 import { WRAP } from "./ui";
+import { readCardParts } from "@/lib/templates/card-parts";
 
 /** Market product listing section: every product of the store (or of the collection being shown) with filters, sort and a grid or list view. */
 export function MarketProductGrid({ node, context, sectionId }: SectionProps) {
@@ -19,7 +20,7 @@ export function MarketProductGrid({ node, context, sectionId }: SectionProps) {
       {products.length === 0 ? (
         <EmptyProducts mode={context.mode} title={resource ? "Nothing in this collection yet" : undefined} />
       ) : (
-        <MarketListing products={products} currency={store.currency ?? "INR"} columns={columns} basePath={String(context.basePath ?? "")} linked={linked} collections={(context.collections ?? []).map((c) => ({ slug: c.slug, name: c.name }))} activeCollection={resource?.slug ?? null} />
+        <MarketListing gridParts={readCardParts(node.settings, false)} listParts={readCardParts(node.settings, true)} products={products} currency={store.currency ?? "INR"} columns={columns} basePath={String(context.basePath ?? "")} linked={linked} collections={(context.collections ?? []).map((c) => ({ slug: c.slug, name: c.name }))} activeCollection={resource?.slug ?? null} />
       )}
     </section>
   );

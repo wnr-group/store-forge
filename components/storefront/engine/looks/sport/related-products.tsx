@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { readCardParts } from "@/lib/templates/card-parts";
 import { gridColumns, type CardProduct } from "../../ui";
 import type { ProductDetailData } from "../../types";
 import type { SectionProps } from "..";
@@ -13,6 +14,7 @@ export function SportRelatedProducts({ node, context, sectionId }: SectionProps)
   const heading = (node.settings?.heading as string) ?? "You may also like";
   const productsToShow = (node.settings?.productsToShow as number) ?? 4;
   const columns = (node.settings?.columns as number) ?? 4;
+  const parts = readCardParts(node.settings, true);
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
 
@@ -43,7 +45,7 @@ export function SportRelatedProducts({ node, context, sectionId }: SectionProps)
         <ul className={cn("grid gap-x-4 gap-y-9 sm:gap-x-6", gridColumns(columns))}>
           {related.map((p, i) => (
             <li key={p.slug} className="min-w-0" {...rise(i % 4)}>
-              <SportProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} />
+              <SportProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} parts={parts} />
             </li>
           ))}
         </ul>

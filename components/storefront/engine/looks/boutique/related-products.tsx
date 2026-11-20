@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { readCardParts } from "@/lib/templates/card-parts";
 import { SECTION_Y, gridColumns, type CardProduct } from "../../ui";
 import { SHELL } from "./shell";
 import type { ProductDetailData } from "../../types";
@@ -13,6 +14,7 @@ export function BoutiqueRelatedProducts({ node, context, sectionId }: SectionPro
   const heading = (node.settings?.heading as string) ?? "You may also like";
   const productsToShow = (node.settings?.productsToShow as number) ?? 4;
   const columns = (node.settings?.columns as number) ?? 4;
+  const parts = readCardParts(node.settings, true);
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
 
@@ -41,7 +43,7 @@ export function BoutiqueRelatedProducts({ node, context, sectionId }: SectionPro
         <ul className={cn("grid gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:gap-x-6", gridColumns(columns))}>
           {related.map((p) => (
             <li key={p.slug} className="min-w-0">
-              <BoutiqueProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} />
+              <BoutiqueProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} parts={parts} />
             </li>
           ))}
         </ul>
