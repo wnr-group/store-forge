@@ -5,7 +5,7 @@ import { asUser } from "./support/studio-session";
 import { publishFromEditor } from "./support/studio-editor";
 
 test.describe.configure({ timeout: 1_800_000 });
-const THEMES = ["Atelier", "Freshly", "Haven", "Lumière", "Maison", "Marketplace", "Plain", "Stride", "Voltage"];
+const THEMES = (process.env.THEMES ?? "Atelier,Freshly,Haven,Lumière,Maison,Marketplace,Plain,Stride,Voltage").split(",");
 type Steps = Record<"open" | "selectElement" | "changeText" | "changeStyle" | "changeVisibility" | "publish" | "storefront", boolean | string>;
 const rows: { theme: string; steps: Steps; notes: string[]; look?: string }[] = [];
 
@@ -34,12 +34,19 @@ async function runSmoke(page: Page, theme: string) {
     await expect(heading).toBeVisible({ timeout: 60_000 });
     steps.open = true;
 
+    const original = (await heading.innerText()).trim();
     await heading.click();
     const inspector = page.getByRole("complementary", { name: "Settings" });
-    const firstText = inspector.locator("input[type=text], input:not([type])").first();
-    await expect(firstText).toBeVisible({ timeout: 15_000 });
+    await expect(inspector.locator("input, textarea").first()).toBeVisible({ timeout: 15_000 });
     steps.selectElement = true;
-    await firstText.fill(text);
+    // The editor opens the setting that holds the clicked words: find the field whose value is the heading text.
+    const fields = inspector.locator("input, textarea");
+    let target = null;
+    for (let i = 0; i < (await fields.count()); i++) {
+      if ((await fields.nth(i).inputValue().catch(() => "")).trim() === original) { target = fields.nth(i); break; }
+    }
+    if (!target) throw new Error(`no settings field holds the heading text "${original}"`);
+    await target.fill(text);
     await expect(frame.locator("body")).toContainText(text, { timeout: 15_000 });
     steps.changeText = true;
 
