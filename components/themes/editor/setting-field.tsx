@@ -6,6 +6,7 @@ import { ImageUploader, type ImageItem } from "@/components/products/image-uploa
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
+import { collectionSelectValue } from "@/lib/storefront/featured";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { VideoField } from "./video-field";
@@ -38,19 +39,18 @@ export function SettingField({ descriptor: d, value, onChange, disabled, error }
 
   const collections = useContext(CollectionChoicesContext);
   if (d.id === "collectionId" && d.type === "text") {
-    const value = typeof current === "string" ? current : "";
-    const known = collections.some((c) => c.slug === value || c.id === value);
+    const { value: selected, known } = collectionSelectValue(current, collections);
     return (
       <div className="space-y-1.5">
         {labelEl}
-        <NativeSelect id={id} value={value} disabled={disabled} aria-invalid={Boolean(error)} onChange={(e) => onChange(e.target.value)}>
+        <NativeSelect id={id} value={selected} disabled={disabled} aria-invalid={Boolean(error)} onChange={(e) => onChange(e.target.value)}>
           <option value="">Newest products (no collection)</option>
           {collections.map((c) => (
-            <option key={c.id} value={c.slug}>{c.name}</option>
+            <option key={c.id} value={c.id}>{c.name}</option>
           ))}
-          {value && !known ? <option value={value}>Removed collection</option> : null}
+          {!known ? <option value={selected}>Removed collection</option> : null}
         </NativeSelect>
-        <p className="text-xs text-muted-foreground">Shows the active products of this collection. Create collections under Catalog &gt; Collections.</p>
+        <p className="text-xs text-muted-foreground">Shows the active products of this collection. Create collections under Studio &gt; Collections.</p>
         {problem}
       </div>
     );

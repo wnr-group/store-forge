@@ -35,3 +35,15 @@ export function resolveCollection<T extends CollectionRef>(ref: unknown, collect
   if (!value) return undefined;
   return collections?.find((c) => c.slug === value || c.id === value);
 }
+
+/**
+ * What the editor's collection select must show for a stored `collectionId`. New choices store the collection's id; older
+ * documents hold its slug. Both resolve to the same collection, so the select is keyed by id and a legacy slug still shows
+ * as chosen. A reference that matches nothing is kept as typed so the editor can flag it as a removed collection.
+ */
+export function collectionSelectValue(ref: unknown, collections: CollectionRef[] | undefined): { value: string; known: boolean } {
+  const match = resolveCollection(ref, collections);
+  if (match) return { value: match.id, known: true };
+  const text = typeof ref === "string" ? ref.trim() : "";
+  return { value: text, known: text === "" };
+}
