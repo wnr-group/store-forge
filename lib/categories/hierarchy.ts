@@ -20,3 +20,24 @@ export function orderCategories<T extends CategoryNode>(rows: T[]): OrderedCateg
   for (const r of rows) if (!seen.has(r.id)) walk(r, 1, r.name); // unreachable rows (cycles) are still shown
   return out;
 }
+
+export type CategoryDeletionImpact = { productCount: number; subcategories: { id: string; name: string }[] };
+
+/** What deleting `id` changes: its own products become uncategorised and its direct subcategories become top-level (DB `SET NULL`). */
+export function categoryDeletionImpact<T extends CategoryNode & { productCount?: number }>(rows: T[], id: string): CategoryDeletionImpact {
+  return {
+    productCount: rows.find((r) => r.id === id)?.productCount ?? 0,
+    subcategories: rows.filter((r) => r.parentId === id).sort(byName).map((r) => ({ id: r.id, name: r.name })),
+  };
+}
+
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+
+export function describeCategoryDeletion({ productCount, subcategories }: CategoryDeletionImpact): string {
+  const products = `${productCount} ${plural(productCount, "product", "products")} will become uncategorised.`;
+  const subs =
+    subcategories.length === 0
+      ? "No subcategories are affected."
+      : `${subcategories.length} ${plural(subcategories.length, "subcategory will become a top-level category", "subcategories will become top-level categories")}: ${subcategories.map((s) => s.name).join(", ")}.`;
+  return `${products} ${subs} The products themselves are kept.`;
+}
