@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PackageOpen, Plus, SearchX } from "lucide-react";
+import { PackageOpen, Plus, SearchX, Upload } from "lucide-react";
 import { ProductTable } from "@/components/products/product-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ListFilters } from "@/components/shared/list-filters";
@@ -26,6 +26,12 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const canManage = canManageCatalog(active);
   const filtered = Boolean(query.q) || query.status !== "all" || query.category !== "all" || query.stock !== "all";
 
+  const importButton = canManage ? (
+    <Link href={`${ROUTES.products}/import`} className={buttonVariants({ variant: "outline" })}>
+      <Upload aria-hidden /> Import
+    </Link>
+  ) : null;
+
   const addButton = canManage ? (
     <Link href={`${ROUTES.products}/new`} className={buttonVariants()}>
       <Plus aria-hidden /> Add product
@@ -34,7 +40,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader title="Products" description="Manage your catalog, pricing and stock." actions={addButton} />
+      <PageHeader title="Products" description="Manage your catalog, pricing and stock." actions={<div className="flex gap-2">{importButton}{addButton}</div>} />
 
       {result.total === 0 && !filtered ? (
         <EmptyState

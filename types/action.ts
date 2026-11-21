@@ -6,4 +6,6 @@ export type ActionResult<T = undefined> =
       error: string;
       code?: string;
       fieldErrors?: Record<string, string>;
+      /** Structured details for allow-listed failures (see lib/api/client.ts); undefined for everything else. */
+      details?: unknown;
     };
