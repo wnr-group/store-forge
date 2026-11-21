@@ -111,15 +111,28 @@ export async function loadCollectionProducts(slug: string, docs: (TemplateDocume
  */
 export const getPublishedDesign = cache(async (slug: string): Promise<PublishedDesign | null> => {
   try {
-    const layout = await getPublicLayoutApi(slug, "index");
-    if (!layout.template?.document) return null;
-    const collections = await getPublicCollectionsApi(slug).catch(() => []);
-    const collectionProducts = await loadCollectionProducts(slug, [layout.template.document as unknown as TemplateDocument], collections);
-    return { layout: layout as PublishedDesign["layout"], collections, collectionProducts };
+    return await loadPublishedDesign(slug);
   } catch {
     return null;
   }
 });
+
+/**
+ * The same read for the storefront itself (D-16, AC-ERR-2): "nothing published" still means the built-in template, but a
+ * failed read or a published document that is not a document is an error, so the shopper sees the neutral "temporarily
+ * unavailable" state with Retry instead of a different design than the one the merchant published.
+ */
+export const getStorefrontDesign = cache(loadPublishedDesign);
+
+async function loadPublishedDesign(slug: string): Promise<PublishedDesign | null> {
+  const layout = await getPublicLayoutApi(slug, "index");
+  if (!layout.template) return null;
+  const document = layout.template.document as unknown;
+  if (!document || typeof document !== "object" || Array.isArray(document)) throw new Error("The published design is not a valid document.");
+  const collections = await getPublicCollectionsApi(slug).catch(() => []);
+  const collectionProducts = await loadCollectionProducts(slug, [document as TemplateDocument], collections);
+  return { layout: layout as PublishedDesign["layout"], collections, collectionProducts };
+}
 
 type PageKind = "product" | "collection";
 
@@ -219,7 +232,7 @@ export const getPublishedCollectionPage = cache(async (slug: string, collectionS
 /** Shared frame for pages the engine builds from a small generated document: the store's published header, footer and theme. */
 export type PublishedFrame = { layout: PublishedDesign["layout"]; collections: PublicCollectionApi[]; collectionProducts?: Record<string, CollectionProductSummary[]> };
 
-export const getPublishedFrame = async (slug: string): Promise<PublishedFrame | null> => getPublishedDesign(slug);
+export const getPublishedFrame = async (slug: string): Promise<PublishedFrame | null> => getStorefrontDesign(slug);
 
 /** Published content pages: titles for menus. A failure means "no pages", never a broken store. */
 export const getPublicPageLinks = cache(async (slug: string): Promise<PublicPageLinkApi[]> => {

@@ -10,8 +10,11 @@ import { listInventory } from "@/services/inventory.service";
  * Real alerts only: stock that needs attention. Streams in via <Suspense> so the
  * extra queries never delay the page behind it.
  */
-export async function Notifications() {
-  const [out, low] = await Promise.all([listInventory({ q: "", stock: "out", page: 1 }), listInventory({ q: "", stock: "low", page: 1 })]);
+export async function Notifications({ canViewStock = true }: { canViewStock?: boolean }) {
+  // A member without catalogue access has no stock to be told about, and the read would be refused (the whole page failed).
+  const [out, low] = canViewStock
+    ? await Promise.all([listInventory({ q: "", stock: "out", page: 1 }), listInventory({ q: "", stock: "low", page: 1 })])
+    : [{ total: 0 }, { total: 0 }];
   const items = [
     ...(out.total ? [{ key: "out", text: `${out.total} item${out.total === 1 ? " is" : "s are"} out of stock`, href: `${ROUTES.inventory}?stock=out` }] : []),
     ...(low.total ? [{ key: "low", text: `${low.total} item${low.total === 1 ? " is" : "s are"} running low`, href: `${ROUTES.inventory}?stock=low` }] : []),

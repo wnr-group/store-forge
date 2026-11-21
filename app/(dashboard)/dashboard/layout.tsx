@@ -16,6 +16,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { ROUTES, SIDEBAR_COOKIE } from "@/config/app";
 import { canViewDashboard, ROLE_LABELS } from "@/lib/auth/permissions";
+import { can } from "@/lib/auth/permissions";
 import { hiddenNavHrefs } from "@/components/dashboard/nav-config";
 import { AppError } from "@/lib/errors";
 import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
@@ -81,7 +82,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <CommandSearch navKey={navKey} hidden={hiddenNav} />
               <ThemeToggle />
               <Suspense fallback={<NotificationsFallback />}>
-                <Notifications />
+                <Notifications canViewStock={can(active, "catalog:view")} />
               </Suspense>
             </div>
           </div>

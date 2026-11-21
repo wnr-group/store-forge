@@ -2,26 +2,13 @@ import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { shot, STORE_SLUG } from "./helpers";
 import { asUser } from "./support/studio-session";
-import { publishFromEditor } from "./support/studio-editor";
+import { applyTheme, publishFromEditor } from "./support/studio-editor";
 
 test.describe.configure({ timeout: 1_800_000 });
+test.use({ actionTimeout: 30_000 });
 const THEMES = (process.env.THEMES ?? "Atelier,Freshly,Haven,Lumière,Maison,Marketplace,Plain,Stride,Voltage").split(",");
 type Steps = Record<"open" | "selectElement" | "changeText" | "changeStyle" | "changeVisibility" | "publish" | "storefront", boolean | string>;
 const rows: { theme: string; steps: Steps; notes: string[]; look?: string }[] = [];
-
-async function applyTheme(page: Page, name: string) {
-  await page.goto("/dashboard/templates");
-  const card = page.getByRole("button", { name: `Preview ${name}`, exact: true }).locator("xpath=ancestor::*[.//button[normalize-space()='Apply theme' or normalize-space()='Customize']][1]");
-  const apply = card.getByRole("button", { name: "Apply theme" });
-  if (await apply.count()) {
-    await apply.click();
-    const dlg = page.getByRole("alertdialog");
-    if (await dlg.count()) await dlg.getByRole("button", { name: /apply|replace|continue|confirm/i }).last().click();
-    await page.waitForURL(/templates\/editor/, { timeout: 60_000 });
-  } else {
-    await page.goto("/dashboard/templates/editor");
-  }
-}
 
 async function runSmoke(page: Page, theme: string) {
   const steps = { open: false, selectElement: false, changeText: false, changeStyle: false, changeVisibility: false, publish: false, storefront: false } as Steps;
@@ -45,9 +32,23 @@ async function runSmoke(page: Page, theme: string) {
     for (let i = 0; i < (await fields.count()); i++) {
       if ((await fields.nth(i).inputValue().catch(() => "")).trim() === original) { target = fields.nth(i); break; }
     }
-    if (!target) throw new Error(`no settings field holds the heading text "${original}"`);
-    await target.fill(text);
-    await expect(frame.locator("body")).toContainText(text, { timeout: 15_000 });
+    let direct = false;
+    if (target) {
+      await target.fill(text);
+      direct = await frame.locator("body").getByText(text).first().waitFor({ timeout: 8_000 }).then(() => true, () => false);
+    }
+    if (!direct) {
+      // A slider hero (Haven, Stride) draws its headline from the slide, not from the hero's own heading field: change it there.
+      const why = target ? "the hero's own Heading field does not change the slider" : "the clicked headline is slide data (no field holds it)";
+      notes.push(`text changed on the first Hero slide: ${why}`);
+      await page.getByText("Hero slide", { exact: true }).first().click();
+      const slideHeading = inspector.getByLabel("Heading", { exact: true });
+      await expect(slideHeading).toBeVisible({ timeout: 15_000 });
+      await slideHeading.fill(text);
+      await expect(frame.locator("body")).toContainText(text, { timeout: 15_000 });
+      // Style and visibility belong to the section: select the hero itself again.
+      await page.getByText("Hero Banner", { exact: true }).first().click();
+    }
     steps.changeText = true;
 
     await page.getByRole("tab", { name: "Style" }).first().click();

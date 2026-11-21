@@ -50,18 +50,14 @@ test("Retry while the API is still down stays on the shopper state and asks the 
   await setMode(page, "pass");
 });
 
-// Characterization of existing behaviour (services/storefront.service.ts getPublishedDesign): a home-page design that cannot be
-// used is treated as "no published design" and the built-in template renders. It is safe (no internals) but it is NOT the neutral
-// error state; recorded as finding D-001 in the defect register.
-test("invalid published document is handled safely: no technical detail, no crash page", async ({ page }) => {
+// D-001 (fixed): a published home design that cannot be used used to be swallowed by getPublishedDesign and replaced by the
+// built-in template. The storefront now reads it strictly (getStorefrontDesign), so it gets the neutral error state (D-16).
+test("invalid published document shows the neutral error state with no technical detail", async ({ page }) => {
   const slug = fresh();
   await setMode(page, INVALID_DOCUMENT);
-  const res = await page.goto(`/s/${slug}`);
-  expect(res?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: 30_000 });
-  const text = await page.locator("body").innerText();
-  expect(text).not.toMatch(/SECRET|hunter2|digest|stack|TypeError|Something went wrong/i);
-  expect(await page.locator('a[href*="dashboard"]').count()).toBe(0);
+  await page.goto(`/s/${slug}`);
+  await expectShopperErrorState(page);
+  expect(page.url()).toContain(`/s/${slug}`);
   await shot(page, "AC-ERR-2_invalid-document");
   await setMode(page, "pass");
 });

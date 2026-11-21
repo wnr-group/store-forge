@@ -49,3 +49,25 @@ export async function pickCollection(page: Page, next: string, opts: { publish?:
   else if (opts.previous) await waitForDraft(page, opts.previous, false);
   if (opts.publish) await publishFromEditor(page);
 }
+
+/** Applies a theme by its card name on the Themes page (or opens the editor when it is already the store's theme). */
+export async function applyTheme(page: Page, name: string) {
+  await page.goto("/dashboard/templates");
+  const card = page.getByRole("button", { name: `Preview ${name}`, exact: true }).locator("xpath=ancestor::*[count(.//button[normalize-space()='Apply theme' or normalize-space()='Customize'])=1][1]");
+  const apply = card.getByRole("button", { name: "Apply theme" });
+  // The card must be found: falling back to the editor of whatever theme is current would test the wrong theme.
+  await expect(card.getByRole("button", { name: /Apply theme|Customize/ })).toHaveCount(1, { timeout: 20_000 });
+  if (await apply.count()) {
+    await apply.click();
+    // A store with its own customizations is asked to confirm; one without is switched straight away.
+    const dlg = page.getByRole("alertdialog");
+    await Promise.race([dlg.waitFor({ timeout: 6_000 }).catch(() => undefined), page.waitForURL(/templates\/editor/, { timeout: 6_000 }).catch(() => undefined)]);
+    if (await dlg.count()) await dlg.getByRole("button", { name: "Switch theme" }).click();
+    await page.waitForURL(/templates\/editor/, { timeout: 60_000 });
+  } else {
+    await card.getByRole("button", { name: "Customize" }).click();
+    await page.waitForURL(/templates\/editor/, { timeout: 60_000 });
+  }
+  await expect(page.getByRole("button", { name: "Publish" }).first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(name, { exact: true }).first()).toBeVisible({ timeout: 20_000 });
+}
