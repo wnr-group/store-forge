@@ -33,7 +33,7 @@ async function editFirstHeading(page: Page, key: (typeof KEYS)[number], text: st
   const fields = inspector.locator("input, textarea");
   await expect(fields.first()).toBeVisible({ timeout: 15_000 });
   let target = null;
-  for (let i = 0; i < (await fields.count()); i++) if ((await fields.nth(i).inputValue().catch(() => "")).trim() === original) { target = fields.nth(i); break; }
+  for (let i = 0; i < (await fields.count()); i++) if ((await fields.nth(i).inputValue().catch(() => "")).trim().toLowerCase() === original.toLowerCase()) { target = fields.nth(i); break; }
   if (!target) throw new Error(`${key}: no settings field holds "${original}"`);
   await target.fill(text);
   await expect(frame.locator("body")).toContainText(text, { timeout: 15_000 });

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { shot, STORE_SLUG } from "./helpers";
 import { asUser } from "./support/studio-session";
@@ -10,7 +11,17 @@ const THEMES = (process.env.THEMES ?? "Atelier,Freshly,Haven,Lumière,Maison,Mar
 type Steps = Record<"open" | "selectElement" | "changeText" | "changeStyle" | "changeVisibility" | "publish" | "storefront", boolean | string>;
 const rows: { theme: string; steps: Steps; notes: string[]; look?: string }[] = [];
 
+/**
+ * The API rate-limits its session check, and nine themes in one run exceed it (it then answers 429 and the app loops between
+ * /login and /dashboard: finding D-014). Local E2E database only: the table is emptied between themes, as it is between files.
+ */
+function clearLocalRateLimits() {
+  const c = process.env.E2E_DB_CONTAINER;
+  if (c) try { execFileSync("docker", ["exec", c, "psql", "-U", "postgres", "-c", "delete from public.rate_limits"], { stdio: "ignore" }); } catch { /* not a local stack */ }
+}
+
 async function runSmoke(page: Page, theme: string) {
+  clearLocalRateLimits();
   const steps = { open: false, selectElement: false, changeText: false, changeStyle: false, changeVisibility: false, publish: false, storefront: false } as Steps;
   const notes: string[] = [];
   const text = `ZZ ${theme.slice(0, 4)} ${Date.now() % 100000}`;

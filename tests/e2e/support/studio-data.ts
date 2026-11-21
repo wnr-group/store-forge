@@ -73,6 +73,10 @@ export const deleteProductsByPrefix = async (page: Page) => {
   await hydrated(page);
   for (let i = 0; i < 6; i++) {
     const menu = page.getByRole("button", { name: new RegExp(`^Actions for ${PREFIX}`) }).first();
+    // The rows stream in after hydration: counting at once saw an empty list and left the test products behind.
+    await menu.waitFor({ timeout: 5_000 }).catch(() => undefined);
+    // The rows stream in after hydration: counting at once saw an empty list and left the test products behind.
+    await menu.waitFor({ timeout: 5_000 }).catch(() => undefined);
     if (!(await menu.count())) break;
     await menu.click();
     await page.getByRole("menuitem", { name: "Delete" }).click();

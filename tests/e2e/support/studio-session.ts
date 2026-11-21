@@ -65,8 +65,8 @@ export async function sessionFor(browser: Browser, who: Who): Promise<string> {
     // A sign-out elsewhere can revoke a saved session: prove it still works before trusting it.
     const context = await browser.newContext({ storageState: file });
     const page = await context.newPage();
-    await page.goto(landing(who));
-    usable = home(who).test(new URL(page.url()).pathname);
+    // An expired session can make the app redirect in a loop: that means "sign in again", not a failure.
+    usable = await page.goto(landing(who)).then(() => home(who).test(new URL(page.url()).pathname), () => false);
     await context.close();
   }
   if (!usable) await freshLogin(browser, who, file);
