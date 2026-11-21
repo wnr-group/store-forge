@@ -1,3 +1,4 @@
+import type { CollectionUsage } from "@/lib/collections/usage";
 import "server-only";
 import { apiRequest } from "@/lib/api/client";
 
@@ -40,6 +41,9 @@ export const createCollectionApi = async (organizationId: string, input: Collect
 export const updateCollectionApi = async (organizationId: string, id: string, input: Omit<CollectionApiInput, "id">) =>
   (await apiRequest<CollectionDetailApi>(`/collections/${id}`, { method: "PATCH", json: input, organizationId })).data;
 
-export const deleteCollectionApi = async (organizationId: string, id: string) => {
-  await apiRequest(`/collections/${id}`, { method: "DELETE", organizationId });
+export const getCollectionUsageApi = async (organizationId: string, id: string) =>
+  (await apiRequest<CollectionUsage>(`/collections/${id}/usage`, { organizationId })).data;
+
+export const deleteCollectionApi = async (organizationId: string, id: string, usage?: string) => {
+  await apiRequest(`/collections/${id}`, { method: "DELETE", organizationId, query: usage ? { usage } : undefined });
 };

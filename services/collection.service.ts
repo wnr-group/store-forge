@@ -3,12 +3,14 @@ import type { Collection } from "@/lib/domain/entities";
 import {
   createCollectionApi,
   deleteCollectionApi,
+  getCollectionUsageApi,
   getCollectionApi,
   listCollectionsApi,
   listProductOptionsApi,
   updateCollectionApi,
   type CollectionApi,
 } from "@/lib/api/endpoints/collection-api";
+import type { CollectionUsage } from "@/lib/collections/usage";
 import { AppError } from "@/lib/errors";
 import { requireActiveTenant } from "@/lib/tenant/context";
 import type { CollectionInput } from "@/lib/validations/catalog";
@@ -62,9 +64,14 @@ export async function updateCollection(id: string, input: Values): Promise<void>
   await updateCollectionApi(tenant.id, id, input);
 }
 
-export async function deleteCollection(id: string): Promise<void> {
+export async function getCollectionUsage(id: string): Promise<CollectionUsage> {
+  const { tenant } = await requireActiveTenant("catalog:manage");
+  return getCollectionUsageApi(tenant.id, id);
+}
+
+export async function deleteCollection(id: string, usage?: string): Promise<void> {
   const { tenant } = await requireActiveTenant("catalog:delete");
-  await deleteCollectionApi(tenant.id, id);
+  await deleteCollectionApi(tenant.id, id, usage);
 }
 
 export type { CollectionInput };
