@@ -50,3 +50,39 @@ describe("Ctrl+K palette items (visibleNavItems)", () => {
     expect(visibleNavItems("admin").map((i) => i.href)).not.toContain(ROUTES.team);
   });
 });
+
+const settingsOnly: Actor = { role: "staff", permissions: { settings: "write" } };
+const productsOnly: Actor = { role: "staff", permissions: { products: "write" } };
+const readOnlyAll: Actor = { role: "staff", permissions: { products: "read", settings: "read", orders: "read", customers: "read" } };
+const groupOf = (group: string) => NAV_SETS.merchant.filter((i) => i.group === group).map((i) => i.href);
+
+describe("Studio navigation group", () => {
+  it("lists exactly Themes, Customize, Products, Categories, Collections, in that order and contiguously", () => {
+    expect(groupOf("Studio")).toEqual([ROUTES.templates, ROUTES.themeEditor, ROUTES.products, ROUTES.categories, ROUTES.collections]);
+    const idx = NAV_SETS.merchant.map((i, n) => (i.group === "Studio" ? n : -1)).filter((n) => n >= 0);
+    expect(idx[idx.length - 1] - idx[0]).toBe(idx.length - 1);
+  });
+  it("keeps Pages and Navigation under Online Store and Inventory under Catalog", () => {
+    expect(groupOf("Online Store")).toEqual([ROUTES.pages, ROUTES.navigation]);
+    expect(groupOf("Catalog")).toEqual([ROUTES.inventory]);
+  });
+  it("shows Themes and Customize only to members with store:manage", () => {
+    for (const actor of [owner, manager, settingsOnly]) expect(hrefs("merchant", actor), actor.role).toEqual(expect.arrayContaining([ROUTES.templates, ROUTES.themeEditor]));
+    for (const actor of [productsOnly, readOnlyAll, noAccess, customersOnly]) {
+      const list = hrefs("merchant", actor);
+      expect(list).not.toContain(ROUTES.templates);
+      expect(list).not.toContain(ROUTES.themeEditor);
+    }
+  });
+  it("shows catalogue items by products access, independent of design access", () => {
+    expect(hrefs("merchant", productsOnly)).toEqual(expect.arrayContaining([ROUTES.products, ROUTES.categories, ROUTES.collections]));
+    expect(hrefs("merchant", settingsOnly)).not.toContain(ROUTES.products);
+  });
+  it("does not hide Pages, Navigation or Settings", () => {
+    for (const actor of [settingsOnly, productsOnly, noAccess]) expect(hrefs("merchant", actor)).toEqual(expect.arrayContaining([ROUTES.pages, ROUTES.navigation, ROUTES.settings]));
+  });
+  it("keeps Settings last so Team members lands before it", () => {
+    expect(NAV_SETS.merchant[NAV_SETS.merchant.length - 1].href).toBe(ROUTES.settings);
+    expect(NAV_SETS.owner.map((i) => i.href).slice(-2)).toEqual([ROUTES.team, ROUTES.settings]);
+  });
+});

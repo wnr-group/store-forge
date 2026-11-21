@@ -6,6 +6,9 @@ export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: b
 
 /** Permission a member needs to see a nav item. Items not listed here are visible to everyone. */
 const NAV_PERMISSION: Record<string, Permission> = {
+  // Design items are shown only to members who can change the design; their pages stay readable by URL (read-only editor).
+  [ROUTES.templates]: "store:manage",
+  [ROUTES.themeEditor]: "store:manage",
   [ROUTES.products]: "catalog:view",
   [ROUTES.categories]: "catalog:view",
   [ROUTES.collections]: "catalog:view",
@@ -21,14 +24,14 @@ export const hiddenNavHrefs = (actor: Actor): string[] =>
 /** Only list pages that exist - no placeholder navigation. */
 export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.dashboard, label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: ROUTES.products, label: "Products", icon: Package, group: "Catalog" },
-  { href: ROUTES.categories, label: "Categories", icon: FolderTree, group: "Catalog" },
-  { href: ROUTES.collections, label: "Collections", icon: Layers, group: "Catalog" },
+  { href: ROUTES.templates, label: "Themes", icon: Palette, group: "Studio", exact: true },
+  { href: ROUTES.themeEditor, label: "Customize", icon: PenTool, group: "Studio" },
+  { href: ROUTES.products, label: "Products", icon: Package, group: "Studio" },
+  { href: ROUTES.categories, label: "Categories", icon: FolderTree, group: "Studio" },
+  { href: ROUTES.collections, label: "Collections", icon: Layers, group: "Studio" },
   { href: ROUTES.inventory, label: "Inventory", icon: Boxes, group: "Catalog" },
   { href: ROUTES.customers, label: "Customers", icon: Users, group: "Insights" },
   { href: ROUTES.analytics, label: "Analytics", icon: BarChart3, group: "Insights" },
-  { href: ROUTES.templates, label: "Themes", icon: Palette, group: "Online Store", exact: true },
-  { href: ROUTES.themeEditor, label: "Customize", icon: PenTool, group: "Online Store" },
   { href: ROUTES.pages, label: "Pages", icon: FileText, group: "Online Store" },
   { href: ROUTES.navigation, label: "Navigation", icon: Menu, group: "Online Store" },
   { href: ROUTES.settings, label: "Settings", icon: Settings, group: "Workspace" },
