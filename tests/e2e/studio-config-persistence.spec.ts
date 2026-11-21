@@ -102,10 +102,10 @@ test("version history restores an older version; an out-of-date tab is refused",
     const A = `ZZ ROLLBACK A ${stamp}`;
     const B = `ZZ ROLLBACK B ${stamp}`;
     try {
-      let d = await save(page, home.id, withText(A, original as never), start.revision);
+      await save(page, home.id, withText(A, original as never), start.revision);
       await publishViaEditor(page);
       await expect.poll(async () => (await liveText(page)).includes(A), { timeout: 30_000, intervals: [1000] }).toBe(true);
-      d = await save(page, home.id, withText(B, original as never), (await detail(page, home.id)).revision);
+      await save(page, home.id, withText(B, original as never), (await detail(page, home.id)).revision);
       await publishViaEditor(page);
       await expect.poll(async () => (await liveText(page)).includes(B), { timeout: 30_000, intervals: [1000] }).toBe(true);
 
