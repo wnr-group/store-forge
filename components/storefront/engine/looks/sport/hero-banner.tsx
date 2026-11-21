@@ -18,7 +18,7 @@ function TwoTone({ title }: { title: string }) {
  * The dark, rounded banner at the top of listing pages: breadcrumb, a big two-tone title and a short text, with the collection's
  * picture fading in from the right.
  */
-export function SportHeroBanner({ eyebrow, title, text, imageUrl, crumbs, sfProps }: { eyebrow?: string; title: string; text?: string; imageUrl?: string | null; crumbs?: { label: string; href?: string }[]; sfProps?: Record<string, string> }) {
+export function SportHeroBanner({ eyebrow, title, text, imageUrl, crumbs, sfProps, titleOv, textOv }: { eyebrow?: string; title: string; text?: string; imageUrl?: string | null; crumbs?: { label: string; href?: string }[]; sfProps?: Record<string, string>; titleOv?: Record<string, string>; textOv?: Record<string, string> }) {
   return (
     <section className={cn(SHELL, "pt-5 md:pt-6")} {...sfProps}>
       <div className="relative isolate overflow-hidden rounded-[1.75rem] bg-primary px-6 py-10 sm:px-10 md:px-14 md:py-16 lg:px-16 lg:py-20">
@@ -48,10 +48,10 @@ export function SportHeroBanner({ eyebrow, title, text, imageUrl, crumbs, sfProp
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="max-w-3xl text-balance text-[2.25rem] font-extrabold uppercase leading-[1] tracking-[-0.03em] md:text-[3.25rem] xl:text-[4rem]" style={HEADLINE_FONT}>
+        <h1 {...titleOv} className="max-w-3xl text-balance text-[2.25rem] font-extrabold uppercase leading-[1] tracking-[-0.03em] md:text-[3.25rem] xl:text-[4rem]" style={HEADLINE_FONT}>
           <TwoTone title={title} />
         </h1>
-        {text ? <p className="mt-5 max-w-xl text-[16px] leading-7 text-white/80 md:text-[18px]">{text}</p> : null}
+        {text ? <p {...textOv} className="mt-5 max-w-xl text-[16px] leading-7 text-white/80 md:text-[18px]">{text}</p> : null}
       </div>
     </section>
   );

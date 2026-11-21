@@ -48,9 +48,16 @@ describe("block style hooks in Maison and Marketplace", () => {
   });
 
   it("sections a look draws from settings alone offer section styling but no block styling", () => {
-    expect(adapterForLook("boutique").block("heading", "rich-text")).toBeNull();
-    expect(adapterForLook("market").block("heading", "rich-text")).toBeNull();
-    expect(adapterForLook("boutique").section("rich-text")).not.toBeNull();
-    expect(adapterForLook("market").section("rich-text")).not.toBeNull();
+    for (const look of ["boutique", "market"]) {
+      expect(adapterForLook(look).block("heading", "product-grid")).toBeNull();
+      expect(adapterForLook(look).section("product-grid")).not.toBeNull();
+    }
+  });
+
+  it("rich text is the engine's own on every look, so its blocks carry the hook (D-003)", () => {
+    for (const look of ["boutique", "market", "sport"]) {
+      expect(adapterForLook(look).block("heading", "rich-text")?.capabilities).toContain("visibility");
+      expect(adapterForLook(look).section("rich-text")).not.toBeNull();
+    }
   });
 });

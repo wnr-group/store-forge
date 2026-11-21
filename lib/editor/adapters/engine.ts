@@ -5,8 +5,10 @@ import type { CapabilityId } from "../style";
 const caps = (...c: CapabilityId[]): readonly CapabilityId[] => c;
 
 const SECTION: ElementSpec = { capabilities: caps("fonts", "background", "spacing", "size", "border", "opacity", "visibility"), textScope: false };
-/** A sticky header cannot be boxed, but its fonts can change: they travel as inherited variables. */
-const HEADER: ElementSpec = { capabilities: caps("fonts"), textScope: false };
+/** A sticky header cannot be boxed, but its fonts can change (they travel as inherited variables) and it can be hidden on a device. */
+const HEADER: ElementSpec = { capabilities: caps("fonts", "visibility"), textScope: false };
+/** An element a look draws itself and marks with the style hook: it can be hidden on a device, nothing else is promised. */
+const HIDE_ONLY: ElementSpec = { capabilities: caps("visibility"), textScope: false };
 const TEXT: ElementSpec = { capabilities: caps("typography", "textColor", "background", "spacing", "border", "opacity", "visibility"), textScope: true };
 const CONTROL: ElementSpec = { capabilities: caps("typography", "textColor", "background", "spacing", "size", "border", "opacity", "visibility"), textScope: true };
 const CONTAINER: ElementSpec = CONTROL;
@@ -49,6 +51,10 @@ export type EngineAdapterConfig = {
   addableSections?: readonly string[];
   /** Sections where only some block types carry the style hook (the look draws the rest itself): section type -> those block types. */
   blockTypes?: Readonly<Record<string, readonly string[]>>;
+  /** Block types a look draws itself (not through the engine) but marks with the style hook, so they can be hidden: section type -> those block types. */
+  hideOnly?: Readonly<Record<string, readonly string[]>>;
+  /** Block types a look accepts in a section but never draws (so the editor does not offer them there): section type -> those block types. */
+  notDrawn?: Readonly<Record<string, readonly string[]>>;
 };
 
 /**
@@ -63,8 +69,11 @@ export function createEngineAdapter(config: EngineAdapterConfig): ThemeEditorAda
     name: config.name,
     looks: config.looks,
     addableSections: config.addableSections,
+    drawsBlock: (type, sectionType) => !config.notDrawn?.[sectionType]?.includes(type),
     section: (type) => (UNWRAPPED_SECTIONS.has(type) ? HEADER : SECTION),
     block: (type, sectionType) => {
+      if (config.notDrawn?.[sectionType]?.includes(type)) return null;
+      if (config.hideOnly?.[sectionType]?.includes(type)) return HIDE_ONLY;
       if (!withBlocks.has(sectionType)) return null;
       const only = config.blockTypes?.[sectionType];
       return only && !only.includes(type) ? null : (BLOCKS[type] ?? null);

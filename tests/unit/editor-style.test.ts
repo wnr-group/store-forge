@@ -188,10 +188,10 @@ describe("section fonts and text parts", () => {
 });
 
 describe("theme adapters", () => {
-  it("each look has an adapter; the sticky header can change fonts only", () => {
+  it("each look has an adapter; the sticky header can change fonts and be hidden, nothing that would box it", () => {
     for (const look of ["standard", "boutique", "sport", "market", "unknown-future-look"]) {
       const a = adapterForLook(look);
-      expect(a.section("header")?.capabilities).toEqual(["fonts"]);
+      expect(a.section("header")?.capabilities).toEqual(["fonts", "visibility"]);
       expect(a.section("hero")?.capabilities.length).toBeGreaterThan(0);
     }
   });
@@ -201,8 +201,9 @@ describe("theme adapters", () => {
     expect(stride.id).toBe("stride");
     expect(stride.block("button", "hero")).not.toBeNull();
     expect(stride.block("column", "multicolumn")).not.toBeNull();
-    expect(stride.block("heading", "rich-text")).toBeNull();
+    expect(stride.block("heading", "hero")).toBeNull(); // the hero draws only its buttons: a heading there is never shown
     expect(stride.block("hero-slide", "hero")).toBeNull();
+    expect(stride.block("link", "header")?.capabilities).toEqual(["visibility"]); // drawn by the look: it can be hidden, nothing more is promised
   });
 
   it("only offers controls that exist as style fields", () => {

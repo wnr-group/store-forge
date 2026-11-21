@@ -11,10 +11,11 @@ import { useOptionalWishlist } from "@/components/storefront/wishlist/wishlist-p
 import { cn } from "@/lib/utils";
 import { resolveImage } from "../../ui";
 import type { SectionProps } from "..";
+import { blockMarkers } from "../../markers";
 import { MarketSearch } from "./search";
 import { FOCUS, Logo, WRAP } from "./ui";
 
-type Item = { id: string; label: string; url: string; isButton: boolean };
+type Item = { id: string; label: string; url: string; isButton: boolean; ov: Record<string, string> };
 
 const NAV_LINK = "relative flex h-9 items-center gap-1.5 rounded-md px-2 text-[13px] font-medium text-primary-foreground/90 transition-colors hover:bg-white/10";
 const COUNT = "absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-accent-foreground tabular-nums";
@@ -32,8 +33,8 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
   const items: Item[] = (node.block_order ?? Object.keys(blocks)).flatMap((id): Item[] => {
     const b = blocks[id];
     if (!b || (b.disabled && context.mode === "public")) return [];
-    if (b.type === "link") return [{ id, label: String(b.settings?.label ?? "Link"), url: String(b.settings?.url ?? "/") || "/", isButton: false }];
-    if (b.type === "button") return [{ id, label: String(b.settings?.label ?? "Enquiry"), url: String(b.settings?.link ?? "/contact") || "/", isButton: true }];
+    if (b.type === "link") return [{ id, label: String(b.settings?.label ?? "Link"), url: String(b.settings?.url ?? "/") || "/", isButton: false, ov: blockMarkers(id, false, b) }];
+    if (b.type === "button") return [{ id, label: String(b.settings?.label ?? "Enquiry"), url: String(b.settings?.link ?? "/contact") || "/", isButton: true, ov: blockMarkers(id, false, b) }];
     return [];
   });
   const links = items.filter((i) => !i.isButton);
@@ -76,7 +77,7 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
   );
 
   // The second row: the store's collections (the first dozen); a store with none shows its menu links instead.
-  const row = collections.length > 0 ? collections.slice(0, 12).map((c) => ({ key: c.slug, label: c.name, href: `/collections/${c.slug}` })) : links.map((l) => ({ key: l.id, label: l.label, href: l.url }));
+  const row = collections.length > 0 ? collections.slice(0, 12).map((c) => ({ key: c.slug, label: c.name, href: `/collections/${c.slug}`, ov: {} as Record<string, string> })) : links.map((l) => ({ key: l.id, label: l.label, href: l.url, ov: l.ov }));
 
   const tabs = [
     { href: "/", label: "Home", icon: Home, badge: 0 },
@@ -135,13 +136,13 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
             {row.map((r) => {
               const on = pathname === r.href || (r.href !== "/" && pathname.startsWith(`${r.href}/`));
               return (
-                <Link key={r.key} href={r.href} aria-current={on ? "page" : undefined} className={cn("whitespace-nowrap rounded px-2 py-1 text-[13px] transition-colors", on ? "bg-white/15 font-medium text-primary-foreground" : "text-primary-foreground/80 hover:bg-white/10", FOCUS)}>
+                <Link key={r.key} href={r.href} {...r.ov} aria-current={on ? "page" : undefined} className={cn("whitespace-nowrap rounded px-2 py-1 text-[13px] transition-colors", on ? "bg-white/15 font-medium text-primary-foreground" : "text-primary-foreground/80 hover:bg-white/10", FOCUS)}>
                   {r.label}
                 </Link>
               );
             })}
             {cta ? (
-              <Link href={cta.url} className={cn("ml-auto flex items-center gap-1.5 whitespace-nowrap rounded px-2 py-1 text-[13px] font-semibold text-accent hover:bg-white/10", FOCUS)}>
+              <Link href={cta.url} {...cta.ov} className={cn("ml-auto flex items-center gap-1.5 whitespace-nowrap rounded px-2 py-1 text-[13px] font-semibold text-accent hover:bg-white/10", FOCUS)}>
                 <Sparkles className="size-3.5" aria-hidden /> {cta.label}
               </Link>
             ) : null}
@@ -170,7 +171,7 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
                 </>
               ) : null}
               {items.map((l) => (
-                <DrawerLink key={l.id} href={l.url}>{l.label}</DrawerLink>
+                <DrawerLink key={l.id} href={l.url} ov={l.ov}>{l.label}</DrawerLink>
               ))}
               {wishlist ? <DrawerLink href="/wishlist">Wishlist</DrawerLink> : null}
               <DrawerLink href={accountHref}>{signedIn ? "Your dashboard" : "Store login"}</DrawerLink>
@@ -214,9 +215,9 @@ export function MarketHeader({ node, context, sectionId }: SectionProps) {
   );
 }
 
-function DrawerLink({ href, children }: { href: string; children: React.ReactNode }) {
+function DrawerLink({ href, children, ov }: { href: string; children: React.ReactNode; ov?: Record<string, string> }) {
   return (
-    <Link href={href} className="flex items-center justify-between px-4 py-2.5 text-sm text-primary hover:bg-muted">
+    <Link href={href} {...ov} className="flex items-center justify-between px-4 py-2.5 text-sm text-primary hover:bg-muted">
       {children}
       <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
     </Link>

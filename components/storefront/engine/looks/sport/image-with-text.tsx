@@ -100,13 +100,13 @@ export function SportImageWithText({ node, context, sectionId }: SectionProps) {
     flush();
     if (b.type === "heading") {
       out.push(
-        <h2 key={id} className={cn("text-balance font-extrabold tracking-[-0.03em] text-primary", upper && "uppercase", panel ? "text-[2.25rem] md:text-[3rem] xl:text-[4rem]" : upper ? "text-[2rem] md:text-[2.5rem] xl:text-[3.25rem]" : "text-[2rem] md:text-[2.5rem] xl:text-[3rem]", upper ? "leading-[0.98]" : "leading-[1.05]")} style={HEADLINE_FONT}>
+        <h2 key={id} {...blockMarkers(id, isPreview, b)} className={cn("text-balance font-extrabold tracking-[-0.03em] text-primary", upper && "uppercase", panel ? "text-[2.25rem] md:text-[3rem] xl:text-[4rem]" : upper ? "text-[2rem] md:text-[2.5rem] xl:text-[3.25rem]" : "text-[2rem] md:text-[2.5rem] xl:text-[3rem]", upper ? "leading-[0.98]" : "leading-[1.05]")} style={HEADLINE_FONT}>
           <Highlighted text={String(st.text ?? "")} className="text-secondary" />
         </h2>,
       );
     } else if (b.type === "text") {
       out.push(
-        <p key={id} className="max-w-xl whitespace-pre-line text-[17px] leading-8 text-foreground/80 md:text-[19px]">
+        <p key={id} {...blockMarkers(id, isPreview, b)} className="max-w-xl whitespace-pre-line text-[17px] leading-8 text-foreground/80 md:text-[19px]">
           {String(st.content ?? "")}
         </p>,
       );

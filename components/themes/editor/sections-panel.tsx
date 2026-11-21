@@ -1,5 +1,6 @@
 "use client";
 
+import type { ThemeEditorAdapter } from "@/lib/editor/adapter";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -44,10 +45,12 @@ type Props = {
   disabled: boolean;
   /** What the theme means for product cards (which elements exist, what the description does by default). */
   cardContext: CardContext;
+  /** The look's editor adapter: it knows which accepted blocks the look never draws, so they are not offered. */
+  adapter: ThemeEditorAdapter;
 };
 
 /** The page outline: announcement, header, the page's own (re-orderable) sections, and footer. */
-export function SectionsPanel({ state, groupIds, pageKind, actions, disabled, cardContext }: Props) {
+export function SectionsPanel({ state, groupIds, pageKind, actions, disabled, cardContext, adapter }: Props) {
   const regions: Region[] = [
     { label: "Announcement bar", docId: groupIds.announcement, kind: "group_announcement", editable: false },
     { label: "Header", docId: groupIds.header, kind: "group_header", editable: false },
@@ -56,12 +59,12 @@ export function SectionsPanel({ state, groupIds, pageKind, actions, disabled, ca
   ];
   return (
     <div className="space-y-5 p-3 sm:p-3.5">
-      {regions.map((r) => (r.docId && state.docs[r.docId] ? <Region key={r.kind} region={r} state={state} actions={actions} disabled={disabled} cardContext={cardContext} /> : null))}
+      {regions.map((r) => (r.docId && state.docs[r.docId] ? <Region key={r.kind} region={r} state={state} actions={actions} disabled={disabled} cardContext={cardContext} adapter={adapter} /> : null))}
     </div>
   );
 }
 
-function Region({ region, state, actions, disabled, cardContext }: { region: Region; state: EditorState; actions: SectionActions; disabled: boolean; cardContext: CardContext }) {
+function Region({ region, state, actions, disabled, cardContext, adapter }: { region: Region; state: EditorState; actions: SectionActions; disabled: boolean; cardContext: CardContext; adapter: ThemeEditorAdapter }) {
   const docId = region.docId!;
   const doc = state.docs[docId].document as unknown as TemplateDocument;
   const order = doc.order ?? [];
@@ -86,7 +89,7 @@ function Region({ region, state, actions, disabled, cardContext }: { region: Reg
         <SortableContext items={order} strategy={verticalListSortingStrategy} disabled={!region.editable || disabled}>
           <ul className="space-y-0.5">
             {order.map((id) => (
-              <SectionRow key={id} id={id} node={doc.sections[id]} docId={docId} state={state} actions={actions} sortable={region.editable} canRemove={region.editable} disabled={disabled} cardContext={cardContext} />
+              <SectionRow key={id} id={id} node={doc.sections[id]} docId={docId} state={state} actions={actions} sortable={region.editable} canRemove={region.editable} disabled={disabled} cardContext={cardContext} adapter={adapter} />
             ))}
           </ul>
         </SortableContext>
@@ -105,7 +108,7 @@ function Region({ region, state, actions, disabled, cardContext }: { region: Reg
   );
 }
 
-function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disabled, cardContext }: { id: string; node: ComponentNode | undefined; docId: string; state: EditorState; actions: SectionActions; sortable: boolean; canRemove: boolean; disabled: boolean; cardContext: CardContext }) {
+function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disabled, cardContext, adapter }: { id: string; node: ComponentNode | undefined; docId: string; state: EditorState; actions: SectionActions; sortable: boolean; canRemove: boolean; disabled: boolean; cardContext: CardContext; adapter: ThemeEditorAdapter }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: !sortable || disabled });
   const sel = state.selection;
   const selected = sel !== null && "sectionId" in sel && sel.docId === docId && sel.sectionId === id;
@@ -117,7 +120,7 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
   const hasCards = cardKind !== null;
   const expanded = selected || open;
   const hidden = Boolean(node?.disabled);
-  const acceptable = useMemo(() => (def?.accepts ?? []).filter((t) => registry.blocks[t]), [def]);
+  const acceptable = useMemo(() => (def?.accepts ?? []).filter((t) => registry.blocks[t] && (adapter.drawsBlock?.(t, node?.type ?? "") ?? true)), [def, adapter, node?.type]);
   const [addBlockOpen, setAddBlockOpen] = useState(false);
 
   if (!node) return null;

@@ -1118,7 +1118,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
               {leftTab === "sections" ? (
-                <SectionsPanel state={state} groupIds={groupIds} pageKind={page.kind} actions={actions} disabled={!canEdit} cardContext={cardContext} />
+                <SectionsPanel state={state} groupIds={groupIds} pageKind={page.kind} actions={actions} disabled={!canEdit} cardContext={cardContext} adapter={adapter} />
               ) : leftTab === "product" ? (
                 previewMode === "demo" ? (
                   <div className="space-y-3 p-4">

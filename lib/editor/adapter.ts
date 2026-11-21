@@ -24,6 +24,11 @@ export interface ThemeEditorAdapter {
   section(type: string): ElementSpec | null;
   /** Style support of a block type inside a section type, or null when the theme draws it without style hooks. */
   block(type: string, sectionType: string): ElementSpec | null;
+  /**
+   * Whether the theme draws this block type inside this section type at all. A block a look never draws cannot be seen, styled or
+   * hidden, so the editor does not offer it there (a document that already holds one stays valid). Undefined = every accepted block is drawn.
+   */
+  drawsBlock?(type: string, sectionType: string): boolean;
   /** Section types merchants may add on a page (all registered ones by default). `undefined` = no restriction. */
   addableSections?: readonly string[];
 }

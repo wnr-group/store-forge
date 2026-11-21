@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { RichText } from "../../richtext-renderer";
 import { BAND_Y, HEADLINE_FONT, PILL_DARK, SHELL, SportEyebrow } from "./ui";
 
-export type FaqItem = { id: string; question: string; answer: string; open: boolean };
+export type FaqItem = { id: string; question: string; answer: string; open: boolean; ov?: Record<string, string> };
 
 /** Two columns: label, headline and a button on the left; ruled questions that open one at a time on the right. */
 export function SportFaq({ eyebrow, heading, subheading, ctaLabel, ctaLink, items, sfProps }: { eyebrow: string; heading: string; subheading: string; ctaLabel: string; ctaLink: string; items: FaqItem[]; sfProps?: Record<string, string> }) {
@@ -31,7 +31,7 @@ export function SportFaq({ eyebrow, heading, subheading, ctaLabel, ctaLink, item
           {items.map((item) => {
             const open = openId === item.id;
             return (
-              <li key={item.id} className="border-b border-border">
+              <li key={item.id} {...item.ov} className="border-b border-border">
                 <h3>
                   <button type="button" onClick={() => setOpenId(open ? null : item.id)} aria-expanded={open} aria-controls={`faq-${item.id}`} className="flex w-full items-center justify-between gap-6 py-5 text-left text-[17px] font-bold text-primary transition-colors hover:text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary">
                     <span>{item.question}</span>

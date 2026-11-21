@@ -1,12 +1,13 @@
 import type { SectionProps } from "..";
 import { SportFaq, type FaqItem } from "./faq";
+import { blockMarkers } from "../../markers";
 
 /** Sport FAQ section: the section's Collapsible Row blocks become the questions. */
 export function SportCollapsibleContent({ node, context, sectionId }: SectionProps) {
   const blocks = node.blocks ?? {};
   const items: FaqItem[] = (node.block_order ?? Object.keys(blocks))
     .filter((id) => blocks[id]?.type === "collapsible-item" && !(blocks[id].disabled && context.mode === "public"))
-    .map((id, i) => ({ id, question: String(blocks[id].settings?.heading ?? ""), answer: String(blocks[id].settings?.content ?? ""), open: Boolean(blocks[id].settings?.defaultOpen) || (i === 0 && Boolean(node.settings?.openFirstItem)) }));
+    .map((id, i) => ({ id, ov: blockMarkers(id, false, blocks[id]), question: String(blocks[id].settings?.heading ?? ""), answer: String(blocks[id].settings?.content ?? ""), open: Boolean(blocks[id].settings?.defaultOpen) || (i === 0 && Boolean(node.settings?.openFirstItem)) }));
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : undefined;
   if (items.length === 0 && !isPreview) return null;
