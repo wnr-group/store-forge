@@ -1,5 +1,6 @@
 import { TemplateRenderer } from "@/components/storefront/engine/renderer";
 import type { CollectionProductSummary, RenderContext } from "@/components/storefront/engine/types";
+import { withPageBackground } from "@/lib/storefront/documents";
 import { resolvePageDocument, type PageKey } from "@/lib/storefront/pages";
 import type { TemplateDocument } from "@/lib/templates/document";
 import type { PublicCollectionApi, PublicLayoutApi } from "@/lib/api/endpoints/public-api";
@@ -40,6 +41,7 @@ export function PublishedView({
     groupAnnouncement: frame?.layout.groups.announcement ?? undefined,
     basePath: "",
   };
-  const chosen = page ? resolvePageDocument(context.theme, page, document) : document;
-  return <TemplateRenderer document={adapt && chosen !== document ? adapt(chosen) : chosen} mode="public" context={context} />;
+  const fallback = withPageBackground(document, context.theme);
+  const chosen = page ? resolvePageDocument(context.theme, page, fallback) : document;
+  return <TemplateRenderer document={adapt && chosen !== fallback ? adapt(chosen) : chosen} mode="public" context={context} />;
 }

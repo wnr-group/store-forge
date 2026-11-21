@@ -1,3 +1,4 @@
+import { withPageBackground } from "@/lib/storefront/documents";
 import { defaultPageDocument, PAGE_LABELS, PAGES_GROUP, storedPageDocument, type PageKey } from "@/lib/storefront/pages";
 import { isDirty, type EditorDoc, type EditorState } from "./state";
 
@@ -15,7 +16,7 @@ export const virtualKey = (id: string): PageKey => id.slice(VIRTUAL_PREFIX.lengt
 const themeDocument = (state: EditorState, themeDocId: string) => state.docs[themeDocId]?.document;
 
 function virtualDoc(state: EditorState, themeDocId: string, key: PageKey): EditorDoc {
-  const document = structuredClone(storedPageDocument(themeDocument(state, themeDocId), key) ?? defaultPageDocument(key)) as unknown as Record<string, unknown>;
+  const document = structuredClone(storedPageDocument(themeDocument(state, themeDocId), key) ?? withPageBackground(defaultPageDocument(key), themeDocument(state, themeDocId))) as unknown as Record<string, unknown>;
   return { templateId: virtualId(key), kind: "index", name: PAGE_LABELS[key], revision: 0, document, saved: JSON.stringify(document) };
 }
 

@@ -7,6 +7,32 @@ import { DOCUMENT_SCHEMA_VERSION } from "@/lib/templates/document";
  * like every other page and never need their own markup.
  */
 
+/**
+ * Generated pages used to ask for a "transparent" background, which the shared colour rule (#rrggbb) rejects, so an edited
+ * generated page could never be saved or published. They now carry a real colour: white, the engine's own default. A page
+ * is shown on the theme's background colour by `withPageBackground`, which keeps the look the pages had before.
+ */
+export const GENERATED_BACKGROUND = "#ffffff";
+const HEX = /^#[0-9a-fA-F]{6}$/;
+
+/** The theme's page background colour, when it has a valid one. */
+export function themeBackground(theme: Record<string, unknown> | null | undefined): string | undefined {
+  const colors = (theme?.settings as { colors?: Record<string, unknown> } | undefined)?.colors;
+  const value = colors?.background;
+  return typeof value === "string" && HEX.test(value) ? value : undefined;
+}
+
+/** A copy of a generated page whose generated rich-text bands use the theme's background instead of plain white. */
+export function withPageBackground(document: TemplateDocument, theme: Record<string, unknown> | null | undefined): TemplateDocument {
+  const bg = themeBackground(theme);
+  if (!bg || bg.toLowerCase() === GENERATED_BACKGROUND) return document;
+  const next = structuredClone(document);
+  for (const section of Object.values(next.sections)) {
+    if (section.type === "rich-text" && section.settings.backgroundColor === GENERATED_BACKGROUND) section.settings.backgroundColor = bg;
+  }
+  return next;
+}
+
 const node = (type: string, settings: Record<string, unknown>, blocks: [string, ComponentNode][] = []): ComponentNode => ({
   type,
   settings,
@@ -40,7 +66,7 @@ export function pageDocument(title: string, body: string): TemplateDocument {
           : [`b${i}`, node("text", { content: part, alignment: "left" })],
       );
     });
-  return doc([["content", node("rich-text", { alignment: "left", maxWidth: "normal", backgroundColor: "transparent" }, blocks)]]);
+  return doc([["content", node("rich-text", { alignment: "left", maxWidth: "normal", backgroundColor: GENERATED_BACKGROUND }, blocks)]]);
 }
 
 /** The collections index: the collection list section over every active collection. */
@@ -53,7 +79,7 @@ export function productListDocument(title: string, note?: string): TemplateDocum
   const intro: [string, ComponentNode][] = [["title", node("heading", { text: title, level: "h1", alignment: "left" })]];
   if (note) intro.push(["note", node("text", { content: note, alignment: "left" })]);
   return doc([
-    ["intro", node("rich-text", { alignment: "left", maxWidth: "wide", backgroundColor: "transparent" }, intro)],
+    ["intro", node("rich-text", { alignment: "left", maxWidth: "wide", backgroundColor: GENERATED_BACKGROUND }, intro)],
     ["grid", node("product-grid", {})],
   ]);
 }

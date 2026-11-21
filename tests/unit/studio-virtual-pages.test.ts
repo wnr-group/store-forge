@@ -24,10 +24,8 @@ describe("the eight virtual pages", () => {
     expect([...PAGE_KEYS]).toEqual(["products", "collections", "search", "cart", "wishlist", "content", "about", "contact"]);
   });
 
-  // Defect D-002 (OPEN): the generated rich-text pages ship backgroundColor "transparent", which the editor and API validators reject, so edits to these five pages cannot be published. This test pins the defect; flip it when fixed.
-  const DEFECT_D002: readonly PageKey[] = ["products", "search", "content", "about", "contact"];
+  // Regression for D-002: generated rich-text pages used backgroundColor "transparent", which the shared colour rule rejects.
   it.each(PAGE_KEYS)("%s: the default validates; edits persist into settings.pages and still validate; reset restores the default", (key) => {
-    if (DEFECT_D002.includes(key)) { expect(ok(defaultPageDocument(key)), `${key} default document fails validation (D-002)`).toBe(false); return; }
     expect(ok(defaultPageDocument(key))).toBe(true);
     const { state, first } = edit(themeState(), key);
     const stored = storedPageDocument(state.docs.theme.document, key)!;
@@ -50,5 +48,16 @@ describe("the eight virtual pages", () => {
     const after = resetVirtualPage(s, "theme", "cart");
     for (const key of PAGE_KEYS.filter((k) => k !== "cart")) expect(storedPageDocument(after.docs.theme.document, key), key).toEqual(before[key]);
     expect(storedPageDocument(after.docs.theme.document, "cart")).toBeNull();
+  });
+});
+
+describe("generated pages on the theme background (D-002)", () => {
+  const dark = { settings: { colors: { background: "#101010" } } };
+  it("keeps the generated default valid and shows the theme background on the generated band", async () => {
+    const { withPageBackground } = await import("@/lib/storefront/documents");
+    const doc = withPageBackground(defaultPageDocument("products"), dark);
+    expect(JSON.stringify(doc)).toContain("#101010");
+    expect(ok(doc)).toBe(true);
+    expect(ok(withPageBackground(defaultPageDocument("about"), null))).toBe(true);
   });
 });
