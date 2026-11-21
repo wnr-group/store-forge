@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { RichText } from "../richtext-renderer";
+import { blockMarkers } from "../markers";
 
 interface CollapsibleItemBlockProps {
   node: ComponentNode;
@@ -20,7 +21,7 @@ export function CollapsibleItemBlock({ node, context, blockId }: CollapsibleItem
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   return (
     <div className="border-b border-border py-4" {...sfProps}>

@@ -15,7 +15,6 @@ export const socialLinkBlock: BlockDefinition = {
         { label: "X (Twitter)", value: "x" },
         { label: "Twitter", value: "twitter" },
         { label: "Pinterest", value: "pinterest" },
-        { label: "TikTok", value: "tiktok" },
         { label: "YouTube", value: "youtube" },
         { label: "LinkedIn", value: "linkedin" },
       ],

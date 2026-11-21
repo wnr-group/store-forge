@@ -20,6 +20,26 @@ export const collapsibleContentSection: SectionDefinition = {
       default: "Find answers to common questions about our products, shipping, and returns.",
     },
     {
+      id: "eyebrow",
+      type: "text",
+      label: "Small label above the heading",
+      default: "",
+      help: "Shown by themes that support it",
+    },
+    {
+      id: "ctaLabel",
+      type: "text",
+      label: "Button label",
+      default: "",
+      help: "Leave empty for no button. Shown by themes that support it",
+    },
+    {
+      id: "ctaLink",
+      type: "url",
+      label: "Button link",
+      default: "/contact",
+    },
+    {
       id: "openFirstItem",
       type: "toggle",
       label: "Keep first item open",

@@ -58,6 +58,12 @@ export type PublicProductApi = {
     category_name: string | null;
     available?: boolean;
   };
+  /**
+   * The product's PUBLISHED presentation settings (`{ schemaVersion, gallery?, focalPoint?, hiddenBlocks? }`), or null when
+   * it has none. Absent on an API that predates product presentations. Typed `unknown` on purpose: it is untrusted and is
+   * read through `parsePresentation`, never used directly.
+   */
+  presentation?: unknown;
   images: { id: string; path: string; alt: string | null; position: number; is_primary: boolean }[];
   options: { name: string; values: string[] }[];
   variants: {

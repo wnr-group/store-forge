@@ -176,7 +176,7 @@
 /*
  * StoreForge design tokens (Linear-inspired workspace theme). Colours are defined once here; components use the
  * semantic Tailwind names (bg-card, text-muted-foreground, bg-sidebar...). Surfaces are white on a very light gray
- * workspace, text is neutral charcoal, and the single indigo accent marks primary actions, links, focus and selection.
+ * workspace, text is neutral charcoal, and the single deep green accent marks primary actions, links, focus and selection.
  * `-text` variants are darker shades of the status colours for small text, which the fills cannot reach 4.5:1
  * contrast with on white.
  */
@@ -188,10 +188,10 @@
   --card-foreground: #25262b;
   --popover: #ffffff;
   --popover-foreground: #25262b;
-  --primary: #635bff;
-  --primary-hover: #5249e8;
+  --primary: #0f7b62;
+  --primary-hover: #0b6551;
   --primary-foreground: #ffffff;
-  --link: #5249e8;
+  --link: #0b6551;
   --secondary: #f3f4f6;
   --secondary-foreground: #25262b;
   --muted: #f3f4f6;
@@ -208,8 +208,8 @@
   --info-text: #1f62bd;
   --border: #e5e7eb;
   --input: #d1d5db;
-  --ring: #635bff;
-  --chart-1: #635bff;
+  --ring: #0f7b62;
+  --chart-1: #0f7b62;
   --chart-2: #9ca3af;
   --chart-3: #d1d5db;
   --chart-4: #6b7280;
@@ -217,12 +217,12 @@
   --radius: 0.5rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #4b5563;
-  --sidebar-primary: #635bff;
+  --sidebar-primary: #0f7b62;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f1f2f4;
   --sidebar-accent-foreground: #25262b;
   --sidebar-border: #e5e7eb;
-  --sidebar-ring: #635bff;
+  --sidebar-ring: #0f7b62;
 }
 
 .dark {
@@ -233,10 +233,10 @@
   --card-foreground: #e8e9eb;
   --popover: #1c1d20;
   --popover-foreground: #e8e9eb;
-  --primary: #7a73ff;
-  --primary-hover: #8d87ff;
-  --primary-foreground: #0f0e1a;
-  --link: #a5a0ff;
+  --primary: #2fb58f;
+  --primary-hover: #44c7a2;
+  --primary-foreground: #08140f;
+  --link: #7fe0bf;
   --secondary: #222327;
   --secondary-foreground: #e8e9eb;
   --muted: #222327;
@@ -253,20 +253,20 @@
   --info-text: #7fb2f4;
   --border: #2a2b2f;
   --input: #3a3c41;
-  --ring: #a5a0ff;
-  --chart-1: #8d87ff;
+  --ring: #7fe0bf;
+  --chart-1: #44c7a2;
   --chart-2: #7b7f88;
   --chart-3: #4a4c52;
   --chart-4: #9ca0a8;
   --chart-5: #34363a;
   --sidebar: #141517;
   --sidebar-foreground: #a8acb3;
-  --sidebar-primary: #7a73ff;
-  --sidebar-primary-foreground: #0f0e1a;
+  --sidebar-primary: #2fb58f;
+  --sidebar-primary-foreground: #08140f;
   --sidebar-accent: #222327;
   --sidebar-accent-foreground: #e8e9eb;
   --sidebar-border: #25262a;
-  --sidebar-ring: #a5a0ff;
+  --sidebar-ring: #7fe0bf;
 }
 
 @layer base {
@@ -333,6 +333,88 @@
 }
 /* Sections own their width (see engine/ui.tsx), so full-bleed backgrounds can reach the edges. */
 .sf-theme h1, .sf-theme h2 { text-wrap: balance; }
+
+/*
+ * Sport look motion (components/storefront/engine/looks/sport/motion.tsx), ported from the LESPARO home page.
+ * Content is visible by default: elements only hide once the observer has set <html data-sf-reveal-on>.
+ *   data-sf-reveal="up"     fade and rise
+ *   data-sf-reveal="words"  each word of a heading rises from behind a mask
+ * --delay offsets an element. .sf-up / .sf-photo / .sf-tint belong to the hero and the hover tints.
+ */
+:root {
+  --sf-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sf-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+  /* Room for italic overhang, so slanted letters are not clipped. */
+  padding-inline-end: 0.1em;
+  margin-inline-end: -0.1em;
+}
+.sf-word {
+  display: inline-block;
+}
+@keyframes sf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+}
+@keyframes sf-load-word {
+  from {
+    translate: 0 112%;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-sf-reveal-on] [data-sf-reveal] {
+    transition:
+      opacity 0.9s var(--sf-ease-out),
+      translate 1.1s var(--sf-ease-out);
+    transition-delay: var(--delay, 0s);
+  }
+  :root[data-sf-reveal-on] [data-sf-reveal="up"]:not([data-sf-revealed]) {
+    opacity: 0;
+    translate: 0 2rem;
+  }
+  :root[data-sf-reveal-on] [data-sf-reveal="words"] {
+    transition: none;
+  }
+  :root[data-sf-reveal-on] [data-sf-reveal="words"] .sf-word {
+    transition: translate 1s var(--sf-ease-out);
+    transition-delay: calc(var(--delay, 0s) + var(--i, 0) * 70ms);
+  }
+  :root[data-sf-reveal-on] [data-sf-reveal="words"]:not([data-sf-revealed]) .sf-word {
+    translate: 0 112%;
+  }
+  /* Hero: the copy rises in, one piece after another, each time a slide comes up; the photograph settles from a slight zoom. */
+  .sf-up {
+    animation: sf-rise 0.9s var(--sf-ease-out) var(--d, 0ms) both;
+  }
+  .sf-hero-word {
+    animation: sf-load-word 1.1s var(--sf-ease-out) both;
+    animation-delay: calc(0.15s + var(--i, 0) * 90ms);
+  }
+  .sf-photo {
+    transform: scale(1.06);
+    transition: transform 7s ease-out;
+  }
+  [data-on="true"] > .sf-photo {
+    transform: scale(1);
+  }
+}
+/* Cards get a soft pastel fill behind them on hover; each card in a row takes the next colour. */
+.sf-tint {
+  transition: background-color 0.5s var(--sf-ease-out);
+}
+@media (hover: hover) {
+  .sf-tint:hover,
+  .sf-tint:focus-within {
+    background-color: var(--sf-tint);
+  }
+}
 
 /*
  * Merchant dashboard scope. MerchantScope (components/dashboard/merchant-scope.tsx) sets data-area="merchant" on a wrapper
@@ -406,4 +488,45 @@
   [data-area="merchant"] [data-sidebar-scroll] nav p {
     padding-top: 0.625rem;
   }
+}
+
+/*
+ * Theme editor palette: warm paper surfaces with a deep green accent (mint selection, green Publish). Scoped to the editor
+ * root so the rest of the dashboard keeps its own colours.
+ */
+.sf-editor {
+  --background: #f4f3ee;
+  --foreground: #1c211e;
+  --card: #fdfdfb;
+  --card-foreground: #1c211e;
+  --primary: #0f7b62;
+  --primary-hover: #0b6551;
+  --primary-foreground: #ffffff;
+  --secondary: #eeece5;
+  --secondary-foreground: #1c211e;
+  --muted: #eeece5;
+  --muted-foreground: #6a716c;
+  --accent: #e4f2ec;
+  --accent-foreground: #0b6551;
+  --border: #e4e1d8;
+  --input: #dcd9ce;
+  --ring: #0f7b62;
+}
+.dark .sf-editor {
+  --background: #131614;
+  --foreground: #e8ece9;
+  --card: #1a1d1b;
+  --card-foreground: #e8ece9;
+  --primary: #2fb58f;
+  --primary-hover: #44c7a2;
+  --primary-foreground: #08140f;
+  --secondary: #242826;
+  --secondary-foreground: #e8ece9;
+  --muted: #242826;
+  --muted-foreground: #98a09a;
+  --accent: #1f3a31;
+  --accent-foreground: #7fe0bf;
+  --border: #2a2f2c;
+  --input: #343a36;
+  --ring: #2fb58f;
 }

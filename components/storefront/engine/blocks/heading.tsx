@@ -1,5 +1,6 @@
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
+import { blockMarkers } from "../markers";
 
 interface HeadingBlockProps {
   node: ComponentNode;
@@ -14,7 +15,7 @@ export function HeadingBlock({ node, context, blockId }: HeadingBlockProps) {
 
   const alignClass = alignment === "center" ? "text-center" : alignment === "right" ? "text-right" : "text-left";
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   switch (level) {
     case "h1":

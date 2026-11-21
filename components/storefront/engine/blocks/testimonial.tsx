@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
+import { blockMarkers } from "../markers";
 
 interface TestimonialBlockProps {
   node: ComponentNode;
@@ -20,7 +21,7 @@ export function TestimonialBlock({ node, context, blockId }: TestimonialBlockPro
   const altText = typeof avatarVal === "object" ? avatarVal?.alt ?? author : author;
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   const avatarUrl = rawPath
     ? rawPath.startsWith("http://") || rawPath.startsWith("https://") || rawPath.startsWith("/")

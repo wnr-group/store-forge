@@ -12,7 +12,9 @@ import {
   type ProductDetailApi,
   type ProductListItemApi,
 } from "@/lib/api/endpoints/product-api";
+import { getStoreApi } from "@/lib/api/endpoints/store-api";
 import { AppError } from "@/lib/errors";
+import { minorToInput } from "@/lib/money";
 import { requireActiveTenant } from "@/lib/tenant/context";
 import { PAGE_SIZE, type ProductListQuery, type ProductValues } from "@/lib/validations/catalog";
 
@@ -141,4 +143,117 @@ export async function setProductsStatus(ids: string[], status: Product["status"]
 export async function duplicateProduct(id: string): Promise<{ id: string }> {
   const { tenant } = await requireActiveTenant("catalog:manage");
   return { id: (await duplicateProductApi(tenant.id, id)).id };
+}
+
+/** What the editor's card dialog edits: the few fields a product card shows. Prices are decimal text in the product's currency. */
+export type QuickEditProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  shortDescription: string;
+  price: string;
+  compareAtPrice: string;
+  currency: string;
+  /** A product with variants has a price per variant, so its price is edited on the product page. */
+  hasVariants: boolean;
+  imagePath: string | null;
+  priceMinor: number;
+  compareAtPriceMinor: number | null;
+};
+
+const toQuickEdit = (d: ProductDetailApi, currency: string): QuickEditProduct => ({
+  id: d.id,
+  slug: d.slug,
+  name: d.name,
+  shortDescription: d.shortDescription ?? "",
+  price: minorToInput(d.priceMinor, currency),
+  compareAtPrice: minorToInput(d.compareAtPriceMinor, currency),
+  currency,
+  hasVariants: d.variants.length > 0,
+  imagePath: d.images[0]?.storagePath ?? null,
+  priceMinor: d.priceMinor,
+  compareAtPriceMinor: d.compareAtPriceMinor,
+});
+
+/** The product a storefront card shows, found by its address. Cards carry the slug, not the id. */
+async function findProductId(organizationId: string, slug: string, name: string): Promise<string> {
+  for (const search of [name, slug]) {
+    const { items } = await listProductsApi(organizationId, { page: 1, limit: 50, search });
+    const match = items.find((p) => p.slug === slug);
+    if (match) return match.id;
+  }
+  throw new AppError("NOT_FOUND", "That product could not be found. It may have been removed.");
+}
+
+/** Reads the product behind a card, for the editor's "edit product" dialog. */
+export async function getProductForQuickEdit(slug: string, name: string): Promise<QuickEditProduct> {
+  const { tenant } = await requireActiveTenant();
+  const id = await findProductId(tenant.id, slug, name);
+  const [detail, store] = await Promise.all([getProductApi(tenant.id, id), getStoreApi(tenant.id)]);
+  return toQuickEdit(detail, store.currency);
+}
+
+export type QuickEditPatch = {
+  id: string;
+  name: string;
+  shortDescription: string;
+  price: string;
+  compareAtPrice: string;
+  /** Storage path of a newly uploaded main picture; null keeps the pictures as they are. */
+  imagePath: string | null;
+};
+
+/**
+ * The whole product as the update expects it, with the card's fields changed: the update replaces the product, so everything
+ * else (variants, options, stock, collections, the other pictures) is sent back as it is. A new main picture replaces the old
+ * one and keeps the rest. Not validated here: the caller runs it through the product schema first.
+ */
+export async function buildQuickEditPayload(patch: QuickEditPatch): Promise<Record<string, unknown>> {
+  const { tenant } = await requireActiveTenant("catalog:manage");
+  const [d, store] = await Promise.all([getProductApi(tenant.id, patch.id), getStoreApi(tenant.id)]);
+  const currency = store.currency;
+  const current = toQuickEdit(d, currency);
+  if (current.hasVariants && (patch.price.trim() !== current.price || patch.compareAtPrice.trim() !== current.compareAtPrice)) {
+    throw new AppError("VALIDATION", "This product has variants, each with its own price. Change prices on the product page.");
+  }
+  const pathById = new Map(d.images.map((i) => [i.id, i.storagePath]));
+  const kept = d.images.map((i) => ({ path: i.storagePath, altText: i.altText ?? "" }));
+  const images = patch.imagePath && patch.imagePath !== current.imagePath ? [{ path: patch.imagePath, altText: patch.name }, ...kept.slice(1)] : kept;
+  return {
+    id: d.id,
+    name: patch.name,
+    slug: d.slug,
+    description: d.description ?? "",
+    shortDescription: patch.shortDescription,
+    productType: d.productType ?? "",
+    categoryId: d.categoryId ?? null,
+    collectionIds: d.collectionIds,
+    sku: d.sku ?? "",
+    price: current.hasVariants ? current.price : patch.price,
+    compareAtPrice: current.hasVariants ? current.compareAtPrice : patch.compareAtPrice,
+    cost: minorToInput(d.costMinor, currency),
+    trackInventory: d.trackInventory,
+    quantity: String(d.quantity),
+    lowStockThreshold: String(d.lowStockThreshold),
+    status: d.status,
+    options: d.options.map((o) => ({ name: o.name, values: o.values })),
+    variants: d.variants.map((v) => ({
+      id: v.id,
+      options: v.options,
+      sku: v.sku ?? "",
+      price: minorToInput(v.priceMinor, currency),
+      compareAtPrice: minorToInput(v.compareAtPriceMinor, currency),
+      quantity: v.quantity,
+      imagePath: v.imageId ? (pathById.get(v.imageId) ?? null) : null,
+      isActive: v.isActive,
+    })),
+    images,
+  };
+}
+
+/** After a card edit: the product as the card shows it now. */
+export async function readQuickEdit(id: string): Promise<QuickEditProduct> {
+  const { tenant } = await requireActiveTenant();
+  const [detail, store] = await Promise.all([getProductApi(tenant.id, id), getStoreApi(tenant.id)]);
+  return toQuickEdit(detail, store.currency);
 }

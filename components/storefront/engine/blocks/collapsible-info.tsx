@@ -5,6 +5,7 @@ import { ChevronDown, Truck, ShieldCheck, HelpCircle } from "lucide-react";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { RichText } from "../richtext-renderer";
+import { blockMarkers } from "../markers";
 
 interface CollapsibleInfoBlockProps {
   node: ComponentNode;
@@ -20,7 +21,7 @@ export function CollapsibleInfoBlock({ node, context, blockId }: CollapsibleInfo
   const [isOpen, setIsOpen] = useState(false);
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   const renderIcon = () => {
     switch (icon) {

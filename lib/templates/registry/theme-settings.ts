@@ -1,5 +1,6 @@
 import type { SettingDescriptor } from "../engine/descriptors";
 import { FONT_KEYS, FONT_REGISTRY, type FontKey } from "../engine/fonts";
+import { DEFAULT_LOOK, LOOK_IDS, LOOK_LABELS } from "../looks";
 import { ALLOWED_SOCIAL_NETWORKS } from "../engine/schema";
 
 /**
@@ -62,6 +63,15 @@ const socialDescriptors: SettingDescriptor[] = (Object.keys(SOCIAL_LABELS) as (k
  */
 export const themeSettingDescriptors: SettingDescriptor[] = [
   { id: "favicon", type: "image", label: "Favicon", default: null, group: "brand" },
+  {
+    id: "look",
+    type: "select",
+    label: "Storefront look",
+    default: DEFAULT_LOOK,
+    group: "brand",
+    help: "How the sections are drawn. Set by the theme.",
+    options: LOOK_IDS.map((id) => ({ label: LOOK_LABELS[id], value: id })),
+  },
   color("primary", "Primary Color", "#1a5aaa"),
   color("secondary", "Secondary Color", "#64748b"),
   color("background", "Background Color", "#ffffff"),

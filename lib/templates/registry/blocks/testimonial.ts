@@ -23,6 +23,15 @@ export const testimonialBlock: BlockDefinition = {
       default: "Verified Customer",
     },
     {
+      id: "rating",
+      type: "range",
+      label: "Star rating",
+      default: 5,
+      min: 1,
+      max: 5,
+      help: "Shown by themes that display stars",
+    },
+    {
       id: "company",
       type: "text",
       label: "Company / Location",

@@ -1,4 +1,5 @@
 import type { SectionDefinition } from "../../engine/descriptors";
+import { cardPartSettings } from "../../card-parts";
 
 export const productGridSection: SectionDefinition = {
   type: "product-grid",
@@ -27,5 +28,6 @@ export const productGridSection: SectionDefinition = {
       min: 4,
       max: 48,
     },
+    ...cardPartSettings,
   ],
 };

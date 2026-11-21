@@ -19,5 +19,5 @@ export default async function ProductsPage({ params }: Params) {
   const store = await getPublicStorefront(slug);
   if (!store) notFound();
   const frame = await getPublishedFrame(slug);
-  return <PublishedView store={store} frame={frame} document={productListDocument("All products")} />;
+  return <PublishedView store={store} frame={frame} document={productListDocument("All products")} page="products" />;
 }

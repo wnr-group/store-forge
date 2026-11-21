@@ -14,14 +14,14 @@ const MODES: { id: PreviewMode; label: string }[] = [
 /** Chooses what a theme preview is filled with: the merchant's real products, or isolated demo content. */
 export function PreviewModeSwitch({ mode, onChange, className }: { mode: PreviewMode; onChange: (mode: PreviewMode) => void; className?: string }) {
   return (
-    <div className={cn("inline-flex rounded-md border p-0.5", className)} role="group" aria-label="Preview with">
+    <div className={cn("inline-flex rounded-lg border p-0.5", className)} role="group" aria-label="Preview with">
       {MODES.map(({ id, label }) => (
         <button
           key={id}
           type="button"
           aria-pressed={mode === id}
           onClick={() => onChange(id)}
-          className={cn("rounded-[5px] px-2.5 py-1 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring", mode === id ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground")}
+          className={cn("rounded-[5px] px-2.5 py-1 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring", mode === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
         >
           {label}
         </button>
