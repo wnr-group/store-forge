@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { isHiddenFor, presentationOf } from "@/lib/templates/product-presentation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { AddToBag } from "@/components/storefront/cart/add-to-bag";
@@ -29,7 +30,9 @@ export function SportMainProduct({ node, context, sectionId }: SectionProps) {
   const gallery = [...new Set([product?.image_path, ...(product?.images ?? [])].filter((p): p is string => Boolean(p)))];
   const shownPath = matched?.image_path ?? picked ?? gallery[0] ?? null;
   const blocks = node.blocks ?? {};
-  const blockOrder = node.block_order ?? Object.keys(blocks);
+  // A product can hide blocks of its own (per-product presentation): description, SKU, type, category, share links.
+  const presentation = presentationOf(product);
+  const blockOrder = (node.block_order ?? Object.keys(blocks)).filter((id) => !isHiddenFor(presentation, blocks[id]?.type ?? ""));
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
   const currency = context.store.currency ?? "INR";
@@ -40,9 +43,9 @@ export function SportMainProduct({ node, context, sectionId }: SectionProps) {
 
   // Only facts the product holds; a row with no value is left out.
   const highlights = [
-    { label: "Category", value: product?.category },
-    { label: "Product type", value: product?.type },
-    { label: "Reference", value: product?.sku },
+    { label: "Category", value: isHiddenFor(presentation, "product-category") ? null : product?.category },
+    { label: "Product type", value: isHiddenFor(presentation, "product-type") ? null : product?.type },
+    { label: "Reference", value: isHiddenFor(presentation, "product-sku") ? null : product?.sku },
     { label: "Availability", value: product ? (soldOut ? "Sold out" : "In stock") : null },
   ].filter((h): h is { label: string; value: string } => Boolean(h.value));
 
@@ -53,7 +56,7 @@ export function SportMainProduct({ node, context, sectionId }: SectionProps) {
           <li>
             <Link href="/products" className="hover:text-primary">Shop</Link>
           </li>
-          {product?.category ? (
+          {product?.category && !isHiddenFor(presentation, "product-category") ? (
             <li className="flex items-center gap-1.5">
               <ChevronRight className="size-3.5" aria-hidden />
               {product.category}
@@ -73,7 +76,7 @@ export function SportMainProduct({ node, context, sectionId }: SectionProps) {
         </div>
 
         <div className="sf-up flex min-w-0 flex-col gap-4" style={{ ["--d" as string]: "120ms" }}>
-          {product?.category ? <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-secondary">{product.category}</p> : null}
+          {product?.category && !isHiddenFor(presentation, "product-category") ? <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-secondary">{product.category}</p> : null}
           {rest.map((id) => renderBlockComponent(blocks[id], ctx, id))}
           <div id="buy" className="scroll-mt-28 border-t border-border pt-6">
             {product ? <AddToBag product={product} selectedOptions={chosen} /> : null}

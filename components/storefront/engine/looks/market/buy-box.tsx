@@ -16,7 +16,7 @@ import { Price, btnAccent, btnOutline, btnPrimary } from "./ui";
  * "Add to cart", "Buy now" and "Add to wishlist", and who sells it. A product with options can only be bought once the
  * chosen options match a real variant; a sold-out product cannot be added.
  */
-export function MarketBuyBox({ product, selectedOptions, currency, storeName }: { product: ProductDetailData; selectedOptions: Record<string, string>; currency: string; storeName: string }) {
+export function MarketBuyBox({ product, selectedOptions, currency, storeName, showReference = true }: { product: ProductDetailData; selectedOptions: Record<string, string>; currency: string; storeName: string; showReference?: boolean }) {
   const cart = useOptionalCart();
   const wishlist = useOptionalWishlist();
   const router = useRouter();
@@ -110,7 +110,7 @@ export function MarketBuyBox({ product, selectedOptions, currency, storeName }: 
             {storeName}
           </span>
         </div>
-        {product.sku ? (
+        {product.sku && showReference ? (
           <div className="flex items-start justify-between gap-3">
             <span className="text-muted-foreground">Reference</span>
             <span className="text-right text-primary">{product.sku}</span>
