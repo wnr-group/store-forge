@@ -1,3 +1,4 @@
+import { shotPath } from "./support/shot-path";
 import { expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -23,12 +24,12 @@ export async function login(page: Page, email: string) {
   await page.waitForURL(/\/dashboard/);
 }
 
-const dir = join(process.cwd(), "artifacts", "qa", "screenshots", TICKET);
-
 /** Captures the CURRENT real page state and verifies the file exists and is non-empty. Call after the action has completed. */
 export async function shot(page: Page, name: string, opts: { fullPage?: boolean } = {}): Promise<string> {
-  mkdirSync(dir, { recursive: true });
-  const path = join(dir, `${name}.png`);
+  const { dir, file } = shotPath(name, TICKET);
+  const abs = join(process.cwd(), dir);
+  mkdirSync(abs, { recursive: true });
+  const path = join(abs, file);
   await page.screenshot({ path, fullPage: opts.fullPage ?? false });
   expect(existsSync(path), `${path} exists`).toBe(true);
   expect(statSync(path).size, `${path} is not empty`).toBeGreaterThan(1000);
