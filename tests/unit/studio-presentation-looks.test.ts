@@ -17,8 +17,6 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => {}, refresh:
 import { TemplateRenderer } from "@/components/storefront/engine/renderer";
 import type { RenderContext } from "@/components/storefront/engine/types";
 import type { TemplateDocument } from "@/lib/templates/document";
-import { productPreset } from "@/lib/templates/registry/presets/product";
-import { toProductResource } from "@/services/storefront.service";
 
 beforeAll(() => {
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
