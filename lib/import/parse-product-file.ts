@@ -1,7 +1,7 @@
 import "server-only";
 import Papa from "papaparse";
 import { readSheet } from "read-excel-file/node";
-import { findBlankLookingFormulaCells, type FormulaFinding } from "./formula-scan";
+import { scanFirstSheet, type FormulaFinding } from "./formula-scan";
 import { ALL_COLUMNS, LIMITS, REQUIRED_COLUMNS, type ImportColumn } from "./product-columns";
 import { inspectXlsxZip } from "./zip-guard";
 
@@ -44,8 +44,15 @@ export async function parseProductFile(file: File): Promise<ParseOutcome> {
     } else {
       const verdict = inspectXlsxZip(buf);
       if (!verdict.ok) return fail("xlsx-guard", verdict.reason);
+      // Scan first (it throws for anything it cannot scan: never "no formulas" by default). The sheet reader expands every missing row
+      // between the first and the last populated row, padded to the header width, so a tiny file with one cell at row 1,048,576 would
+      // allocate about a million rows. The bound comes from the supported input (500 products), with room for ordinary blank rows.
+      const scan = scanFirstSheet(buf);
+      if (scan.maxRow > LIMITS.sheetRows || scan.maxCol > LIMITS.sheetCols) {
+        return fail("xlsx-guard", `This sheet has data as far as row ${scan.maxRow}, column ${scan.maxCol}. Imports can use at most ${LIMITS.sheetRows.toLocaleString("en-US")} rows and ${LIMITS.sheetCols} columns. Remove stray cells and blank rows, or export a CSV.`);
+      }
+      formulas = scan.formulas;
       grid = (await readSheet(buf)) as unknown[][];
-      formulas = findBlankLookingFormulaCells(buf); // throws for anything it cannot scan: never "no formulas" by default
     }
   } catch (e) {
     if (e instanceof RangeError) return fail("xlsx-guard", "This .xlsx file expands to too much data. Remove unused rows and columns, or export a CSV.");
