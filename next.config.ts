@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
   // Secret, team-member and reset passwords), so that line would put them in the server log. Development only; `next start` never
   // prints it. Request lines and errors are still logged.
   logging: { serverFunctions: false },
+  // Server Action request bodies are capped at 1 MB by default, the same as the product import file limit (LIMITS.fileBytes in
+  // lib/import/product-columns.ts). A file near that limit plus the multipart overhead would be refused by the transport before the
+  // action runs, so the user would never see the actionable size message. 2 MB covers the file limit with room for the overhead;
+  // the parser still enforces the real 1 MB file limit.
+  experimental: { serverActions: { bodySizeLimit: "2mb" } },
   images: {
     remotePatterns: supabaseHost
       ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/products/**" }]
