@@ -83,9 +83,9 @@ describe("Studio navigation group", () => {
   it("does not hide Pages, Navigation or Settings", () => {
     for (const actor of [settingsOnly, productsOnly, noAccess]) expect(hrefs("merchant", actor)).toEqual(expect.arrayContaining([ROUTES.pages, ROUTES.navigation, ROUTES.settings]));
   });
-  it("keeps Settings last so Team members lands before it", () => {
+  it("keeps Settings last so Team members and Payments land before it", () => {
     expect(NAV_SETS.merchant[NAV_SETS.merchant.length - 1].href).toBe(ROUTES.settings);
-    expect(NAV_SETS.owner.map((i) => i.href).slice(-2)).toEqual([ROUTES.team, ROUTES.settings]);
+    expect(NAV_SETS.owner.map((i) => i.href).slice(-3)).toEqual([ROUTES.team, ROUTES.payments, ROUTES.settings]);
   });
 });
 

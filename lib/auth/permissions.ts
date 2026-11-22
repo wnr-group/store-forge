@@ -98,6 +98,7 @@ export const canViewCustomers = (a: Actor) => can(a, "customers:view");
 export const canManageCustomers = (a: Actor) => can(a, "customers:manage");
 export const canDeleteCustomers = (a: Actor) => can(a, "customers:delete");
 export const canManageMembers = (a: Actor) => can(a, "members:manage");
+export const canManagePayments = (a: Actor) => can(a, "payments:manage");
 export const canViewDesign = (a: Actor) => can(a, "design:view");
 export const canEditDesign = (a: Actor) => can(a, "design:edit");
 export const canPublishDesign = (a: Actor) => can(a, "design:publish");

@@ -19,7 +19,7 @@ describe("importProducts", () => {
     expect(apiRequest).toHaveBeenCalledWith("/products/import", expect.objectContaining({ method: "POST", organizationId: tenant.id, timeoutMs: 60_000, json: { rows: expect.any(Array) } }));
   });
   it("turns the API's PRODUCT_IMPORT_INVALID details into typed row details and drops anything unexpected", async () => {
-    apiRequest.mockRejectedValue(new AppError("VALIDATION", "No products were imported.", undefined, { total: 1, errors: [{ row: 2, column: "price", message: "m", value: "0" }], secret: "internal" }));
+    apiRequest.mockRejectedValue(new AppError("VALIDATION", "No products were imported.", undefined, undefined, { total: 1, errors: [{ row: 2, column: "price", message: "m", value: "0" }], secret: "internal" }));
     const err = await importProducts([{ row: 2, name: "A", price: "0" }]).catch((e) => e as AppError);
     expect(err).toBeInstanceOf(AppError);
     expect((err as AppError).details).toEqual({ kind: "rows", total: 1, errors: [{ row: 2, column: "price", message: "m", value: "0" }] });

@@ -11,7 +11,7 @@ if (process.env.UPDATE_MANIFEST_BUNDLE === "1") writeFileSync(FILE, serializeMan
 
 describe("manifest bundle [AC-REG-01]", () => {
   it("the committed bundle equals the one generated from source (no drift)", () => {
-    expect(readFileSync(FILE, "utf8")).toBe(serializeManifestBundle());
+    expect(readFileSync(FILE, "utf8").split("\r\n").join("\n")).toBe(serializeManifestBundle()); // a checkout may convert line endings
   });
 
   it("holds 43 valid manifests with unique kind and id", () => {

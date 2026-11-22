@@ -17,7 +17,7 @@ export async function importProductsAction(formData: FormData) {
       const file = formData.get("file");
       if (!(file instanceof File)) throw new AppError("VALIDATION", "Choose a file to import.");
       const parsed = await parseProductFile(file);
-      if (!parsed.ok) throw new AppError("VALIDATION", "No products were imported.", undefined, { kind: "file", errors: parsed.errors });
+      if (!parsed.ok) throw new AppError("VALIDATION", "No products were imported.", undefined, undefined, { kind: "file", errors: parsed.errors });
       const result = await importProducts(parsed.rows);
       revalidatePath(ROUTES.products);
       revalidatePath(ROUTES.dashboard);

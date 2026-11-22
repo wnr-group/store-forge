@@ -13,7 +13,7 @@ export async function importProducts(rows: ProductImportRowApi[]): Promise<{ cou
   } catch (e) {
     if (e instanceof AppError && e.details && typeof e.details === "object") {
       const parsed = importDetailsSchema.safeParse({ kind: "rows", ...(e.details as object) });
-      if (parsed.success) throw new AppError("VALIDATION", e.message, undefined, parsed.data);
+      if (parsed.success) throw new AppError("VALIDATION", e.message, undefined, undefined, parsed.data);
       throw new AppError("UNKNOWN", "Something went wrong. Please try again.");
     }
     throw e;
