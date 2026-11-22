@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext, ProductDetailData } from "../types";
+import { blockMarkers } from "../markers";
 
 interface ProductCategoryBlockProps {
   node: ComponentNode;
@@ -15,7 +16,7 @@ export function ProductCategoryBlock({ node, context, blockId }: ProductCategory
   const categoryName = product?.category;
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   if (!categoryName) return null;
 

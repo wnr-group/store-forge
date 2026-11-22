@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { LEVEL_LABELS, MODULE_LABELS, presetOf, ROLE_PRESET_KEYS, ROLE_PRESETS, roleLabel } from "@/lib/auth/permissions";
 import { MODULES, type AccessLevel, type MemberPermissions } from "@/lib/domain/enums";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
+import { useReturnFocus } from "@/lib/hooks/use-return-focus";
 import { createMemberSchema, updateMemberSchema, type CreateMemberInput, type PermissionsInput } from "@/lib/validations/team";
 
 export type MemberRow = {
@@ -101,13 +102,15 @@ function PermissionFields({ idPrefix, value, onChange, disabled, error }: { idPr
 
 type AddMemberDialogProps = {
   open: boolean;
+  /** Where focus goes when the dialog closes (see useReturnFocus). Optional: Platform Admin does not pass it. */
+  finalFocus?: React.ComponentProps<typeof DialogContent>["finalFocus"];
   onOpenChange: (o: boolean) => void;
   /** Defaults to the Owner's own-tenant action; the Platform Admin passes one bound to a company. */
   create?: (v: CreateMemberInput) => ReturnType<typeof createMemberAction>;
   description?: string;
 };
 
-export function AddMemberDialog({ open, onOpenChange, create = createMemberAction, description = "Creates a sign-in for your company. No verification email is sent: share the email and initial password securely, and ask them to change it after first sign-in." }: AddMemberDialogProps) {
+export function AddMemberDialog({ open, onOpenChange, finalFocus, create = createMemberAction, description = "Creates a sign-in for your company. No verification email is sent: share the email and initial password securely, and ask them to change it after first sign-in." }: AddMemberDialogProps) {
   const router = useRouter();
   const [v, setV] = useState({ fullName: "", email: "", password: "" });
   const [permissions, setPermissions] = useState<PermissionsInput>({ ...ROLE_PRESETS.viewer.permissions } as PermissionsInput);
@@ -138,7 +141,7 @@ export function AddMemberDialog({ open, onOpenChange, create = createMemberActio
 
   return (
     <Dialog open={open} onOpenChange={(o) => !pending && onOpenChange(o)}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" data-dialog="add-member" finalFocus={finalFocus}>
         <DialogHeader>
           <DialogTitle>Add team member</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -219,6 +222,7 @@ type Pending = { kind: "edit" | "reset" | "toggle" | "remove"; member: MemberRow
 export function TeamManager({ members, description }: { members: MemberRow[]; description: string }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
+  const addFocus = useReturnFocus(adding);
   const [target, setTarget] = useState<Pending>(null);
   const close = () => setTarget(null);
   const label = (m: MemberRow) => `${m.fullName ?? m.email} (${m.email})`;
@@ -284,7 +288,7 @@ export function TeamManager({ members, description }: { members: MemberRow[]; de
         </Table>
       </div>
 
-      {adding ? <AddMemberDialog key="add" open onOpenChange={setAdding} /> : null}
+      {adding ? <AddMemberDialog key="add" open onOpenChange={setAdding} finalFocus={addFocus} /> : null}
       {target?.kind === "edit" ? <EditMemberDialog key={target.member.userId} member={target.member} onClose={close} /> : null}
       {target?.kind === "reset" ? (
         <ResetPasswordDialog open onOpenChange={(o) => !o && close()} subject={label(target.member)} onSubmit={(password) => resetMemberPasswordAction(target.member.userId, { password })} />

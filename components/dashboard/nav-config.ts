@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, CreditCard, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -37,6 +37,7 @@ export const NAV_ITEMS: NavItem[] = [
 export const OWNER_NAV_ITEMS: NavItem[] = [
   ...NAV_ITEMS.slice(0, -1),
   { href: ROUTES.team, label: "Team members", icon: UserCog, group: "Workspace" },
+  { href: ROUTES.payments, label: "Payments", icon: CreditCard, group: "Workspace" },
   NAV_ITEMS[NAV_ITEMS.length - 1],
 ];
 
@@ -54,6 +55,9 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
 /** Serializable key: icon components cannot cross the server -> client boundary. */
 export type NavKey = "merchant" | "owner" | "admin";
 export const NAV_SETS: Record<NavKey, NavItem[]> = { merchant: NAV_ITEMS, owner: OWNER_NAV_ITEMS, admin: ADMIN_NAV_ITEMS };
+
+/** What `navKey`'s member can open: the same set the sidebar lists, minus the hrefs hidden for them (e.g. by `hiddenNavHrefs`). */
+export const visibleNavItems = (navKey: NavKey, hidden: readonly string[] = []): NavItem[] => NAV_SETS[navKey].filter((item) => !hidden.includes(item.href));
 
 export function isActive(pathname: string, item: Pick<NavItem, "href" | "exact">) {
   return item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);

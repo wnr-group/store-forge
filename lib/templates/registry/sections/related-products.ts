@@ -1,4 +1,5 @@
 import type { SectionDefinition } from "../../engine/descriptors";
+import { cardPartSettings } from "../../card-parts";
 
 export const relatedProductsSection: SectionDefinition = {
   type: "related-products",
@@ -27,5 +28,6 @@ export const relatedProductsSection: SectionDefinition = {
       min: 2,
       max: 4,
     },
+    ...cardPartSettings,
   ],
 };

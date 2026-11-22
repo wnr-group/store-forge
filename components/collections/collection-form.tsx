@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { deleteCollectionAction, saveCollectionAction } from "@/app/(dashboard)/dashboard/collections/actions";
 import { ImageUploader, type ImageItem } from "@/components/products/image-uploader";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { useReportFormState, type FormState } from "@/components/shared/embedded-form";
 import { FormField } from "@/components/shared/form-field";
 import { SectionCard } from "@/components/shared/section-card";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -27,9 +28,14 @@ type Props = {
   initial?: Collection & { productIds: string[] };
   products: { id: string; name: string }[];
   canDelete: boolean;
+  /**
+   * Set when the form is shown in a dialog (the theme editor) instead of on its own page: a created collection is reported here
+   * rather than opening its page, Cancel calls `onCancel`, and `onStateChange` tells the dialog about unsaved changes.
+   */
+  embedded?: { onCreated: (id: string, status: "draft" | "active") => void; onCancel: () => void; onStateChange?: (state: FormState) => void };
 };
 
-export function CollectionForm({ mode, initial, products, canDelete }: Props) {
+export function CollectionForm({ mode, initial, products, canDelete, embedded }: Props) {
   const router = useRouter();
   const [id] = useState(() => initial?.id ?? uuid());
   const [name, setName] = useState(initial?.name ?? "");
@@ -46,6 +52,16 @@ export function CollectionForm({ mode, initial, products, canDelete }: Props) {
 
   const visible = useMemo(() => products.filter((p) => p.name.toLowerCase().includes(filter.trim().toLowerCase())), [products, filter]);
   const uploading = image.some((i) => i.status === "uploading");
+  // Changed since it was opened: what the dialog around an embedded form asks about before it closes.
+  const dirty =
+    name !== (initial?.name ?? "") ||
+    slug !== (initial?.slug ?? "") ||
+    description !== (initial?.description ?? "") ||
+    status !== (initial?.status ?? "draft") ||
+    JSON.stringify(picked) !== JSON.stringify(initial?.productIds ?? []) ||
+    (image.find((i) => i.status === "done")?.path ?? null) !== (initial?.imagePath ?? null) ||
+    uploading;
+  useReportFormState(embedded?.onStateChange, dirty, pending);
 
   const buildPayload = () => {
     const done = image.find((i) => i.status === "done" && i.path);
@@ -67,8 +83,10 @@ export function CollectionForm({ mode, initial, products, canDelete }: Props) {
         return;
       }
       toast.success(mode === "create" ? "Collection created" : "Changes saved");
-      if (mode === "create") router.replace(`${ROUTES.collections}/${id}`);
-      else router.refresh();
+      if (mode === "create") {
+        if (embedded) embedded.onCreated(id, status);
+        else router.replace(`${ROUTES.collections}/${id}`);
+      } else router.refresh();
     });
   };
 
@@ -140,9 +158,13 @@ export function CollectionForm({ mode, initial, products, canDelete }: Props) {
         </div>
       </div>
 
-      <div className="sticky bottom-0 z-20 -mx-3 mt-6 border-t bg-background sm:-mx-6">
-        <div className="flex items-center justify-end gap-2 px-3 py-3 sm:px-6">
-          <Link href={ROUTES.collections} className={cn(buttonVariants({ variant: "outline" }), "h-9")}>{mode === "create" ? "Cancel" : "Back"}</Link>
+      <div className={cn("sticky bottom-0 z-20 mt-6 border-t bg-background", embedded ? "-mx-4 -mb-4" : "-mx-3 sm:-mx-6")}>
+        <div className={cn("flex items-center justify-end gap-2 py-3", embedded ? "px-4" : "px-3 sm:px-6")}>
+          {embedded ? (
+            <Button type="button" variant="outline" className="h-9" onClick={embedded.onCancel} disabled={pending}>Cancel</Button>
+          ) : (
+            <Link href={ROUTES.collections} className={cn(buttonVariants({ variant: "outline" }), "h-9")}>{mode === "create" ? "Cancel" : "Back"}</Link>
+          )}
           <Button type="submit" className="h-9" disabled={pending || uploading}>
             {pending ? <Loader2 className="animate-spin" aria-hidden /> : null}
             {pending ? "Saving…" : mode === "create" ? "Create collection" : "Save changes"}

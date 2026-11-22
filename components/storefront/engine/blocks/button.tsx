@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
+import { blockMarkers } from "../markers";
 
 interface ButtonBlockProps {
   node: ComponentNode;
@@ -15,7 +16,7 @@ export function ButtonBlock({ node, context, blockId }: ButtonBlockProps) {
   const openInNewTab = Boolean(node.settings?.openInNewTab);
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   const baseStyle = "inline-flex items-center justify-center rounded-md px-5 py-2.5 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
   let variantStyle = "bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs";

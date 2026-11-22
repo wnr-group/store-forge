@@ -3,6 +3,5 @@
 // so parallel load cannot skew their measurements. Run them explicitly with
 // `vitest run --config vitest.timing.config.mts` (the default config excludes them).
 export const TIMING_TEST_FILES: readonly string[] = [
-  "tests/unit/engine-benchmark.test.ts",
   "tests/unit/engine-richtext-corpus.test.ts",
 ];

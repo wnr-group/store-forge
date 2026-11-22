@@ -7,6 +7,7 @@ import type { RenderContext } from "../types";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { CONTAINER, EditorialArt, EditorialHeader, ImagePlaceholder, RADIUS, SECTION_Y, SectionHeading } from "../ui";
 import { cn } from "@/lib/utils";
+import { readCollectionCardParts, type CollectionCardParts } from "@/lib/templates/card-parts";
 import { isEditorialTheme, isGroceryTheme, isHomeTheme } from "@/lib/templates/engine/theme-style";
 
 interface CollectionListSectionProps {
@@ -19,7 +20,9 @@ interface CollectionListSectionProps {
 export function CollectionListSection({ node, context, sectionId }: CollectionListSectionProps) {
   const title = (node.settings?.title as string) ?? "Collections";
   const columns = (node.settings?.columns as number) ?? 3;
-  const showProductCount = Boolean(node.settings?.showProductCount ?? true);
+  // What each card shows is the merchant's choice; the product count keeps its own setting.
+  const parts = readCollectionCardParts(node.settings, true);
+  const showProductCount = parts.count;
   const collections = context.collections ?? [];
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
@@ -30,17 +33,17 @@ export function CollectionListSection({ node, context, sectionId }: CollectionLi
   const chosen = node.settings?.layout;
   const layout = chosen === "grid" || chosen === "editorial" ? chosen : isAtelier ? "editorial" : "grid";
   if (layout === "editorial" && collections.length > 0) {
-    return <EditorialCollections title={title} showProductCount={showProductCount} collections={collections} sfProps={sfProps} />;
+    return <EditorialCollections title={title} showProductCount={showProductCount} parts={parts} collections={collections} sfProps={sfProps} />;
   }
 
   // Haven (home & furniture) gets arched room cards with a staggered rhythm.
   if (isHomeTheme(context.theme) && chosen !== "grid" && chosen !== "editorial" && collections.length > 0) {
-    return <RoomCollections title={title} showProductCount={showProductCount} columns={columns} collections={collections} sfProps={sfProps} />;
+    return <RoomCollections title={title} showProductCount={showProductCount} parts={parts} columns={columns} collections={collections} sfProps={sfProps} />;
   }
 
   // Freshly (grocery) gets compact tinted tiles with a round picture, built for scanning many categories at a glance.
   if (isGroceryTheme(context.theme) && chosen !== "grid" && chosen !== "editorial" && collections.length > 0) {
-    return <GroceryCategories title={title} showProductCount={showProductCount} collections={collections} sfProps={sfProps} />;
+    return <GroceryCategories title={title} showProductCount={showProductCount} parts={parts} collections={collections} sfProps={sfProps} />;
   }
 
   // Avoid a lone card on the last row: four collections sit in four columns, not three plus one.
@@ -59,11 +62,11 @@ export function CollectionListSection({ node, context, sectionId }: CollectionLi
             const img = publicImageUrl(col.image_path);
             return (
               <li key={col.slug || col.id}>
-                <Link href={`/collections/${col.slug}`} className={cn("group relative block aspect-[4/5] overflow-hidden sm:aspect-[4/3] lg:aspect-[5/6] bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", RADIUS)}>
-                  {img ? <Image src={img} alt={col.name} fill sizes="(min-width: 1024px) 33vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" /> : <ImagePlaceholder className="absolute inset-0" icon={false} deep />}
+                <Link href={`/collections/${col.slug}`} data-sf-card="" data-sf-collection={col.id} className={cn("group relative block aspect-[4/5] overflow-hidden sm:aspect-[4/3] lg:aspect-[5/6] bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", RADIUS)}>
+                  {img && parts.image ? <Image src={img} alt={col.name} fill sizes="(min-width: 1024px) 33vw, 50vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" /> : <ImagePlaceholder className="absolute inset-0" icon={false} deep />}
                   <span aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
                   <span className="absolute inset-x-0 bottom-0 flex flex-col gap-0.5 p-3 text-white sm:p-5">
-                    <span className="text-base leading-tight font-medium sm:text-xl">{col.name}</span>
+                    {parts.title ? <span className="text-base leading-tight font-medium sm:text-xl">{col.name}</span> : null}
                     {showProductCount && typeof col.product_count === "number" ? <span className="text-xs text-white/80">{col.product_count} {col.product_count === 1 ? "product" : "products"}</span> : null}
                   </span>
                 </Link>
@@ -90,7 +93,7 @@ function editorialPlan(count: number): { feature: boolean; span: string } {
  * Editorial layout: a tall feature picture beside a grid of portraits, each with its caption below the picture
  * (index number, serif name, product count and an arrow) instead of text laid over it. Corners follow the theme.
  */
-function EditorialCollections({ title, showProductCount, collections, sfProps }: { title: string; showProductCount: boolean; collections: NonNullable<RenderContext["collections"]>; sfProps: { "data-sf-section"?: string } }) {
+function EditorialCollections({ title, showProductCount, parts, collections, sfProps }: { title: string; showProductCount: boolean; parts: CollectionCardParts; collections: NonNullable<RenderContext["collections"]>; sfProps: { "data-sf-section"?: string } }) {
   const { feature, span } = editorialPlan(collections.length);
   return (
     <section className={cn(CONTAINER, SECTION_Y)} {...sfProps}>
@@ -102,15 +105,15 @@ function EditorialCollections({ title, showProductCount, collections, sfProps }:
           const stacked = feature && collections.length === 3 && i > 0;
           return (
             <li key={col.slug || col.id} className={cn("min-w-0", span, isFeature && "col-span-2 lg:row-span-2")}>
-              <Link href={`/collections/${col.slug}`} className="group flex h-full flex-col gap-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4">
+              <Link href={`/collections/${col.slug}`} data-sf-card="" data-sf-collection={col.id} className="group flex h-full flex-col gap-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4">
                 <div className={cn("relative w-full overflow-hidden bg-muted", RADIUS, isFeature ? "aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:min-h-[28rem] lg:flex-1" : stacked ? "aspect-[3/4] lg:aspect-[16/9]" : "aspect-[3/4]")}>
-                  {img ? <Image src={img} alt={col.name} fill sizes={isFeature ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"} className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]" /> : <EditorialArt name={col.name} index={i} large={isFeature} />}
+                  {img && parts.image ? <Image src={img} alt={col.name} fill sizes={isFeature ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"} className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]" /> : <EditorialArt name={col.name} index={i} large={isFeature} />}
                   <span aria-hidden className="pointer-events-none absolute inset-3 border border-white/0 transition-colors duration-500 group-hover:border-white/70 sm:inset-4" />
                   <span aria-hidden className="absolute top-3 left-3 text-xs tracking-[0.2em] text-white mix-blend-difference sm:top-4 sm:left-4">{String(i + 1).padStart(2, "0")}</span>
                 </div>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 space-y-1">
-                    <h3 className={cn("leading-tight tracking-tight text-foreground", isFeature ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl")}>{col.name}</h3>
+                    {parts.title ? <h3 className={cn("leading-tight tracking-tight text-foreground", isFeature ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl")}>{col.name}</h3> : null}
                     {showProductCount && typeof col.product_count === "number" ? <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">{col.product_count} {col.product_count === 1 ? "piece" : "pieces"}</p> : null}
                   </div>
                   <ArrowUpRight className="mt-1 size-5 shrink-0 text-foreground/40 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" strokeWidth={1.25} />
@@ -131,7 +134,7 @@ const GROCERY_TINTS = ["#e7f5ea", "#ffefdc", "#fff6cc", "#fde5e1", "#eaf4d3", "#
  * Grocery layout: a heading row with a "View all" pill, then tinted rounded tiles (2 per row on phones, 3 on tablets, 6 on desktop).
  * Each tile has a round picture on a white ring, the bold name and an item count; hover lifts the tile and nudges the arrow.
  */
-function GroceryCategories({ title, showProductCount, collections, sfProps }: { title: string; showProductCount: boolean; collections: NonNullable<RenderContext["collections"]>; sfProps: { "data-sf-section"?: string } }) {
+function GroceryCategories({ title, showProductCount, parts, collections, sfProps }: { title: string; showProductCount: boolean; parts: CollectionCardParts; collections: NonNullable<RenderContext["collections"]>; sfProps: { "data-sf-section"?: string } }) {
   return (
     <section className={cn(CONTAINER, SECTION_Y)} {...sfProps}>
       <div className="mb-7 flex items-end justify-between gap-4 sm:mb-9">
@@ -153,16 +156,16 @@ function GroceryCategories({ title, showProductCount, collections, sfProps }: { 
           return (
             <li key={col.slug || col.id} className="min-w-0">
               <Link
-                href={`/collections/${col.slug}`}
+                href={`/collections/${col.slug}`} data-sf-card="" data-sf-collection={col.id}
                 style={{ backgroundColor: GROCERY_TINTS[i % GROCERY_TINTS.length] }}
                 className="group relative isolate flex h-full transform-gpu flex-col items-center rounded-3xl px-3 pb-4 pt-5 text-center outline-none ring-1 ring-black/5 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform hover:-translate-y-1.5 focus-visible:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
                 {/* The lift shadow fades in on its own layer: animating box-shadow itself repaints every frame and looks choppy. */}
                 <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-3xl opacity-0 shadow-[0_22px_34px_-18px_rgba(20,35,26,0.4)] transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none" />
                 <span className="relative isolate block aspect-square w-full max-w-[8.5rem] transform-gpu overflow-hidden rounded-full bg-white shadow-[0_8px_20px_-10px_rgba(20,35,26,0.4)] ring-4 ring-white">
-                  {img ? <Image src={img} alt="" fill sizes="(min-width: 1024px) 140px, 40vw" className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.08] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" icon={false} deep />}
+                  {img && parts.image ? <Image src={img} alt="" fill sizes="(min-width: 1024px) 140px, 40vw" className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.08] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" icon={false} deep />}
                 </span>
-                <span className="mt-4 block text-[15px] font-bold leading-tight text-foreground">{col.name}</span>
+                {parts.title ? <span className="mt-4 block text-[15px] font-bold leading-tight text-foreground">{col.name}</span> : null}
                 <span className="mt-1.5 inline-flex min-h-6 items-center gap-1 text-xs font-medium text-foreground/70">
                   {showProductCount && typeof col.product_count === "number" ? `${col.product_count} ${col.product_count === 1 ? "item" : "items"}` : "Shop now"}
                   <ArrowUpRight className="size-3.5 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none" aria-hidden />
@@ -191,7 +194,7 @@ function roomPlan(count: number, index: number): string {
  * rooms up), with the room name over the picture, a thin frame that draws in on hover and an arrow that rises into view.
  * Only `transform` and `opacity` animate, so it stays smooth.
  */
-function RoomCollections({ title, showProductCount, collections, sfProps }: { title: string; showProductCount: boolean; columns: number; collections: NonNullable<RenderContext["collections"]>; sfProps: { "data-sf-section"?: string } }) {
+function RoomCollections({ title, showProductCount, parts, collections, sfProps }: { title: string; showProductCount: boolean; parts: CollectionCardParts; columns: number; collections: NonNullable<RenderContext["collections"]>; sfProps: { "data-sf-section"?: string } }) {
   const count = collections.length;
   const feature = (i: number) => i === 0 && count >= 3 && count <= 5;
   return (
@@ -212,14 +215,14 @@ function RoomCollections({ title, showProductCount, collections, sfProps }: { ti
           const big = feature(i) || count <= 2;
           return (
             <li key={col.slug || col.id} className={cn("min-w-0", feature(i) && "col-span-2", roomPlan(count, i))}>
-              <Link href={`/collections/${col.slug}`} className="group relative isolate block aspect-[4/5] size-full transform-gpu overflow-hidden rounded-lg bg-muted outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 sm:aspect-[4/3] lg:aspect-auto">
-                {img ? <Image src={img} alt="" fill sizes={big ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"} className="object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.06] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" icon={false} deep />}
+              <Link href={`/collections/${col.slug}`} data-sf-card="" data-sf-collection={col.id} className="group relative isolate block aspect-[4/5] size-full transform-gpu overflow-hidden rounded-lg bg-muted outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 sm:aspect-[4/3] lg:aspect-auto">
+                {img && parts.image ? <Image src={img} alt="" fill sizes={big ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"} className="object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.06] motion-reduce:transition-none" /> : <ImagePlaceholder className="absolute inset-0" icon={false} deep />}
                 <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <span aria-hidden className="pointer-events-none absolute inset-3 rounded-md border border-white/0 transition-colors duration-500 group-hover:border-white/60 sm:inset-4 motion-reduce:transition-none" />
                 <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 text-white sm:p-6">
                   <span className="min-w-0">
                     {showProductCount && typeof col.product_count === "number" ? <span className="block text-xs tracking-wide text-white/80">{col.product_count} {col.product_count === 1 ? "piece" : "pieces"}</span> : null}
-                    <span className={cn("mt-0.5 block font-semibold leading-tight tracking-tight", big ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl")}>{col.name}</span>
+                    {parts.title ? <span className={cn("mt-0.5 block font-semibold leading-tight tracking-tight", big ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl")}>{col.name}</span> : null}
                   </span>
                   <span aria-hidden className="flex size-10 shrink-0 translate-y-1 items-center justify-center rounded-full bg-white text-neutral-950 opacity-90 transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none sm:size-11">
                     <ArrowUpRight className="size-5" />

@@ -45,6 +45,10 @@ describe("searchProducts", () => {
   it("matches name and description case-insensitively", () => {
     expect(searchProducts(products, "LINEN").map((p) => p.name)).toEqual(["Linen Shirt", "Denim Jacket"]);
   });
+  it("needs every word, in any order", () => {
+    expect(searchProducts(products, "shirt linen").map((p) => p.name)).toEqual(["Linen Shirt"]);
+    expect(searchProducts(products, "linen scarf")).toEqual([]);
+  });
   it("returns nothing for a blank term", () => {
     expect(searchProducts(products, "   ")).toEqual([]);
   });

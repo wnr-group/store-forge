@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ROUTES } from "@/config/app";
 import { INVENTORY_REASONS } from "@/lib/domain/enums";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
+import { useReturnFocus } from "@/lib/hooks/use-return-focus";
 import { inventoryAdjustSchema } from "@/lib/validations/catalog";
 import type { InventoryRow } from "@/services/inventory.service";
 
@@ -40,6 +41,7 @@ const label = (r: InventoryRow) => (r.variantTitle ? `${r.productName} – ${r.v
 export function InventoryTable({ rows, canAdjust }: { rows: InventoryRow[]; canAdjust: boolean }) {
   const router = useRouter();
   const [target, setTarget] = useState<InventoryRow | null>(null);
+  const finalFocus = useReturnFocus(target !== null);
   const [mode, setMode] = useState<"add" | "set">("add");
   const [value, setValue] = useState("");
   const [reason, setReason] = useState<(typeof INVENTORY_REASONS)[number]>("restock");
@@ -115,7 +117,7 @@ export function InventoryTable({ rows, canAdjust }: { rows: InventoryRow[]; canA
       </div>
 
       <Dialog open={target !== null} onOpenChange={(o) => !o && !pending && setTarget(null)}>
-        <DialogContent>
+        <DialogContent finalFocus={finalFocus}>
           <DialogHeader>
             <DialogTitle>Adjust stock</DialogTitle>
             <DialogDescription>{target ? `${label(target)} · currently ${target.quantity}` : ""}</DialogDescription>

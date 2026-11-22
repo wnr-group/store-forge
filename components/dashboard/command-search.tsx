@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { NAV_ITEMS } from "./nav-config";
+import { visibleNavItems, type NavKey } from "./nav-config";
 
-/** Ctrl/Cmd+K quick navigation across dashboard sections. */
-export function CommandSearch() {
+/** Ctrl/Cmd+K quick navigation across the dashboard sections this member can open (the same list as the sidebar). */
+export function CommandSearch({ navKey, hidden }: { navKey: NavKey; hidden?: string[] }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
@@ -33,7 +33,7 @@ export function CommandSearch() {
       <Button
         variant="outline"
         onClick={() => setOpen(true)}
-        className="h-9 w-9 justify-center px-0 text-muted-foreground sm:w-56 sm:justify-start sm:px-2.5"
+        className="h-8 w-8 justify-center px-0 text-muted-foreground sm:w-56 sm:justify-start sm:px-2.5"
         aria-label="Search"
       >
         <Search aria-hidden />
@@ -46,7 +46,7 @@ export function CommandSearch() {
           <CommandList>
             <CommandEmpty>No results.</CommandEmpty>
             <CommandGroup heading="Navigate">
-              {NAV_ITEMS.map((item) => (
+              {visibleNavItems(navKey, hidden).map((item) => (
                 <CommandItem key={item.href} value={item.label} onSelect={() => go(item.href)}>
                   <item.icon aria-hidden />
                   {item.label}

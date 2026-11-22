@@ -64,7 +64,7 @@ describe("[AC-ENG-001] theme descriptors are the single source of the theme sett
 
   it("[AC-ENG-001] the ids are the nested keys of the stored document, grouped as D24 says", () => {
     const idsOf = (group: string) => byGroup(group).map((d) => d.id);
-    expect(idsOf("brand")).toEqual(["favicon"]);
+    expect(idsOf("brand")).toEqual(["favicon", "look"]);
     expect(idsOf("colors")).toEqual(["primary", "secondary", "background", "text", "accent", "muted", "border"]);
     expect(idsOf("typography")).toEqual(["headingFont", "bodyFont", "baseSize", "headingWeight", "bodyWeight", "lineHeight"]);
     expect(idsOf("layout")).toEqual(["pageWidth", "gridGap"]);
@@ -76,7 +76,8 @@ describe("[AC-ENG-001] theme descriptors are the single source of the theme sett
   it("[AC-ENG-001] every key of the generated schema exists as a descriptor, and every descriptor is a key of the schema", () => {
     const keys = generatedKeys();
     const groupsWithDescriptors = THEME_GROUPS.filter((g) => byGroup(g).length > 0);
-    expect(Object.keys(keys).sort()).toEqual([...groupsWithDescriptors].sort());
+    // `pages` is the one group without descriptors: whole page documents for the generated storefront pages (lib/storefront/pages.ts).
+    expect(Object.keys(keys).sort()).toEqual([...groupsWithDescriptors, "pages"].sort());
     for (const group of groupsWithDescriptors) {
       const schemaKeys = keys[group] ?? Object.keys(ALLOWED_SOCIAL_NETWORKS); // social: the host-checked rule, keyed by the one network list
       expect({ group, keys: [...schemaKeys].sort() }).toEqual({ group, keys: byGroup(group).map((d) => d.id).sort() });

@@ -1,4 +1,4 @@
-import { SAMPLE_COLLECTIONS, SAMPLE_PRODUCTS } from "./sample-data";
+import { SAMPLE_COLLECTIONS, SAMPLE_CONTENT_PAGES, SAMPLE_PRODUCTS } from "./sample-data";
 import type { PreviewStoreData } from "./types";
 
 /**
@@ -21,6 +21,7 @@ export function previewData(real: PreviewStoreData, mode: PreviewMode): PreviewD
     collections: SAMPLE_COLLECTIONS,
     collectionProducts: Object.fromEntries(SAMPLE_COLLECTIONS.map((c, i) => [c.slug, SAMPLE_PRODUCTS.slice(i, i + 8)])),
     productPage: null,
+    contentPages: SAMPLE_CONTENT_PAGES,
   };
 }
 

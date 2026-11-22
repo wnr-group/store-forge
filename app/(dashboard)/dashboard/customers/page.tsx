@@ -9,6 +9,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROUTES } from "@/config/app";
 import { canManageCustomers } from "@/lib/auth/permissions";
+import { formatDate } from "@/lib/format-date";
 import { formatMoney } from "@/lib/money";
 import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { customerListQuerySchema } from "@/lib/validations/catalog";
@@ -16,15 +17,14 @@ import { listCustomers } from "@/services/customer.service";
 
 export const metadata: Metadata = { title: "Customers" };
 
-const date = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
-
 export default async function CustomersPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const raw = await searchParams;
   const query = customerListQuerySchema.parse(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])));
   const { active, store } = await requireWorkspaceCan("customers:view");
   const result = await listCustomers(query);
   const currency = store?.currency ?? "INR";
-  const add = canManageCustomers(active) ? <AddCustomerButton /> : null;
+  const timezone = store?.timezone ?? "UTC";
+  const add =canManageCustomers(active) ? <AddCustomerButton /> : null;
 
   return (
     <>
@@ -69,8 +69,8 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                         <TableCell className="hidden text-muted-foreground md:table-cell">{c.phone ?? "—"}</TableCell>
                         <TableCell className="text-right tabular-nums">{c.orderCount}</TableCell>
                         <TableCell className="text-right tabular-nums">{formatMoney(c.totalSpentMinor, currency)}</TableCell>
-                        <TableCell className="hidden text-muted-foreground lg:table-cell">{c.lastOrderAt ? date.format(c.lastOrderAt) : "—"}</TableCell>
-                        <TableCell className="hidden text-muted-foreground xl:table-cell">{date.format(c.createdAt)}</TableCell>
+                        <TableCell className="hidden text-muted-foreground lg:table-cell">{c.lastOrderAt ? formatDate(c.lastOrderAt, timezone) : "—"}</TableCell>
+                        <TableCell className="hidden text-muted-foreground xl:table-cell">{formatDate(c.createdAt, timezone)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

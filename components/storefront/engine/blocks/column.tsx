@@ -4,6 +4,7 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { RichText } from "../richtext-renderer";
 import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
+import { blockMarkers } from "../markers";
 
 interface ColumnBlockProps {
   node: ComponentNode;
@@ -22,7 +23,7 @@ export function ColumnBlock({ node, context, blockId }: ColumnBlockProps) {
   const linkUrl = (node.settings?.linkUrl as string) ?? "";
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   const imageUrl = rawPath
     ? rawPath.startsWith("http://") || rawPath.startsWith("https://") || rawPath.startsWith("/")

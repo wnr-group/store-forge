@@ -1,0 +1,18 @@
+$ npx eslint   (whole repository)
+
+C:\Users\Eshwar\WNR\store-forge-studio-ui\lib\supabase\middleware.ts
+  28:16  error  'isSignedIn' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\Eshwar\WNR\store-forge-studio-ui\lib\tenant\context.ts
+  6:37  warning  'Role' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Eshwar\WNR\store-forge-studio-ui\tests\unit\tenant-context-api.test.ts
+  58:7  warning  'code' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 3 problems (1 error, 2 warnings)
+
+exit code: 1
+
+$ npx eslint <every changed or new .ts/.tsx file>
+warning: in the working copy of 'app/(dashboard)/dashboard/layout.tsx', LF will be replaced by CRLF the next time Git touches it
+exit code: 0
