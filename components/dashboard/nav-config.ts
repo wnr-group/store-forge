@@ -41,6 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
 export const OWNER_NAV_ITEMS: NavItem[] = [
   ...NAV_ITEMS.slice(0, -1),
   { href: ROUTES.team, label: "Team members", icon: UserCog, group: "Workspace" },
+  { href: ROUTES.payments, label: "Payments", icon: CreditCard, group: "Workspace" },
   NAV_ITEMS[NAV_ITEMS.length - 1],
 ];
 

@@ -17,6 +17,10 @@ const devOrigins = rootHost ? [rootHost, `*.${rootHost}`] : [];
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: devOrigins,
+  // `next dev` prints every Server Action call WITH its arguments to the terminal. Several actions receive secrets (the Razorpay Key
+  // Secret, team-member and reset passwords), so that line would put them in the server log. Development only; `next start` never
+  // prints it. Request lines and errors are still logged.
+  logging: { serverFunctions: false },
   images: {
     remotePatterns: supabaseHost
       ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/products/**" }]

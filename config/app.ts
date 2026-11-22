@@ -26,6 +26,7 @@ export const ROUTES = {
   customers: "/dashboard/customers",
   analytics: "/dashboard/analytics",
   team: "/dashboard/team",
+  payments: "/dashboard/payments",
   settings: "/dashboard/settings",
   reviews: "/dashboard/reviews",
   templates: "/dashboard/templates",

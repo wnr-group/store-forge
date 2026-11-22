@@ -55,6 +55,8 @@ const PERMISSIONS = {
   "tenant:delete": { ownerOnly: true },
   // Creating accounts is Owner-only: it needs the privileged Admin Auth API and must stay inside the Owner's own tenant.
   "members:manage": { ownerOnly: true },
+  // The tenant's Razorpay credentials. Owner-only here, in the API and in RLS (the API repository's migration 0034).
+  "payments:manage": { ownerOnly: true },
   // Products, categories, collections, inventory.
   "catalog:view": { module: "products", need: "read" },
   "catalog:manage": { module: "products", need: "write" },
