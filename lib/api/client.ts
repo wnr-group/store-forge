@@ -83,7 +83,7 @@ export function toAppError(status: number, body: ApiEnvelope<unknown> | null): A
   const code = CODE_BY_STATUS[status] ?? "UNKNOWN";
   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
-  return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+  return new AppError(code, message, fieldErrors(body?.error?.details), body?.error?.code, structured);
 }
 
 export type ApiResult<T> = { data: T; meta?: PageMeta };

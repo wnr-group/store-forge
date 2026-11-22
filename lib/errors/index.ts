@@ -16,6 +16,8 @@ export class AppError extends Error {
     public readonly code: AppErrorCode,
     message: string,
     public readonly fieldErrors?: Record<string, string>,
+    /** The API's machine code (e.g. `PAYMENTS_UNAVAILABLE`), when the error came from the API. Never shown to users. */
+    public readonly apiCode?: string,
     /** Typed, allow-listed structured details (for example the rows of a failed import). Never raw API internals. */
     public readonly details?: unknown,
   ) {
