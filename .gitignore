@@ -55,3 +55,13 @@ artifacts/**/traces/
 test-results/
 playwright-report/
 
+
+# E2E and QA screenshots stay local and are never committed (archive them outside the repository)
+/artifacts/**/*.png
+/artifacts/**/*.jpg
+/artifacts/**/*.jpeg
+/artifacts/**/*.webp
+/artifacts/**/*.gif
+/artifacts/**/*.zip
+/artifacts/**/*.trace
+/artifacts/**/*.har
