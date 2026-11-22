@@ -81,9 +81,9 @@ test("all eight virtual pages: edit, publish, see it live; reset touches one pag
     await publishFromEditor(page);
     await page.goto(`/s/${STORE_SLUG}/cart`);
     await expect(page.locator("body")).not.toContainText(texts.cart);
+    await shot(page, "AC-VP-2_cart-back-to-its-default");
     await page.goto(`/s/${STORE_SLUG}/wishlist`);
     await expect(page.locator("body")).toContainText(texts.wishlist);
-    await shot(page, "AC-VP-2_reset-cart-only-wishlist-intact");
     await page.context().request.delete(`${API}/store/pages/${contentId}`, { headers: { Origin: "http://localhost:3100" } });
   });
 });
