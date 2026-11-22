@@ -55,10 +55,18 @@ interface ReviewItem {
   createdAt: string;
 }
 
+async function fetchReviewItems(filter: string): Promise<ReviewItem[] | null> {
+  const res = await listReviewsAction(filter ? { status: filter } : undefined);
+  return res.ok && res.data ? res.data.items : null;
+}
+
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("");
+  // Loading is derived: the list is loading until the current filter's first response has settled, or while an explicit refresh runs.
+  const [loadedFilter, setLoadedFilter] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const loading = loadedFilter !== statusFilter || refreshing;
 
   // Create Modal
   const [createOpen, setCreateOpen] = useState(false);
@@ -78,20 +86,30 @@ export default function ReviewsPage() {
   const [importPending, setImportPending] = useState(false);
   const [importErrors, setImportErrors] = useState<Array<{ row: number; field: string; message: string }>>([]);
 
+  // Explicit refresh after a change: shows the loading state while it runs.
   const loadReviews = async () => {
-    setLoading(true);
+    setRefreshing(true);
     try {
-      const res = await listReviewsAction(statusFilter ? { status: statusFilter } : undefined);
-      if (res.ok && res.data) {
-        setReviews(res.data.items);
-      }
+      const items = await fetchReviewItems(statusFilter);
+      if (items) setReviews(items);
     } finally {
-      setLoading(false);
+      setRefreshing(false);
     }
   };
 
+  // Load when the filter changes. State is only set after the await, and a response for a superseded filter is ignored.
   useEffect(() => {
-    void loadReviews();
+    let current = true;
+    void fetchReviewItems(statusFilter)
+      .then((items) => {
+        if (current && items) setReviews(items);
+      })
+      .finally(() => {
+        if (current) setLoadedFilter(statusFilter);
+      });
+    return () => {
+      current = false;
+    };
   }, [statusFilter]);
 
   const handleToggleStatus = async (review: ReviewItem) => {

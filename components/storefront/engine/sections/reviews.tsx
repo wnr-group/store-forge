@@ -56,18 +56,18 @@ export function ReviewsSection({
   sectionId?: string;
 }) {
   const [data, setData] = useState<ReviewsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
 
   const productResource = context.resource as { slug?: string } | undefined;
   const productSlug = productResource?.slug;
   const storeData = context.store as { slug?: string } | undefined;
   const storeSlug = storeData?.slug ?? "demo";
+  // Loading is derived: a request is pending while there is a product and its key has not settled, so the effect sets no state synchronously.
+  const requestKey = productSlug ? `${storeSlug}/${productSlug}` : null;
+  const loading = requestKey !== null && loadedKey !== requestKey;
 
   useEffect(() => {
-    if (!productSlug) {
-      setLoading(false);
-      return;
-    }
+    if (!requestKey) return;
 
     const abortController = new AbortController();
     fetch(`/api/v1/public/storefronts/${storeSlug}/products/${productSlug}/reviews`, {
@@ -79,10 +79,10 @@ export function ReviewsSection({
         else if (json) setData(json);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => setLoadedKey(requestKey));
 
     return () => abortController.abort();
-  }, [storeSlug, productSlug]);
+  }, [storeSlug, productSlug, requestKey]);
 
   const title = (node.settings?.title as string) || "Customer Reviews";
   const disclosure = data?.disclosure || "Feedback collected by the store.";

@@ -111,11 +111,14 @@ export const listReusableSectionsApi = async (organizationId: string) =>
     updatedAt: string;
   }>>("/store/studio/reusable-sections", { organizationId })).data;
 
+/** What create and update return: the record's id is guaranteed, the rest is not asserted here (the list call has the full shape). */
+export type ReusableSectionWriteResult = { id: string } & Record<string, unknown>;
+
 export const createReusableSectionApi = async (
   organizationId: string,
   json: { componentId: string; name: string; description?: string; content: Record<string, unknown> },
 ) =>
-  (await apiRequest<any>("/store/studio/reusable-sections", {
+  (await apiRequest<ReusableSectionWriteResult>("/store/studio/reusable-sections", {
     method: "POST",
     organizationId,
     json,
@@ -126,7 +129,7 @@ export const updateReusableSectionApi = async (
   id: string,
   json: { name?: string; description?: string; content?: Record<string, unknown> },
 ) =>
-  (await apiRequest<any>(`/store/studio/reusable-sections/${id}`, {
+  (await apiRequest<ReusableSectionWriteResult>(`/store/studio/reusable-sections/${id}`, {
     method: "PUT",
     organizationId,
     json,

@@ -32,13 +32,14 @@ export function PublishDialog({ publishFlow, waitingPages, waitingProducts, pres
 }) {
   const { publishOpen, setPublishOpen, publish, publishing, doPublish } = publishFlow;
   const [readiness, setReadiness] = useState<ReadinessReportApi | null>(null);
-  const [loadingReadiness, setLoadingReadiness] = useState(false);
+  // Loading is derived from the dialog being open and the request not having settled yet, so the effect never sets state synchronously.
+  const [readinessSettled, setReadinessSettled] = useState(false);
+  const loadingReadiness = publishOpen && !readinessSettled;
   const [acknowledgedWarningKeys, setAcknowledgedWarningKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!publishOpen) return;
     let active = true;
-    setLoadingReadiness(true);
     getReadinessReportAction()
       .then((res) => {
         if (active && res && "data" in res && res.data) {
@@ -47,10 +48,11 @@ export function PublishDialog({ publishFlow, waitingPages, waitingProducts, pres
       })
       .catch(() => {})
       .finally(() => {
-        if (active) setLoadingReadiness(false);
+        if (active) setReadinessSettled(true);
       });
     return () => {
       active = false;
+      setReadinessSettled(false);
     };
   }, [publishOpen]);
 
