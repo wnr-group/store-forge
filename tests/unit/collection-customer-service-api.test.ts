@@ -84,7 +84,7 @@ describe("collections in API mode", () => {
     await svc.updateCollection("col1", { name: "S" } as never);
     await svc.deleteCollection("col1");
     expect(col.update).toHaveBeenCalledWith(tenant.id, "col1", { name: "S" });
-    expect(col.remove).toHaveBeenCalledWith(tenant.id, "col1");
+    expect(col.remove).toHaveBeenCalledWith(tenant.id, "col1", undefined);
     expect(requireActiveTenant).toHaveBeenCalledWith("catalog:delete");
   });
 });

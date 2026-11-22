@@ -1,0 +1,19 @@
+
+Running 10 tests using 1 worker
+
+  ok  1 tests\e2e\product-import-api.spec.ts:65:1 › AC-10 (API): no session is rejected with 401 and nothing is written (339ms)
+  ok  2 tests\e2e\product-import-api.spec.ts:74:1 › AC-10 (API): a member without catalog:manage (products read) is rejected with 403 and nothing is written (503ms)
+  ok  3 tests\e2e\product-import-api.spec.ts:83:1 › tenant isolation: a member of tenant 1 cannot import into tenant 2 by naming it in X-Organization-Id (620ms)
+smuggled tenant_id: API answered 400
+  ok  4 tests\e2e\product-import-api.spec.ts:91:1 › tenant isolation: a tenant id smuggled inside a row cannot place the product in another tenant (378ms)
+  ok  5 tests\e2e\product-import-api.spec.ts:101:1 › tenant isolation: the same SKU in two tenants never conflicts, and the other tenant's product is untouched (811ms)
+  ok  6 tests\e2e\product-import-api.spec.ts:110:1 › tenant isolation: another tenant's categories are not resolvable (row error, nothing created) (420ms)
+rollback error: [{"row":5,"column":"price","message":"Price must be greater than zero.","value":"abc"}]
+  ok  7 tests\e2e\product-import-api.spec.ts:120:1 › all-or-nothing: one invalid row among valid rows creates nothing; the error names row, column, message and value (1.1s)
+  ok  8 tests\e2e\product-import-api.spec.ts:138:1 › all-or-nothing: a fully valid request creates every row with the manual-form defaults, owned by the caller's tenant (960ms)
+concurrent same-SKU statuses: 201,400,409,409
+  ok  9 tests\e2e\product-import-api.spec.ts:164:1 › duplicate submission (server side): concurrent identical requests that carry a SKU yield exactly one product (256ms)
+sequential no-SKU resubmit statuses: 201,201
+  ok 10 tests\e2e\product-import-api.spec.ts:175:1 › duplicate submission (server side), characterization: resubmitting rows WITHOUT a SKU creates them again (no idempotency protection) (241ms)
+
+  10 passed (8.5s)

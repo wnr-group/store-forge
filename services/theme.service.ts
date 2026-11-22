@@ -23,30 +23,30 @@ import { toProductResource } from "@/services/storefront.service";
 import type { PreviewStoreData, ThemeIndustry } from "@/lib/themes/types";
 
 /**
- * The Theme Store and the visual editor's data, from the StoreForge API. Reading is open to every member of the active
- * workspace; changing anything needs `store:manage` (checked here and again by the API and the database). The workspace
+ * The Theme Store and the visual editor's data, from the StoreForge API. The template reads shared with Navigation stay open
+ * to every member of the active workspace; the Studio reads need `design:view`, applying a theme and saving drafts `design:edit`, publishing and rolling back `design:publish` (checked here and again by the API and the database). The workspace
  * comes from the verified membership, never from the browser.
  */
 
 export type ThemeQuery = { page: number; limit: number; search?: string; industry?: ThemeIndustry };
 
 export async function getThemes(q: ThemeQuery) {
-  const { tenant } = await requireActiveTenant();
+  const { tenant } = await requireActiveTenant("design:view");
   return listThemesApi(tenant.id, { page: q.page, limit: q.limit, search: q.search, industry: q.industry, sortOrder: "asc" });
 }
 
 export async function getThemeDetail(slug: string) {
-  const { tenant } = await requireActiveTenant();
+  const { tenant } = await requireActiveTenant("design:view");
   return getThemeApi(tenant.id, slug);
 }
 
 export async function getCurrentTheme() {
-  const { tenant } = await requireActiveTenant();
+  const { tenant } = await requireActiveTenant("design:view");
   return getCurrentThemeApi(tenant.id);
 }
 
 export async function applyTheme(slug: string) {
-  const { tenant } = await requireActiveTenant("store:manage");
+  const { tenant } = await requireActiveTenant("design:edit");
   return applyThemeApi(tenant.id, slug);
 }
 
@@ -66,27 +66,27 @@ export async function getPreview(id: string) {
 }
 
 export async function saveDraft(id: string, document: unknown, expectedRevision: number) {
-  const { tenant } = await requireActiveTenant("store:manage");
+  const { tenant } = await requireActiveTenant("design:edit");
   return saveDraftApi(tenant.id, id, document, expectedRevision);
 }
 
 export async function publishTheme(label?: string) {
-  const { tenant } = await requireActiveTenant("store:manage");
+  const { tenant } = await requireActiveTenant("design:publish");
   return publishThemeApi(tenant.id, label);
 }
 
 export async function publishTemplate(id: string, expectedRevision?: number, label?: string) {
-  const { tenant } = await requireActiveTenant("store:manage");
+  const { tenant } = await requireActiveTenant("design:publish");
   return publishTemplateApi(tenant.id, id, expectedRevision, label);
 }
 
 export async function getVersions(id: string) {
-  const { tenant } = await requireActiveTenant();
+  const { tenant } = await requireActiveTenant("design:view");
   return listVersionsApi(tenant.id, id);
 }
 
 export async function rollbackTemplate(id: string, versionId: string) {
-  const { tenant } = await requireActiveTenant("store:manage");
+  const { tenant } = await requireActiveTenant("design:publish");
   return rollbackApi(tenant.id, id, versionId);
 }
 
@@ -152,7 +152,7 @@ export async function getPreviewStoreData(options: PreviewOptions = {}): Promise
     : undefined;
 
   return {
-    store: { name: store.name, slug: store.slug, description: store.description, logo_path: store.logoPath, currency: store.currency, products },
+    store: { name: store.name, slug: store.slug, description: store.description, logo_path: store.logoPath, currency: store.currency, timezone: store.timezone, products },
     collections,
     collectionProducts,
     productPage,

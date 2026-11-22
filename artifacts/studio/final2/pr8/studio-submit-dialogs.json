@@ -1,0 +1,275 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-submit-dialogs.spec.ts",
+      "--reporter=json,list",
+      "--output=C:/Users/Eshwar/AppData/Local/Temp/pw-out"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/AppData/Local/Temp/pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-submit-dialogs.spec.ts",
+      "file": "studio-submit-dialogs.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Add customer and Edit customer: a successful submit, and what happens to focus",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14757,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:12:13.847Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e4d77420a14b2dde56b6-361ee0cf2394f25349c2",
+          "file": "studio-submit-dialogs.spec.ts",
+          "line": 38,
+          "column": 1
+        },
+        {
+          "title": "Adjust stock: a successful submit returns focus to the row's Adjust button",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 13545,
+                  "error": {
+                    "message": "Error: adjust stock: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                    "stack": "Error: adjust stock: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at expectRestored (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts:51:72)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-submit-dialogs.spec.ts:129:7\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-submit-dialogs.spec.ts:96:3",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                      "column": 72,
+                      "line": 51
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39msupport\\studio-data.ts:51\n\n \u001b[90m 49 |\u001b[39m   \u001b[36mconst\u001b[39m strip \u001b[33m=\u001b[39m (s\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m \u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mstringify({ \u001b[33m...\u001b[39m\u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mparse(s)\u001b[33m,\u001b[39m updatedAt\u001b[33m:\u001b[39m undefined })\u001b[33m;\u001b[39m\n \u001b[90m 50 |\u001b[39m   expect(after\u001b[33m.\u001b[39mleftoverCustomers\u001b[33m,\u001b[39m \u001b[32m`${label}: no leftover test customer`\u001b[39m)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m   expect(after\u001b[33m.\u001b[39mleftoverProducts\u001b[33m,\u001b[39m \u001b[32m`${label}: no leftover test product`\u001b[39m)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m   \u001b[36mconst\u001b[39m diff \u001b[33m=\u001b[39m (a\u001b[33m:\u001b[39m string[]\u001b[33m,\u001b[39m b\u001b[33m:\u001b[39m string[]) \u001b[33m=>\u001b[39m \u001b[32m`missing now: [${a.filter((x) => !b.includes(x)).join(\",\")}] extra now: [${b.filter((x) => !a.includes(x)).join(\",\")}]`\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   \u001b[36mfor\u001b[39m (\u001b[36mconst\u001b[39m key \u001b[36mof\u001b[39m [\u001b[32m\"categories\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"collections\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"customersTop\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"productsTop\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"adjustments\"\u001b[39m] \u001b[36mas\u001b[39m \u001b[36mconst\u001b[39m) {\n \u001b[90m 54 |\u001b[39m     expect(after[key]\u001b[33m,\u001b[39m \u001b[32m`${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`\u001b[39m)\u001b[33m.\u001b[39mtoEqual(before[key])\u001b[33m;\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                        "column": 72,
+                        "line": 51
+                      },
+                      "message": "Error: adjust stock: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n   at support\\studio-data.ts:51\n\n  49 |   const strip = (s: string) => JSON.stringify({ ...JSON.parse(s), updatedAt: undefined });\n  50 |   expect(after.leftoverCustomers, `${label}: no leftover test customer`).toEqual([]);\n> 51 |   expect(after.leftoverProducts, `${label}: no leftover test product`).toEqual([]);\n     |                                                                        ^\n  52 |   const diff = (a: string[], b: string[]) => `missing now: [${a.filter((x) => !b.includes(x)).join(\",\")}] extra now: [${b.filter((x) => !a.includes(x)).join(\",\")}]`;\n  53 |   for (const key of [\"categories\", \"collections\", \"customersTop\", \"productsTop\", \"adjustments\"] as const) {\n  54 |     expect(after[key], `${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`).toEqual(before[key]);\n    at expectRestored (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts:51:72)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-submit-dialogs.spec.ts:129:7\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-submit-dialogs.spec.ts:96:3"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:12:28.758Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-submit-dialogs-Adju-0f8ce--to-the-row-s-Adjust-button\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-submit-dialogs-Adju-0f8ce--to-the-row-s-Adjust-button\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                    "column": 72,
+                    "line": 51
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "e4d77420a14b2dde56b6-2ca56940e6f5e46e2a45",
+          "file": "studio-submit-dialogs.spec.ts",
+          "line": 95,
+          "column": 1
+        },
+        {
+          "title": "Add team member: a successful submit returns focus to Add member (creates the one reusable restricted account, once)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "The reusable restricted account e2e-reusable-restricted@demo.test already exists; the Team UI cannot delete members, so this create flow runs only when it is first created (see closeout report).",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-submit-dialogs.spec.ts",
+                    "line": 139,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 5187,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:12:45.958Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "The reusable restricted account e2e-reusable-restricted@demo.test already exists; the Team UI cannot delete members, so this create flow runs only when it is first created (see closeout report).",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-submit-dialogs.spec.ts",
+                        "line": 139,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e4d77420a14b2dde56b6-259378bf5a7b55a126b0",
+          "file": "studio-submit-dialogs.spec.ts",
+          "line": 134,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T15:12:11.575Z",
+    "duration": 40678.642,
+    "expected": 1,
+    "skipped": 1,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

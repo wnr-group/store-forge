@@ -1,0 +1,11 @@
+
+Running 4 tests using 1 worker
+
+500-row import: click to success banner = 3566 ms
+  ok 1 tests\e2e\product-import-limits.spec.ts:31:1 › 500 rows (the maximum) import in one request: all rows persist for the tenant, none leak, duration recorded (7.1s)
+  ok 2 tests\e2e\product-import-limits.spec.ts:56:1 › 501 rows are refused before any API call and nothing is written (2.4s)
+  ok 3 tests\e2e\product-import-limits.spec.ts:71:1 › a file over 1 MB is stopped in the browser: clear error, no request is sent, nothing is written (2.6s)
+API over-limit body: HTTP 413 {"success":false,"message":"Something went wrong. Please try again.","error":{"code":"HTTP_413","details":null},"timesta
+  ok 4 tests\e2e\product-import-limits.spec.ts:86:1 › the API itself answers a real HTTP 413 to an over-2 MB body on the import route and writes nothing (677ms)
+
+  4 passed (20.5s)

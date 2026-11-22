@@ -11,14 +11,20 @@ import { isSettingVisible } from "@/lib/templates/engine/descriptor-check";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { SettingDescriptor } from "@/lib/templates/engine/descriptors";
 import { getRegistry } from "@/lib/templates/registry/index";
+import { BadgeUploadField } from "./badge-upload-field";
+import { t } from "@/lib/i18n/messages";
+import { countdownNeedsTarget } from "@/lib/templates/countdown";
 import { themeSettingDescriptors } from "@/lib/templates/registry/theme-settings";
 import type { EditorState } from "@/lib/themes/editor/state";
 import { CardElements, type CardContext } from "./card-elements";
 import { SettingField } from "./setting-field";
 import { StylePanel } from "./style-panel";
 import { TextOnPage } from "./text-on-page";
+import { DisplayRulesPanel, showsDisplayPanel } from "./display-rules-panel";
+import type { DisplayRules } from "@/lib/templates/display-rules";
 
 const registry = getRegistry();
+const BADGE_MARK_FIELDS: ReadonlySet<string> = new Set(["markAssetId", "markPath", "markAlt"]);
 
 const GROUP_LABELS: Record<string, string> = {
   brand: "Brand",
@@ -57,9 +63,15 @@ type Props = {
   onDuplicate?: () => void;
   onRemove?: () => void;
   cardContext: CardContext;
+  /** Studio is on for this store: the "When to show" panel is offered, and its device toggles replace the Style tab's hide field. */
+  studioEnabled?: boolean;
+  /** The store's time zone and the preview clock (epoch ms), for the "When to show" panel. */
+  timezone?: string | null;
+  nowMs?: number;
+  onDisplay?: (docId: string, sectionId: string, blockId: string | undefined, display: DisplayRules | undefined) => void;
 };
 
-export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle, onDuplicate, onRemove, cardContext }: Props) {
+export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle, onDuplicate, onRemove, cardContext, studioEnabled = false, timezone, nowMs = 0, onDisplay }: Props) {
   if (mode === "theme") {
     return themeDocId && state.docs[themeDocId] ? (
       <ThemeSettings doc={state.docs[themeDocId].document} disabled={disabled} problems={problems[themeDocId] ?? {}} onChange={(group, key, value) => onThemeSetting(themeDocId, group, key, value)} />
@@ -101,11 +113,17 @@ export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSet
       onDuplicate={onDuplicate}
       onRemove={onRemove}
       cardContext={cardContext}
+      studioEnabled={studioEnabled}
+      timezone={timezone}
+      nowMs={nowMs}
+      onDisplay={onDisplay}
     />
   );
 }
 
-type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "styleDevice" | "onStyle" | "onResetStyle" | "onSelectParent" | "focusSetting" | "onFocusConsumed" | "clickedText" | "onText" | "onTextStyle" | "onDuplicate" | "onRemove" | "cardContext"> & {
+type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "styleDevice" | "onStyle" | "onResetStyle" | "onSelectParent" | "focusSetting" | "onFocusConsumed" | "clickedText" | "onText" | "onTextStyle" | "onDuplicate" | "onRemove" | "cardContext" | "timezone" | "onDisplay"> & {
+  studioEnabled: boolean;
+  nowMs: number;
   docId: string;
   sectionId: string;
   blockId: string | undefined;
@@ -115,7 +133,7 @@ type ElementEditorProps = Pick<Props, "disabled" | "onSetting" | "adapter" | "st
 };
 
 /** The selected section or block: a Content tab (its own settings) and a Style tab (what the theme's adapter allows). */
-function ElementEditor({ docId, sectionId, blockId, section, node, disabled, problems, onSetting, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle, onDuplicate, onRemove, cardContext }: ElementEditorProps) {
+function ElementEditor({ docId, sectionId, blockId, section, node, disabled, problems, onSetting, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle, onDuplicate, onRemove, cardContext, studioEnabled, timezone, nowMs, onDisplay }: ElementEditorProps) {
   const [tab, setTab] = useState<"content" | "style">("content");
   const content = useRef<HTMLDivElement>(null);
   const def = blockId ? registry.blocks[node.type] : registry.sections[node.type];
@@ -142,6 +160,10 @@ function ElementEditor({ docId, sectionId, blockId, section, node, disabled, pro
 
   const parentName = registry.sections[section.type]?.name ?? section.type;
   const title = def?.name ?? node.type;
+  // An uploaded badge image is chosen with the upload dialog (attestation required), not typed into text fields.
+  const uploadedBadge = blockId !== undefined && node.type === "trust-badge" && node.settings?.kind === "upload";
+  const str = (k: string) => (typeof node.settings?.[k] === "string" ? (node.settings[k] as string) : "");
+  const showDisplay = Boolean(onDisplay) && showsDisplayPanel(studioEnabled, blockId ? "block" : "section", node.type);
   return (
     <div>
       <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur">
@@ -197,12 +219,21 @@ function ElementEditor({ docId, sectionId, blockId, section, node, disabled, pro
           {def && def.settings.length > 0 ? (
             <div className="space-y-4">
               {def.settings
-                .filter((d) => d.group !== CARD_SETTING_GROUP && isSettingVisible(d, node.settings))
+                .filter((d) => d.group !== CARD_SETTING_GROUP && isSettingVisible(d, node.settings) && !(uploadedBadge && BADGE_MARK_FIELDS.has(d.id)))
                 .map((d) => (
                   <div key={`${docId}:${sectionId}:${blockId ?? ""}:${d.id}`} data-setting-id={d.id} className="rounded-md">
                     <SettingField descriptor={d} value={node.settings?.[d.id]} disabled={disabled} error={problems[`${base}.${d.id}`]} onChange={(value) => onSetting(docId, sectionId, blockId, d.id, value)} />
                   </div>
                 ))}
+              {uploadedBadge ? (
+                <BadgeUploadField
+                  marks={{ markAssetId: str("markAssetId"), markPath: str("markPath"), markAlt: str("markAlt") }}
+                  disabled={disabled}
+                  errors={{ markAssetId: problems[`${base}.markAssetId`], markPath: problems[`${base}.markPath`], markAlt: problems[`${base}.markAlt`] }}
+                  onChange={(patch) => { for (const [k, v] of Object.entries(patch)) onSetting(docId, sectionId, blockId, k, v); }}
+                />
+              ) : null}
+              {!blockId && node.type === "countdown" && countdownNeedsTarget(node) ? <p className="rounded-md bg-muted/60 px-3 py-2 text-sm text-muted-foreground">{t("countdown.editor.noTarget")}</p> : null}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">This {blockId ? "block" : "section"} has no content settings of its own. {def?.accepts?.length ? "Add blocks to it from the list on the left." : ""}</p>
@@ -218,6 +249,7 @@ function ElementEditor({ docId, sectionId, blockId, section, node, disabled, pro
               disabled={disabled}
               onChange={(key, value) => onStyle(docId, sectionId, blockId, styleDevice, key, value)}
               onResetAll={() => onResetStyle(docId, sectionId, blockId)}
+              hideVisibility={studioEnabled}
             />
           ) : (
             <p className="rounded-md bg-muted/60 px-3 py-2 text-sm text-muted-foreground">
@@ -228,6 +260,7 @@ function ElementEditor({ docId, sectionId, blockId, section, node, disabled, pro
           )}
         </div>
       )}
+      {showDisplay ? <DisplayRulesPanel node={node} disabled={disabled} timezone={timezone} nowMs={nowMs} onChange={(display) => onDisplay?.(docId, sectionId, blockId, display)} /> : null}
       </div>
     </div>
   );

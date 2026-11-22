@@ -46,6 +46,8 @@ type Props = {
   disabled: boolean;
   onChange: (key: StyleKey, value: unknown) => void;
   onResetAll: () => void;
+  /** Studio is on: device visibility is the "When to show" panel's, so the "Hide on this device" field is not offered here. */
+  hideVisibility?: boolean;
 };
 
 /**
@@ -53,8 +55,11 @@ type Props = {
  * that applies on the device being previewed and where it comes from; changing it writes an override for that device, and
  * Reset removes just that override so the element inherits again.
  */
-export function StylePanel({ spec, style, inherited = [], device, disabled, onChange, onResetAll }: Props) {
-  const groups = useMemo(() => CAPABILITY_IDS.filter((id) => spec.capabilities.includes(id)).map((id) => ({ id, fields: fieldsFor([id]) })), [spec]);
+export function StylePanel({ spec, style, inherited = [], device, disabled, onChange, onResetAll, hideVisibility = false }: Props) {
+  const groups = useMemo(
+    () => CAPABILITY_IDS.filter((id) => spec.capabilities.includes(id) && !(hideVisibility && id === "visibility")).map((id) => ({ id, fields: fieldsFor([id]) })),
+    [spec, hideVisibility],
+  );
   const layers: StyleLayer[] = [...inherited, { source: "element", style }];
 
   return (

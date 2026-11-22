@@ -50,7 +50,7 @@ describe("checkDrafts", () => {
     expect(await svc.checkDrafts([A, B, C, D, E])).toEqual({ empty: [A], real: [B] });
   });
 
-  it("reads at most 50 distinct products per call, ten at a time, and needs no write permission", async () => {
+  it("reads at most 50 distinct products per call, ten at a time, and needs only design:view (no edit permission)", async () => {
     const svc = await import("@/services/presentation.service");
     let inFlight = 0;
     let peak = 0;
@@ -65,7 +65,7 @@ describe("checkDrafts", () => {
     expect(await svc.checkDrafts([...many, ...many])).toEqual({ empty: [], real: [] });
     expect(getPresentation).toHaveBeenCalledTimes(50);
     expect(peak).toBeLessThanOrEqual(10);
-    expect(requireActiveTenant).toHaveBeenCalledWith(undefined);
+    expect(requireActiveTenant).toHaveBeenCalledWith("design:view");
   });
 });
 

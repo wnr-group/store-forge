@@ -1,0 +1,45 @@
+
+Running 8 tests using 1 worker
+
+  ok 1 tests\e2e\studio-scope.spec.ts:39:3 › merchant dashboard (scoped styling applies) › toolbar and header controls are 32px (5.3s)
+  ok 2 tests\e2e\studio-scope.spec.ts:52:3 › merchant dashboard (scoped styling applies) › dialog controls (portal) are 32px and error text is the darker red (2.2s)
+  ok 3 tests\e2e\studio-scope.spec.ts:62:3 › merchant dashboard (scoped styling applies) › dark mode: merchant error TEXT is the approved lighter red; the global --error token is unchanged (2.0s)
+  ok 4 tests\e2e\studio-scope.spec.ts:88:3 › Ctrl+K palette matches the sidebar › owner sees Team members in both (2.5s)
+  ok 5 tests\e2e\studio-scope.spec.ts:96:3 › Ctrl+K palette matches the sidebar › staff get no Team members, and nothing the sidebar hides (3.7s)
+  ok 6 tests\e2e\studio-scope.spec.ts:106:3 › outside the merchant scope (global defaults are unchanged) › login screen (1.1s)
+  x  7 tests\e2e\studio-scope.spec.ts:118:3 › outside the merchant scope (global defaults are unchanged) › platform admin keeps the 36px select, 32px search and the global error red (969ms)
+  ok 8 tests\e2e\studio-scope.spec.ts:137:3 › leaving the dashboard › signing out removes the scope marker (4.3s)
+
+
+  1) tests\e2e\studio-scope.spec.ts:118:3 › outside the merchant scope (global defaults are unchanged) › platform admin keeps the 36px select, 32px search and the global error red 
+
+    Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.
+
+       at support\studio-session.ts:25
+
+      23 |   if (who === "staff") return STAFF;
+      24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;
+    > 25 |   if (!e) throw new Error("Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.");
+         |                 ^
+      26 |   return e;
+      27 | }
+      28 |
+        at emailOf (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:25:17)
+        at freshLogin (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:34:39)
+        at sessionFor (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:66:16)
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:77:19)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-scope.spec.ts:119:5
+
+    Error Context: test-results\studio-scope-outside-the-m-598f4-ch-and-the-global-error-red\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-scope-outside-the-m-598f4-ch-and-the-global-error-red\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-scope-outside-the-m-598f4-ch-and-the-global-error-red\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-scope.spec.ts:118:3 › outside the merchant scope (global defaults are unchanged) › platform admin keeps the 36px select, 32px search and the global error red 
+  7 passed (27.5s)

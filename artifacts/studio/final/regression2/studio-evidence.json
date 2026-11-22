@@ -1,0 +1,537 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-evidence.spec.ts",
+      "--reporter=json,list"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/WNR/store-forge-integ/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-evidence.spec.ts",
+      "file": "studio-evidence.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "F4/F2 merchant controls, dialog and error text (light)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9396,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:37:21.356Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8a46eb363baaefa8ac74-e446c3086499d43bf455",
+          "file": "studio-evidence.spec.ts",
+          "line": 27,
+          "column": 3
+        },
+        {
+          "title": "F4/F2 merchant controls, dialog and error text (dark)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5641,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:37:30.900Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8a46eb363baaefa8ac74-f221e3ebdad278704fbf",
+          "file": "studio-evidence.spec.ts",
+          "line": 27,
+          "column": 3
+        },
+        {
+          "title": "Admin and Login keep their original rendering (light)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8463,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:37:36.559Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8a46eb363baaefa8ac74-1a4f7fc9598fe319b857",
+          "file": "studio-evidence.spec.ts",
+          "line": 94,
+          "column": 3
+        },
+        {
+          "title": "Admin and Login keep their original rendering (dark)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5973,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:37:45.046Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8a46eb363baaefa8ac74-aab7965ea2e3fd015c5f",
+          "file": "studio-evidence.spec.ts",
+          "line": 94,
+          "column": 3
+        },
+        {
+          "title": "F12-8 Analytics chart axis ticks are identical to origin/main",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3235,
+                  "error": {
+                    "message": "Error: x-axis tick labels identical\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[32m-   \"20 Oct\",\u001b[39m\n\u001b[2m    \"23 Oct\",\u001b[22m\n\u001b[2m    \"26 Oct\",\u001b[22m\n\u001b[2m    \"29 Oct\",\u001b[22m\n\u001b[2m    \"1 Nov\",\u001b[22m\n\u001b[2m    \"3 Nov\",\u001b[22m\n\u001b[2m    \"5 Nov\",\u001b[22m\n\u001b[2m    \"7 Nov\",\u001b[22m\n\u001b[2m    \"9 Nov\",\u001b[22m\n\u001b[2m    \"11 Nov\",\u001b[22m\n\u001b[2m    \"14 Nov\",\u001b[22m\n\u001b[32m-   \"18 Nov\",\u001b[39m\n\u001b[31m+   \"17 Nov\",\u001b[39m\n\u001b[31m+   \"21 Nov\",\u001b[39m\n\u001b[2m  ]\u001b[22m",
+                    "stack": "Error: x-axis tick labels identical\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[32m-   \"20 Oct\",\u001b[39m\n\u001b[2m    \"23 Oct\",\u001b[22m\n\u001b[2m    \"26 Oct\",\u001b[22m\n\u001b[2m    \"29 Oct\",\u001b[22m\n\u001b[2m    \"1 Nov\",\u001b[22m\n\u001b[2m    \"3 Nov\",\u001b[22m\n\u001b[2m    \"5 Nov\",\u001b[22m\n\u001b[2m    \"7 Nov\",\u001b[22m\n\u001b[2m    \"9 Nov\",\u001b[22m\n\u001b[2m    \"11 Nov\",\u001b[22m\n\u001b[2m    \"14 Nov\",\u001b[22m\n\u001b[32m-   \"18 Nov\",\u001b[39m\n\u001b[31m+   \"17 Nov\",\u001b[39m\n\u001b[31m+   \"21 Nov\",\u001b[39m\n\u001b[2m  ]\u001b[22m\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts:221:56\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:83:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts:218:3",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts",
+                      "column": 56,
+                      "line": 221
+                    },
+                    "snippet": " \u001b[90m 219 |\u001b[39m     \u001b[36mconst\u001b[39m axis \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m measureChartAxis(page)\u001b[33m;\u001b[39m\n \u001b[90m 220 |\u001b[39m     \u001b[36mconst\u001b[39m before \u001b[33m=\u001b[39m baseline\u001b[33m<\u001b[39m\u001b[36mtypeof\u001b[39m axis\u001b[33m>\u001b[39m(\u001b[32m\"chartAxis\"\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 221 |\u001b[39m     expect(axis\u001b[33m.\u001b[39mticks\u001b[33m,\u001b[39m \u001b[32m\"x-axis tick labels identical\"\u001b[39m)\u001b[33m.\u001b[39mtoEqual(before\u001b[33m.\u001b[39mticks)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 222 |\u001b[39m     record(info\u001b[33m,\u001b[39m [\u001b[32m\"F12-8\"\u001b[39m]\u001b[33m,\u001b[39m \u001b[32m\"chart x-axis ticks\"\u001b[39m\u001b[33m,\u001b[39m { before\u001b[33m:\u001b[39m before\u001b[33m.\u001b[39mticks\u001b[33m,\u001b[39m after\u001b[33m:\u001b[39m axis\u001b[33m.\u001b[39mticks })\u001b[33m;\u001b[39m\n \u001b[90m 223 |\u001b[39m     \u001b[36mawait\u001b[39m capture(page\u001b[33m,\u001b[39m info\u001b[33m,\u001b[39m { ac\u001b[33m:\u001b[39m [\u001b[32m\"F12-8\"\u001b[39m]\u001b[33m,\u001b[39m folder\u001b[33m:\u001b[39m \u001b[32m\"F12-timezone\"\u001b[39m\u001b[33m,\u001b[39m name\u001b[33m:\u001b[39m \u001b[32m\"analytics-chart-axis\"\u001b[39m\u001b[33m,\u001b[39m note\u001b[33m:\u001b[39m \u001b[32m\"Analytics 'Sales over time' chart: x-axis tick labels equal those measured on origin/main.\"\u001b[39m\u001b[33m,\u001b[39m target\u001b[33m:\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m\".recharts-wrapper\"\u001b[39m)\u001b[33m.\u001b[39mfirst() })\u001b[33m;\u001b[39m\n \u001b[90m 224 |\u001b[39m   })\u001b[33m;\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts",
+                        "column": 56,
+                        "line": 221
+                      },
+                      "message": "Error: x-axis tick labels identical\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[32m-   \"20 Oct\",\u001b[39m\n\u001b[2m    \"23 Oct\",\u001b[22m\n\u001b[2m    \"26 Oct\",\u001b[22m\n\u001b[2m    \"29 Oct\",\u001b[22m\n\u001b[2m    \"1 Nov\",\u001b[22m\n\u001b[2m    \"3 Nov\",\u001b[22m\n\u001b[2m    \"5 Nov\",\u001b[22m\n\u001b[2m    \"7 Nov\",\u001b[22m\n\u001b[2m    \"9 Nov\",\u001b[22m\n\u001b[2m    \"11 Nov\",\u001b[22m\n\u001b[2m    \"14 Nov\",\u001b[22m\n\u001b[32m-   \"18 Nov\",\u001b[39m\n\u001b[31m+   \"17 Nov\",\u001b[39m\n\u001b[31m+   \"21 Nov\",\u001b[39m\n\u001b[2m  ]\u001b[22m\n\n  219 |     const axis = await measureChartAxis(page);\n  220 |     const before = baseline<typeof axis>(\"chartAxis\");\n> 221 |     expect(axis.ticks, \"x-axis tick labels identical\").toEqual(before.ticks);\n      |                                                        ^\n  222 |     record(info, [\"F12-8\"], \"chart x-axis ticks\", { before: before.ticks, after: axis.ticks });\n  223 |     await capture(page, info, { ac: [\"F12-8\"], folder: \"F12-timezone\", name: \"analytics-chart-axis\", note: \"Analytics 'Sales over time' chart: x-axis tick labels equal those measured on origin/main.\", target: page.locator(\".recharts-wrapper\").first() });\n  224 |   });\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts:221:56\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:83:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts:218:3"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:38:25.792Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-evidence-F12-8-Anal-551e4-re-identical-to-origin-main\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-evidence-F12-8-Anal-551e4-re-identical-to-origin-main\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts",
+                    "column": 56,
+                    "line": 221
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "8a46eb363baaefa8ac74-50e94350a5709a7d5666",
+          "file": "studio-evidence.spec.ts",
+          "line": 217,
+          "column": 1
+        },
+        {
+          "title": "tooling self-check: rendered contrast helper reproduces a known pair",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4002,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:38:31.324Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8a46eb363baaefa8ac74-da04fb8795c595a78633",
+          "file": "studio-evidence.spec.ts",
+          "line": 228,
+          "column": 1
+        }
+      ],
+      "suites": [
+        {
+          "title": "F1 command palette",
+          "file": "studio-evidence.spec.ts",
+          "line": 132,
+          "column": 6,
+          "specs": [
+            {
+              "title": "owner: Team members is offered, and nothing else changed from origin/main",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3430,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:37:51.041Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a46eb363baaefa8ac74-1eebdc17f71c2202728d",
+              "file": "studio-evidence.spec.ts",
+              "line": 133,
+              "column": 3
+            },
+            {
+              "title": "staff: palette equals the sidebar by label and destination, with no Team",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5195,
+                      "error": {
+                        "message": "Error: same labels as origin/main for this member\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 0\u001b[39m\n\n\u001b[33m@@ -4,11 +4,9 @@\u001b[39m\n\u001b[2m    \"Categories\",\u001b[22m\n\u001b[2m    \"Collections\",\u001b[22m\n\u001b[2m    \"Inventory\",\u001b[22m\n\u001b[2m    \"Customers\",\u001b[22m\n\u001b[2m    \"Analytics\",\u001b[22m\n\u001b[32m-   \"Themes\",\u001b[39m\n\u001b[32m-   \"Customize\",\u001b[39m\n\u001b[2m    \"Pages\",\u001b[22m\n\u001b[2m    \"Navigation\",\u001b[22m\n\u001b[2m    \"Settings\",\u001b[22m\n\u001b[2m  ]\u001b[22m",
+                        "stack": "Error: same labels as origin/main for this member\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 0\u001b[39m\n\n\u001b[33m@@ -4,11 +4,9 @@\u001b[39m\n\u001b[2m    \"Categories\",\u001b[22m\n\u001b[2m    \"Collections\",\u001b[22m\n\u001b[2m    \"Inventory\",\u001b[22m\n\u001b[2m    \"Customers\",\u001b[22m\n\u001b[2m    \"Analytics\",\u001b[22m\n\u001b[32m-   \"Themes\",\u001b[39m\n\u001b[32m-   \"Customize\",\u001b[39m\n\u001b[2m    \"Pages\",\u001b[22m\n\u001b[2m    \"Navigation\",\u001b[22m\n\u001b[2m    \"Settings\",\u001b[22m\n\u001b[2m  ]\u001b[22m\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts:164:69\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:83:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts:156:5",
+                        "location": {
+                          "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts",
+                          "column": 69,
+                          "line": 164
+                        },
+                        "snippet": " \u001b[90m 162 |\u001b[39m       expect(palette)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoContain(\u001b[32m\"Team members\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 163 |\u001b[39m       expect([\u001b[33m...\u001b[39mpalette]\u001b[33m.\u001b[39msort()\u001b[33m,\u001b[39m \u001b[32m\"same labels as the sidebar\"\u001b[39m)\u001b[33m.\u001b[39mtoEqual(\u001b[33mObject\u001b[39m\u001b[33m.\u001b[39mkeys(sidebar)\u001b[33m.\u001b[39msort())\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 164 |\u001b[39m       expect(palette\u001b[33m,\u001b[39m \u001b[32m\"same labels as origin/main for this member\"\u001b[39m)\u001b[33m.\u001b[39mtoEqual(baseline\u001b[33m<\u001b[39m\u001b[33mstring\u001b[39m[]\u001b[33m>\u001b[39m(\u001b[32m\"palette.staff\"\u001b[39m))\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 165 |\u001b[39m       record(info\u001b[33m,\u001b[39m [\u001b[32m\"F1-2\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"F1-3\"\u001b[39m]\u001b[33m,\u001b[39m \u001b[32m\"staff palette vs sidebar\"\u001b[39m\u001b[33m,\u001b[39m { palette\u001b[33m,\u001b[39m sidebar })\u001b[33m;\u001b[39m\n \u001b[90m 166 |\u001b[39m       \u001b[36mawait\u001b[39m capture(page\u001b[33m,\u001b[39m info\u001b[33m,\u001b[39m { ac\u001b[33m:\u001b[39m [\u001b[32m\"F1-3\"\u001b[39m]\u001b[33m,\u001b[39m folder\u001b[33m:\u001b[39m \u001b[32m\"F1-command-palette\"\u001b[39m\u001b[33m,\u001b[39m name\u001b[33m:\u001b[39m \u001b[32m\"staff-palette-sidebar-parity\"\u001b[39m\u001b[33m,\u001b[39m note\u001b[33m:\u001b[39m \u001b[32m\"Staff's palette (top of the list): same entries as the sidebar.\"\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 167 |\u001b[39m       \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"listbox\"\u001b[39m)\u001b[33m.\u001b[39mevaluate((el) \u001b[33m=>\u001b[39m {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts",
+                            "column": 69,
+                            "line": 164
+                          },
+                          "message": "Error: same labels as origin/main for this member\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 0\u001b[39m\n\n\u001b[33m@@ -4,11 +4,9 @@\u001b[39m\n\u001b[2m    \"Categories\",\u001b[22m\n\u001b[2m    \"Collections\",\u001b[22m\n\u001b[2m    \"Inventory\",\u001b[22m\n\u001b[2m    \"Customers\",\u001b[22m\n\u001b[2m    \"Analytics\",\u001b[22m\n\u001b[32m-   \"Themes\",\u001b[39m\n\u001b[32m-   \"Customize\",\u001b[39m\n\u001b[2m    \"Pages\",\u001b[22m\n\u001b[2m    \"Navigation\",\u001b[22m\n\u001b[2m    \"Settings\",\u001b[22m\n\u001b[2m  ]\u001b[22m\n\n  162 |       expect(palette).not.toContain(\"Team members\");\n  163 |       expect([...palette].sort(), \"same labels as the sidebar\").toEqual(Object.keys(sidebar).sort());\n> 164 |       expect(palette, \"same labels as origin/main for this member\").toEqual(baseline<string[]>(\"palette.staff\"));\n      |                                                                     ^\n  165 |       record(info, [\"F1-2\", \"F1-3\"], \"staff palette vs sidebar\", { palette, sidebar });\n  166 |       await capture(page, info, { ac: [\"F1-3\"], folder: \"F1-command-palette\", name: \"staff-palette-sidebar-parity\", note: \"Staff's palette (top of the list): same entries as the sidebar.\" });\n  167 |       await page.getByRole(\"listbox\").evaluate((el) => {\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts:164:69\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:83:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts:156:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:37:54.494Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-evidence-F1-command-f80f9-nd-destination-with-no-Team\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-evidence-F1-command-f80f9-nd-destination-with-no-Team\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-evidence.spec.ts",
+                        "column": 69,
+                        "line": 164
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "8a46eb363baaefa8ac74-b4f5f743b0c79c3ecad7",
+              "file": "studio-evidence.spec.ts",
+              "line": 155,
+              "column": 3
+            },
+            {
+              "title": "owner: choosing an entry navigates to the same destination as its sidebar link",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 15613,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:38:03.227Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a46eb363baaefa8ac74-07f0f6e095a1c09be96e",
+              "file": "studio-evidence.spec.ts",
+              "line": 175,
+              "column": 3
+            },
+            {
+              "title": "staff cannot reach Team by URL or through the API",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6760,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:38:19.005Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a46eb363baaefa8ac74-9d705c0ae2a4626dad96",
+              "file": "studio-evidence.spec.ts",
+              "line": 194,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T12:37:19.108Z",
+    "duration": 77037.912,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

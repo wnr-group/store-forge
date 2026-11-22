@@ -1,0 +1,7 @@
+
+Running 2 tests using 1 worker
+
+  ok 1 tests\e2e\product-import-csv.spec.ts:6:1 › AC-11/14: a valid CSV creates the products as drafts with the manual-form defaults (14.8s)
+  ok 2 tests\e2e\product-import-csv.spec.ts:24:1 › the downloaded template has every column and a sample row (5.0s)
+
+  2 passed (23.1s)

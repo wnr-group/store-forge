@@ -1,0 +1,23 @@
+diff --git a/tests/unit/boutique-look.test.ts b/tests/unit/boutique-look.test.ts
+index 4b09af2..ba9d58b 100644
+--- a/tests/unit/boutique-look.test.ts
++++ b/tests/unit/boutique-look.test.ts
+@@ -17,6 +17,7 @@ import { LOOKS, lookSection, type StorefrontLook } from "@/components/storefront
+ import { BoutiqueHero } from "@/components/storefront/engine/looks/boutique/hero";
+ import { initialsOf } from "@/components/storefront/engine/looks/boutique/initials";
+ import { percentOff } from "@/components/storefront/engine/looks/boutique/product-card";
++import { BoutiqueRichText } from "@/components/storefront/engine/looks/boutique/rich-text";
+ import { sortProducts } from "@/components/storefront/engine/looks/boutique/sortable-grid";
+ import { TemplateRenderer } from "@/components/storefront/engine/renderer";
+ import type { TemplateDocument } from "@/lib/templates/document";
+@@ -49,7 +50,9 @@ describe("look registry", () => {
+   it("standard-look themes keep the engine's own sections", () => {
+     expect(lookSection({ settings: { buttons: { radius: 12 } } }, "hero")).toBeUndefined();
+     expect(lookSection(boutiqueTheme, "hero")).toBe(BoutiqueHero);
+-    expect(lookSection(boutiqueTheme, "rich-text")).toBeUndefined();
++    // Rich text is drawn by the look (it adds a search field to the generated search page); footer is the engine's own.
++    expect(lookSection(boutiqueTheme, "rich-text")).toBe(BoutiqueRichText);
++    expect(lookSection(boutiqueTheme, "footer")).toBeUndefined();
+   });
+ 
+   it("another look is picked up from registry data alone, without touching the dispatcher", () => {

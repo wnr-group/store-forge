@@ -19,6 +19,8 @@ import { mainProductSection } from "./sections/main-product";
 import { relatedProductsSection } from "./sections/related-products";
 import { promotionalBannerSection } from "./sections/promotional-banner";
 import { logoListSection } from "./sections/logo-list";
+import { countdownSection } from "./sections/countdown";
+import { trustBadgesSection } from "./sections/trust-badges";
 
 // Block definitions (21 approved blocks)
 import { headingBlock } from "./blocks/heading";
@@ -43,6 +45,7 @@ import { variantPickerBlock } from "./blocks/variant-picker";
 import { collapsibleInfoBlock } from "./blocks/collapsible-info";
 import { socialShareBlock } from "./blocks/social-share";
 import { heroSlideBlock } from "./blocks/hero-slide";
+import { trustBadgeBlock } from "./blocks/trust-badge";
 
 export function getRegistry(): ComponentRegistry {
   return {
@@ -65,6 +68,8 @@ export function getRegistry(): ComponentRegistry {
       "related-products": relatedProductsSection,
       "promotional-banner": promotionalBannerSection,
       "logo-list": logoListSection,
+      countdown: countdownSection,
+      "trust-badges": trustBadgesSection,
     },
     blocks: {
       heading: headingBlock,
@@ -89,6 +94,7 @@ export function getRegistry(): ComponentRegistry {
       "collapsible-info": collapsibleInfoBlock,
       "social-share": socialShareBlock,
       "hero-slide": heroSlideBlock,
+      "trust-badge": trustBadgeBlock,
     },
   };
 }

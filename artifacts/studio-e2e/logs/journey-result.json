@@ -1,0 +1,146 @@
+{
+  "startedAt": "2026-11-22T09:16:03.352Z",
+  "axe": {
+    "editor-desktop": {
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 7,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "nodes": 6
+        },
+        {
+          "id": "color-contrast",
+          "nodes": 45
+        }
+      ],
+      "passes": 35
+    },
+    "storefront-desktop": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 13
+        }
+      ],
+      "passes": 24
+    },
+    "storefront-mobile": {
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 11
+        }
+      ],
+      "passes": 24
+    }
+  },
+  "statusBefore": {
+    "enabled": false,
+    "schemaV2Capable": false,
+    "schemaVersion": 1,
+    "pointOfNoReturnAt": null,
+    "features": {
+      "badge_upload": "unavailable",
+      "review_import": "unavailable"
+    }
+  },
+  "enable": 200,
+  "studioLoadMs": 4342,
+  "switchFocusable": true,
+  "apiDraft": {
+    "schemaVersion": 2,
+    "display": {
+      "v": 1,
+      "rules": [
+        {
+          "type": "device",
+          "mobile": false,
+          "tablet": true,
+          "desktop": true
+        }
+      ]
+    },
+    "revision": 200
+  },
+  "readinessStudioOn": {
+    "counts": {
+      "blockers": 2,
+      "warnings": 3,
+      "information": 0
+    },
+    "issues": [
+      "BLOCKER media.alt.missing",
+      "BLOCKER media.alt.missing",
+      "WARNING a11y.contrast.unknown",
+      "WARNING a11y.contrast.unknown",
+      "WARNING a11y.contrast.unknown"
+    ]
+  },
+  "publishWithStudioOn": {
+    "status": 400,
+    "code": "READINESS_BLOCKED"
+  },
+  "flagOffBeforePublish": 200,
+  "storefront": {
+    "desktop": {
+      "firstSectionVisible": true,
+      "firstHeading": "ZZ Volt 2885",
+      "hideClassInHtml": true
+    },
+    "tablet": {
+      "firstSectionVisible": true,
+      "firstHeading": "ZZ Volt 2885",
+      "hideClassInHtml": true
+    },
+    "mobile": {
+      "firstSectionVisible": false,
+      "firstHeading": "ZZ Volt 2885",
+      "hideClassInHtml": true
+    }
+  },
+  "performance": {
+    "runs": [
+      {
+        "lcp": 452,
+        "cls": 0,
+        "loadMs": 810
+      },
+      {
+        "lcp": 444,
+        "cls": 0,
+        "loadMs": 801
+      },
+      {
+        "lcp": 320,
+        "cls": 0,
+        "loadMs": 698
+      },
+      {
+        "lcp": 428,
+        "cls": 0,
+        "loadMs": 814
+      },
+      {
+        "lcp": 284,
+        "cls": 0,
+        "loadMs": 666
+      }
+    ],
+    "lcpP75Ms": 444,
+    "clsP75": 0,
+    "note": "lab measurement, 5 runs, no CPU/network throttling; not real-user field data; INP not measured"
+  },
+  "restored": true,
+  "consoleErrors": [],
+  "failedRequests": [],
+  "finishedAt": "2026-11-22T09:18:03.723Z"
+}

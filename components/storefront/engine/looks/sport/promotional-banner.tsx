@@ -35,12 +35,12 @@ export function SportPromotionalBanner({ node, context, sectionId }: SectionProp
               const st = b.settings ?? {};
               if (b.type === "heading") {
                 return (
-                  <h2 key={id} className="text-balance text-[1.875rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-white md:text-[2.5rem] xl:text-[3rem]" style={HEADLINE_FONT}>
+                  <h2 key={id} {...blockMarkers(id, isPreview, b)} className="text-balance text-[1.875rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-white md:text-[2.5rem] xl:text-[3rem]" style={HEADLINE_FONT}>
                     {String(st.text ?? "")}
                   </h2>
                 );
               }
-              if (b.type === "text") return <p key={id} className="max-w-lg whitespace-pre-line text-[16px] leading-7 text-white/85">{String(st.content ?? "")}</p>;
+              if (b.type === "text") return <p key={id} {...blockMarkers(id, isPreview, b)} className="max-w-lg whitespace-pre-line text-[16px] leading-7 text-white/85">{String(st.content ?? "")}</p>;
               if (b.type === "button") {
                 return (
                   <div key={id} className="flex flex-wrap items-center gap-5" {...blockMarkers(id, isPreview, b)}>
@@ -67,7 +67,7 @@ export function SportPromotionalBanner({ node, context, sectionId }: SectionProp
               {steps.map((id, i) => {
                 const st = blocks[id].settings ?? {};
                 return (
-                  <li key={id} className="rounded-[1rem] border border-white/15 bg-white/10 p-6 backdrop-blur-sm">
+                  <li key={id} {...blockMarkers(id, isPreview, blocks[id])} className="rounded-[1rem] border border-white/15 bg-white/10 p-6 backdrop-blur-sm">
                     <span className="flex size-7 items-center justify-center rounded-full bg-accent text-[13px] font-bold text-primary">{i + 1}</span>
                     <p className="mt-4 text-[20px] font-bold" style={HEADLINE_FONT}>
                       {String(st.title ?? "")}

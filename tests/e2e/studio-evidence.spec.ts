@@ -161,7 +161,10 @@ test.describe("F1 command palette", () => {
       const palette = (await page.getByRole("option").allInnerTexts()).map((t) => t.trim());
       expect(palette).not.toContain("Team members");
       expect([...palette].sort(), "same labels as the sidebar").toEqual(Object.keys(sidebar).sort());
-      expect(palette, "same labels as origin/main for this member").toEqual(baseline<string[]>("palette.staff"));
+      // Studio (decision D-11, AC-NAV-3): Themes and Customize are shown only to members who can change the design
+      // (store:manage). Staff can only read settings, so those two entries are the one intended difference from origin/main.
+      const studioOnly = ["Themes", "Customize"];
+      expect(palette, "same labels as origin/main for this member, minus the design entries Studio hides from it").toEqual(baseline<string[]>("palette.staff").filter((l) => !studioOnly.includes(l)));
       record(info, ["F1-2", "F1-3"], "staff palette vs sidebar", { palette, sidebar });
       await capture(page, info, { ac: ["F1-3"], folder: "F1-command-palette", name: "staff-palette-sidebar-parity", note: "Staff's palette (top of the list): same entries as the sidebar." });
       await page.getByRole("listbox").evaluate((el) => {

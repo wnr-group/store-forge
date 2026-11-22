@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { PublishedView } from "@/components/storefront/published-view";
 import { pageDocument } from "@/lib/storefront/documents";
 import { defaultPageDocument, PAGE_LABELS, storedPageDocument, withPageContent, type PageKey } from "@/lib/storefront/pages";
-import { getPublicContentPage, getPublicStorefront, getPublishedFrame } from "@/services/storefront.service";
+import { getPublicContentPage, getPublicLandingPage, getPublicStorefront, getPublishedFrame } from "@/services/storefront.service";
+import type { TemplateDocument } from "@/lib/templates/document";
 
 /**
  * A published content page (About, Contact...) at the root of the store's address. Static routes such as /products win over
@@ -29,7 +30,18 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (data) return { title: `${data.page.title} | ${data.store.name}` };
   const designed = await designedPage(slug, pageSlug);
   const store = designed ? await getPublicStorefront(slug) : null;
-  return designed && store ? { title: `${PAGE_LABELS[designed.key].replace(" page", "")} | ${store.name}` } : { title: "Page not found" };
+  if (designed && store) return { title: `${PAGE_LABELS[designed.key].replace(" page", "")} | ${store.name}` };
+  const landing = await getPublicLandingPage(slug, pageSlug);
+  if (landing) {
+    const s = await getPublicStorefront(slug);
+    const storeName = s?.name ?? "";
+    const title = landing.page?.seoTitle || landing.page?.title;
+    return {
+      title: title ? `${title} | ${storeName}` : storeName,
+      description: landing.page?.seoDescription || landing.page?.description || undefined,
+    };
+  }
+  return { title: "Page not found" };
 }
 
 export default async function ContentPage({ params }: Params) {
@@ -39,7 +51,18 @@ export default async function ContentPage({ params }: Params) {
   if (!store) notFound();
   if (!data) {
     const designed = await designedPage(slug, pageSlug);
-    if (!designed) notFound();
+    if (!designed) {
+      const landing = await getPublicLandingPage(slug, pageSlug);
+      if (!landing) notFound();
+      const frame = await getPublishedFrame(slug);
+      return (
+        <PublishedView
+          store={store}
+          frame={frame}
+          document={landing.template.document as unknown as TemplateDocument}
+        />
+      );
+    }
     return <PublishedView store={store} frame={designed.frame} document={defaultPageDocument(designed.key)} page={designed.key} />;
   }
   const frame = await getPublishedFrame(slug);

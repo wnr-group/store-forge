@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { isHiddenFor, presentationOf } from "@/lib/templates/product-presentation";
 import Image from "next/image";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { resolveVariant } from "@/lib/templates/variant-selection";
@@ -30,7 +31,9 @@ export function MarketMainProduct({ node, context, sectionId }: SectionProps) {
   const shownPath = matched?.image_path ?? picked ?? gallery[0] ?? null;
   const index = Math.max(0, gallery.indexOf(shownPath ?? ""));
   const blocks = node.blocks ?? {};
-  const blockOrder = node.block_order ?? Object.keys(blocks);
+  // A product can hide blocks of its own (per-product presentation): description, SKU, type, category, share links.
+  const presentation = presentationOf(product);
+  const blockOrder = (node.block_order ?? Object.keys(blocks)).filter((id) => !isHiddenFor(presentation, blocks[id]?.type ?? ""));
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
   const currency = context.store.currency ?? "INR";
@@ -42,7 +45,7 @@ export function MarketMainProduct({ node, context, sectionId }: SectionProps) {
 
   return (
     <section className={cn(WRAP, "py-4 pb-20 lg:pb-6")} {...sfProps}>
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Shop", href: "/products" }, ...(product?.category ? [{ label: product.category }] : []), ...(product ? [{ label: product.name }] : [])]} />
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Shop", href: "/products" }, ...(product?.category && !isHiddenFor(presentation, "product-category") ? [{ label: product.category }] : []), ...(product ? [{ label: product.name }] : [])]} />
 
       <div className="mt-3 grid gap-5 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)_320px]">
         <div className="self-start lg:sticky lg:top-[116px]">
@@ -77,7 +80,7 @@ export function MarketMainProduct({ node, context, sectionId }: SectionProps) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">
-          {product?.category ? <p className="text-[13px] font-semibold text-secondary">{product.category}</p> : null}
+          {product?.category && !isHiddenFor(presentation, "product-category") ? <p className="text-[13px] font-semibold text-secondary">{product.category}</p> : null}
           {rest.map((id) => renderBlockComponent(blocks[id], ctx, id))}
           {info.length > 0 ? (
             <div className="overflow-hidden rounded-xl border border-border/80 bg-white px-4 shadow-sm [&>div:first-child]:border-t-0">{info.map((id) => renderBlockComponent(blocks[id], ctx, id))}</div>
@@ -86,7 +89,7 @@ export function MarketMainProduct({ node, context, sectionId }: SectionProps) {
 
         {product ? (
           <div className="self-start lg:sticky lg:top-[116px]">
-            <MarketBuyBox product={product} selectedOptions={chosen} currency={currency} storeName={context.store.name} />
+            <MarketBuyBox product={product} selectedOptions={chosen} currency={currency} storeName={context.store.name} showReference={!isHiddenFor(presentation, "product-sku")} />
           </div>
         ) : null}
       </div>

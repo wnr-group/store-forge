@@ -1,0 +1,47 @@
+
+Running 1 test using 1 worker
+
+  x  1 tests\e2e\studio-qa-d001.spec.ts:31:1 › display rule: configure, save, refresh, API state, live storefront (23.0s)
+
+
+  1) tests\e2e\studio-qa-d001.spec.ts:31:1 › display rule: configure, save, refresh, API state, live storefront 
+
+    Error: expect(locator).toBeChecked() failed
+
+    Locator:  getByRole('complementary', { name: 'Settings' }).getByRole('switch', { name: /mobile/i }).first()
+    Expected: checked
+    Received: unchecked
+    Timeout:  15000ms
+
+    Call log:
+      - Expect "toBeChecked" getByRole('complementary', { name: 'Settings' }).getByRole('switch', { name: /mobile/i }).first() with timeout 15000ms
+      - waiting for getByRole('complementary', { name: 'Settings' }).getByRole('switch', { name: /mobile/i }).first()
+        33 × locator resolved to <span tabindex="0" role="switch" data-unchecked="" id="base-ui-_r_m_" data-slot="switch" data-size="default" aria-checked="false" aria-labelledby="_r_d_-mobile-label" class="peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-all outline-none group-has-[:focus-visible]/field-label:border-transparent group-has-[:focus-visible]/field-label:ring-0 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 fo…>…</span>
+           - unexpected value "unchecked"
+
+
+      41 |     const insp = await openHero(page);
+      42 |     const mobile = insp.getByRole("switch", { name: /mobile/i }).first();
+    > 43 |     await expect(mobile).toBeChecked();
+         |                          ^
+      44 |     await shot(page, "01-display-rule-panel-before");
+      45 |     await mobile.click();
+      46 |     await expect(mobile).not.toBeChecked();
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-qa-d001.spec.ts:43:26
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-qa-d001.spec.ts:38:3
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-qa-d001-display-rul-9a372-h-API-state-live-storefront\error-context.md
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-qa-d001-display-rul-9a372-h-API-state-live-storefront\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-qa-d001-display-rul-9a372-h-API-state-live-storefront\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-qa-d001-display-rul-9a372-h-API-state-live-storefront\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-qa-d001.spec.ts:31:1 › display rule: configure, save, refresh, API state, live storefront 

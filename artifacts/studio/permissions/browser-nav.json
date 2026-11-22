@@ -1,0 +1,94 @@
+{
+  "takenAt": "2026-11-22T09:19:15.787Z",
+  "rows": [
+    {
+      "who": "owner",
+      "ac": "AC-NAV-2",
+      "seen": [
+        "Overview",
+        "Themes",
+        "Customize",
+        "Products",
+        "Categories",
+        "Collections",
+        "Inventory",
+        "Customers",
+        "Analytics",
+        "Pages",
+        "Navigation",
+        "Team members",
+        "Settings"
+      ]
+    },
+    {
+      "who": "admin",
+      "ac": "AC-NAV-2",
+      "seen": [
+        "Overview",
+        "Themes",
+        "Customize",
+        "Products",
+        "Categories",
+        "Collections",
+        "Inventory",
+        "Customers",
+        "Analytics",
+        "Pages",
+        "Navigation",
+        "Settings"
+      ]
+    },
+    {
+      "who": "designOnly",
+      "ac": "AC-NAV-3",
+      "seen": [
+        "Overview",
+        "Themes",
+        "Customize",
+        "Pages",
+        "Navigation",
+        "Settings"
+      ]
+    },
+    {
+      "who": "catalogOnly",
+      "ac": "AC-NAV-3",
+      "seen": [
+        "Overview",
+        "Products",
+        "Categories",
+        "Collections",
+        "Inventory",
+        "Pages",
+        "Navigation",
+        "Settings"
+      ]
+    },
+    {
+      "who": "readOnly",
+      "ac": "AC-NAV-2",
+      "seen": [
+        "Overview",
+        "Products",
+        "Categories",
+        "Collections",
+        "Inventory",
+        "Customers",
+        "Analytics",
+        "Pages",
+        "Navigation",
+        "Settings"
+      ]
+    },
+    {
+      "who": "noAccess",
+      "ac": "AC-NAV-3",
+      "seen": [
+        "Overview",
+        "Pages",
+        "Navigation",
+        "Settings"
+      ]
+    }
+  ]
+}

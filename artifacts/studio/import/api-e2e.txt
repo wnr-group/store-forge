@@ -1,0 +1,15 @@
+
+ RUN  v4.1.12 C:/Users/Eshwar/WNR/store-forge-api-integ
+
+[31m[Nest] 30620  - [39m21/11/2026, 5:42:47 pm [31m  ERROR[39m [38;5;3m[AllExceptionsFilter] [39m[31mUnhandled exception on POST /api/v1/products/import[39m
+Error: forced failure
+    at ProductsService.<anonymous> (C:/Users/Eshwar/WNR/store-forge-api-integ/test/product-import.e2e-spec.ts:335:34)
+    at ProductsService.insertNewProductInTx (file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/@vitest/spy/dist/index.js:332:34)
+    at C:/Users/Eshwar/WNR/store-forge-api-integ/src/modules/products/product-import.service.ts:152:38
+    at async file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/@electric-sql/pglite/dist/chunk-UYHX356B.js:8:1303
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  17:42:26
+   Duration  20.79s (transform 3.89s, setup 0ms, import 12.13s, tests 8.11s, environment 0ms)
+

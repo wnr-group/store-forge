@@ -1,0 +1,143 @@
+
+Running 12 tests using 1 worker
+
+  -   1 tests\e2e\studio-func.spec.ts:38:3 › loading state: Products shows its skeleton while the page loads, then the real page
+  -   2 tests\e2e\studio-func.spec.ts:38:3 › loading state: Categories shows its skeleton while the page loads, then the real page
+  -   3 tests\e2e\studio-func.spec.ts:38:3 › loading state: Collections shows its skeleton while the page loads, then the real page
+  -   4 tests\e2e\studio-func.spec.ts:38:3 › loading state: Inventory shows its skeleton while the page loads, then the real page
+  -   5 tests\e2e\studio-func.spec.ts:38:3 › loading state: Customers shows its skeleton while the page loads, then the real page
+  -   6 tests\e2e\studio-func.spec.ts:38:3 › loading state: Analytics shows its skeleton while the page loads, then the real page
+  -   7 tests\e2e\studio-func.spec.ts:38:3 › loading state: Settings shows its skeleton while the page loads, then the real page
+  -   8 tests\e2e\studio-func.spec.ts:38:3 › loading state: Team members shows its skeleton while the page loads, then the real page
+  ok  9 tests\e2e\studio-func.spec.ts:66:1 › Inventory row action: Adjust opens the dialog, validates, and Cancel leaves the data alone (5.5s)
+  x  10 tests\e2e\studio-func.spec.ts:86:1 › Products row actions: menu items, Edit link, publish/draft toggle, Duplicate and Delete on a test product (15.5s)
+  x  11 tests\e2e\studio-func.spec.ts:129:1 › Collections: add form validates, Cancel returns, create, edit, delete-confirm Cancel keeps it, Delete removes it (29.0s)
+  x  12 tests\e2e\studio-func.spec.ts:192:1 › Settings: validation messages, a successful save with feedback that persists, and the original value restored (17.1s)
+
+
+  1) tests\e2e\studio-func.spec.ts:86:1 › Products row actions: menu items, Edit link, publish/draft toggle, Duplicate and Delete on a test product 
+
+    Error: products row actions: no leftover test product
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "4a7fd90d-9db9-4a76-91da-572fade4dbe4",
+    +   "c2883477-fbf0-4206-93a7-a94933cf4e79",
+    +   "fe93c35a-284e-4c48-9cb5-53b07998be60",
+    + ]
+
+       at support\studio-data.ts:51
+
+      49 |   const strip = (s: string) => JSON.stringify({ ...JSON.parse(s), updatedAt: undefined });
+      50 |   expect(after.leftoverCustomers, `${label}: no leftover test customer`).toEqual([]);
+    > 51 |   expect(after.leftoverProducts, `${label}: no leftover test product`).toEqual([]);
+         |                                                                        ^
+      52 |   const diff = (a: string[], b: string[]) => `missing now: [${a.filter((x) => !b.includes(x)).join(",")}] extra now: [${b.filter((x) => !a.includes(x)).join(",")}]`;
+      53 |   for (const key of ["categories", "collections", "customersTop", "productsTop", "adjustments"] as const) {
+      54 |     expect(after[key], `${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`).toEqual(before[key]);
+        at expectRestored (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-data.ts:51:72)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-func.spec.ts:122:7
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-func.spec.ts:87:3
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-func-Products-row-a-33f8e-nd-Delete-on-a-test-product\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-func-Products-row-a-33f8e-nd-Delete-on-a-test-product\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-func-Products-row-a-33f8e-nd-Delete-on-a-test-product\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\studio-func.spec.ts:129:1 › Collections: add form validates, Cancel returns, create, edit, delete-confirm Cancel keeps it, Delete removes it 
+
+    Error: collections: no leftover test product
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "4a7fd90d-9db9-4a76-91da-572fade4dbe4",
+    +   "c2883477-fbf0-4206-93a7-a94933cf4e79",
+    +   "fe93c35a-284e-4c48-9cb5-53b07998be60",
+    + ]
+
+       at support\studio-data.ts:51
+
+      49 |   const strip = (s: string) => JSON.stringify({ ...JSON.parse(s), updatedAt: undefined });
+      50 |   expect(after.leftoverCustomers, `${label}: no leftover test customer`).toEqual([]);
+    > 51 |   expect(after.leftoverProducts, `${label}: no leftover test product`).toEqual([]);
+         |                                                                        ^
+      52 |   const diff = (a: string[], b: string[]) => `missing now: [${a.filter((x) => !b.includes(x)).join(",")}] extra now: [${b.filter((x) => !a.includes(x)).join(",")}]`;
+      53 |   for (const key of ["categories", "collections", "customersTop", "productsTop", "adjustments"] as const) {
+      54 |     expect(after[key], `${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`).toEqual(before[key]);
+        at expectRestored (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-data.ts:51:72)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-func.spec.ts:185:7
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-func.spec.ts:130:3
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-func-Collections-ad-8cd35--keeps-it-Delete-removes-it\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-func-Collections-ad-8cd35--keeps-it-Delete-removes-it\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-func-Collections-ad-8cd35--keeps-it-Delete-removes-it\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests\e2e\studio-func.spec.ts:192:1 › Settings: validation messages, a successful save with feedback that persists, and the original value restored 
+
+    Error: settings: no leftover test product
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "4a7fd90d-9db9-4a76-91da-572fade4dbe4",
+    +   "c2883477-fbf0-4206-93a7-a94933cf4e79",
+    +   "fe93c35a-284e-4c48-9cb5-53b07998be60",
+    + ]
+
+       at support\studio-data.ts:51
+
+      49 |   const strip = (s: string) => JSON.stringify({ ...JSON.parse(s), updatedAt: undefined });
+      50 |   expect(after.leftoverCustomers, `${label}: no leftover test customer`).toEqual([]);
+    > 51 |   expect(after.leftoverProducts, `${label}: no leftover test product`).toEqual([]);
+         |                                                                        ^
+      52 |   const diff = (a: string[], b: string[]) => `missing now: [${a.filter((x) => !b.includes(x)).join(",")}] extra now: [${b.filter((x) => !a.includes(x)).join(",")}]`;
+      53 |   for (const key of ["categories", "collections", "customersTop", "productsTop", "adjustments"] as const) {
+      54 |     expect(after[key], `${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`).toEqual(before[key]);
+        at expectRestored (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-data.ts:51:72)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-func.spec.ts:232:7
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-func.spec.ts:193:3
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-func-Settings-valid-29822-the-original-value-restored\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-func-Settings-valid-29822-the-original-value-restored\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-func-Settings-valid-29822-the-original-value-restored\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    tests\e2e\studio-func.spec.ts:86:1 › Products row actions: menu items, Edit link, publish/draft toggle, Duplicate and Delete on a test product 
+    tests\e2e\studio-func.spec.ts:129:1 › Collections: add form validates, Cancel returns, create, edit, delete-confirm Cancel keeps it, Delete removes it 
+    tests\e2e\studio-func.spec.ts:192:1 › Settings: validation messages, a successful save with feedback that persists, and the original value restored 
+  8 skipped
+  1 passed (1.3m)

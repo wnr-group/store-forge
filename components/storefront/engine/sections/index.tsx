@@ -20,10 +20,17 @@ import { MainProductSection } from "./main-product";
 import { RelatedProductsSection } from "./related-products";
 import { PromotionalBannerSection } from "./promotional-banner";
 import { LogoListSection } from "./logo-list";
+import { CountdownSection, countdownNow } from "./countdown";
+import { CountdownEndMessage } from "./countdown-parts";
+import { TrustBadgesSection } from "./trust-badges";
+import { ReviewsSection } from "./reviews";
+import { RecommendationsSection } from "./recommendations";
+import { resolveCountdown } from "@/lib/templates/countdown";
 import { lookSection } from "../looks";
 import { hasStyleOverrides, UNWRAPPED_SECTIONS } from "@/lib/editor/render";
 import { overrideValue } from "@/lib/editor/style";
 import { readTextOverrides } from "@/lib/editor/text";
+import { passesSchedule, withDeviceRule } from "../display";
 import { TextOverrides } from "../text-overrides";
 import { CartPageSection } from "@/components/storefront/cart/cart-page";
 import { WishlistPageSection } from "@/components/storefront/wishlist/wishlist-page";
@@ -50,6 +57,10 @@ export const SECTION_COMPONENTS: Record<
   "related-products": RelatedProductsSection,
   "promotional-banner": PromotionalBannerSection,
   "logo-list": LogoListSection,
+  countdown: CountdownSection,
+  "trust-badges": TrustBadgesSection,
+  reviews: ReviewsSection,
+  recommendations: RecommendationsSection,
   /** The bag page. Only the generated cart document uses it; it is not an editor section. */
   cart: CartPageSection,
   /** The wishlist page. Only the generated wishlist document uses it; it is not an editor section. */
@@ -65,6 +76,9 @@ export function renderSectionComponent(
   if (node.disabled && context.mode === "public") {
     return null;
   }
+
+  // Display rules (schema 2): an inactive schedule omits the section before any look draws it.
+  if (!passesSchedule(node, context)) return null;
 
   // A theme's look may draw this section itself; every other section is the engine's own component.
   const Component = lookSection(context.theme, node.type) ?? SECTION_COMPONENTS[node.type];
@@ -85,6 +99,15 @@ export function renderSectionComponent(
     return null;
   }
 
+  // A countdown that has ended with a message shows that message as a PROTECTED part: no style wrapper, text overrides or device rule
+  // is applied around it, so none of them can hide or restyle it.
+  if (node.type === "countdown") {
+    const view = resolveCountdown(node, countdownNow(context));
+    if (view.kind === "ended") {
+      return <CountdownEndMessage key={sectionId} message={view.message} sectionId={sectionId} preview={context.mode === "preview" || context.mode === "editor"} />;
+    }
+  }
+
   let out: React.ReactNode = <Component node={node} context={context} sectionId={sectionId} />;
   // A section with style overrides sits in a box the generated stylesheet can reach (see lib/editor/render.ts).
   if (sectionId && hasStyleOverrides(node)) {
@@ -94,5 +117,5 @@ export function renderSectionComponent(
   // Replaced words (see lib/editor/text.ts). The wrapper has no box, so it is safe around a sticky header too.
   const texts = readTextOverrides(node.settings);
   if (texts.length > 0) out = <TextOverrides overrides={texts}>{out}</TextOverrides>;
-  return <React.Fragment key={sectionId}>{out}</React.Fragment>;
+  return <React.Fragment key={sectionId}>{withDeviceRule(node, out)}</React.Fragment>;
 }

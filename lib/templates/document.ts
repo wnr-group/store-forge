@@ -22,6 +22,10 @@ export const ASSIGNMENT_RESOURCE_TYPES = ["product", "collection"] as const;
 export type AssignmentResourceType = (typeof ASSIGNMENT_RESOURCE_TYPES)[number];
 
 export const DOCUMENT_SCHEMA_VERSION = 1;
+/** Schema 2 adds optional `display` rules on sections and blocks. Both versions are read; a document only upgrades when saved by Studio. */
+export const DISPLAY_SCHEMA_VERSION = 2;
+export const SUPPORTED_SCHEMA_VERSIONS = [1, 2] as const;
+export const LATEST_SCHEMA_VERSION = DISPLAY_SCHEMA_VERSION;
 
 /** Formalized layout options (D3, R3): the only page chrome a document may name. There is no "default" layout (C-02). */
 export const LAYOUTS = ["classic", "spotlight"] as const;
@@ -33,6 +37,8 @@ export function isLayoutKey(value: unknown): value is LayoutKey {
   return typeof value === "string" && (LAYOUTS as readonly string[]).includes(value);
 }
 
+import type { DisplayRules } from "./display-rules";
+
 /** A section or a block: one recursive shape (D6). `disabled` is omitted when false (D26). */
 export type ComponentNode = {
   type: string;
@@ -40,6 +46,8 @@ export type ComponentNode = {
   blocks: Record<string, ComponentNode>;
   block_order: string[];
   disabled?: boolean;
+  /** Schema 2: when (schedule) and where (device) the node shows. Absent means always, everywhere. */
+  display?: DisplayRules;
 };
 
 export type TemplateDocument = {

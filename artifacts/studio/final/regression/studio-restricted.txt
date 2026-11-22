@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 tests\e2e\studio-restricted.spec.ts:96:1 › F1-2 restricted member: palette hides permission-gated entries and equals the sidebar (26.2s)
+
+  1 passed (30.0s)

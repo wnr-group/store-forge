@@ -13,7 +13,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { orderCategories } from "@/lib/categories/hierarchy";
+import { categoryDeletionImpact, describeCategoryDeletion, orderCategories } from "@/lib/categories/hierarchy";
 import { useReturnFocus } from "@/lib/hooks/use-return-focus";
 import { cn } from "@/lib/utils";
 import type { CategoryRow } from "@/services/category.service";
@@ -138,7 +138,7 @@ export function CategoryManager({ rows, canManage, canDelete }: { rows: Category
         open={toDelete !== null}
         onOpenChange={(o) => !o && setToDelete(null)}
         title={`Delete "${toDelete?.name ?? ""}"?`}
-        description={`${toDelete?.productCount ? `${toDelete.productCount} product(s) will become uncategorised. ` : ""}Subcategories become top-level categories. The products themselves are kept.`}
+        description={toDelete ? describeCategoryDeletion(categoryDeletionImpact(rows, toDelete.id)) : ""}
         confirmLabel="Delete category"
         successMessage="Category deleted"
         onConfirm={async () => {

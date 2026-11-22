@@ -1,0 +1,50 @@
+
+Running 3 tests using 1 worker
+
+  ok 1 tests\e2e\studio-submit-dialogs.spec.ts:38:1 › Add customer and Edit customer: a successful submit, and what happens to focus (14.8s)
+  x  2 tests\e2e\studio-submit-dialogs.spec.ts:95:1 › Adjust stock: a successful submit returns focus to the row's Adjust button (13.5s)
+  -  3 tests\e2e\studio-submit-dialogs.spec.ts:134:1 › Add team member: a successful submit returns focus to Add member (creates the one reusable restricted account, once)
+
+
+  1) tests\e2e\studio-submit-dialogs.spec.ts:95:1 › Adjust stock: a successful submit returns focus to the row's Adjust button 
+
+    Error: adjust stock: no leftover test product
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "c2883477-fbf0-4206-93a7-a94933cf4e79",
+    + ]
+
+       at support\studio-data.ts:51
+
+      49 |   const strip = (s: string) => JSON.stringify({ ...JSON.parse(s), updatedAt: undefined });
+      50 |   expect(after.leftoverCustomers, `${label}: no leftover test customer`).toEqual([]);
+    > 51 |   expect(after.leftoverProducts, `${label}: no leftover test product`).toEqual([]);
+         |                                                                        ^
+      52 |   const diff = (a: string[], b: string[]) => `missing now: [${a.filter((x) => !b.includes(x)).join(",")}] extra now: [${b.filter((x) => !a.includes(x)).join(",")}]`;
+      53 |   for (const key of ["categories", "collections", "customersTop", "productsTop", "adjustments"] as const) {
+      54 |     expect(after[key], `${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`).toEqual(before[key]);
+        at expectRestored (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-data.ts:51:72)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-submit-dialogs.spec.ts:129:7
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-submit-dialogs.spec.ts:96:3
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-submit-dialogs-Adju-0f8ce--to-the-row-s-Adjust-button\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-submit-dialogs-Adju-0f8ce--to-the-row-s-Adjust-button\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-submit-dialogs-Adju-0f8ce--to-the-row-s-Adjust-button\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-submit-dialogs.spec.ts:95:1 › Adjust stock: a successful submit returns focus to the row's Adjust button 
+  1 skipped
+  1 passed (40.7s)

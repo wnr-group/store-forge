@@ -1,0 +1,15 @@
+
+Running 10 tests using 1 worker
+
+  ok  1 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the owner member (7.0s)
+  ok  2 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the manager (all write) member (3.5s)
+  ok  3 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the design-only (settings write) member (2.1s)
+  ok  4 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the catalogue-only (products write) member (2.3s)
+  ok  5 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the read-only (everything read) member (3.4s)
+  ok  6 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the no-access (everything none) member (2.3s)
+  ok  7 tests\e2e\studio-restricted-members.spec.ts:45:1 › design-only member: can customize and publish; the catalogue routes fall back to the overview without an error page (14.3s)
+  ok  8 tests\e2e\studio-restricted-members.spec.ts:61:3 › catalogOnly member: Themes and the editor open read-only (nothing can be applied or published) (5.4s)
+  ok  9 tests\e2e\studio-restricted-members.spec.ts:61:3 › readOnly member: Themes and the editor open read-only (nothing can be applied or published) (3.7s)
+  ok 10 tests\e2e\studio-restricted-members.spec.ts:76:1 › read-only member: sees the catalogue but cannot add or import; no-access member lands on the overview (7.5s)
+
+  10 passed (56.2s)

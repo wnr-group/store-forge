@@ -14,11 +14,12 @@ import type { SectionProps } from "..";
 import { SportMotion } from "./motion";
 import { useSearchSubmit } from "../../use-search-submit";
 import { HEADLINE_FONT, SHELL } from "./ui";
+import { blockMarkers } from "../../markers";
 
 const FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 const isShopUrl = (url: string) => /^\/(products)?(#products)?$/.test(url) && url !== "/";
 
-type Item = { id: string; label: string; url: string; isButton: boolean };
+type Item = { id: string; label: string; url: string; isButton: boolean; ov: Record<string, string> };
 
 /**
  * Sport header: the logo, the menu in spaced capitals with an underline on the current page, a pill search field, the
@@ -34,8 +35,8 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
   const items: Item[] = (node.block_order ?? Object.keys(blocks)).flatMap((id): Item[] => {
     const b = blocks[id];
     if (!b || (b.disabled && context.mode === "public")) return [];
-    if (b.type === "link") return [{ id, label: String(b.settings?.label ?? "Link"), url: String(b.settings?.url ?? "/") || "/", isButton: false }];
-    if (b.type === "button") return [{ id, label: String(b.settings?.label ?? "Enquiry"), url: String(b.settings?.link ?? "/contact") || "/", isButton: true }];
+    if (b.type === "link") return [{ id, label: String(b.settings?.label ?? "Link"), url: String(b.settings?.url ?? "/") || "/", isButton: false, ov: blockMarkers(id, false, b) }];
+    if (b.type === "button") return [{ id, label: String(b.settings?.label ?? "Enquiry"), url: String(b.settings?.link ?? "/contact") || "/", isButton: true, ov: blockMarkers(id, false, b) }];
     return [];
   });
   const links = items.filter((i) => !i.isButton);
@@ -107,6 +108,7 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
               <Link
                 key={l.id}
                 href={l.url}
+                {...l.ov}
                 onMouseEnter={() => setMega(isMega && collections.length > 0)}
                 onFocus={() => setMega(isMega && collections.length > 0)}
                 aria-expanded={isMega ? mega : undefined}
@@ -140,7 +142,7 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
             </button>
           ) : null}
           {cta ? (
-            <Link href={cta.url} className={cn("ml-2 hidden h-11 items-center rounded-[0.5rem] bg-primary px-6 text-[15px] font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover,var(--primary))] sm:inline-flex", FOCUS)}>
+            <Link href={cta.url} {...cta.ov} className={cn("ml-2 hidden h-11 items-center rounded-[0.5rem] bg-primary px-6 text-[15px] font-semibold text-primary-foreground transition-colors hover:bg-[var(--primary-hover,var(--primary))] sm:inline-flex", FOCUS)}>
               {cta.label}
             </Link>
           ) : null}
@@ -187,7 +189,7 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
               <input name="q" type="search" placeholder="Search products" aria-label="Search the store" className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground" />
             </form>
             {items.map((l) => (
-              <Link key={l.id} href={l.url} className="border-b border-border py-4 text-[14px] font-medium uppercase tracking-[0.14em] text-primary last:border-b-0">
+              <Link key={l.id} href={l.url} {...l.ov} className="border-b border-border py-4 text-[14px] font-medium uppercase tracking-[0.14em] text-primary last:border-b-0">
                 {l.label}
               </Link>
             ))}

@@ -21,6 +21,8 @@ const APPROVED_SECTIONS = [
   "related-products",
   "promotional-banner",
   "logo-list",
+  "countdown",
+  "trust-badges",
 ] as const;
 
 const APPROVED_BLOCKS = [
@@ -46,6 +48,7 @@ const APPROVED_BLOCKS = [
   "collapsible-info",
   "social-share",
   "hero-slide",
+  "trust-badge",
 ] as const;
 
 const FORBIDDEN_COMPONENT_IDS = [
@@ -57,22 +60,22 @@ const FORBIDDEN_COMPONENT_IDS = [
   "ratings",
   "newsletter",
   "video",
-  "countdown",
 ];
+// "countdown" was forbidden until the Studio countdown section (fixed moment, same for every visitor; legal-gated) was approved.
 
 describe("Component Registry Audit [AC-REN-011]", () => {
   const registry = getRegistry();
 
-  it("contains exactly the 18 approved sections", () => {
+  it("contains exactly the 20 approved sections", () => {
     const sectionKeys = Object.keys(registry.sections).sort();
     expect(sectionKeys).toEqual([...APPROVED_SECTIONS].sort());
-    expect(sectionKeys.length).toBe(18);
+    expect(sectionKeys.length).toBe(20);
   });
 
-  it("contains exactly the 22 approved blocks", () => {
+  it("contains exactly the 23 approved blocks", () => {
     const blockKeys = Object.keys(registry.blocks).sort();
     expect(blockKeys).toEqual([...APPROVED_BLOCKS].sort());
-    expect(blockKeys.length).toBe(22);
+    expect(blockKeys.length).toBe(23);
   });
 
   it("contains no unsupported or forbidden component IDs", () => {

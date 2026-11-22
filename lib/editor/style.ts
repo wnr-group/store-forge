@@ -224,6 +224,8 @@ export type CssTarget = {
   textScope: boolean;
   /** A button block: its look (colour, corners, border, size) is applied to the button inside the wrapper, not to the wrapper. */
   control?: boolean;
+  /** A sticky section (the header) sits in a box-less wrapper (`display:contents`, set inline): showing it again must keep that. */
+  unwrapped?: boolean;
 };
 
 function declarations(values: StyleValues, only?: (key: StyleKey) => boolean): string[] {
@@ -299,7 +301,7 @@ function declarations(values: StyleValues, only?: (key: StyleKey) => boolean): s
 const WRAPPER_KEYS = new Set<StyleKey>(["marginTop", "marginBottom", "textAlign", "opacity", "hidden"]);
 const CONTROL_TAGS = "a,button";
 
-function rulesFor(id: string, values: StyleValues, textScope: boolean, control: boolean): string {
+function rulesFor(id: string, values: StyleValues, textScope: boolean, control: boolean, unwrapped = false): string {
   const attr = `[data-sf-ov=${overrideValue(id)}]`;
   const self = attr + attr;
   const rules: string[] = [];
@@ -311,7 +313,8 @@ function rulesFor(id: string, values: StyleValues, textScope: boolean, control: 
     if (button.length) rules.push(`${self}${attr} :where(${CONTROL_TAGS}){${button.join(";")}}`);
     return rules.join("");
   }
-  const own = declarations(values);
+  // The wrapper's own inline `display:contents` outranks a stylesheet rule, so hiding and showing it again are forced.
+  const own = declarations(values).map((d) => (unwrapped && d === "display:none" ? "display:none!important" : unwrapped && d === "display:block" ? "display:contents!important" : d));
   if (own.length) rules.push(`${self}{${own.join(";")}}`);
   if (textScope) {
     const inner = declarations(values, (k) => TEXT_KEYS.has(k));
@@ -332,9 +335,9 @@ export function elementCss(targets: readonly CssTarget[]): string {
     if (!SAFE_ID.test(t.id)) continue;
     const style = parseElementStyle(t.style);
     if (!style) continue;
-    if (style.base) base += rulesFor(t.id, style.base, t.textScope, !!t.control);
-    if (style.tablet) tablet += rulesFor(t.id, style.tablet, t.textScope, !!t.control);
-    if (style.mobile) mobile += rulesFor(t.id, style.mobile, t.textScope, !!t.control);
+    if (style.base) base += rulesFor(t.id, style.base, t.textScope, !!t.control, t.unwrapped);
+    if (style.tablet) tablet += rulesFor(t.id, style.tablet, t.textScope, !!t.control, t.unwrapped);
+    if (style.mobile) mobile += rulesFor(t.id, style.mobile, t.textScope, !!t.control, t.unwrapped);
   }
   const css = base + (tablet ? `@media (max-width:1279px){${tablet}}` : "") + (mobile ? `@media (max-width:767px){${mobile}}` : "");
   // Defence in depth: nothing above can produce these, but a stylesheet that a text node would escape, or that could close its

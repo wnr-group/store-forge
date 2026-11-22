@@ -1,0 +1,13 @@
+
+Running 8 tests using 1 worker
+
+  ok 1 tests\e2e\studio-timezone.spec.ts:58:3 › store-timezone dates (server TZ=UTC, browser America/Los_Angeles, store Asia/Kolkata) › browser and server timezones really differ from the store's (4.2s)
+  ok 2 tests\e2e\studio-timezone.spec.ts:68:3 › store-timezone dates (server TZ=UTC, browser America/Los_Angeles, store Asia/Kolkata) › Customers list (2.6s)
+  ok 3 tests\e2e\studio-timezone.spec.ts:101:3 › store-timezone dates (server TZ=UTC, browser America/Los_Angeles, store Asia/Kolkata) › Customer detail (2.6s)
+  ok 4 tests\e2e\studio-timezone.spec.ts:124:3 › store-timezone dates (server TZ=UTC, browser America/Los_Angeles, store Asia/Kolkata) › Inventory recent adjustments (3.1s)
+  ok 5 tests\e2e\studio-timezone.spec.ts:163:5 › store-timezone dates (server TZ=UTC, browser America/Los_Angeles, store Asia/Kolkata) › Overview recent orders (3.7s)
+  ok 6 tests\e2e\studio-timezone.spec.ts:163:5 › store-timezone dates (server TZ=UTC, browser America/Los_Angeles, store Asia/Kolkata) › Analytics recent orders (3.7s)
+  ok 7 tests\e2e\studio-timezone.spec.ts:186:3 › store-timezone dates (server TZ=UTC, browser America/Los_Angeles, store Asia/Kolkata) › Products Updated column (client component) and no hydration error (3.7s)
+  ok 8 tests\e2e\studio-timezone.spec.ts:213:3 › store-timezone dates (server TZ=UTC, browser America/Los_Angeles, store Asia/Kolkata) › how many real records discriminate between store, server and browser time (no data is created) (747ms)
+
+  8 passed (27.1s)

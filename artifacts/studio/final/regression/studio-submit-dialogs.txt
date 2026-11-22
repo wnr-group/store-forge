@@ -1,0 +1,9 @@
+
+Running 3 tests using 1 worker
+
+  ok 1 tests\e2e\studio-submit-dialogs.spec.ts:38:1 › Add customer and Edit customer: a successful submit, and what happens to focus (16.5s)
+  ok 2 tests\e2e\studio-submit-dialogs.spec.ts:95:1 › Adjust stock: a successful submit returns focus to the row's Adjust button (15.8s)
+  -  3 tests\e2e\studio-submit-dialogs.spec.ts:134:1 › Add team member: a successful submit returns focus to Add member (creates the one reusable restricted account, once)
+
+  1 skipped
+  2 passed (37.2s)

@@ -1,0 +1,194 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./tests/timing-files" without a file extension (vitest.config.mts:2:35). Add the file extension
+  - import "./vitest.shared" without a file extension (vitest.config.mts:3:45). Add the file extension
+  - ESM syntax in a file loaded as CommonJS (vitest.shared.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+  - ESM syntax in a file loaded as CommonJS (tests/timing-files.ts:5:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+
+ RUN  v5.1.0 C:/Users/Eshwar/WNR/store-forge-integ
+
+stderr | tests/unit/studio-registry-coverage.test.ts > registry coverage per look > every element on every look persists, validates, renders and is covered, or is dispositioned
+Received `false` for a non-boolean attribute `prefetch`.
+
+If you want to write it to the DOM, pass a string instead: prefetch="false" or prefetch={value.toString()}.
+
+If you used to conditionally omit it with prefetch={condition && value}, pass prefetch={condition ? value : undefined} instead.
+
+ ❯ tests/unit/studio-registry-coverage.test.ts (2 tests | 1 failed) 1057ms
+   ❯ registry coverage per look (2)
+     × every element on every look persists, validates, renders and is covered, or is dispositioned 1043ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/studio-registry-coverage.test.ts > registry coverage per look > every element on every look persists, validates, renders and is covered, or is dispositioned
+AssertionError: undispositioned gaps (see artifacts/studio/inventory/registry-coverage.json):
+standard:section:header:visibility
+standard:block:image:visibility
+standard:block:group:visibility
+standard:block:product-title:visibility
+standard:block:product-price:visibility
+standard:block:product-compare-at-price:visibility
+standard:block:product-sku:visibility
+standard:block:product-type:visibility
+standard:block:product-category:visibility
+standard:block:product-description:visibility
+standard:block:variant-picker:visibility
+standard:block:collapsible-info:visibility
+standard:block:social-share:visibility
+standard:block:hero-slide:visibility
+boutique:section:header:visibility
+boutique:block:text:visibility
+boutique:block:image:visibility
+boutique:block:link:visibility
+boutique:block:social-link:visibility
+boutique:block:group:visibility
+boutique:block:product-title:visibility
+boutique:block:product-price:visibility
+boutique:block:product-compare-at-price:visibility
+boutique:block:product-sku:visibility
+boutique:block:product-type:visibility
+boutique:block:product-category:visibility
+boutique:block:product-description:visibility
+boutique:block:variant-picker:visibility
+boutique:block:collapsible-info:visibility
+boutique:block:social-share:visibility
+boutique:block:hero-slide:visibility
+sport:section:header:visibility
+sport:block:heading:visibility
+sport:block:text:visibility
+sport:block:button:visibility
+sport:block:image:visibility
+sport:block:link:visibility
+sport:block:link-column:visibility
+sport:block:social-link:visibility
+sport:block:collapsible-item:visibility
+sport:block:testimonial:visibility
+sport:block:group:visibility
+sport:block:product-title:visibility
+sport:block:product-price:visibility
+sport:block:product-compare-at-price:visibility
+sport:block:product-sku:visibility
+sport:block:product-type:visibility
+sport:block:product-category:visibility
+sport:block:product-description:visibility
+sport:block:variant-picker:visibility
+sport:block:collapsible-info:visibility
+sport:block:social-share:visibility
+sport:block:hero-slide:visibility
+market:section:header:visibility
+market:block:heading:visibility
+market:block:text:visibility
+market:block:button:visibility
+market:block:image:visibility
+market:block:link:visibility
+market:block:link-column:visibility
+market:block:social-link:visibility
+market:block:group:visibility
+market:block:product-title:visibility
+market:block:product-price:visibility
+market:block:product-compare-at-price:visibility
+market:block:product-sku:visibility
+market:block:product-type:visibility
+market:block:product-category:visibility
+market:block:product-description:visibility
+market:block:variant-picker:visibility
+market:block:collapsible-info:visibility
+market:block:social-share:visibility
+market:block:hero-slide:visibility: expected [ …(73) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "standard:section:header:visibility",
++   "standard:block:image:visibility",
++   "standard:block:group:visibility",
++   "standard:block:product-title:visibility",
++   "standard:block:product-price:visibility",
++   "standard:block:product-compare-at-price:visibility",
++   "standard:block:product-sku:visibility",
++   "standard:block:product-type:visibility",
++   "standard:block:product-category:visibility",
++   "standard:block:product-description:visibility",
++   "standard:block:variant-picker:visibility",
++   "standard:block:collapsible-info:visibility",
++   "standard:block:social-share:visibility",
++   "standard:block:hero-slide:visibility",
++   "boutique:section:header:visibility",
++   "boutique:block:text:visibility",
++   "boutique:block:image:visibility",
++   "boutique:block:link:visibility",
++   "boutique:block:social-link:visibility",
++   "boutique:block:group:visibility",
++   "boutique:block:product-title:visibility",
++   "boutique:block:product-price:visibility",
++   "boutique:block:product-compare-at-price:visibility",
++   "boutique:block:product-sku:visibility",
++   "boutique:block:product-type:visibility",
++   "boutique:block:product-category:visibility",
++   "boutique:block:product-description:visibility",
++   "boutique:block:variant-picker:visibility",
++   "boutique:block:collapsible-info:visibility",
++   "boutique:block:social-share:visibility",
++   "boutique:block:hero-slide:visibility",
++   "sport:section:header:visibility",
++   "sport:block:heading:visibility",
++   "sport:block:text:visibility",
++   "sport:block:button:visibility",
++   "sport:block:image:visibility",
++   "sport:block:link:visibility",
++   "sport:block:link-column:visibility",
++   "sport:block:social-link:visibility",
++   "sport:block:collapsible-item:visibility",
++   "sport:block:testimonial:visibility",
++   "sport:block:group:visibility",
++   "sport:block:product-title:visibility",
++   "sport:block:product-price:visibility",
++   "sport:block:product-compare-at-price:visibility",
++   "sport:block:product-sku:visibility",
++   "sport:block:product-type:visibility",
++   "sport:block:product-category:visibility",
++   "sport:block:product-description:visibility",
++   "sport:block:variant-picker:visibility",
++   "sport:block:collapsible-info:visibility",
++   "sport:block:social-share:visibility",
++   "sport:block:hero-slide:visibility",
++   "market:section:header:visibility",
++   "market:block:heading:visibility",
++   "market:block:text:visibility",
++   "market:block:button:visibility",
++   "market:block:image:visibility",
++   "market:block:link:visibility",
++   "market:block:link-column:visibility",
++   "market:block:social-link:visibility",
++   "market:block:group:visibility",
++   "market:block:product-title:visibility",
++   "market:block:product-price:visibility",
++   "market:block:product-compare-at-price:visibility",
++   "market:block:product-sku:visibility",
++   "market:block:product-type:visibility",
++   "market:block:product-category:visibility",
++   "market:block:product-description:visibility",
++   "market:block:variant-picker:visibility",
++   "market:block:collapsible-info:visibility",
++   "market:block:social-share:visibility",
++   "market:block:hero-slide:visibility",
++ ]
+
+ ❯ tests/unit/studio-registry-coverage.test.ts:102:119
+    100|     const known = new Set((JSON.parse(readFileSync("tests/fixtures/stu…
+    101|     const open = rows.flatMap(gapsOf).filter((k) => !known.has(k));
+    102|     expect(open, `undispositioned gaps (see artifacts/studio/inventory…
+       |                                                                                                                       ^
+    103|   });
+    104| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  13:42:16
+   Duration  5.97s (transform 44%, import 34%, tests 22%)
+

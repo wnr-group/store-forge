@@ -1,0 +1,49 @@
+{
+  "takenAt": "2026-11-21T15:28:29.185Z",
+  "rows": [
+    {
+      "theme": "Atelier",
+      "look": "standard",
+      "hiddenLinkLabel": "Home",
+      "draftPersisted": true,
+      "published": true,
+      "mobileHeaderVisible": false,
+      "desktopHeaderVisible": true,
+      "hiddenLinkVisibleOnDesktop": 0,
+      "otherLinksVisibleOnDesktop": 6
+    },
+    {
+      "theme": "Maison",
+      "look": "boutique",
+      "hiddenLinkLabel": "Home",
+      "draftPersisted": true,
+      "published": true,
+      "mobileHeaderVisible": false,
+      "desktopHeaderVisible": true,
+      "hiddenLinkVisibleOnDesktop": 0,
+      "otherLinksVisibleOnDesktop": 8
+    },
+    {
+      "theme": "Stride",
+      "look": "sport",
+      "hiddenLinkLabel": "Shop",
+      "draftPersisted": true,
+      "published": true,
+      "mobileHeaderVisible": false,
+      "desktopHeaderVisible": true,
+      "hiddenLinkVisibleOnDesktop": 0,
+      "otherLinksVisibleOnDesktop": 6
+    },
+    {
+      "theme": "Marketplace",
+      "look": "market",
+      "hiddenLinkLabel": "Shop",
+      "draftPersisted": true,
+      "published": true,
+      "mobileHeaderVisible": false,
+      "desktopHeaderVisible": true,
+      "hiddenLinkVisibleOnDesktop": 0,
+      "otherLinksVisibleOnDesktop": 13
+    }
+  ]
+}

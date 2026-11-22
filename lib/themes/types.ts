@@ -93,6 +93,8 @@ export type PreviewStoreData = {
     description: string | null;
     logo_path: string | null;
     currency: string;
+    /** The store IANA time zone (schedules are written on its clock). Absent in sample data. */
+    timezone?: string;
     products: {
       name: string;
       slug: string;

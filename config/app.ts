@@ -28,6 +28,7 @@ export const ROUTES = {
   team: "/dashboard/team",
   payments: "/dashboard/payments",
   settings: "/dashboard/settings",
+  reviews: "/dashboard/reviews",
   templates: "/dashboard/templates",
   themeEditor: "/dashboard/templates/editor",
   pages: "/dashboard/pages",

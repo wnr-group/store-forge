@@ -1,0 +1,11 @@
+
+Running 6 tests using 1 worker
+
+  ok 1 tests\e2e\product-regression.spec.ts:31:1 › create: the manual product form still creates a draft product for the tenant (7.6s)
+  ok 2 tests\e2e\product-regression.spec.ts:39:1 › list + search: the products list shows the new products and search narrows to them (3.9s)
+  ok 3 tests\e2e\product-regression.spec.ts:50:1 › edit: changing name, price and visibility persists (4.3s)
+  ok 4 tests\e2e\product-regression.spec.ts:63:1 › filter: the status filter and the category filter return only matching products (5.7s)
+  ok 5 tests\e2e\product-regression.spec.ts:78:1 › bulk actions: publish, move to draft and delete work on a multi-selection (9.5s)
+  ok 6 tests\e2e\product-regression.spec.ts:104:1 › inventory: the inventory page still loads for the manager (2.5s)
+
+  6 passed (41.2s)

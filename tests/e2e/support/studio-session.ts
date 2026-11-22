@@ -2,25 +2,31 @@ import type { Browser } from "@playwright/test";
 import { mkdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { login, OWNER, password, STAFF } from "../helpers";
+import { login, MANAGER, OWNER, password, STAFF } from "../helpers";
 
 /**
  * One REAL UI login per account, reused by every spec file in the run (the API rate-limits logins).
  * The saved browser storage state lives outside the repository (the OS temp folder), is reused only while it is still
  * a valid session, and is replaced by a fresh real login otherwise. Nothing here bypasses authentication.
  */
-export type Who = "owner" | "staff" | "platform";
+export type Who = "owner" | "admin" | "staff" | "platform" | "designOnly" | "catalogOnly" | "readOnly" | "noAccess";
+
+/** The restricted members come from tests/qa/seed-restricted-members.sql (local database only). */
+const SEEDED: Partial<Record<Who, string>> = { designOnly: "design-only@demo.test", catalogOnly: "catalog-only@demo.test", readOnly: "read-only@demo.test", noAccess: "no-access@demo.test" };
 
 const dir = process.env.E2E_SESSION_DIR ?? join(tmpdir(), "studio-e2e-sessions");
 const MAX_AGE_MS = 25 * 60 * 1000;
 const checked = new Map<Who, string>();
 
-const home: Record<Who, RegExp> = { owner: /\/dashboard/, staff: /\/dashboard/, platform: /\/admin/ };
-const landing: Record<Who, string> = { owner: "/dashboard", staff: "/dashboard", platform: "/admin" };
+const home = (who: Who): RegExp => (who === "platform" ? /\/admin/ : /\/dashboard/);
+const landing = (who: Who): string => (who === "platform" ? "/admin" : "/dashboard");
 
 function emailOf(who: Who): string {
   if (who === "owner") return OWNER;
+  if (who === "admin") return MANAGER;
   if (who === "staff") return STAFF;
+  const seeded = SEEDED[who];
+  if (seeded) return seeded;
   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;
   if (!e) throw new Error("Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.");
   return e;
@@ -34,7 +40,7 @@ async function freshLogin(browser: Browser, who: Who, file: string) {
     await page.locator("#email").fill(emailOf(who));
     await page.locator("#password").fill(password());
     await page.getByRole("button", { name: "Sign in" }).click();
-    await page.waitForURL(home[who]);
+    await page.waitForURL(home(who));
   } else {
     await login(page, emailOf(who));
   }
@@ -59,8 +65,8 @@ export async function sessionFor(browser: Browser, who: Who): Promise<string> {
     // A sign-out elsewhere can revoke a saved session: prove it still works before trusting it.
     const context = await browser.newContext({ storageState: file });
     const page = await context.newPage();
-    await page.goto(landing[who]);
-    usable = home[who].test(new URL(page.url()).pathname);
+    // An expired session can make the app redirect in a loop: that means "sign in again", not a failure.
+    usable = await page.goto(landing(who)).then(() => home(who).test(new URL(page.url()).pathname), () => false);
     await context.close();
   }
   if (!usable) await freshLogin(browser, who, file);

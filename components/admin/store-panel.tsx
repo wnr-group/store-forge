@@ -4,7 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { updateCompanyStoreAction } from "@/app/(admin)/admin/actions";
+import { updateCompanyStoreAction, setCompanyStudioRolloutAction } from "@/app/(admin)/admin/actions";
 import { FormField } from "@/components/shared/form-field";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
@@ -156,6 +156,66 @@ function EditStoreForm({ tenantId, store }: Pick<Props, "tenantId" | "store">) {
   );
 }
 
+function StudioRolloutSection({ tenantId }: { tenantId: string }) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [enabled, setEnabled] = useState(false);
+  const [reason, setReason] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const toggle = async (newVal: boolean) => {
+    const promptReason = window.prompt(
+      `Why are you ${newVal ? "enabling" : "disabling"} Store Forge Studio for this store?`,
+      newVal ? "Enabling Studio feature rollout" : "Disabling Studio feature rollout",
+    );
+    if (!promptReason || !promptReason.trim()) {
+      toast.error("A reason is required to change the rollout flag.");
+      return;
+    }
+    setPending(true);
+    try {
+      const res = await setCompanyStudioRolloutAction(tenantId, {
+        enabled: newVal,
+        reason: promptReason.trim(),
+      });
+      if (res.ok) {
+        setEnabled(newVal);
+        toast.success(`Store Forge Studio ${newVal ? "enabled" : "disabled"}`);
+        router.refresh();
+      } else {
+        toast.error(res.error || "Failed to update Studio rollout");
+      }
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border bg-muted/20 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h4 className="text-sm font-semibold text-foreground">Store Forge Studio Feature Flag</h4>
+          <p className="text-xs text-muted-foreground">
+            Enables schema version 2 (display rules, countdown, trust badges, readiness panel). Default off for existing stores.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={enabled ? "destructive" : "default"}
+            disabled={pending}
+            onClick={() => toggle(!enabled)}
+          >
+            {pending ? <Loader2 className="size-3.5 animate-spin mr-1" /> : null}
+            {enabled ? "Disable Studio" : "Enable Studio"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Platform Admin: the organization's primary store. Its details can be edited here; to take the store offline, suspend or delete the organization. */
 export function StorePanel({ tenantId, store, storeUrl }: Props) {
   return (
@@ -177,6 +237,8 @@ export function StorePanel({ tenantId, store, storeUrl }: Props) {
           <StatusBadge tone={STATUS_TONE[store.status]}>{STATUS_LABEL[store.status]}</StatusBadge>
         </span>
       </div>
+      <hr />
+      <StudioRolloutSection tenantId={tenantId} />
       <hr />
       <EditStoreForm key={`${store.name}|${store.description}|${store.contactEmail}|${store.contactPhone}|${store.currency}|${store.timezone}`} tenantId={tenantId} store={store} />
     </div>

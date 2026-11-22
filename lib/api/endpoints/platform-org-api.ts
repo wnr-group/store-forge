@@ -83,7 +83,7 @@ export const updateOrganizationStoreApi = async (
 
 export const addOrganizationMemberApi = async (
   id: string,
-  input: { fullName: string; email: string; password: string; permissions: Record<string, string> },
+  input: { fullName: string; email: string; password: string; permissions: Record<string, string>; capabilities?: string[] },
 ) => (await apiRequest<{ userId: string; email: string }>(`/platform/organizations/${id}/members`, { method: "POST", json: input })).data;
 
 export const setOrganizationMemberStatusApi = async (id: string, userId: string, status: "active" | "disabled") => {
@@ -100,3 +100,15 @@ export const transferOwnershipApi = async (id: string, input: { userId: string; 
 
 export const recoverOwnerApi = async (id: string, input: { ownerName: string; ownerEmail: string; ownerPassword: string; previousOwner: "keep" | "disable" }) =>
   (await apiRequest<{ email: string }>(`/platform/organizations/${id}/ownership/recover`, { method: "POST", json: input })).data;
+
+export const setStudioRolloutApi = async (id: string, input: { enabled: boolean; reason: string }) =>
+  (await apiRequest<{ storeId: string; enabled: boolean; enabledAt: string | null; pointOfNoReturnAt: string | null }>(
+    `/platform/organizations/${id}/studio-rollout`,
+    { method: "PUT", json: input },
+  )).data;
+
+export const getStudioRolloutEventsApi = async (id: string) =>
+  (await apiRequest<Array<{ id: string; storeId: string; actorId: string; action: string; reason: string; createdAt: string }>>(
+    `/platform/organizations/${id}/studio-rollout/events`,
+  )).data;
+

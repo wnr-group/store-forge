@@ -1,0 +1,15 @@
+API changed files since baseline:
+src/modules/collections/collection-usage.spec.ts
+src/modules/collections/collection-usage.ts
+src/modules/collections/collections.controller.ts
+src/modules/collections/collections.dto.ts
+src/modules/collections/collections.service.ts
+test/collection-usage.e2e-spec.ts
+test/product-presentations-isolation.e2e-spec.ts
+test/studio-permissions.e2e-spec.ts
+added-line findings:
+migrations changed:
+none
+tracked env:
+none
+?? artifacts/

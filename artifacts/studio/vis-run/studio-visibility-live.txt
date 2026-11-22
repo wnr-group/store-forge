@@ -1,0 +1,9 @@
+
+Running 4 tests using 1 worker
+
+  ok 1 tests\e2e\studio-visibility-live.spec.ts:35:3 › standard look (Atelier): header hidden on a phone, a menu link hidden on a desktop (38.8s)
+  ok 2 tests\e2e\studio-visibility-live.spec.ts:35:3 › boutique look (Maison): header hidden on a phone, a menu link hidden on a desktop (38.1s)
+  ok 3 tests\e2e\studio-visibility-live.spec.ts:35:3 › sport look (Stride): header hidden on a phone, a menu link hidden on a desktop (50.3s)
+  ok 4 tests\e2e\studio-visibility-live.spec.ts:35:3 › market look (Marketplace): header hidden on a phone, a menu link hidden on a desktop (49.4s)
+
+  4 passed (3.0m)

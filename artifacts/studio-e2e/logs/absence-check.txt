@@ -1,0 +1,21 @@
+# Absence check (grep of both repos, 2026-11-22T14:27:55+05:30). Count = files containing the term.
+product_reviews: FE=0 API=0
+review_imports: FE=0 API=0
+product_recommendations: FE=0 API=0
+group_cart_drawer: FE=0 API=0
+web_vitals_daily: FE=0 API=0
+reusable_sections: FE=0 API=0
+reusable_section_versions: FE=0 API=0
+draft_review_requests: FE=0 API=0
+change_ledger: FE=0 API=0
+draft_discard_audit: FE=0 API=0
+seo_title: FE=0 API=0
+meta_description: FE=0 API=0
+'page'.*template: FE=0 API=0
+sitemap: FE=0 API=1
+recently.viewed: FE=0 API=0
+fingerprint writers (non-null):
+../store-forge-api-integ/src/database/schema/studio.ts:194:    fingerprint: text('fingerprint'),
+storefront sitemap route:
+ls: cannot access 'app/sitemap*': No such file or directory
+ls: cannot access 'app/*/sitemap*': No such file or directory

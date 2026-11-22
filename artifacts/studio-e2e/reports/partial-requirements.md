@@ -1,0 +1,16 @@
+# Partial requirements
+
+
+| Requirement ID | Release | Criterion | Detail | Evidence |
+|---|---|---|---|---|
+| AC-REG-05 | R1 | Unavailable component refused by editor, API and database | No database-level refusal exists; API refuses only at publish with the flag on; not verified end to end | - |
+| AC-DSP-05 | R1 | End <= start rejected on save/publish | Save with an invalid schedule is rejected (API e2e, 400, nothing written); publish-time rule `display.schedule.order` covered by readiness tests. UI message and publish path not exercised in a browser. | test-results/api-e2e.txt; test-results/qa-d-001-api-e2e.txt |
+| AC-RDY-01 | R1 | Blocker disables Publish in UI and API rejects it, no override | Feature absent from both repositories (Fresh: with Studio on, theme publish returns 400 READINESS_BLOCKED (2 media.alt.missing blockers) and the readiness report lists 2 blockers + 3 warnings. No readiness panel exists, so the UI half (disabled Publish, issue list) cannot be shown.) | logs/absence-check.txt (re-run in this pass: see environment.txt feature grep) |
+| AC-RDY-04 | R1 | Issue carries severity, message, item, fix action, navigable control path | Contract passes; no editor navigation exists | test-results/api-e2e.txt |
+| AC-RDY-06 | R1 | Every catalogue rule has pass+fail test and decided severity | badge.excluded-claim stub and media.image.oversized missing | test-results/api-unit.txt |
+| AC-PRM-02 | R1 | design:write cannot publish/restore in UI, API or DB | API and DB refuse (tested). The editor gets only a canManage flag, so Publish is likely still offered to write-level members; not browser-verified | test-results/api-e2e.txt |
+| AC-A11-01 | R1 | Keyboard/focus/name/motion checks and automated scan | Existing banner/hero pages only: storefront axe scans at desktop and mobile found 0 violations (1 incomplete contrast check each, needs manual review); keyboard switch ok. New components (countdown, badges) cannot be exercised (legal gate), editor is covered by AC-EDT-05. | - |
+| AC-LGL-01 | R1 | Gated component unavailable in editor, API, DB, storefront without approval | Real status: badge_upload/review_import unavailable (0 approvals). Implementer reports the gate is not enforced on media upload-requests or attestations (not reproduced here); editor/storefront not browser-verified | test-results/R1-flag-and-display-run.json |
+| AC-ROL-01 | R1 | Existing store flag off; merchant cannot enable; platform-admin changes audited | Fresh: existing store status enabled=false; platform admin enable 200; audit events rows present in the database (enabled/disabled with reasons). No flag admin screen exists; unauthorised rejection covered by API e2e only. | test-results/R1-flag-and-display-run.json; screenshots/deployment/R1-flag-off-editor-no-display-panel.png |
+| AC-ROL-02 | R1 | Flag off: new functionality inaccessible, no data modified | Fresh: with the flag off the editor publish succeeded and the storefront rendered at desktop, tablet and mobile with schema-2 content intact. No before/after data comparison and no hosted-database run. | test-results/R1-storefront-after-disable.txt |
+| AC-EDT-01 | R1 | Shell split keeps behaviour (existing suites unchanged) | 1,539 to ~400 lines; characterisation tests pass; existing Playwright editor suites not re-run after the split | test-results/fe-unit.txt |

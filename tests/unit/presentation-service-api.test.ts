@@ -81,17 +81,17 @@ describe("API errors reach the editor in the shape it handles", () => {
 });
 
 describe("presentation service", () => {
-  it("reading needs no special permission; saving, publishing and resetting need store:manage", async () => {
+  it("reading needs design:view; saving a draft needs design:edit; publishing and resetting need design:publish", async () => {
     const svc = await import("@/services/presentation.service");
     apiRequest.mockResolvedValueOnce({ data: detail() }).mockResolvedValueOnce({ data: [], meta: { page: 1, limit: 100, total: 0, totalPages: 1 } });
     await svc.getPresentation(PID);
     await svc.listPresentations();
-    expect(requireActiveTenant.mock.calls.map((c) => c[0])).toEqual([undefined, undefined]);
+    expect(requireActiveTenant.mock.calls.map((c) => c[0])).toEqual(["design:view", "design:view"]);
     requireActiveTenant.mockClear();
     await svc.savePresentationDraft(PID, { schemaVersion: 1 }, 0);
     await svc.publishPresentation(PID, 1);
     await svc.resetPresentation(PID);
-    expect(requireActiveTenant.mock.calls.map((c) => c[0])).toEqual(["store:manage", "store:manage", "store:manage"]);
+    expect(requireActiveTenant.mock.calls.map((c) => c[0])).toEqual(["design:edit", "design:publish", "design:publish"]);
   });
 
   it("a permission failure stops before any call to the API", async () => {

@@ -6,7 +6,7 @@ import { ROUTES } from "@/config/app";
 import { run } from "@/lib/actions/run";
 import { collectionInputSchema } from "@/lib/validations/catalog";
 import { parseInput } from "@/lib/validations/parse";
-import { buildCollectionQuickEditValues, createCollection, deleteCollection, getCollectionForQuickEdit, listProductOptions, updateCollection } from "@/services/collection.service";
+import { buildCollectionQuickEditValues, createCollection, deleteCollection, getCollectionForQuickEdit, getCollectionUsage, listProductOptions, updateCollection } from "@/services/collection.service";
 import { invalidateStorefront } from "@/lib/storefront/cache";
 
 const refresh = async () => {
@@ -28,9 +28,16 @@ export async function saveCollectionAction(mode: unknown, id: unknown, input: un
   });
 }
 
-export async function deleteCollectionAction(id: unknown) {
+const usageHash = z.string().regex(/^[a-f0-9]{64}$/).optional();
+
+/** Where the collection is used in the store design, for the delete warning. */
+export async function getCollectionUsageAction(id: unknown) {
+  return run(async () => getCollectionUsage(parseInput(z.uuid(), id)));
+}
+
+export async function deleteCollectionAction(id: unknown, usage?: unknown) {
   return run(async () => {
-    await deleteCollection(parseInput(z.uuid(), id));
+    await deleteCollection(parseInput(z.uuid(), id), parseInput(usageHash, usage));
     await refresh();
   });
 }

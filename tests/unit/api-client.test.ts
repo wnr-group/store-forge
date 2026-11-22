@@ -110,6 +110,35 @@ describe("apiRequest", () => {
     expect(error.fieldErrors).toBeUndefined();
   });
 
+  it("keeps structured details only for allow-listed codes", async () => {
+    const { toAppError } = await import("@/lib/api/client");
+    const rows = { total: 1, errors: [{ row: 2, column: "price", message: "m", value: "0" }] };
+    const kept = toAppError(400, { success: false, message: "No products were imported.", error: { code: "PRODUCT_IMPORT_INVALID", details: rows } });
+    expect(kept.details).toEqual(rows);
+    expect(kept.fieldErrors).toBeUndefined();
+    const dropped = toAppError(400, { success: false, message: "x", error: { code: "SOMETHING_ELSE", details: rows } });
+    expect(dropped.details).toBeUndefined();
+  });
+
+  it("maps HTTP 413 to an actionable message, even when the body is not the API envelope", async () => {
+    const { apiRequest, toAppError } = await import("@/lib/api/client");
+    const direct = toAppError(413, { statusCode: 413, message: "request entity too large" } as never);
+    expect(direct.code).toBe("VALIDATION");
+    expect(direct.message).toContain("too large");
+    expect(direct.message).toContain("split");
+    reply = { status: 413, body: { success: false, message: "Something went wrong. Please try again.", error: { code: "HTTP_413", details: null } } };
+    await expect(apiRequest("/products/import", { method: "POST", json: { rows: [] }, organizationId: ORG })).rejects.toMatchObject({ code: "VALIDATION", message: expect.stringContaining("too large") });
+  });
+
+  it("uses the per-call timeout and keeps the 15 s default for other calls", async () => {
+    const { apiRequest } = await import("@/lib/api/client");
+    const spy = vi.spyOn(AbortSignal, "timeout");
+    await apiRequest("/categories");
+    await apiRequest("/products/import", { method: "POST", json: { rows: [] }, organizationId: ORG, timeoutMs: 60_000 });
+    expect(spy.mock.calls.map((c) => c[0])).toEqual([15_000, 60_000]);
+    spy.mockRestore();
+  });
+
   it("turns a network failure into the generic error", async () => {
     const { apiRequest } = await import("@/lib/api/client");
     const original = process.env.API_BASE_URL;

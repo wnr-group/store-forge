@@ -1,0 +1,15 @@
+fe-tsc | cwd=. | cmd=node node_modules/typescript/bin/tsc --noEmit | sha=9cf1440 | start=14:34:25 end=14:34:32 | exit=0 | 
+fe-lint | cwd=. | cmd=node node_modules/eslint/bin/eslint.js lib components services app tests | sha=9cf1440 | start=14:34:32 end=14:35:18 | exit=0 | 
+fe-unit | cwd=. | cmd=node node_modules/vitest/vitest.mjs run | sha=9cf1440 | start=14:35:18 end=14:36:18 | exit=0 |  Test Files  147 passed (147);      Tests  2936 passed (2936);
+api-tsc | cwd=../store-forge-api-integ | cmd=node node_modules/typescript/bin/tsc --noEmit | sha=703341d | start=14:36:18 end=14:36:31 | exit=0 | 
+api-lint | cwd=../store-forge-api-integ | cmd=node node_modules/oxlint/bin/oxlint --type-aware src/ test/ | sha=703341d | start=14:36:32 end=14:36:34 | exit=0 | 
+api-unit | cwd=../store-forge-api-integ | cmd=node node_modules/vitest/vitest.mjs run | sha=703341d | start=14:36:35 end=14:36:54 | exit=0 |  Test Files  25 passed (25);      Tests  341 passed (341);
+api-e2e | cwd=../store-forge-api-integ | cmd=node node_modules/vitest/vitest.mjs run --config vitest.config.e2e.ts | sha=703341d | start=14:36:54 end=14:41:14 | exit=0 |  Test Files  27 passed (27);      Tests  404 passed (404);
+api-integration | cwd=../store-forge-api-integ | cmd=node node_modules/vitest/vitest.mjs run --config vitest.config.integration.ts | sha=703341d | start=14:41:15 end=14:41:25 | exit=0 |  Test Files  1 passed (1);      Tests  13 passed (13);
+journey | cwd=. | cmd=npx playwright test -c artifacts/studio-e2e/qa/playwright.qa.config.ts | sha=9cf1440 | start=14:45:58 end=14:48:05 | exit=0
+studio-nav-group exit=0  1 passed (13.9s) 
+studio-restricted-members exit=1  1 failed  9 passed (1.7m) 
+studio-collection-picker exit=1  1 failed 
+studio-storefront-errors exit=1  4 failed 
+playwright-repo-specs start=14:48:15 end=14:51:29
+studio-collection-picker exit=1  1 failed 

@@ -16,8 +16,8 @@ import { toProductResource } from "@/services/storefront.service";
 import type { PickerPage, PresentationSummary, ProductPreview } from "@/lib/themes/types";
 
 /**
- * Per-product presentation for the Customize editor. Reading is open to every member of the active workspace; saving,
- * publishing and resetting need `store:manage` (checked here, again by the API and the database). The workspace comes
+ * Per-product presentation for the Customize editor. Reading needs `design:view`, saving drafts `design:edit`,
+ * publishing and resetting `design:publish` (checked here, again by the API and the database). The workspace comes
  * from the verified membership, never from the browser.
  */
 
@@ -31,7 +31,7 @@ const MAX_LIST_PAGES = 10;
  * counting as if the list were complete.
  */
 export async function listPresentations(): Promise<{ items: PresentationSummary[]; truncated: boolean }> {
-  const { tenant } = await requireActiveTenant();
+  const { tenant } = await requireActiveTenant("design:view");
   const all: PresentationSummary[] = [];
   let truncated = false;
   for (let page = 1; page <= MAX_LIST_PAGES; page += 1) {
@@ -44,22 +44,22 @@ export async function listPresentations(): Promise<{ items: PresentationSummary[
 }
 
 export async function getPresentation(productId: string) {
-  const { tenant } = await requireActiveTenant();
+  const { tenant } = await requireActiveTenant("design:view");
   return getPresentationApi(tenant.id, productId);
 }
 
 export async function savePresentationDraft(productId: string, document: unknown, expectedRevision: number) {
-  const { tenant } = await requireActiveTenant("store:manage");
+  const { tenant } = await requireActiveTenant("design:edit");
   return savePresentationDraftApi(tenant.id, productId, document, expectedRevision);
 }
 
 export async function publishPresentation(productId: string, expectedRevision?: number) {
-  const { tenant } = await requireActiveTenant("store:manage");
+  const { tenant } = await requireActiveTenant("design:publish");
   return publishPresentationApi(tenant.id, productId, expectedRevision);
 }
 
 export async function resetPresentation(productId: string) {
-  const { tenant } = await requireActiveTenant("store:manage");
+  const { tenant } = await requireActiveTenant("design:publish");
   return resetPresentationApi(tenant.id, productId);
 }
 
@@ -67,7 +67,7 @@ const PICKER_PAGE = 20;
 
 /** The picker's products: the store's active products from the existing admin list (the API's list of customized products has ids only). */
 export async function listPickerProducts(q: { page: number; search?: string }): Promise<PickerPage> {
-  const { tenant } = await requireActiveTenant();
+  const { tenant } = await requireActiveTenant("design:view");
   const { items, meta } = await listProductsApi(tenant.id, { page: q.page, limit: PICKER_PAGE, search: q.search || undefined, status: "active", sortBy: "createdAt", sortOrder: "desc" });
   return {
     items: items.map((p) => ({ id: p.id, name: p.name, slug: p.slug, imagePath: p.imagePath })),
@@ -101,7 +101,7 @@ async function findProductId(tenantId: string, slug: string): Promise<string | n
  * feature yet) is reported in `presentationError` and does not stop the preview.
  */
 export async function loadProductPreview(target: { productId?: string; slug?: string }): Promise<ProductPreview> {
-  const { tenant } = await requireActiveTenant();
+  const { tenant } = await requireActiveTenant("design:view");
   let productId = target.productId;
   let slug = target.slug;
   if (productId) {
@@ -141,7 +141,7 @@ const CHECK_CONCURRENCY = 10;
  * read, was published meanwhile, or uses an unsupported version is in neither list, so the caller never guesses.
  */
 export async function checkDrafts(ids: string[]): Promise<{ empty: string[]; real: string[] }> {
-  const { tenant } = await requireActiveTenant();
+  const { tenant } = await requireActiveTenant("design:view");
   const unique = [...new Set(ids)].slice(0, CHECK_CHUNK);
   const empty: string[] = [];
   const real: string[] = [];

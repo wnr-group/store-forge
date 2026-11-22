@@ -1,8 +1,8 @@
 import "server-only";
-import { isRole } from "@/lib/auth/permissions";
+import { effectiveCapabilities, isRole } from "@/lib/auth/permissions";
 import { getCurrentOrganizationApi, listMyOrganizationsApi, type OrganizationSummaryApi } from "@/lib/api/endpoints/organization-api";
 import type { StoreApi } from "@/lib/api/endpoints/store-api";
-import type { MemberPermissions } from "@/lib/domain/enums";
+import type { MemberCapability, MemberPermissions } from "@/lib/domain/enums";
 import { AppError } from "@/lib/errors";
 import { resolveActiveTenant } from "@/lib/tenant/resolve";
 import type { Store } from "@/services/store.service";
@@ -14,6 +14,7 @@ const toMembership = (o: OrganizationSummaryApi): TenantMembership => ({
   tenant: { id: o.id, name: o.name, slug: o.slug, publicId: o.publicId },
   role: o.role as TenantMembership["role"],
   permissions: o.permissions as MemberPermissions,
+  capabilities: effectiveCapabilities(o.role as TenantMembership["role"], o.capabilities as MemberCapability[] | undefined),
   joinedAt: new Date(o.joinedAt),
 });
 

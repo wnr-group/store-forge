@@ -1,6 +1,7 @@
 import React from "react";
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
+import { passesSchedule, withDeviceRule } from "../display";
 
 import { HeadingBlock } from "./heading";
 import { TextBlock } from "./text";
@@ -23,6 +24,7 @@ import { ProductDescriptionBlock } from "./product-description";
 import { VariantPickerBlock } from "./variant-picker";
 import { CollapsibleInfoBlock } from "./collapsible-info";
 import { SocialShareBlock } from "./social-share";
+import { TrustBadgeBlock } from "./trust-badge";
 
 export const BLOCK_COMPONENTS: Record<
   string,
@@ -49,6 +51,7 @@ export const BLOCK_COMPONENTS: Record<
   "variant-picker": VariantPickerBlock,
   "collapsible-info": CollapsibleInfoBlock,
   "social-share": SocialShareBlock,
+  "trust-badge": TrustBadgeBlock,
 };
 
 export function renderBlockComponent(
@@ -59,6 +62,9 @@ export function renderBlockComponent(
   if (node.disabled && context.mode === "public") {
     return null;
   }
+
+  // Display rules (schema 2): an inactive schedule omits the block before it is drawn.
+  if (!passesSchedule(node, context)) return null;
 
   const Component = BLOCK_COMPONENTS[node.type];
   if (!Component) {
@@ -76,13 +82,15 @@ export function renderBlockComponent(
     return null;
   }
 
-  return (
+  return withDeviceRule(
+    node,
     <Component
       key={blockId}
       node={node}
       context={context}
       blockId={blockId}
       renderBlock={(childNode, childId) => renderBlockComponent(childNode, context, childId)}
-    />
+    />,
+    blockId,
   );
 }

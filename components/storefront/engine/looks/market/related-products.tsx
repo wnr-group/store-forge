@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { HIDEABLE_SECTION, isHiddenFor, presentationOf } from "@/lib/templates/product-presentation";
 import { type CardProduct } from "../../ui";
 import type { ProductDetailData } from "../../types";
 import type { SectionProps } from "..";
@@ -26,6 +27,8 @@ export function MarketRelatedProducts({ node, context, sectionId }: SectionProps
         return false;
       });
   const related = pool.slice(0, Math.max(productsToShow, 8));
+  // A product can hide its related products (per-product presentation).
+  if (isHiddenFor(presentationOf(current), HIDEABLE_SECTION)) return null;
   if (related.length === 0 && !isPreview) return null;
 
   if (related.length === 0) {

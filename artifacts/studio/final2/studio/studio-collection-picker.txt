@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 tests\e2e\studio-collection-picker.spec.ts:9:1 › picking a collection stores its id, survives a reload, and the storefront shows it (19.3s)
+
+  1 passed (22.5s)

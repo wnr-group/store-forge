@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { EditorShell, type EditorInit } from "@/components/themes/editor/editor-shell";
 import { ROUTES } from "@/config/app";
-import { canManageStore } from "@/lib/auth/permissions";
+import { canAttestDesign, canEditDesign } from "@/lib/auth/permissions";
 import { toFailure } from "@/lib/errors";
 import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
 import { requireWorkspaceCan } from "@/lib/tenant/context";
 import { ThemeQueryProvider } from "@/lib/themes/queries";
 import type { ProductPreview, ThemeKind } from "@/lib/themes/types";
 import { loadProductPreview } from "@/services/presentation.service";
+import { getStudioStatus } from "@/services/studio.service";
 import { getCurrentTheme, getPreviewStoreData, getTemplate, listTemplates } from "@/services/theme.service";
 
 export const metadata: Metadata = { title: "Theme editor" };
@@ -24,7 +25,7 @@ const productIdParam = z.string().uuid();
 
 /** The visual editor: the page structure, a live preview built by the storefront's own renderer, and the settings of the selection. */
 export default async function ThemeEditorPage({ searchParams }: Props) {
-  const { active } = await requireWorkspaceCan("dashboard:view");
+  const { active } = await requireWorkspaceCan("design:view");
   const { page, product } = await searchParams;
   const productId = productIdParam.safeParse(product);
   const all = (await listTemplates()).filter((t) => t.status === "active");
@@ -35,10 +36,12 @@ export default async function ThemeEditorPage({ searchParams }: Props) {
   // A product link opens the Product page, unless a page was asked for.
   const chosen = pages.find((p) => p.id === page) ?? (productId.success ? pages.find((p) => p.kind === "product") : undefined) ?? pages[0];
   const shared = all.filter((t) => SHARED_KINDS.includes(t.kind));
-  const [docs, current, data] = await Promise.all([
+  const [docs, current, data, studio] = await Promise.all([
+    // Studio off (or unknown) is the safe answer: the editor then works exactly as before.
     Promise.all([chosen, ...shared].map((t) => getTemplate(t.id))),
     getCurrentTheme(),
     getPreviewStoreData({ collectionProducts: true, productPage: true, contentPages: true }),
+    getStudioStatus(),
   ]);
 
   // The Product page starts on the linked product, or on the store's first product as it always did.
@@ -58,7 +61,7 @@ export default async function ThemeEditorPage({ searchParams }: Props) {
 
   const init: EditorInit = {
     tenantId: active.tenant.id,
-    canManage: canManageStore(active),
+    canManage: canEditDesign(active),
     storeSlug: data.store.slug,
     storeHost: storefrontHost(data.store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, active.tenant.publicId),
     storeUrl: storefrontUrl(data.store.slug, process.env.NEXT_PUBLIC_ROOT_DOMAIN, active.tenant.publicId),
@@ -69,6 +72,9 @@ export default async function ThemeEditorPage({ searchParams }: Props) {
     data,
     initialProduct,
     initialProductError,
+    studioEnabled: studio.enabled,
+    studioFeatures: studio.features,
+    canAttest: canAttestDesign(active),
   };
 
   return (

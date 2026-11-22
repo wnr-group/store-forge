@@ -1,0 +1,31 @@
+
+ RUN  v4.1.12 C:/Users/Eshwar/WNR/store-forge-api-integ
+
+[Nest] 2336  - 21/11/2026, 8:26:40 pm   ERROR [PlatformOrganizationsService] provisioning failed (owner a4955a97-68bb-4caf-80e6-39790a9b277d, auth user removed: true): Failed query: select public.platform_provision_tenant(
+          $1::uuid, $2, $3, $4,
+          $5, $6, $7, $8) as result
+params: a4955a97-68bb-4caf-80e6-39790a9b277d,Company 40,Store 40,store-40,,,,m145rm | public_id_taken
+[Nest] 2336  - 21/11/2026, 8:26:40 pm   ERROR [AllExceptionsFilter] Unhandled exception on POST /api/v1/platform/organizations
+Error: Failed query: select public.platform_provision_tenant(
+          $1::uuid, $2, $3, $4,
+          $5, $6, $7, $8) as result
+params: a4955a97-68bb-4caf-80e6-39790a9b277d,Company 40,Store 40,store-40,,,,m145rm
+    at PglitePreparedQuery.queryWithCache (file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/drizzle-orm/pg-core/session.js:41:15)
+    at C:/Users/Eshwar/WNR/store-forge-api-integ/src/modules/platform-admin/organizations/organizations.service.ts:323:9
+    at async file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/@electric-sql/pglite/dist/chunk-UYHX356B.js:8:1303
+[Nest] 20092  - 21/11/2026, 8:27:39 pm   ERROR [AllExceptionsFilter] Unhandled exception on POST /api/v1/platform/organizations
+Error: boom
+    at FakeAuthAdmin.createConfirmedUser (C:/Users/Eshwar/WNR/store-forge-api-integ/test/support/app.ts:90:13)
+    at PlatformOrganizationsService.create (C:/Users/Eshwar/WNR/store-forge-api-integ/src/modules/platform-admin/organizations/organizations.service.ts:381:40)
+[Nest] 40044  - 21/11/2026, 8:29:33 pm   ERROR [AllExceptionsFilter] Unhandled exception on POST /api/v1/products/import
+Error: forced failure
+    at ProductsService.<anonymous> (C:/Users/Eshwar/WNR/store-forge-api-integ/test/product-import.e2e-spec.ts:335:34)
+    at ProductsService.insertNewProductInTx (file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/@vitest/spy/dist/index.js:332:34)
+    at C:/Users/Eshwar/WNR/store-forge-api-integ/src/modules/products/product-import.service.ts:152:38
+    at async file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/@electric-sql/pglite/dist/chunk-UYHX356B.js:8:1303
+
+ Test Files  23 passed (23)
+      Tests  312 passed (312)
+   Start at  20:25:42
+   Duration  323.37s (transform 3.99s, setup 0ms, import 159.88s, tests 151.86s, environment 4ms)
+

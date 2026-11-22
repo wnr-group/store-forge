@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { deleteCollectionAction, saveCollectionAction } from "@/app/(dashboard)/dashboard/collections/actions";
+import { deleteCollectionAction, getCollectionUsageAction, saveCollectionAction } from "@/app/(dashboard)/dashboard/collections/actions";
 import { ImageUploader, type ImageItem } from "@/components/products/image-uploader";
+import { describeCollectionUsage, type CollectionUsage } from "@/lib/collections/usage";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useReportFormState, type FormState } from "@/components/shared/embedded-form";
 import { FormField } from "@/components/shared/form-field";
@@ -49,6 +50,19 @@ export function CollectionForm({ mode, initial, products, canDelete, embedded }:
   );
   const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [usage, setUsage] = useState<CollectionUsage | null>(null);
+  const [checking, setChecking] = useState(false);
+  const startDelete = async () => {
+    setChecking(true);
+    const res = await getCollectionUsageAction(id);
+    setChecking(false);
+    if (!res.ok) {
+      toast.error(res.error); // never open a plain delete when the usage check failed
+      return;
+    }
+    setUsage(res.data ?? null);
+    setConfirmDelete(true);
+  };
 
   const visible = useMemo(() => products.filter((p) => p.name.toLowerCase().includes(filter.trim().toLowerCase())), [products, filter]);
   const uploading = image.some((i) => i.status === "uploading");
@@ -151,7 +165,7 @@ export function CollectionForm({ mode, initial, products, canDelete, embedded }:
             <ImageUploader value={image} onChange={setImage} scope="collection" ownerId={id} max={1} single disabled={pending} label="Collection image" />
           </SectionCard>
           {mode === "edit" && canDelete ? (
-            <Button type="button" variant="outline" className="w-full text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)} disabled={pending}>
+            <Button type="button" variant="outline" className="w-full text-destructive hover:text-destructive" onClick={() => void startDelete()} disabled={pending || checking}>
               <Trash2 aria-hidden /> Delete collection
             </Button>
           ) : null}
@@ -176,13 +190,19 @@ export function CollectionForm({ mode, initial, products, canDelete, embedded }:
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title={`Delete "${initial?.name ?? "collection"}"?`}
-        description="The collection and its image are removed. The products in it are kept."
-        confirmLabel="Delete collection"
+        description={describeCollectionUsage(usage, initial?.name ?? "This collection")}
+        confirmLabel={usage && usage.total > 0 ? "Delete anyway" : "Delete collection"}
         onConfirm={async () => {
-          const res = await deleteCollectionAction(id);
+          const res = await deleteCollectionAction(id, usage && usage.total > 0 ? usage.hash : undefined);
           if (res.ok) {
             toast.success("Collection deleted");
             router.replace(ROUTES.collections);
+            return res;
+          }
+          if (res.code === "CONFLICT") {
+            // The design changed since the warning: show the current usage and ask again.
+            const fresh = await getCollectionUsageAction(id);
+            if (fresh.ok) setUsage(fresh.data ?? null);
           }
           return res;
         }}

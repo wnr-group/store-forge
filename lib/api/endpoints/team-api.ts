@@ -11,6 +11,7 @@ export type TeamMemberApi = {
   status: string;
   joinedAt: string;
   permissions: Record<string, string>;
+  capabilities?: string[];
 };
 
 export type TeamPermissionsApi = Record<string, string>;
@@ -20,10 +21,10 @@ export const listTeamApi = async (organizationId: string) =>
 
 export const createMemberApi = async (
   organizationId: string,
-  input: { fullName: string; email: string; password: string; permissions: TeamPermissionsApi },
+  input: { fullName: string; email: string; password: string; permissions: TeamPermissionsApi; capabilities?: string[] },
 ) => (await apiRequest<{ userId: string; email: string }>("/team/members", { method: "POST", json: input, organizationId })).data;
 
-export const updateMemberApi = async (organizationId: string, userId: string, input: { fullName: string; permissions: TeamPermissionsApi }) => {
+export const updateMemberApi = async (organizationId: string, userId: string, input: { fullName: string; permissions: TeamPermissionsApi; capabilities?: string[] }) => {
   await apiRequest(`/team/members/${userId}`, { method: "PATCH", json: input, organizationId });
 };
 

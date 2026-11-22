@@ -1,0 +1,98 @@
+{
+  "label": "after",
+  "takenAt": "2026-11-21T08:19:01.966Z",
+  "runs": 7,
+  "environment": {
+    "node": "v24.18.0",
+    "os": "win32 10.0.26300",
+    "cpu": "11th Gen Intel(R) Core(TM) i5-11320H @ 3.20GHz",
+    "cores": 8,
+    "memGb": 26,
+    "api": "http://localhost:4000/api/v1",
+    "frontend": "http://localhost:3100"
+  },
+  "commits": {
+    "fe": "8c339cdc887c04599b0487d28d146e639932744f",
+    "apiTree": "5f194174393d8dadcf7d9f8e56b91f01b5d40770"
+  },
+  "dataset": {
+    "store": "urban-nest-demo",
+    "template": "5db6315a-bde6-4488-a50c-53633c761b92",
+    "indexSections": 6,
+    "productSlug": "qa-xlsx-2-4"
+  },
+  "results": {
+    "draftSaveMs": {
+      "median": 31,
+      "all": [
+        32,
+        35,
+        23,
+        22,
+        28,
+        45,
+        31
+      ]
+    },
+    "publishMs": {
+      "median": 31,
+      "all": [
+        31,
+        27,
+        32,
+        16,
+        32,
+        27,
+        41
+      ]
+    },
+    "rollbackMs": {
+      "median": 35,
+      "all": [
+        35,
+        25,
+        38,
+        30,
+        29,
+        37,
+        38
+      ]
+    },
+    "storefrontHomeFetchMs": {
+      "median": 135,
+      "all": [
+        206,
+        113,
+        135,
+        239,
+        135,
+        103,
+        132
+      ]
+    },
+    "publicProductReadMs": {
+      "median": 14,
+      "all": [
+        13,
+        16,
+        9,
+        18,
+        10,
+        21,
+        14
+      ]
+    },
+    "publicLayoutReadMs": {
+      "median": 14,
+      "all": [
+        21,
+        13,
+        12,
+        15,
+        7,
+        23,
+        14
+      ]
+    }
+  }
+}

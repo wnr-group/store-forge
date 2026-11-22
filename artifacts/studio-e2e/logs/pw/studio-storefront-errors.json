@@ -1,0 +1,394 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-storefront-errors.spec.ts",
+      "--reporter=json,list",
+      "--output=C:/Users/Eshwar/AppData/Local/Temp/pw-out"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/AppData/Local/Temp/pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-storefront-errors.spec.ts",
+      "file": "studio-storefront-errors.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "API unavailable: shopper state, no internals, same URL, Retry re-fetches from the server and recovers",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 346,
+                  "error": {
+                    "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=http500\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n",
+                    "stack": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=http500\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n    at setMode (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:12:60)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:26:9",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                      "column": 60,
+                      "line": 12
+                    },
+                    "snippet": " \u001b[90m 10 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mINVALID_DOCUMENT\u001b[39m \u001b[33m=\u001b[39m \u001b[32m\"bad-order\"\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 11 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mTHROWING_SECTION\u001b[39m \u001b[33m=\u001b[39m \u001b[32m\"null-section\"\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 12 |\u001b[39m \u001b[36mconst\u001b[39m setMode \u001b[33m=\u001b[39m (page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m\u001b[33m,\u001b[39m mode\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m page\u001b[33m.\u001b[39mrequest\u001b[33m.\u001b[39mget(\u001b[32m`${PROXY}/__fault/mode?mode=${mode}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 13 |\u001b[39m \u001b[36mconst\u001b[39m requests \u001b[33m=\u001b[39m \u001b[36masync\u001b[39m (page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m) \u001b[33m=>\u001b[39m ((\u001b[36mawait\u001b[39m (\u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mrequest\u001b[33m.\u001b[39mget(\u001b[32m`${PROXY}/__fault/stats`\u001b[39m))\u001b[33m.\u001b[39mjson()) \u001b[36mas\u001b[39m { storefrontRequests\u001b[33m:\u001b[39m number })\u001b[33m.\u001b[39mstorefrontRequests\u001b[33m;\u001b[39m\n \u001b[90m 14 |\u001b[39m \u001b[36mconst\u001b[39m fresh \u001b[33m=\u001b[39m () \u001b[33m=>\u001b[39m \u001b[32m`fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 15 |\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                        "column": 60,
+                        "line": 12
+                      },
+                      "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=http500\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n\n  10 | const INVALID_DOCUMENT = \"bad-order\";\n  11 | const THROWING_SECTION = \"null-section\";\n> 12 | const setMode = (page: Page, mode: string) => page.request.get(`${PROXY}/__fault/mode?mode=${mode}`);\n     |                                                            ^\n  13 | const requests = async (page: Page) => ((await (await page.request.get(`${PROXY}/__fault/stats`)).json()) as { storefrontRequests: number }).storefrontRequests;\n  14 | const fresh = () => `fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;\n  15 |\n    at setMode (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:12:60)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:26:9"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:21:21.123Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-storefront-errors-A-4f9e5-rom-the-server-and-recovers\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-storefront-errors-A-4f9e5-rom-the-server-and-recovers\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                    "column": 60,
+                    "line": 12
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "59efed79351847f225bd-2021c9dce98b02fded8c",
+          "file": "studio-storefront-errors.spec.ts",
+          "line": 24,
+          "column": 1
+        },
+        {
+          "title": "Retry while the API is still down stays on the shopper state and asks the server again",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 389,
+                  "error": {
+                    "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=http500\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n",
+                    "stack": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=http500\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n    at setMode (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:12:60)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:43:9",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                      "column": 60,
+                      "line": 12
+                    },
+                    "snippet": " \u001b[90m 10 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mINVALID_DOCUMENT\u001b[39m \u001b[33m=\u001b[39m \u001b[32m\"bad-order\"\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 11 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mTHROWING_SECTION\u001b[39m \u001b[33m=\u001b[39m \u001b[32m\"null-section\"\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 12 |\u001b[39m \u001b[36mconst\u001b[39m setMode \u001b[33m=\u001b[39m (page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m\u001b[33m,\u001b[39m mode\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m page\u001b[33m.\u001b[39mrequest\u001b[33m.\u001b[39mget(\u001b[32m`${PROXY}/__fault/mode?mode=${mode}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 13 |\u001b[39m \u001b[36mconst\u001b[39m requests \u001b[33m=\u001b[39m \u001b[36masync\u001b[39m (page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m) \u001b[33m=>\u001b[39m ((\u001b[36mawait\u001b[39m (\u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mrequest\u001b[33m.\u001b[39mget(\u001b[32m`${PROXY}/__fault/stats`\u001b[39m))\u001b[33m.\u001b[39mjson()) \u001b[36mas\u001b[39m { storefrontRequests\u001b[33m:\u001b[39m number })\u001b[33m.\u001b[39mstorefrontRequests\u001b[33m;\u001b[39m\n \u001b[90m 14 |\u001b[39m \u001b[36mconst\u001b[39m fresh \u001b[33m=\u001b[39m () \u001b[33m=>\u001b[39m \u001b[32m`fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 15 |\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                        "column": 60,
+                        "line": 12
+                      },
+                      "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=http500\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n\n  10 | const INVALID_DOCUMENT = \"bad-order\";\n  11 | const THROWING_SECTION = \"null-section\";\n> 12 | const setMode = (page: Page, mode: string) => page.request.get(`${PROXY}/__fault/mode?mode=${mode}`);\n     |                                                            ^\n  13 | const requests = async (page: Page) => ((await (await page.request.get(`${PROXY}/__fault/stats`)).json()) as { storefrontRequests: number }).storefrontRequests;\n  14 | const fresh = () => `fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;\n  15 |\n    at setMode (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:12:60)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:43:9"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:21:23.418Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-storefront-errors-R-53c85-e-and-asks-the-server-again\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-storefront-errors-R-53c85-e-and-asks-the-server-again\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                    "column": 60,
+                    "line": 12
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "59efed79351847f225bd-8cbf751d47bc87ee6dda",
+          "file": "studio-storefront-errors.spec.ts",
+          "line": 41,
+          "column": 1
+        },
+        {
+          "title": "invalid published document shows the neutral error state with no technical detail",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 535,
+                  "error": {
+                    "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=bad-order\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n",
+                    "stack": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=bad-order\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n    at setMode (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:12:60)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:57:9",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                      "column": 60,
+                      "line": 12
+                    },
+                    "snippet": " \u001b[90m 10 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mINVALID_DOCUMENT\u001b[39m \u001b[33m=\u001b[39m \u001b[32m\"bad-order\"\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 11 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mTHROWING_SECTION\u001b[39m \u001b[33m=\u001b[39m \u001b[32m\"null-section\"\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 12 |\u001b[39m \u001b[36mconst\u001b[39m setMode \u001b[33m=\u001b[39m (page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m\u001b[33m,\u001b[39m mode\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m page\u001b[33m.\u001b[39mrequest\u001b[33m.\u001b[39mget(\u001b[32m`${PROXY}/__fault/mode?mode=${mode}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 13 |\u001b[39m \u001b[36mconst\u001b[39m requests \u001b[33m=\u001b[39m \u001b[36masync\u001b[39m (page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m) \u001b[33m=>\u001b[39m ((\u001b[36mawait\u001b[39m (\u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mrequest\u001b[33m.\u001b[39mget(\u001b[32m`${PROXY}/__fault/stats`\u001b[39m))\u001b[33m.\u001b[39mjson()) \u001b[36mas\u001b[39m { storefrontRequests\u001b[33m:\u001b[39m number })\u001b[33m.\u001b[39mstorefrontRequests\u001b[33m;\u001b[39m\n \u001b[90m 14 |\u001b[39m \u001b[36mconst\u001b[39m fresh \u001b[33m=\u001b[39m () \u001b[33m=>\u001b[39m \u001b[32m`fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 15 |\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                        "column": 60,
+                        "line": 12
+                      },
+                      "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=bad-order\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n\n  10 | const INVALID_DOCUMENT = \"bad-order\";\n  11 | const THROWING_SECTION = \"null-section\";\n> 12 | const setMode = (page: Page, mode: string) => page.request.get(`${PROXY}/__fault/mode?mode=${mode}`);\n     |                                                            ^\n  13 | const requests = async (page: Page) => ((await (await page.request.get(`${PROXY}/__fault/stats`)).json()) as { storefrontRequests: number }).storefrontRequests;\n  14 | const fresh = () => `fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;\n  15 |\n    at setMode (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:12:60)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:57:9"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:21:25.679Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-storefront-errors-i-905bf-te-with-no-technical-detail\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-storefront-errors-i-905bf-te-with-no-technical-detail\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                    "column": 60,
+                    "line": 12
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "59efed79351847f225bd-dad9e456eba6b7d5dbee",
+          "file": "studio-storefront-errors.spec.ts",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "a section that throws while rendering is caught by the boundary",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 361,
+                  "error": {
+                    "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=null-section\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n",
+                    "stack": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=null-section\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n    at setMode (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:12:60)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:67:9",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                      "column": 60,
+                      "line": 12
+                    },
+                    "snippet": " \u001b[90m 10 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mINVALID_DOCUMENT\u001b[39m \u001b[33m=\u001b[39m \u001b[32m\"bad-order\"\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 11 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mTHROWING_SECTION\u001b[39m \u001b[33m=\u001b[39m \u001b[32m\"null-section\"\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 12 |\u001b[39m \u001b[36mconst\u001b[39m setMode \u001b[33m=\u001b[39m (page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m\u001b[33m,\u001b[39m mode\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m page\u001b[33m.\u001b[39mrequest\u001b[33m.\u001b[39mget(\u001b[32m`${PROXY}/__fault/mode?mode=${mode}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 13 |\u001b[39m \u001b[36mconst\u001b[39m requests \u001b[33m=\u001b[39m \u001b[36masync\u001b[39m (page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m) \u001b[33m=>\u001b[39m ((\u001b[36mawait\u001b[39m (\u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mrequest\u001b[33m.\u001b[39mget(\u001b[32m`${PROXY}/__fault/stats`\u001b[39m))\u001b[33m.\u001b[39mjson()) \u001b[36mas\u001b[39m { storefrontRequests\u001b[33m:\u001b[39m number })\u001b[33m.\u001b[39mstorefrontRequests\u001b[33m;\u001b[39m\n \u001b[90m 14 |\u001b[39m \u001b[36mconst\u001b[39m fresh \u001b[33m=\u001b[39m () \u001b[33m=>\u001b[39m \u001b[32m`fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 15 |\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                        "column": 60,
+                        "line": 12
+                      },
+                      "message": "Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100\nCall log:\n\u001b[2m  - → GET http://127.0.0.1:4100/__fault/mode?mode=null-section\u001b[22m\n\u001b[2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36\u001b[22m\n\u001b[2m    - accept: */*\u001b[22m\n\u001b[2m    - accept-encoding: gzip,deflate,br\u001b[22m\n\n\n  10 | const INVALID_DOCUMENT = \"bad-order\";\n  11 | const THROWING_SECTION = \"null-section\";\n> 12 | const setMode = (page: Page, mode: string) => page.request.get(`${PROXY}/__fault/mode?mode=${mode}`);\n     |                                                            ^\n  13 | const requests = async (page: Page) => ((await (await page.request.get(`${PROXY}/__fault/stats`)).json()) as { storefrontRequests: number }).storefrontRequests;\n  14 | const fresh = () => `fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;\n  15 |\n    at setMode (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:12:60)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts:67:9"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:21:28.309Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-storefront-errors-a-162d3-g-is-caught-by-the-boundary\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-storefront-errors-a-162d3-g-is-caught-by-the-boundary\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-storefront-errors.spec.ts",
+                    "column": 60,
+                    "line": 12
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "59efed79351847f225bd-3c455daefd31acffe847",
+          "file": "studio-storefront-errors.spec.ts",
+          "line": 65,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-22T09:21:19.444Z",
+    "duration": 9581.1,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

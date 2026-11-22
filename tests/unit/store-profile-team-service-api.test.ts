@@ -137,3 +137,32 @@ describe("team in API mode", () => {
     expect(team.create).not.toHaveBeenCalled();
   });
 });
+
+describe("team design level and capabilities", () => {
+  it("sends permissions.design and capabilities to the API on create and edit", async () => {
+    team.create.mockResolvedValue({ userId: UID, email: "s@x.co" });
+    const svc = await import("@/services/team.service");
+    const withDesign = { ...perms, design: "write" };
+    await svc.createMember({ fullName: "Sam Lee", email: "s@x.co", password: "Passw0rd!x", permissions: withDesign, capabilities: ["attest"] } as never);
+    await svc.updateMember({ userId: UID, fullName: "Sam Lee", permissions: { ...perms, design: "publish" }, capabilities: ["attest", "discard"] } as never);
+    expect(team.create).toHaveBeenCalledWith(tenant.id, expect.objectContaining({ permissions: withDesign, capabilities: ["attest"] }));
+    expect(team.update).toHaveBeenCalledWith(tenant.id, UID, { fullName: "Sam Lee", permissions: { ...perms, design: "publish" }, capabilities: ["attest", "discard"] });
+  });
+
+  it("rejects an unknown design level or capability before calling the API", async () => {
+    const svc = await import("@/services/team.service");
+    await expect(svc.updateMember({ userId: UID, fullName: "Sam Lee", permissions: { ...perms, design: "owner" } } as never)).rejects.toMatchObject({ code: "VALIDATION" });
+    await expect(svc.updateMember({ userId: UID, fullName: "Sam Lee", permissions: perms, capabilities: ["root"] } as never)).rejects.toMatchObject({ code: "VALIDATION" });
+    expect(team.update).not.toHaveBeenCalled();
+  });
+
+  it("threads the capabilities of the team list into the rows", async () => {
+    team.list.mockResolvedValue([
+      { userId: UID, fullName: "Sam", email: "s@x.co", role: "admin", roleLabel: "Manager", status: "active", joinedAt: "2026-02-01T00:00:00.000Z", permissions: { ...perms, design: "read" }, capabilities: ["discard"] },
+      { userId: "44444444-4444-4444-8444-444444444444", fullName: null, email: "o@x.co", role: "admin", roleLabel: "x", status: "active", joinedAt: "2026-02-01T00:00:00.000Z", permissions: perms },
+    ]);
+    const { listTeam } = await import("@/services/team.service");
+    const rows = await listTeam();
+    expect(rows.map((r) => r.capabilities)).toEqual([["discard"], []]);
+  });
+});

@@ -1,0 +1,16 @@
+
+Running 11 tests using 1 worker
+
+  ok  1 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 600px height (light) (5.4s)
+  ok  2 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 700px height (light) (3.2s)
+  ok  3 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 800px height (light) (3.4s)
+  ok  4 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 900px height (light) (3.5s)
+  ok  5 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 600px height (dark) (3.2s)
+  ok  6 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 700px height (dark) (3.2s)
+  ok  7 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 800px height (dark) (3.4s)
+  ok  8 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 900px height (dark) (3.3s)
+  ok  9 tests\e2e\studio-sidebar.spec.ts:94:1 › staff sidebar at 700px height still reaches every item (4.3s)
+  ok 10 tests\e2e\studio-sidebar.spec.ts:113:1 › Platform Admin sidebar is unchanged (no scroll cue, original link height) (2.9s)
+  ok 11 tests\e2e\studio-sidebar.spec.ts:130:1 › navigating reveals the active item in a clipped sidebar (2.8s)
+
+  11 passed (42.4s)

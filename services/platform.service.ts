@@ -12,6 +12,8 @@ import {
   removeOrganizationMemberApi,
   setOrganizationMemberStatusApi,
   setOrganizationStatusApi,
+  setStudioRolloutApi,
+  getStudioRolloutEventsApi,
   transferOwnershipApi,
   updateOrganizationApi,
   updateOrganizationStoreApi,
@@ -153,4 +155,14 @@ export async function transferCompanyOwnership(tenantId: string, v: TransferInpu
 export async function recoverCompanyOwner(tenantId: string, v: RecoverInput): Promise<{ email: string }> {
   await requirePlatformAdmin();
   return recoverOwnerApi(tenantId, v);
+}
+
+export async function setCompanyStudioRollout(tenantId: string, enabled: boolean, reason: string) {
+  await requirePlatformAdmin();
+  return setStudioRolloutApi(tenantId, { enabled, reason });
+}
+
+export async function getCompanyStudioRolloutEvents(tenantId: string) {
+  await requirePlatformAdmin();
+  return getStudioRolloutEventsApi(tenantId);
 }

@@ -1,0 +1,215 @@
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigLoadedModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDatabaseModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mThrottlerModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHealthModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mOrganizationsModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mInventoryModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAnalyticsModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPublicModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mUsersModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mStorageModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mStoreModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mCategoriesModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mCustomersModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPagesModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTeamModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPlatformAdminModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mThemesModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mCollectionsModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mProductsModule dependencies initialized[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/v1/auth}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/auth/login, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/auth/logout, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/auth/refresh, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/auth/session, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/auth/me, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/auth/change-password, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/api/v1/health}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/health, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/health/ready, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mUsersController {/api/v1/users}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/users/me, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/users/me, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mOrganizationsController {/api/v1/organizations}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/organizations, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/organizations/current, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mStoreController {/api/v1/store}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mUploadsController {/api/v1/uploads}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/uploads/signed-urls, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mCategoriesController {/api/v1/categories}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/categories, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/categories/:id, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/categories, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/categories/:id, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/categories/:id, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mCollectionsController {/api/v1/collections}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/collections, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/collections/product-options, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/collections/:id, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/collections, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/collections/:id, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/collections/:id, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mProductsController {/api/v1/products}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/products, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/products/:id, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/products, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/products/import, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/products/bulk-delete, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/products/bulk-status, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/products/:id/duplicate, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/products/:id, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/products/:id, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mInventoryController {/api/v1/inventory}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/inventory, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/inventory/adjustments, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/inventory/adjustments, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mCustomersController {/api/v1/customers}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/customers, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/customers/:id, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/customers, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/customers/:id, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/customers/:id, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAnalyticsController {/api/v1/analytics}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/analytics, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mTeamController {/api/v1/team/members}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/team/members, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/team/members, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/team/members/:userId, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/team/members/:userId/status, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/team/members/:userId, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/team/members/:userId/password, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mThemesController {/api/v1/themes}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/themes, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/themes/:slug, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mStoreThemeController {/api/v1/store/theme}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/theme, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/theme, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/theme/publish, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mTemplatesController {/api/v1/store/templates}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/templates, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/templates/:id, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/templates/:id/preview, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/templates/:id/draft, PUT} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/templates/:id/publish, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/templates/:id/versions, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/templates/:id/rollback, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mProductPresentationsController {/api/v1/store/product-presentations}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/product-presentations, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/product-presentations/:productId, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/product-presentations/:productId/draft, PUT} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/product-presentations/:productId/publish, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/product-presentations/:productId, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPagesController {/api/v1/store/pages}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/pages, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/pages/:id, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/pages, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/pages/:id, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/store/pages/:id, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPublicController {/api/v1/public}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/public/branding, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/public/hosts/:subdomain, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/public/storefronts/:slug, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/public/storefronts/:slug/layout, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/public/storefronts/:slug/collections, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/public/storefronts/:slug/products/:productSlug, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/public/storefronts/:slug/collections/:collectionSlug, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/public/storefronts/:slug/pages, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/public/storefronts/:slug/pages/:pageSlug, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPlatformOrganizationsController {/api/v1/platform}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/me, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/overview, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id/status, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id/store, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id/members, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id/members/:userId/status, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id/members/:userId, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id/ownership/transfer, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id/ownership/recover, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPlatformAdminsController {/api/v1/platform/admins}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/admins, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/admins, POST} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/admins/:userId, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/admins/:userId, DELETE} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPlatformSettingsController {/api/v1/platform/settings}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/settings, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/settings, PATCH} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuditController {/api/v1/platform/audit-logs}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/audit-logs, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/audit-logs/admins, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPlatformUsageController {/api/v1/platform}:[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/organizations/:id/usage, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/usage, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/usage/summary, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/usage/inactive, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/v1/platform/usage/new-organizations, GET} route[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[Bootstrap] [39m[32mAPI listening on port 4001 under /api/v1[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[Bootstrap] [39m[32mSwagger UI at /api/docs[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:14 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/collections/11111111-1111-4111-8111-111111111111/usage 404 11ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates 200 91ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92 200 22ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92 200 18ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPUT /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft 200 37ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/publish 200 22ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/versions 200 14ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/rollback 200 22ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92 200 11ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPUT /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft 200 17ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/publish 200 19ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/versions 200 13ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/rollback 200 18ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92 200 16ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPUT /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft 200 23ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/publish 200 33ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/versions 200 19ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/rollback 200 26ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92 200 14ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPUT /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft 200 23ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/publish 200 29ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/versions 200 15ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/rollback 200 18ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:51 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92 200 10ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPUT /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft 200 21ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/publish 200 29ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/versions 200 20ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/rollback 200 30ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92 200 15ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPUT /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft 200 16ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/publish 200 17ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/versions 200 12ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/rollback 200 17ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92 200 11ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPUT /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft 200 17ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/publish 200 29ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/versions 200 17ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/rollback 200 20ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92 200 10ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPUT /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft 200 15ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:52 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/publish 200 12ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/products/qa-xlsx-2-4 200 11ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/products/qa-xlsx-2-4 200 6ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/products/qa-xlsx-2-4 200 5ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/products/qa-xlsx-2-4 200 5ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/products/qa-xlsx-2-4 200 6ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/products/qa-xlsx-2-4 200 7ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/products/qa-xlsx-2-4 200 4ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/layout?kind=index 200 6ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/layout?kind=index 200 4ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/layout?kind=index 200 6ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/layout?kind=index 200 6ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/layout?kind=index 200 7ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/layout?kind=index 200 8ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:48:53 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /api/v1/public/storefronts/urban-nest-demo/layout?kind=index 200 7ms[39m
+[32m[Nest] 22752  - [39m21/11/2026, 1:49:04 pm [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /api/v1/products/import 201 1301ms[39m

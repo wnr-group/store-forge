@@ -1,0 +1,25 @@
+
+Running 20 tests using 1 worker
+
+  ok  1 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Categories: Add category — closed with Escape (4.3s)
+  ok  2 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Categories: Add category — closed with X button (3.4s)
+  ok  3 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Categories: Add category — closed with Cancel (2.3s)
+  ok  4 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Customers: Add customer — closed with Escape (2.5s)
+  ok  5 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Customers: Add customer — closed with X button (2.5s)
+  ok  6 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Customers: Add customer — closed with Cancel (2.8s)
+  ok  7 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Inventory: Adjust stock — closed with Escape (2.5s)
+  ok  8 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Inventory: Adjust stock — closed with X button (2.7s)
+  ok  9 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Inventory: Adjust stock — closed with Cancel (2.6s)
+  ok 10 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Team: Add member — closed with Escape (2.1s)
+  ok 11 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Team: Add member — closed with X button (2.3s)
+  ok 12 tests\e2e\studio-a11y.spec.ts:35:7 › dialogs return focus to the control that opened them › Team: Add member — closed with Cancel (2.0s)
+  ok 13 tests\e2e\studio-a11y.spec.ts:54:3 › dialogs return focus to the control that opened them › a dialog opened from a row menu still returns focus to the menu button (2.4s)
+  ok 14 tests\e2e\studio-a11y.spec.ts:69:3 › dialogs return focus to the control that opened them › a confirm dialog still returns focus (existing behaviour preserved) (2.7s)
+  ok 15 tests\e2e\studio-a11y.spec.ts:89:5 › skip link › merchant desktop: first Tab shows it, Enter lands on the page content (2.8s)
+  ok 16 tests\e2e\studio-a11y.spec.ts:89:5 › skip link › merchant mobile: first Tab shows it, Enter lands on the page content (2.5s)
+  ok 17 tests\e2e\studio-a11y.spec.ts:122:3 › skip link › Platform Admin is unchanged (no skip link) (7.1s)
+  ok 18 tests\e2e\studio-a11y.spec.ts:136:5 › Add team member dialog footer › actions stay visible at 800px (light); validation and cancel unchanged (2.4s)
+  ok 19 tests\e2e\studio-a11y.spec.ts:136:5 › Add team member dialog footer › actions stay visible at 800px (dark); validation and cancel unchanged (2.3s)
+  ok 20 tests\e2e\studio-a11y.spec.ts:178:3 › Add team member dialog footer › Platform Admin's Add member dialog keeps its original (non-sticky) footer (6.1s)
+
+  20 passed (1.1m)

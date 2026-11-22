@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { DOCUMENT_SCHEMA_VERSION, LAYOUTS, type ComponentNode } from "../document";
+import { SUPPORTED_SCHEMA_VERSIONS, LAYOUTS, type ComponentNode } from "../document";
+import { displayRulesSchema } from "../display-rules";
 import { LIMITS } from "../limits";
 
 export const HEX_COLOR_REGEX = /^#([0-9a-fA-F]{6})$/;
@@ -278,6 +279,9 @@ export const socialLinksSchema = z.custom<Record<string, string>>(
   "Social links must be HTTPS URLs matching their respective network host",
 );
 
+/** Schema 1 and 2 are both accepted (dual read). */
+export const schemaVersionSchema = z.union([z.literal(SUPPORTED_SCHEMA_VERSIONS[0]), z.literal(SUPPORTED_SCHEMA_VERSIONS[1])]);
+
 export const componentNodeSchema: z.ZodType<ComponentNode> = z.lazy(() =>
   z.object({
     type: z.string().min(1, "Component type is required"),
@@ -285,18 +289,19 @@ export const componentNodeSchema: z.ZodType<ComponentNode> = z.lazy(() =>
     blocks: z.record(z.string(), componentNodeSchema),
     block_order: z.array(z.string()),
     disabled: z.boolean().optional(),
+    display: displayRulesSchema.optional(),
   }),
 );
 
 export const pageTemplateSchema = z.object({
-  schemaVersion: z.literal(DOCUMENT_SCHEMA_VERSION),
+  schemaVersion: schemaVersionSchema,
   layout: layoutKeySchema,
   sections: z.record(z.string(), componentNodeSchema),
   order: z.array(z.string()),
 });
 
 export const groupTemplateSchema = z.object({
-  schemaVersion: z.literal(DOCUMENT_SCHEMA_VERSION),
+  schemaVersion: schemaVersionSchema,
   layout: layoutKeySchema.optional(),
   sections: z.record(z.string(), componentNodeSchema),
   order: z.array(z.string()),

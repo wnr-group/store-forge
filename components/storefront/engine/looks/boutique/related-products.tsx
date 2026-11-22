@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { HIDEABLE_SECTION, isHiddenFor, presentationOf } from "@/lib/templates/product-presentation";
 import { readCardParts } from "@/lib/templates/card-parts";
 import { SECTION_Y, gridColumns, type CardProduct } from "../../ui";
 import { SHELL } from "./shell";
@@ -29,6 +30,8 @@ export function BoutiqueRelatedProducts({ node, context, sectionId }: SectionPro
         return false;
       });
   const related = pool.slice(0, productsToShow);
+  // A product can hide its related products (per-product presentation).
+  if (isHiddenFor(presentationOf(current), HIDEABLE_SECTION)) return null;
   if (related.length === 0 && !isPreview) return null;
 
   return (

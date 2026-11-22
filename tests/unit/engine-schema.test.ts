@@ -60,7 +60,7 @@ describe("Engine Root Schemas per Kind [AC-ENG-005] [AC-ENG-015] [AC-ENG-016] [A
     // Rejects missing layout or wrong schemaVersion
     expect(
       pageSchema.safeParse({
-        schemaVersion: 2,
+        schemaVersion: 3,
         layout: "classic",
         sections: {},
         order: [],

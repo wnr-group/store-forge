@@ -1,4 +1,5 @@
 import type { ComponentNode } from "../document";
+import { parseDisplayRules } from "../display-rules";
 import { LIMITS } from "../limits";
 
 /** Own-property test: `in` and plain indexing also match inherited names such as "constructor" or "__proto__". */
@@ -58,6 +59,9 @@ export function nodeShapeProblems(node: unknown, path: string): ShapeProblem[] {
   }
   if (node.disabled !== undefined && typeof node.disabled !== "boolean") {
     problems.push({ path: `${path}.disabled`, message: "disabled must be true or false" });
+  }
+  if (node.display !== undefined && parseDisplayRules(node.display) === null) {
+    problems.push({ path: `${path}.display`, message: "display must be valid display rules" });
   }
   return problems;
 }

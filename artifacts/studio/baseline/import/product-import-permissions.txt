@@ -1,0 +1,8 @@
+
+Running 2 tests using 1 worker
+
+  ok 1 tests\e2e\product-import-permissions.spec.ts:5:1 › AC-10: the manager sees Import and can open the page (6.5s)
+  -  2 tests\e2e\product-import-permissions.spec.ts:14:1 › AC-10: an account without catalog:manage sees no Import button and is redirected away from the page
+
+  1 skipped
+  1 passed (9.4s)
