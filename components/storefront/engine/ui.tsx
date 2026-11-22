@@ -4,6 +4,7 @@ import { ArrowUpRight, ImageIcon, ShoppingBag } from "lucide-react";
 import { formatMoney } from "@/lib/money";
 import { imageRawPath, publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
+import { ALL_CARD_PARTS, type CardParts } from "@/lib/templates/card-parts";
 
 /**
  * Building blocks shared by the storefront sections, so every theme gets the same responsive grid, spacing and card
@@ -70,38 +71,45 @@ export type CardProduct = {
 };
 
 /** One product in a grid: picture with a sale tag, name and price. Links to the product page when `href` is given. */
-export function ProductCard({ product, currency, href, accent, showDescription = false, priority = false }: { product: CardProduct; currency: string; href?: string | null; accent?: string | null; showDescription?: boolean; priority?: boolean }) {
+export function ProductCard({ product, currency, href, accent, showDescription = false, priority = false, parts }: { product: CardProduct; currency: string; href?: string | null; accent?: string | null; showDescription?: boolean; priority?: boolean; parts?: CardParts }) {
+  const show = parts ?? { ...ALL_CARD_PARTS, description: showDescription };
   const img = publicImageUrl(product.image_path);
   const onSale = product.compare_at_price_minor != null && product.compare_at_price_minor > product.price_minor;
   const soldOut = product.available === false;
   const body = (
     <>
-      <div className={cn("relative aspect-[4/5] overflow-hidden bg-muted", RADIUS)}>
-        {img ? (
-          <Image src={img} alt={product.name} fill priority={priority} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" className={cn("object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]", soldOut && "opacity-60")} />
-        ) : (
-          <ImagePlaceholder className="absolute inset-0" />
-        )}
-        {soldOut ? <span className="absolute top-2 left-2 rounded-[calc(var(--radius,0.5rem)/2)] bg-background px-2 py-0.5 text-[11px] font-medium tracking-wide text-foreground shadow-xs">Sold out</span> : onSale ? <span className="absolute top-2 left-2 rounded-[calc(var(--radius,0.5rem)/2)] bg-foreground px-2 py-0.5 text-[11px] font-medium tracking-wide text-background">Sale</span> : null}
-      </div>
-      <div className="mt-3 space-y-1">
-        <h3 className="line-clamp-2 text-sm leading-snug font-medium text-foreground sm:text-[15px]">{product.name}</h3>
-        {showDescription && product.short_description ? <p className="line-clamp-1 text-xs text-muted-foreground">{product.short_description}</p> : null}
-        <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
-          <span className="font-semibold text-foreground" style={accent ? { color: accent } : undefined}>
-            {formatMoney(product.price_minor, currency)}
-          </span>
-          {onSale ? <span className="text-xs text-muted-foreground line-through">{formatMoney(product.compare_at_price_minor!, currency)}</span> : null}
-        </p>
+      {show.image ? (
+        <div className={cn("relative aspect-[4/5] overflow-hidden bg-muted", RADIUS)}>
+          {img ? (
+            <Image src={img} alt={product.name} fill priority={priority} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" className={cn("object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]", soldOut && "opacity-60")} />
+          ) : (
+            <ImagePlaceholder className="absolute inset-0" />
+          )}
+          {show.badge ? (soldOut ? <span className="absolute top-2 left-2 rounded-[calc(var(--radius,0.5rem)/2)] bg-background px-2 py-0.5 text-[11px] font-medium tracking-wide text-foreground shadow-xs">Sold out</span> : onSale ? <span className="absolute top-2 left-2 rounded-[calc(var(--radius,0.5rem)/2)] bg-foreground px-2 py-0.5 text-[11px] font-medium tracking-wide text-background">Sale</span> : null) : null}
+        </div>
+      ) : null}
+      <div className={cn("space-y-1", show.image && "mt-3")}>
+        {show.title ? <h3 className="line-clamp-2 text-sm leading-snug font-medium text-foreground sm:text-[15px]">{product.name}</h3> : null}
+        {show.description && product.short_description ? <p className="line-clamp-1 text-xs text-muted-foreground">{product.short_description}</p> : null}
+        {show.price || (show.comparePrice && onSale) ? (
+          <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+            {show.price ? (
+              <span className="font-semibold text-foreground" style={accent ? { color: accent } : undefined}>
+                {formatMoney(product.price_minor, currency)}
+              </span>
+            ) : null}
+            {show.comparePrice && onSale ? <span className="text-xs text-muted-foreground line-through">{formatMoney(product.compare_at_price_minor!, currency)}</span> : null}
+          </p>
+        ) : null}
       </div>
     </>
   );
   return href ? (
-    <Link href={href} className="group block outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+    <Link href={href} data-sf-card="" data-sf-product={product.slug} className="group block outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
       {body}
     </Link>
   ) : (
-    <div className="group">{body}</div>
+    <div className="group" data-sf-card="" data-sf-product={product.slug}>{body}</div>
   );
 }
 
@@ -192,26 +200,33 @@ export function EditorialHeader({ eyebrow, title, href, linkLabel = "View all" }
  * Product card for editorial themes: tall picture with a square tag and index, a "View piece" bar that slides up on
  * hover, and the name in serif above a fine-tracked price. Corners follow the theme.
  */
-export function EditorialProductCard({ product, currency, href, index, priority = false }: { product: CardProduct; currency: string; href: string; index: number; priority?: boolean }) {
+export function EditorialProductCard({ product, currency, href, index, priority = false, parts = ALL_CARD_PARTS }: { product: CardProduct; currency: string; href: string; index: number; priority?: boolean; parts?: CardParts }) {
+  // Without a choice the editorial card has never shown a description.
+  const show = { ...parts, description: parts === ALL_CARD_PARTS ? false : parts.description };
   const img = publicImageUrl(product.image_path);
   const onSale = product.compare_at_price_minor != null && product.compare_at_price_minor > product.price_minor;
   const soldOut = product.available === false;
   return (
-    <Link href={href} className="group flex flex-col gap-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4">
+    <Link href={href} data-sf-card="" data-sf-product={product.slug} className="group flex flex-col gap-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4">
+      {show.image ? (
       <div className={cn("relative aspect-[3/4] w-full overflow-hidden bg-muted", RADIUS)}>
         {img ? <Image src={img} alt={product.name} fill priority={priority} sizes="(min-width: 1024px) 25vw, 50vw" className={cn("object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]", soldOut && "opacity-60")} /> : <ProductPlaceholder index={index} />}
         <span aria-hidden className="absolute top-3 left-3 text-[0.65rem] tracking-[0.2em] text-white mix-blend-difference sm:top-4 sm:left-4">{String(index + 1).padStart(2, "0")}</span>
-        {soldOut || onSale ? <span className="absolute top-3 right-3 bg-background px-2.5 py-1 text-[0.6rem] tracking-[0.2em] text-foreground uppercase sm:top-4 sm:right-4">{soldOut ? "Sold out" : "Sale"}</span> : null}
+        {show.badge && (soldOut || onSale) ? <span className="absolute top-3 right-3 bg-background px-2.5 py-1 text-[0.6rem] tracking-[0.2em] text-foreground uppercase sm:top-4 sm:right-4">{soldOut ? "Sold out" : "Sale"}</span> : null}
         <span aria-hidden className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-2 bg-background/95 py-3.5 text-[0.65rem] tracking-[0.26em] text-foreground uppercase backdrop-blur-sm transition-transform duration-500 ease-out group-hover:translate-y-0 group-focus-visible:translate-y-0">
           View piece <ArrowUpRight className="size-3.5" strokeWidth={1.5} />
         </span>
       </div>
+      ) : null}
       <div className="space-y-1.5">
-        <h3 className="truncate text-lg leading-snug tracking-tight text-foreground sm:text-xl">{product.name}</h3>
-        <p className="flex flex-wrap items-baseline gap-x-3 text-sm tracking-[0.06em]">
-          <span className="text-foreground">{formatMoney(product.price_minor, currency)}</span>
-          {onSale ? <span className="text-xs text-muted-foreground line-through">{formatMoney(product.compare_at_price_minor!, currency)}</span> : null}
-        </p>
+        {show.title ? <h3 className="truncate text-lg leading-snug tracking-tight text-foreground sm:text-xl">{product.name}</h3> : null}
+        {show.description && product.short_description ? <p className="line-clamp-1 text-sm text-muted-foreground">{product.short_description}</p> : null}
+        {show.price || (show.comparePrice && onSale) ? (
+          <p className="flex flex-wrap items-baseline gap-x-3 text-sm tracking-[0.06em]">
+            {show.price ? <span className="text-foreground">{formatMoney(product.price_minor, currency)}</span> : null}
+            {show.comparePrice && onSale ? <span className="text-xs text-muted-foreground line-through">{formatMoney(product.compare_at_price_minor!, currency)}</span> : null}
+          </p>
+        ) : null}
       </div>
     </Link>
   );
@@ -247,7 +262,9 @@ function ProductPlaceholder({ index }: { index: number }) {
  * Grocery product card: a white card with the picture on a soft panel, a real discount badge (worked out from the compare-at
  * price, never invented), the name, price and an arrow chip. The hover lift and shadow animate on their own layers so they stay smooth.
  */
-export function GroceryProductCard({ product, currency, href, priority = false }: { product: CardProduct; currency: string; href?: string | null; priority?: boolean }) {
+export function GroceryProductCard({ product, currency, href, priority = false, parts = ALL_CARD_PARTS }: { product: CardProduct; currency: string; href?: string | null; priority?: boolean; parts?: CardParts }) {
+  // Without a choice the grocery card has never shown a description.
+  const show = { ...parts, description: parts === ALL_CARD_PARTS ? false : parts.description };
   const img = publicImageUrl(product.image_path);
   const compare = product.compare_at_price_minor;
   const onSale = compare != null && compare > product.price_minor;
@@ -257,24 +274,27 @@ export function GroceryProductCard({ product, currency, href, priority = false }
   const body = (
     <>
       <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-3xl opacity-0 shadow-[0_22px_34px_-18px_rgba(20,35,26,0.4)] transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none" />
+      {show.image ? (
       <span className="relative isolate block aspect-square w-full transform-gpu overflow-hidden rounded-2xl bg-muted">
         {img ? (
           <Image src={img} alt="" fill priority={priority} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 30vw, 46vw" className={cn("object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.07] motion-reduce:transition-none", soldOut && "opacity-60")} />
         ) : (
           <ImagePlaceholder className="absolute inset-0" />
         )}
-        {soldOut ? (
+        {show.badge ? (soldOut ? (
           <span className="absolute left-2 top-2 rounded-full bg-background px-2.5 py-1 text-[11px] font-bold text-foreground shadow-sm">Sold out</span>
         ) : onSale ? (
           <span className="absolute left-2 top-2 rounded-full bg-[color-mix(in_srgb,var(--accent,#ea580c)_82%,black)] px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">{off}% off</span>
-        ) : null}
+        ) : null) : null}
       </span>
-      <span className="mt-3 flex flex-1 flex-col px-1 pb-1">
-        <span className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">{product.name}</span>
+      ) : null}
+      <span className={cn("flex flex-1 flex-col px-1 pb-1", show.image && "mt-3")}>
+        {show.title ? <span className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">{product.name}</span> : null}
+        {show.description && product.short_description ? <span className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{product.short_description}</span> : null}
         <span className="mt-auto flex items-end justify-between gap-2 pt-3">
           <span className="flex min-w-0 flex-col leading-tight">
-            {onSale ? <span className="text-xs text-muted-foreground line-through">{formatMoney(compare!, currency)}</span> : null}
-            <span className="text-base font-extrabold text-foreground">{formatMoney(product.price_minor, currency)}</span>
+            {show.comparePrice && onSale ? <span className="text-xs text-muted-foreground line-through">{formatMoney(compare!, currency)}</span> : null}
+            {show.price ? <span className="text-base font-extrabold text-foreground">{formatMoney(product.price_minor, currency)}</span> : null}
           </span>
           <span aria-hidden className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
             <ArrowUpRight className="size-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none" />
@@ -284,11 +304,11 @@ export function GroceryProductCard({ product, currency, href, priority = false }
     </>
   );
   return href ? (
-    <Link href={href} className={cardClass}>
+    <Link href={href} className={cardClass} data-sf-card="" data-sf-product={product.slug}>
       {body}
     </Link>
   ) : (
-    <div className={cardClass}>{body}</div>
+    <div className={cardClass} data-sf-card="" data-sf-product={product.slug}>{body}</div>
   );
 }
 
@@ -296,7 +316,8 @@ export function GroceryProductCard({ product, currency, href, priority = false }
  * Home & furniture product card (Haven): a tall portrait picture with no box around it, then name, a one-line description and the
  * price. On hover the picture zooms slowly and a "View piece" bar rises from its bottom edge. Sale and sold-out tags are real data.
  */
-export function HavenProductCard({ product, currency, href, priority = false }: { product: CardProduct; currency: string; href?: string | null; priority?: boolean }) {
+export function HavenProductCard({ product, currency, href, priority = false, parts = ALL_CARD_PARTS }: { product: CardProduct; currency: string; href?: string | null; priority?: boolean; parts?: CardParts }) {
+  const show = parts;
   const img = publicImageUrl(product.image_path);
   const compare = product.compare_at_price_minor;
   const onSale = compare != null && compare > product.price_minor;
@@ -304,38 +325,42 @@ export function HavenProductCard({ product, currency, href, priority = false }: 
   const cardClass = "group block outline-none";
   const body = (
     <>
+      {show.image ? (
       <span className="relative isolate block aspect-[4/5] w-full transform-gpu overflow-hidden rounded-lg bg-[var(--surface,var(--muted))] sm:aspect-square ring-1 ring-foreground/5 group-focus-visible:ring-2 group-focus-visible:ring-accent group-focus-visible:ring-offset-4">
         {img ? (
           <Image src={img} alt="" fill priority={priority} sizes="(min-width: 640px) 272px, 50vw" className={cn("object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:scale-[1.05] motion-reduce:transition-none", soldOut && "opacity-60")} />
         ) : (
           <ImagePlaceholder className="absolute inset-0" />
         )}
-        {soldOut ? (
+        {show.badge ? (soldOut ? (
           <span className="absolute left-3 top-3 rounded-sm bg-background px-2.5 py-1 text-xs font-medium text-foreground shadow-sm">Sold out</span>
         ) : onSale ? (
           <span className="absolute left-3 top-3 rounded-sm bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground shadow-sm">Sale</span>
-        ) : null}
+        ) : null) : null}
         <span aria-hidden className="absolute inset-x-3 bottom-3 flex translate-y-3 items-center justify-between rounded-md bg-background/95 px-3.5 py-2.5 text-[13px] font-medium text-foreground opacity-0 shadow-sm backdrop-blur-sm transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 motion-reduce:transition-none">
           View piece
           <ArrowUpRight className="size-4" />
         </span>
       </span>
-      <span className="mt-4 block space-y-1">
-        <span className="line-clamp-2 block text-[15px] font-semibold leading-snug tracking-tight text-foreground">{product.name}</span>
-        {product.short_description ? <span className="line-clamp-1 block text-sm text-muted-foreground">{product.short_description}</span> : null}
-        <span className="flex flex-wrap items-baseline gap-x-2.5 pt-0.5">
-          <span className="text-[15px] font-semibold tabular-nums text-foreground">{formatMoney(product.price_minor, currency)}</span>
-          {onSale ? <span className="text-sm tabular-nums text-muted-foreground line-through">{formatMoney(compare!, currency)}</span> : null}
-        </span>
+      ) : null}
+      <span className={cn("block space-y-1", show.image && "mt-4")}>
+        {show.title ? <span className="line-clamp-2 block text-[15px] font-semibold leading-snug tracking-tight text-foreground">{product.name}</span> : null}
+        {show.description && product.short_description ? <span className="line-clamp-1 block text-sm text-muted-foreground">{product.short_description}</span> : null}
+        {show.price || (show.comparePrice && onSale) ? (
+          <span className="flex flex-wrap items-baseline gap-x-2.5 pt-0.5">
+            {show.price ? <span className="text-[15px] font-semibold tabular-nums text-foreground">{formatMoney(product.price_minor, currency)}</span> : null}
+            {show.comparePrice && onSale ? <span className="text-sm tabular-nums text-muted-foreground line-through">{formatMoney(compare!, currency)}</span> : null}
+          </span>
+        ) : null}
       </span>
     </>
   );
   return href ? (
-    <Link href={href} className={cardClass}>
+    <Link href={href} className={cardClass} data-sf-card="" data-sf-product={product.slug}>
       {body}
     </Link>
   ) : (
-    <div className={cardClass}>{body}</div>
+    <div className={cardClass} data-sf-card="" data-sf-product={product.slug}>{body}</div>
   );
 }
 

@@ -2,14 +2,21 @@
 
 import { QueryClient, QueryClientProvider, keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
+import { checksFor, runDraftChecks, signatureOf, type DraftCheck } from "@/lib/themes/editor/draft-checks";
+import type { PresentationSummary } from "./types";
 import {
   applyThemeAction,
   getCurrentThemeAction,
   getThemeAction,
   getVersionsAction,
+  checkDraftsAction,
+  listPickerProductsAction,
+  listPresentationsAction,
   listTemplatesAction,
   listThemesAction,
+  publishPresentationAction,
   publishThemeAction,
+  resetPresentationAction,
   rollbackAction,
 } from "@/app/(dashboard)/dashboard/templates/actions";
 import type { ActionResult } from "@/types/action";
@@ -40,6 +47,8 @@ export const themeKeys = {
   current: ["themes", "current"] as const,
   templates: ["themes", "templates"] as const,
   versions: (id: string) => ["themes", "versions", id] as const,
+  presentations: ["themes", "presentations"] as const,
+  picker: (q: object) => ["themes", "picker", q] as const,
 };
 
 export function ThemeQueryProvider({ children }: { children: ReactNode }) {
@@ -91,5 +100,59 @@ export function useRollback() {
   return useMutation({
     mutationFn: async (v: { id: string; versionId: string }) => unwrap(await rollbackAction(v)),
     onSuccess: () => client.invalidateQueries({ queryKey: themeKeys.all }),
+  });
+}
+
+/** Every customized product with its state: the status chips of the picker and the "not published" summary. */
+export const usePresentationList = () =>
+  useQuery({ queryKey: themeKeys.presentations, retry: false, queryFn: async () => unwrap(await listPresentationsAction()) });
+
+const NO_CHECKS: ReadonlyMap<string, DraftCheck> = new Map();
+
+/**
+ * Reads the never-published products of the list to tell empty drafts (nothing to publish) from real ones. Each row is read
+ * once, in chunks, and remembered by (product, revision, updated-at), so the list changing or the editor re-rendering never
+ * repeats a read. Rows that could not be read stay out of `checks` (unverified) and `failed` says so.
+ */
+export function useDraftChecks(rows: PresentationSummary[]) {
+  const [cache] = useState(() => new Map<string, DraftCheck>());
+  const query = useQuery({
+    queryKey: [...themeKeys.presentations, "draft-checks", signatureOf(rows)] as const,
+    enabled: rows.length > 0,
+    retry: false,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const outcome = await runDraftChecks(rows, cache, async (ids) => unwrap(await checkDraftsAction(ids)));
+      return { checks: checksFor(rows, cache), ...outcome };
+    },
+  });
+  return {
+    checks: query.data?.checks ?? NO_CHECKS,
+    checking: query.isFetching,
+    failed: query.isError || (query.data?.failedChunks ?? 0) > 0,
+    skipped: query.data?.skipped ?? 0,
+    retry: () => void query.refetch(),
+  };
+}
+
+export type PickerQuery = { page: number; search?: string };
+
+/** The store's active products for the picker, from the existing admin product list. */
+export const usePickerProducts = (q: PickerQuery, enabled = true) =>
+  useQuery({ queryKey: themeKeys.picker(q), enabled, placeholderData: keepPreviousData, queryFn: async () => unwrap(await listPickerProductsAction(q)) });
+
+export function usePublishPresentation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (v: { productId: string; expectedRevision?: number }) => unwrap(await publishPresentationAction(v)),
+    onSuccess: () => client.invalidateQueries({ queryKey: themeKeys.presentations }),
+  });
+}
+
+export function useResetPresentation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (productId: string) => unwrap(await resetPresentationAction(productId)),
+    onSuccess: () => client.invalidateQueries({ queryKey: themeKeys.presentations }),
   });
 }

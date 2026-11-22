@@ -23,3 +23,9 @@ export const SAMPLE_COLLECTIONS: PreviewStoreData["collections"] = ["New arrival
   image_path: null,
   product_count: 6 + i,
 }));
+
+/** Demo content pages, only for exploring a theme. */
+export const SAMPLE_CONTENT_PAGES: NonNullable<PreviewStoreData["contentPages"]> = [
+  { title: "About us", slug: "about", body: "# Our story\n\nWe make things we are proud of, and we ship them with care.\n\nEvery order is packed by hand." },
+  { title: "Contact", slug: "contact", body: "We reply within one working day.\n\nWrite to us any time." },
+];

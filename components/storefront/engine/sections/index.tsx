@@ -20,6 +20,13 @@ import { MainProductSection } from "./main-product";
 import { RelatedProductsSection } from "./related-products";
 import { PromotionalBannerSection } from "./promotional-banner";
 import { LogoListSection } from "./logo-list";
+import { lookSection } from "../looks";
+import { hasStyleOverrides, UNWRAPPED_SECTIONS } from "@/lib/editor/render";
+import { overrideValue } from "@/lib/editor/style";
+import { readTextOverrides } from "@/lib/editor/text";
+import { TextOverrides } from "../text-overrides";
+import { CartPageSection } from "@/components/storefront/cart/cart-page";
+import { WishlistPageSection } from "@/components/storefront/wishlist/wishlist-page";
 
 export const SECTION_COMPONENTS: Record<
   string,
@@ -43,6 +50,10 @@ export const SECTION_COMPONENTS: Record<
   "related-products": RelatedProductsSection,
   "promotional-banner": PromotionalBannerSection,
   "logo-list": LogoListSection,
+  /** The bag page. Only the generated cart document uses it; it is not an editor section. */
+  cart: CartPageSection,
+  /** The wishlist page. Only the generated wishlist document uses it; it is not an editor section. */
+  wishlist: WishlistPageSection,
 };
 
 export function renderSectionComponent(
@@ -55,7 +66,8 @@ export function renderSectionComponent(
     return null;
   }
 
-  const Component = SECTION_COMPONENTS[node.type];
+  // A theme's look may draw this section itself; every other section is the engine's own component.
+  const Component = lookSection(context.theme, node.type) ?? SECTION_COMPONENTS[node.type];
 
   // AC-REN-014: Unknown component skipped publicly, warning in editor/preview
   if (!Component) {
@@ -73,5 +85,14 @@ export function renderSectionComponent(
     return null;
   }
 
-  return <Component key={sectionId} node={node} context={context} sectionId={sectionId} />;
+  let out: React.ReactNode = <Component node={node} context={context} sectionId={sectionId} />;
+  // A section with style overrides sits in a box the generated stylesheet can reach (see lib/editor/render.ts).
+  if (sectionId && hasStyleOverrides(node)) {
+    // A sticky section gets a box-less wrapper: only inherited properties (fonts) can reach it, and sticky positioning survives.
+    out = <div data-sf-ov={overrideValue(sectionId)} style={UNWRAPPED_SECTIONS.has(node.type) ? { display: "contents" } : undefined}>{out}</div>;
+  }
+  // Replaced words (see lib/editor/text.ts). The wrapper has no box, so it is safe around a sticky header too.
+  const texts = readTextOverrides(node.settings);
+  if (texts.length > 0) out = <TextOverrides overrides={texts}>{out}</TextOverrides>;
+  return <React.Fragment key={sectionId}>{out}</React.Fragment>;
 }

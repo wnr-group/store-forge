@@ -8,6 +8,38 @@ export const imageWithTextSection: SectionDefinition = {
   maxChildren: 10,
   settings: [
     {
+      id: "eyebrow",
+      type: "text",
+      label: "Small label above the heading",
+      default: "",
+      help: "Shown by themes that support it",
+    },
+    {
+      id: "variant",
+      type: "select",
+      label: "Layout style",
+      default: "plain",
+      help: "Panel puts the text and picture in one tinted, rounded panel. Shown by themes that support it",
+      options: [
+        { label: "Plain", value: "plain" },
+        { label: "Panel", value: "panel" },
+      ],
+    },
+    {
+      id: "uppercaseHeading",
+      type: "toggle",
+      label: "Capital letters in the heading",
+      default: true,
+      help: "Shown by themes that support it",
+    },
+    {
+      id: "badge",
+      type: "text",
+      label: "Label on the picture",
+      default: "",
+      help: "Shown by themes that support it",
+    },
+    {
       id: "image",
       type: "image",
       label: "Featured Image",

@@ -7,6 +7,7 @@ import { resolveCollection } from "@/lib/storefront/featured";
 import { isEditorialTheme, isGroceryTheme, isHomeTheme } from "@/lib/templates/engine/theme-style";
 import { CONTAINER, EditorialHeader, EditorialProductCard, EmptyProducts, GRID_GAP, GroceryProductCard, HavenFeaturedProduct, HavenProductCard, ProductCard, SECTION_Y, SectionHeading, balancedColumns, gridColumns, type CardProduct } from "../ui";
 import { cn } from "@/lib/utils";
+import { readCardParts } from "@/lib/templates/card-parts";
 
 interface FeaturedCollectionSectionProps {
   node: ComponentNode;
@@ -26,6 +27,9 @@ export function FeaturedCollectionSection({ node, context, sectionId }: Featured
   const productsToShow = (node.settings?.productsToShow as number) ?? 4;
   const columns = (node.settings?.columns as number) ?? 4;
   const showViewAll = Boolean(node.settings?.showViewAll ?? true);
+  // What each card shows is the merchant's choice; without one, a card keeps the description behaviour it always had.
+  const plainParts = readCardParts(node.settings, false);
+  const homeParts = readCardParts(node.settings, true);
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
@@ -46,7 +50,7 @@ export function FeaturedCollectionSection({ node, context, sectionId }: Featured
         <ul className={cn("grid gap-x-3 gap-y-10 sm:gap-x-5 sm:gap-y-12 lg:gap-x-6", gridColumns(cols))}>
           {products.map((p, i) => (
             <li key={p.slug} className="min-w-0">
-              <EditorialProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} index={i} priority={i < 2} />
+              <EditorialProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} index={i} priority={i < 2} parts={plainParts} />
             </li>
           ))}
         </ul>
@@ -79,7 +83,7 @@ export function FeaturedCollectionSection({ node, context, sectionId }: Featured
           <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-[repeat(auto-fill,minmax(13.5rem,17rem))] sm:gap-x-5 sm:gap-y-10 lg:gap-x-6 lg:gap-y-12">
             {products.map((p, i) => (
               <li key={p.slug} className="min-w-0">
-                <HavenProductCard product={p} currency={currency} href={`/products/${p.slug}`} priority={i < 3} />
+                <HavenProductCard product={p} currency={currency} href={`/products/${p.slug}`} priority={i < 3} parts={homeParts} />
               </li>
             ))}
           </ul>
@@ -120,7 +124,7 @@ export function FeaturedCollectionSection({ node, context, sectionId }: Featured
           <ul className={cn("grid gap-3 sm:gap-4", gridColumns(cols))}>
             {products.map((p, i) => (
               <li key={p.slug} className="min-w-0">
-                <GroceryProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} priority={i < 4} />
+                <GroceryProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} priority={i < 4} parts={plainParts} />
               </li>
             ))}
           </ul>
@@ -147,7 +151,7 @@ export function FeaturedCollectionSection({ node, context, sectionId }: Featured
         <ul className={cn("grid", gridColumns(balancedColumns(products.length, columns)), GRID_GAP)}>
           {products.map((p, i) => (
             <li key={p.slug}>
-              <ProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} priority={i < 2} />
+              <ProductCard product={p} currency={store.currency ?? "INR"} href={`/products/${p.slug}`} priority={i < 2} parts={plainParts} />
             </li>
           ))}
         </ul>

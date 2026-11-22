@@ -11,6 +11,11 @@ import { renderSectionComponent } from "./sections";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { resolveBinding } from "@/lib/templates/engine/bindings";
 import { themeToStyle } from "@/lib/templates/engine/theme-style";
+import { documentsCss } from "@/lib/editor/render";
+import { lookHasCart } from "./looks";
+import { CartProvider } from "@/components/storefront/cart/cart-provider";
+import { CartChrome } from "@/components/storefront/cart/cart-drawer";
+import { WishlistProvider } from "@/components/storefront/wishlist/wishlist-provider";
 
 /**
  * Resolves data-bound settings against store/resource context (AC-REN-016).
@@ -126,15 +131,34 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
 
   // Extract accent color and hero heading for layout header styling
   const heroSection = sections["hero"];
+  // Style overrides the merchant set in the visual editor, as one stylesheet for the page and its shared groups. The CSS is
+  // built only from validated values and contains nothing a text node would escape (see lib/editor/style.ts).
+  const overrideCss = documentsCss([doc, groupHeader, groupFooter, groupAnnouncement]);
+
   const accentColor = (heroSection?.settings?.accentColor as string) || null;
   const classicHeading = (heroSection?.settings?.heading as string) || store.name;
 
   // Split hero section out when layout is spotlight and hero variant is spotlight
   const isSpotlightHero = layout === "spotlight" && heroSection && heroSection.settings?.variant === "spotlight";
 
-  return (
+  const cartEnabled = themed && typeof store.slug === "string" && store.slug.length > 0;
+  const cartChrome = cartEnabled && lookHasCart(enrichedContext.theme);
+  const withCart = (node: React.ReactNode) =>
+    cartEnabled ? (
+      // Editor and theme preview keep their cart in memory only, so they never touch a shopper's saved bag.
+      <CartProvider storeSlug={store.slug} currency={typeof store.currency === "string" ? store.currency : "INR"} persist={activeMode === "public"}>
+        <WishlistProvider storeSlug={store.slug} persist={activeMode === "public"}>
+          {node}
+        </WishlistProvider>
+      </CartProvider>
+    ) : (
+      node
+    );
+
+  return withCart(
     <StorefrontContext.Provider value={enrichedContext}>
       <div className={themed ? "sf-theme flex min-h-dvh flex-col bg-background text-foreground" : "flex min-h-dvh flex-col"} style={themed ? themeStyle : undefined}>
+        {overrideCss ? <style>{overrideCss}</style> : null}
         {/* Optional Announcement Group */}
         {groupAnnouncement ? (
           <div>
@@ -215,6 +239,7 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
             {store.name} · Powered by StoreForge
           </footer>
         )}
+        {cartChrome ? <CartChrome /> : null}
       </div>
     </StorefrontContext.Provider>
   );

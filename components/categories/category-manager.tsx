@@ -1,72 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FolderPlus, FolderTree, Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { deleteCategoryAction, saveCategoryAction } from "@/app/(dashboard)/dashboard/categories/actions";
+import { FolderPlus, FolderTree, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { deleteCategoryAction } from "@/app/(dashboard)/dashboard/categories/actions";
+import { blankCategory, CategoryForm, type CategoryDraft } from "@/components/categories/category-form";
+import type { FormState } from "@/components/shared/embedded-form";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FormField } from "@/components/shared/form-field";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { NativeSelect } from "@/components/ui/native-select";
-import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { orderCategories } from "@/lib/categories/hierarchy";
-import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { useReturnFocus } from "@/lib/hooks/use-return-focus";
 import { cn } from "@/lib/utils";
-import { categoryInputSchema } from "@/lib/validations/catalog";
 import type { CategoryRow } from "@/services/category.service";
 
-type Draft = { id: string | null; name: string; slug: string; description: string; parentId: string };
-const blank: Draft = { id: null, name: "", slug: "", description: "", parentId: "" };
 
 export function CategoryManager({ rows, canManage, canDelete }: { rows: CategoryRow[]; canManage: boolean; canDelete: boolean }) {
   const router = useRouter();
-  const [draft, setDraft] = useState<Draft | null>(null);
-  const { errors, formError, pending, validate, validateField, clear, fail, reset, submit } = useFormErrors();
+  const [draft, setDraft] = useState<CategoryDraft | null>(null);
+  // The form reports whether it is saving, so the dialog is not closed over a save that is running.
+  const saving = useRef(false);
+  const onFormState = useCallback((state: FormState) => {
+    saving.current = state.pending;
+  }, []);
   const [toDelete, setToDelete] = useState<CategoryRow | null>(null);
   const finalFocus = useReturnFocus(draft !== null);
 
-  const payloadOf = (d: Draft) => ({ name: d.name, slug: d.slug.trim() || undefined, description: d.description, parentId: d.parentId || null });
-  const change = (patch: Partial<Draft>, field: string) => {
-    if (draft) setDraft({ ...draft, ...patch });
-    clear(field);
-  };
-  const blur = (field: string) => () => draft && validateField(categoryInputSchema, payloadOf(draft), field);
-
   const open = (r?: CategoryRow, parentId = "") => {
-    reset();
-    setDraft(r ? { id: r.id, name: r.name, slug: r.slug, description: r.description ?? "", parentId: r.parentId ?? "" } : { ...blank, parentId });
-  };
-
-  const save = () => {
-    if (!draft) return;
-    const payload = payloadOf(draft);
-    if (!validate(categoryInputSchema, payload)) return;
-    submit(async () => {
-      const res = await saveCategoryAction(draft.id, payload);
-      if (!res.ok) {
-        fail(res);
-        return;
-      }
-      toast.success(draft.id ? "Category updated" : "Category created");
-      setDraft(null);
-      router.refresh();
-    });
+    setDraft(r ? { id: r.id, name: r.name, slug: r.slug, description: r.description ?? "", parentId: r.parentId ?? "" } : { ...blankCategory, parentId });
   };
 
   const ordered = orderCategories(rows);
-  const hasChildren = draft?.id ? rows.some((r) => r.parentId === draft.id) : false;
-  const parentOptions = rows.filter((r) => !r.parentId && r.id !== draft?.id);
-  // An unchanged legacy parent stays selectable so saving never silently moves the category.
-  const currentParent = draft?.parentId ? rows.find((r) => r.id === draft.parentId) : undefined;
-  if (currentParent && !parentOptions.some((r) => r.id === currentParent.id)) parentOptions.push(currentParent);
   const add = canManage ? (
     <Button onClick={() => open()}>
       <Plus aria-hidden /> Add category
@@ -144,46 +112,24 @@ export function CategoryManager({ rows, canManage, canDelete }: { rows: Category
         </>
       )}
 
-      <Dialog open={draft !== null} onOpenChange={(o) => !o && !pending && setDraft(null)}>
+      <Dialog open={draft !== null} onOpenChange={(o) => !o && !saving.current && setDraft(null)}>
         <DialogContent finalFocus={finalFocus}>
           <DialogHeader>
             <DialogTitle>{draft?.id ? "Edit category" : draft?.parentId ? "New subcategory" : "New category"}</DialogTitle>
             <DialogDescription>Group products under a category, and optionally a subcategory inside it.</DialogDescription>
           </DialogHeader>
           {draft ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                save();
+            <CategoryForm
+              key={draft.id ?? `new:${draft.parentId}`}
+              initial={draft}
+              rows={rows}
+              onStateChange={onFormState}
+              onSaved={() => {
+                setDraft(null);
+                router.refresh();
               }}
-              className="space-y-3"
-              noValidate
-            >
-              {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
-              <FormField id="cat-name" label="Category name" required error={errors.name}>
-                <Input id="cat-name" value={draft.name} onChange={(e) => change({ name: e.target.value }, "name")} onBlur={blur("name")} aria-invalid={Boolean(errors.name)} aria-describedby="cat-name-msg" aria-required autoFocus disabled={pending} />
-              </FormField>
-              <FormField id="cat-slug" label="Slug" required={Boolean(draft.id)} optional={!draft.id} error={errors.slug} hint={draft.id ? "Lowercase letters, numbers and hyphens." : "Leave blank to generate it from the name."}>
-                <Input id="cat-slug" value={draft.slug} onChange={(e) => change({ slug: e.target.value }, "slug")} onBlur={blur("slug")} aria-invalid={Boolean(errors.slug)} aria-describedby="cat-slug-msg" disabled={pending} />
-              </FormField>
-              <FormField id="cat-parent" label="Parent category" optional error={errors.parentId} hint={hasChildren ? "This category has subcategories, so it cannot become a subcategory." : "Leave empty for a top-level category."}>
-                <NativeSelect id="cat-parent" value={draft.parentId} onChange={(e) => change({ parentId: e.target.value }, "parentId")} aria-invalid={Boolean(errors.parentId)} aria-describedby="cat-parent-msg" disabled={pending || hasChildren}>
-                  <option value="">None (top level)</option>
-                  {parentOptions.map((r) => (
-                    <option key={r.id} value={r.id}>{r.name}</option>
-                  ))}
-                </NativeSelect>
-              </FormField>
-              <FormField id="cat-desc" label="Description" optional error={errors.description}>
-                <Textarea id="cat-desc" rows={3} value={draft.description} onChange={(e) => change({ description: e.target.value }, "description")} onBlur={blur("description")} aria-invalid={Boolean(errors.description)} aria-describedby="cat-desc-msg" disabled={pending} />
-              </FormField>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setDraft(null)} disabled={pending}>Cancel</Button>
-                <Button type="submit" disabled={pending}>
-                  {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Saving…" : "Save"}
-                </Button>
-              </DialogFooter>
-            </form>
+              onCancel={() => setDraft(null)}
+            />
           ) : null}
         </DialogContent>
       </Dialog>

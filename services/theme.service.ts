@@ -2,6 +2,7 @@ import "server-only";
 import { listCollectionsApi } from "@/lib/api/endpoints/collection-api";
 import { listProductsApi } from "@/lib/api/endpoints/product-api";
 import { getStoreApi } from "@/lib/api/endpoints/store-api";
+import { listPagesApi } from "@/lib/api/endpoints/pages-api";
 import {
   applyThemeApi,
   getCurrentThemeApi,
@@ -98,6 +99,8 @@ type PreviewOptions = {
   collectionProducts?: boolean;
   /** Also load the first product as a product page shows it, for the editor's product-page preview. */
   productPage?: boolean;
+  /** Also load the published content pages (About, Contact ...). */
+  contentPages?: boolean;
 };
 
 /**
@@ -144,10 +147,29 @@ export async function getPreviewStoreData(options: PreviewOptions = {}): Promise
     options.productPage && live && products[0] ? getPublicProductApi(store.slug, products[0].slug).then(toProductResource, () => null) : null,
   ]);
 
+  const contentPages = options.contentPages
+    ? await listPagesApi(tenant.id).then((rows) => rows.filter((r) => r.status === "published").map((r) => ({ title: r.title, slug: r.slug, body: r.body })), () => [])
+    : undefined;
+
   return {
     store: { name: store.name, slug: store.slug, description: store.description, logo_path: store.logoPath, currency: store.currency, products },
     collections,
     collectionProducts,
     productPage,
+    contentPages,
   };
+}
+
+/** One product as its page shows it (pictures, options, variants), for the editor's product-page preview. */
+export async function getPreviewProduct(slug: string): Promise<Record<string, unknown> | null> {
+  const { tenant } = await requireActiveTenant();
+  const store = await getStoreApi(tenant.id);
+  return getPublicProductApi(store.slug, slug).then(toProductResource, () => null);
+}
+
+/** The active products of one collection, for the editor's collection-page preview. */
+export async function getPreviewCollectionProducts(slug: string): Promise<PreviewStoreData["store"]["products"] | null> {
+  const { tenant } = await requireActiveTenant();
+  const store = await getStoreApi(tenant.id);
+  return getPublicCollectionApi(store.slug, slug).then((r) => r.products, () => null);
 }

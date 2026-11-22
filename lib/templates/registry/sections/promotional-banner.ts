@@ -4,8 +4,8 @@ export const promotionalBannerSection: SectionDefinition = {
   type: "promotional-banner",
   name: "Promotional Banner",
   category: "Marketing",
-  accepts: ["heading", "text", "button"],
-  maxChildren: 5,
+  accepts: ["heading", "text", "button", "column"],
+  maxChildren: 10,
   settings: [
     {
       id: "title",

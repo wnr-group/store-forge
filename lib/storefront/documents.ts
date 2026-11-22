@@ -60,7 +60,21 @@ export function productListDocument(title: string, note?: string): TemplateDocum
 
 /** Case-insensitive search over name and short description; blank terms match nothing. */
 export function searchProducts<T extends { name: string; short_description?: string | null }>(products: T[], term: string): T[] {
-  const needle = term.trim().toLowerCase().slice(0, 100);
-  if (!needle) return [];
-  return products.filter((p) => p.name.toLowerCase().includes(needle) || (p.short_description ?? "").toLowerCase().includes(needle));
+  const words = term.trim().toLowerCase().slice(0, 100).split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [];
+  // Every word has to appear in the name or description, in any order, so "blue shirt" finds "Shirt, blue".
+  return products.filter((p) => {
+    const text = `${p.name} ${p.short_description ?? ""}`.toLowerCase();
+    return words.every((w) => text.includes(w));
+  });
+}
+
+/** The bag page: one cart section. The lines live in the shopper's browser, so the page itself holds no store data. */
+export function cartDocument(): TemplateDocument {
+  return doc([["cart", node("cart", {})]]);
+}
+
+/** The wishlist page: one wishlist section. The saved products live in the shopper's browser. */
+export function wishlistDocument(): TemplateDocument {
+  return doc([["wishlist", node("wishlist", {})]]);
 }

@@ -15,6 +15,14 @@ const geistMono = localFont({ src: "./fonts/geist-mono-latin.woff2", variable: "
 const manrope = localFont({ src: "./fonts/manrope-latin.woff2", variable: "--font-manrope", weight: "200 800", display: "swap" });
 const dmSans = localFont({ src: "./fonts/dm-sans-latin.woff2", variable: "--font-dm-sans", weight: "100 1000", display: "swap" });
 
+// Storefront theme fonts (Maison): Cormorant Garamond for display, Jost for body. Registered in lib/templates/engine/fonts.ts.
+const jost = localFont({ src: "./fonts/jost-latin.woff2", variable: "--font-jost", weight: "100 900", display: "swap" });
+const cormorantGaramond = localFont({ src: "./fonts/cormorant-garamond-latin.woff2", variable: "--font-cormorant-garamond", weight: "300 700", display: "swap" });
+
+// Storefront theme fonts (Stride): Archivo for headlines, Plus Jakarta Sans for body. Registered in lib/templates/engine/fonts.ts.
+const plusJakartaSans = localFont({ src: "./fonts/plus-jakarta-sans-latin.woff2", variable: "--font-plus-jakarta-sans", weight: "200 800", display: "swap" });
+const archivo = localFont({ src: "./fonts/archivo-latin.woff2", variable: "--font-archivo", weight: "100 900", display: "swap" });
+
 export async function generateMetadata(): Promise<Metadata> {
   const { platformName } = await getPublicBranding();
   return {
@@ -27,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     // suppressHydrationWarning: the theme-init script below sets the `dark` class before React hydrates.
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${geistMono.variable} ${manrope.variable} ${dmSans.variable} h-full antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${geistMono.variable} ${manrope.variable} ${dmSans.variable} ${jost.variable} ${cormorantGaramond.variable} ${plusJakartaSans.variable} ${archivo.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         {/* beforeInteractive: Next injects it into the initial HTML and runs it before hydration, without React re-rendering a <script>. */}
         <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />

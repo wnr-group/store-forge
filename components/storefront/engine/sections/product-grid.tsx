@@ -2,6 +2,7 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext } from "../types";
 import { CONTAINER, EmptyProducts, GRID_GAP, GroceryProductCard, ProductCard, gridColumns, type CardProduct } from "../ui";
 import { cn } from "@/lib/utils";
+import { readCardParts } from "@/lib/templates/card-parts";
 import { LegacyProductGridSection } from "./legacy-product-grid";
 import { hasTheme, isGroceryTheme } from "@/lib/templates/engine/theme-style";
 
@@ -22,6 +23,7 @@ export function ProductGridSection({ node, context, sectionId }: ProductGridSect
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
+  const parts = readCardParts(node.settings, false);
   const linked = context.linkCards === true || (context.basePath !== undefined && context.basePath !== null);
   const basePath = context.basePath ?? "";
 
@@ -50,7 +52,7 @@ export function ProductGridSection({ node, context, sectionId }: ProductGridSect
         <ul className={cn("grid gap-3 sm:gap-4", gridColumns(columns))}>
           {products.map((p, i) => (
             <li key={p.slug} className="min-w-0">
-              <GroceryProductCard product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} priority={i < 6} />
+              <GroceryProductCard product={p} currency={currency} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} priority={i < 6} parts={parts} />
             </li>
           ))}
         </ul>
@@ -63,7 +65,7 @@ export function ProductGridSection({ node, context, sectionId }: ProductGridSect
       <ul className={cn("grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4", GRID_GAP)}>
         {products.map((p, i) => (
           <li key={p.slug}>
-            <ProductCard product={p} currency={store.currency ?? "INR"} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} accent={accent} priority={i < 4} />
+            <ProductCard product={p} currency={store.currency ?? "INR"} href={linked && p.slug ? `${basePath}/products/${p.slug}` : null} accent={accent} priority={i < 4} parts={parts} />
           </li>
         ))}
       </ul>

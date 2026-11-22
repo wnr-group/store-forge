@@ -1,6 +1,7 @@
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext, ProductDetailData } from "../types";
 import { RichText } from "../richtext-renderer";
+import { blockMarkers } from "../markers";
 
 interface ProductDescriptionBlockProps {
   node: ComponentNode;
@@ -15,7 +16,7 @@ export function ProductDescriptionBlock({ node, context, blockId }: ProductDescr
   const maxLines = (node.settings?.maxLines as number) ?? 5;
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   if (!description) return null;
 

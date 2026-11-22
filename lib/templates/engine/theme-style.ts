@@ -1,3 +1,4 @@
+import { DEFAULT_LOOK, LOOK_TINT, isLookId, type LookId } from "../looks";
 import { themeToCssVars, type ThemeSettings } from "./theme-css";
 
 /**
@@ -70,7 +71,8 @@ export function themeToStyle(theme: unknown): Record<string, string> {
   }
   // The colour picture placeholders are tinted with: the primary, unless that is near-black or grey, then the accent.
   const accentHex = color("accent");
-  const tint = primary && HEX.test(primary) && (chroma(primary) > 0.25 || !(accentHex && HEX.test(accentHex))) ? primary : accentHex && HEX.test(accentHex) ? accentHex : primary;
+  const preferred = LOOK_TINT[lookOf(theme)] === "secondary" ? color("secondary") : undefined;
+  const tint = preferred && HEX.test(preferred) ? preferred : primary && HEX.test(primary) && (chroma(primary) > 0.25 || !(accentHex && HEX.test(accentHex))) ? primary : accentHex && HEX.test(accentHex) ? accentHex : primary;
   if (tint && HEX.test(tint)) set("--tint", tint);
   const secondary = color("secondary");
   if (secondary && HEX.test(secondary)) {
@@ -129,4 +131,13 @@ export function isHomeTheme(theme: unknown): boolean {
 export function isEditorialTheme(theme: unknown): boolean {
   const ts = themeSettingsOf(theme) as { buttons?: { radius?: number } } | null;
   return ts?.buttons?.radius === 0;
+}
+
+/**
+ * The storefront look a theme asks for (`settings.brand.look`). Anything missing or unknown is the standard look, so a
+ * stored document can never select a look that does not exist.
+ */
+export function lookOf(theme: unknown): LookId {
+  const look = themeSettingsOf(theme)?.brand?.look;
+  return isLookId(look) ? look : DEFAULT_LOOK;
 }

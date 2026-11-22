@@ -6,7 +6,8 @@ import { ROUTES } from "@/config/app";
 import { run } from "@/lib/actions/run";
 import { categoryInputSchema } from "@/lib/validations/catalog";
 import { parseInput } from "@/lib/validations/parse";
-import { createCategory, deleteCategory, normalize, updateCategory } from "@/services/category.service";
+import { orderCategories } from "@/lib/categories/hierarchy";
+import { createCategory, deleteCategory, listCategories, normalize, updateCategory } from "@/services/category.service";
 import { invalidateStorefront } from "@/lib/storefront/cache";
 
 const refresh = async () => {
@@ -30,4 +31,14 @@ export async function deleteCategoryAction(id: unknown) {
     await deleteCategory(parseInput(z.uuid(), id));
     await refresh();
   });
+}
+
+/** Every category with its parent, for the parent picker of the category form. */
+export async function listCategoryRowsAction() {
+  return run(async () => (await listCategories()).map((c) => ({ id: c.id, name: c.name, parentId: c.parentId })));
+}
+
+/** The store's categories as a flat, indented list for a picker (a parent before its children). */
+export async function listCategoryChoicesAction() {
+  return run(async () => orderCategories(await listCategories()).map((c) => ({ id: c.id, label: c.label })));
 }

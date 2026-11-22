@@ -2,6 +2,7 @@ import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext, ProductDetailData } from "../types";
 import { formatMoney } from "@/lib/money";
 import { resolveVariant } from "@/lib/templates/variant-selection";
+import { blockMarkers } from "../markers";
 
 interface ProductPriceBlockProps {
   node: ComponentNode;
@@ -27,7 +28,7 @@ export function ProductPriceBlock({ node, context, blockId }: ProductPriceBlockP
   const onSale = Boolean(compareAtPriceMinor && compareAtPriceMinor > priceMinor);
 
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   const sizeClass =
     textSize === "large" ? "text-2xl sm:text-3xl" : textSize === "small" ? "text-base" : "text-xl sm:text-2xl";

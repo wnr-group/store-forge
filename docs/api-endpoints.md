@@ -21,6 +21,10 @@ Which service function calls which StoreForge API endpoint. The base path is `/a
 | Customers | list, get, create, update, delete | `/customers[/:id]` | Yes | Order history (last 50) is inside `GET /customers/:id` |
 | Analytics | `getAnalytics` | `GET /analytics?range=7\|30\|90` | Yes | Also feeds the dashboard. The API uses the store's timezone and currency |
 | Store | `updateStoreSettings`, `getPrimaryStore`, `isCurrencyLocked` | `GET`/`PATCH /store` | Yes | |
+| Product design (Customize > Product) | `listPresentations`, `getPresentation` | `GET /store/product-presentations`, `/:productId` | Yes | The list has product ids and states only; a product never customized reads as revision 0, state `default` |
+| | `savePresentationDraft` | `PUT /store/product-presentations/:productId/draft` | Yes | Whole document plus `expectedRevision` (0 for a new one). 409 on a stale revision, 400 with field errors keyed `productPresentation.<id>.<path>` |
+| | `publishPresentation` | `POST /store/product-presentations/:productId/publish` | Yes | Optional `expectedRevision`; `published: false` when nothing changed. Theme publish-all also publishes product drafts (`productPresentations.published`) |
+| | `resetPresentation` | `DELETE /store/product-presentations/:productId` | Yes | Removes draft AND live settings at once; the storefront cache is dropped by the action |
 | Profile | `getOwnProfile`, `updateOwnName` | `GET`/`PATCH /users/me` | No | The session is rotated through `/auth/refresh` after a rename |
 | Team | `listTeam`, create, update, set status, remove, reset password | `/team/members[/:userId][/status\|/password]` | Yes | Owner only |
 | Workspace | `loadWorkspaceData` | `GET /organizations`, `GET /organizations/current` | No / Yes | One `/organizations/current` call per membership on a store host |
@@ -52,6 +56,7 @@ The API applies the admin rate limit and writes audit entries inside its own mut
 |---|---|---|
 | Public branding | `GET /public/branding` | Anonymous. Cached 5 minutes, with default text on failure |
 | Public storefront | `GET /public/storefronts/:slug` | Anonymous. 404 means no store. Memoized per request |
+| Public product | `GET /public/storefronts/:slug/products/:productSlug` | Anonymous. Includes `presentation` (the published per-product settings, or null); read through `parsePresentation`, never trusted as is |
 
 ## Authentication
 

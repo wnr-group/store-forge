@@ -1,10 +1,18 @@
 import type { SectionDefinition } from "../../engine/descriptors";
+import { collectionCardPartSettings } from "../../card-parts";
 
 export const collectionListSection: SectionDefinition = {
   type: "collection-list",
   name: "Collection List",
   category: "Collections",
   settings: [
+    {
+      id: "eyebrow",
+      type: "text",
+      label: "Small label above the title",
+      default: "",
+      help: "Shown by themes that support it",
+    },
     {
       id: "title",
       type: "text",
@@ -31,10 +39,18 @@ export const collectionListSection: SectionDefinition = {
       max: 6,
     },
     {
+      id: "showViewAll",
+      type: "toggle",
+      label: "Show View All Link",
+      default: true,
+      help: "Shown by themes that support it",
+    },
+    {
       id: "showProductCount",
       type: "toggle",
       label: "Show Product Count",
       default: true,
     },
+    ...collectionCardPartSettings,
   ],
 };

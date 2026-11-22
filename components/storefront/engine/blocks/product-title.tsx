@@ -1,5 +1,6 @@
 import type { ComponentNode } from "@/lib/templates/document";
 import type { RenderContext, ProductDetailData } from "../types";
+import { blockMarkers } from "../markers";
 
 interface ProductTitleBlockProps {
   node: ComponentNode;
@@ -15,7 +16,7 @@ export function ProductTitleBlock({ node, context, blockId }: ProductTitleBlockP
 
   const alignClass = alignment === "center" ? "text-center" : alignment === "right" ? "text-right" : "text-left";
   const isPreview = context.mode === "preview" || context.mode === "editor";
-  const sfProps = isPreview && blockId ? { "data-sf-block": blockId } : {};
+  const sfProps = blockMarkers(blockId, isPreview, node);
 
   if (!name) return null;
 
