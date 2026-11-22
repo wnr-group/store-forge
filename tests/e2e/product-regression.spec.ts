@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { evidence } from "./evidence";
 import { MANAGER, login } from "./helpers";
 import { dbAvailable, dbRows, dbScalar } from "./support/db";
-import { addProduct, runId } from "./ui";
+import { addCategory, addProduct, runId } from "./ui";
 
 /**
  * Regression check of the EXISTING product flows that the import feature sits beside: create, edit, list, search and
@@ -67,11 +67,20 @@ test("filter: the status filter and the category filter return only matching pro
   await list(`q=${encodeURIComponent(`QA REG ${id}`)}&status=draft`);
   await expect(page.locator("tbody tr")).toHaveCount(1);
   await expect(page.locator("tbody tr").first()).toContainText("Draft");
-  const clothing = dbScalar(`select id from public.categories where tenant_id='${tenant}' and name='Clothing'`);
-  await list(`category=${clothing}`);
+  // This test owns its category fixture (the file creates none elsewhere and nothing guarantees a seeded one). The names deliberately do
+  // not start with `QA REG ${id}`, so the product does not change the counts the other tests make on that prefix.
+  const categoryName = `QA CAT ${id}`;
+  const categoryProduct = `QA CAT ${id} Item`;
+  await addCategory(page, categoryName);
+  await addProduct(page, categoryProduct, "7.00", categoryName);
+  const categoryId = dbScalar(`select id from public.categories where tenant_id='${tenant}' and name='${categoryName}'`);
+  expect(categoryId, "the category fixture must exist before it is used as a filter").toMatch(/^[0-9a-f-]{36}$/);
+  expect(dbScalar(`select category_id from public.products where tenant_id='${tenant}' and name='${categoryProduct}'`)).toBe(categoryId);
+  await list(`category=${categoryId}`);
   const rows = page.locator("tbody tr");
-  expect(await rows.count()).toBeGreaterThan(0);
-  for (const text of await rows.allInnerTexts()) expect(text).toContain("Clothing");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText(categoryProduct);
+  await expect(rows.first()).toContainText(categoryName);
   await evidence(page, "REG-filter.png");
 });
 

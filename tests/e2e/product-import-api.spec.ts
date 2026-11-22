@@ -89,7 +89,9 @@ test("tenant isolation: a member of tenant 1 cannot import into tenant 2 by nami
 });
 
 test("tenant isolation: a tenant id smuggled inside a row cannot place the product in another tenant", async () => {
-  const marker = `QA API ${id} smuggle`;
+  // Deliberately NOT prefixed `QA API ${id} `: the valid-row assertions below count and list that prefix, and this product exists in org 1
+  // whenever the API ignores the unknown field instead of rejecting it.
+  const marker = `QA SMUGGLE ${id} tenant-field`;
   const res = await post(manager, org1, [{ row: 2, name: marker, price: "5.00", tenant_id: org2, tenantId: org2 }]);
   // Either the API rejects the unknown field or it ignores it. It must never write to tenant 2.
   expect([201, 400], await res.text()).toContain(res.status());
