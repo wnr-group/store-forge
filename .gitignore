@@ -44,3 +44,9 @@ next-env.d.ts
 # claude code
 .claude/
 
+# large binary e2e recordings and traces
+*.mp4
+*.webm
+artifacts/**/videos/
+artifacts/**/traces/
+artifacts/**/screenshots/

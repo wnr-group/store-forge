@@ -12,7 +12,13 @@ Run these before opening a pull request and after changing an API-backed module.
 | Timing tests | `npm run test:timing` |
 | Unit and timing tests together | `npm test` |
 | End-to-end (Playwright) | `npm run test:e2e` |
+| Studio video preflight | `npm run studio:video:preflight` |
+| Studio video recording | `npm run studio:video:record` |
+| Studio video validation | `npm run studio:video:validate` |
+| Studio video reporting | `npm run studio:video:report` |
 | Production build | `npm run build` |
+
+See [docs/studio-localhost-e2e-video-recording.md](studio-localhost-e2e-video-recording.md) for the end-to-end browser video demonstration workflow.
 
 `npm run build` runs the type-check, so a type error in a test file also fails the build.
 

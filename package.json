@@ -12,7 +12,11 @@
     "test:unit": "vitest run",
     "test:timing": "vitest run --config vitest.timing.config.mts",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "studio:video:preflight": "tsx tests/studio-video/preflight.ts",
+    "studio:video:record": "tsx tests/studio-video/record.ts",
+    "studio:video:validate": "tsx tests/studio-video/validate.ts",
+    "studio:video:report": "tsx tests/studio-video/report.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -48,6 +52,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.1.0"
   },
