@@ -1,0 +1,126 @@
+{
+  "takenAt": "2026-11-21T15:58:47.168Z",
+  "rows": [
+    {
+      "theme": "Atelier",
+      "steps": {
+        "open": true,
+        "selectElement": true,
+        "changeText": true,
+        "changeStyle": true,
+        "changeVisibility": true,
+        "publish": true,
+        "storefront": true
+      },
+      "notes": []
+    },
+    {
+      "theme": "Freshly",
+      "steps": {
+        "open": true,
+        "selectElement": true,
+        "changeText": true,
+        "changeStyle": true,
+        "changeVisibility": true,
+        "publish": true,
+        "storefront": true
+      },
+      "notes": []
+    },
+    {
+      "theme": "Haven",
+      "steps": {
+        "open": true,
+        "selectElement": true,
+        "changeText": true,
+        "changeStyle": true,
+        "changeVisibility": true,
+        "publish": true,
+        "storefront": true
+      },
+      "notes": [
+        "text changed on the first Hero slide: the hero's own Heading field does not change the slider"
+      ]
+    },
+    {
+      "theme": "Lumière",
+      "steps": {
+        "open": true,
+        "selectElement": true,
+        "changeText": true,
+        "changeStyle": true,
+        "changeVisibility": true,
+        "publish": true,
+        "storefront": true
+      },
+      "notes": []
+    },
+    {
+      "theme": "Maison",
+      "steps": {
+        "open": true,
+        "selectElement": true,
+        "changeText": true,
+        "changeStyle": true,
+        "changeVisibility": true,
+        "publish": true,
+        "storefront": true
+      },
+      "notes": []
+    },
+    {
+      "theme": "Marketplace",
+      "steps": {
+        "open": true,
+        "selectElement": true,
+        "changeText": true,
+        "changeStyle": true,
+        "changeVisibility": true,
+        "publish": true,
+        "storefront": true
+      },
+      "notes": []
+    },
+    {
+      "theme": "Plain",
+      "steps": {
+        "open": true,
+        "selectElement": true,
+        "changeText": true,
+        "changeStyle": true,
+        "changeVisibility": true,
+        "publish": true,
+        "storefront": true
+      },
+      "notes": []
+    },
+    {
+      "theme": "Stride",
+      "steps": {
+        "open": true,
+        "selectElement": true,
+        "changeText": true,
+        "changeStyle": true,
+        "changeVisibility": true,
+        "publish": true,
+        "storefront": true
+      },
+      "notes": [
+        "text changed on the first Hero slide: the clicked headline is slide data (no field holds it)"
+      ]
+    },
+    {
+      "theme": "Voltage",
+      "steps": {
+        "open": true,
+        "selectElement": true,
+        "changeText": true,
+        "changeStyle": true,
+        "changeVisibility": true,
+        "publish": true,
+        "storefront": true
+      },
+      "notes": []
+    }
+  ]
+}

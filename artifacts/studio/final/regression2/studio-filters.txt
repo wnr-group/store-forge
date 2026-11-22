@@ -1,0 +1,47 @@
+
+Running 4 tests using 1 worker
+
+  x  1 tests\e2e\studio-filters.spec.ts:17:1 › Products: search narrows the list, the status filter works, a no-match search shows the empty state, clearing restores (22.7s)
+  ok 2 tests\e2e\studio-filters.spec.ts:51:1 › Customers: search by name narrows the list and a no-match search shows the empty state (5.8s)
+  ok 3 tests\e2e\studio-filters.spec.ts:68:1 › Customers: the sort control reorders the list (3.5s)
+  ok 4 tests\e2e\studio-filters.spec.ts:84:1 › Inventory: the stock-level filter and search work, and a no-match search shows the empty state (4.9s)
+
+
+  1) tests\e2e\studio-filters.spec.ts:17:1 › Products: search narrows the list, the status filter works, a no-match search shows the empty state, clearing restores 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Adjustable Dumbbell Set').first()
+    Expected: visible
+    Timeout: 15000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Adjustable Dumbbell Set').first() with timeout 15000ms
+      - waiting for getByText('Adjustable Dumbbell Set').first()
+
+
+      33 |     await search(page, /search by name or sku/i).fill("");
+      34 |     await expect.poll(() => urlParam(page, "q")).toBeNull();
+    > 35 |     await expect(page.getByText("Adjustable Dumbbell Set").first()).toBeVisible();
+         |                                                                     ^
+      36 |
+      37 |     await page.locator("select").filter({ has: page.locator("option", { hasText: "Draft" }) }).first().selectOption({ label: "Draft" });
+      38 |     await expect.poll(() => urlParam(page, "status")).toBe("draft");
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-filters.spec.ts:35:69
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:83:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-filters.spec.ts:18:3
+
+    Error Context: test-results\studio-filters-Products-se-90fc0-pty-state-clearing-restores\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-filters-Products-se-90fc0-pty-state-clearing-restores\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-filters-Products-se-90fc0-pty-state-clearing-restores\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-filters.spec.ts:17:1 › Products: search narrows the list, the status filter works, a no-match search shows the empty state, clearing restores 
+  3 passed (43.3s)

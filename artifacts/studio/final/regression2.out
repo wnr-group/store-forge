@@ -1,0 +1,7 @@
+studio-a11y exit=0  20 passed (1.1m) 
+studio-evidence exit=1  2 failed  8 passed (1.3m) 
+studio-filters exit=1  1 failed  3 passed (43.3s) 
+studio-scope exit=0  8 passed (26.4s) 
+studio-sidebar exit=0  11 passed (42.4s) 
+studio-viewports exit=0  4 passed (35.1s) 
+DONE

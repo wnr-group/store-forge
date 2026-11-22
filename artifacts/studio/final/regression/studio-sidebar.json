@@ -1,0 +1,526 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-sidebar.spec.ts",
+      "--reporter=json,list"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/WNR/store-forge-integ/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-sidebar.spec.ts",
+      "file": "studio-sidebar.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "owner sidebar at 600px height (light)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6576,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:32:44.612Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-e2915d547e5835801b38",
+          "file": "studio-sidebar.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "owner sidebar at 700px height (light)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3542,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:32:51.404Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-83808beba4e231a7ad96",
+          "file": "studio-sidebar.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "owner sidebar at 800px height (light)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4078,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:32:54.968Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-11e87e5c77f9e21c747f",
+          "file": "studio-sidebar.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "owner sidebar at 900px height (light)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3413,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:32:59.066Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-954d045a9384fe1a958d",
+          "file": "studio-sidebar.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "owner sidebar at 600px height (dark)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3479,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:33:02.501Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-5828971f5e8fe789f5d7",
+          "file": "studio-sidebar.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "owner sidebar at 700px height (dark)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3217,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:33:06.003Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-55e11112c539ad97e293",
+          "file": "studio-sidebar.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "owner sidebar at 800px height (dark)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3844,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:33:09.240Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-a49f52bfc33833e3395c",
+          "file": "studio-sidebar.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "owner sidebar at 900px height (dark)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3567,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:33:13.103Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-261fd5d5f883bec019a5",
+          "file": "studio-sidebar.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "staff sidebar at 700px height still reaches every item",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4752,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:33:16.691Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-37ade41f84d9d2ec9950",
+          "file": "studio-sidebar.spec.ts",
+          "line": 94,
+          "column": 1
+        },
+        {
+          "title": "Platform Admin sidebar is unchanged (no scroll cue, original link height)",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 835,
+                  "error": {
+                    "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.",
+                    "stack": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-sidebar.spec.ts:114:3",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                      "column": 17,
+                      "line": 25
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39msupport\\studio-session.ts:25\n\n \u001b[90m 23 |\u001b[39m   \u001b[36mif\u001b[39m (who \u001b[33m===\u001b[39m \u001b[32m\"staff\"\u001b[39m) \u001b[36mreturn\u001b[39m \u001b[33mSTAFF\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 24 |\u001b[39m   \u001b[36mconst\u001b[39m e \u001b[33m=\u001b[39m process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mE2E_PLATFORM_ADMIN_EMAIL\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39me) \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m   \u001b[36mreturn\u001b[39m e\u001b[33m;\u001b[39m\n \u001b[90m 27 |\u001b[39m }\n \u001b[90m 28 |\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                        "column": 17,
+                        "line": 25
+                      },
+                      "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n\n   at support\\studio-session.ts:25\n\n  23 |   if (who === \"staff\") return STAFF;\n  24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;\n> 25 |   if (!e) throw new Error(\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\");\n     |                 ^\n  26 |   return e;\n  27 | }\n  28 |\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-sidebar.spec.ts:114:3"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:33:21.461Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-sidebar-Platform-Ad-2161c-l-cue-original-link-height-\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-sidebar-Platform-Ad-2161c-l-cue-original-link-height-\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                    "column": 17,
+                    "line": 25
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-a55f9587b894ee617025",
+          "file": "studio-sidebar.spec.ts",
+          "line": 113,
+          "column": 1
+        },
+        {
+          "title": "navigating reveals the active item in a clipped sidebar",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4857,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:33:24.498Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f52a560d53a9a511a730-b187c7a90f4a22c41bcc",
+          "file": "studio-sidebar.spec.ts",
+          "line": 130,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T12:32:41.797Z",
+    "duration": 48397.992,
+    "expected": 10,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

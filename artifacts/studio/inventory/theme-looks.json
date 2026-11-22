@@ -1,0 +1,11 @@
+{
+ "atelier": "standard(default)",
+ "freshly": "standard(default)",
+ "haven": "standard(default)",
+ "lumiere": "standard(default)",
+ "maison": "boutique",
+ "marketplace": "market",
+ "plain": "standard(default)",
+ "stride": "sport",
+ "voltage": "standard(default)"
+}

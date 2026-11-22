@@ -14,16 +14,16 @@ const DISPLAY = { fontFamily: "var(--sf-font-heading)", fontWeight: "var(--sf-fo
 const LABEL = "text-[11px] font-medium uppercase tracking-[0.2em]";
 
 /** The bag drawer (slides in from the right) and the "added to your bag" toast. Rendered once per page, inside the themed wrapper. */
-export function CartChrome() {
+export function CartChrome({ cartDrawerDocument }: { cartDrawerDocument?: Record<string, unknown> }) {
   return (
     <>
-      <CartDrawer />
+      <CartDrawer cartDrawerDocument={cartDrawerDocument} />
       <CartToast />
     </>
   );
 }
 
-function CartDrawer() {
+function CartDrawer({ cartDrawerDocument }: { cartDrawerDocument?: Record<string, unknown> }) {
   const cart = useCart();
   const panel = useRef<HTMLDivElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);

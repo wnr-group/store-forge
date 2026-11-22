@@ -1,0 +1,1766 @@
+[
+  {
+    "id": "AC-BASE-1",
+    "criterion": "PR #9 integrated and verified on the API integration branch; PR #7 then PR #10 on the frontend integration branch; PR #8 preserved.",
+    "source": "TICKET_CONFIRMED (Pull all Santu changes) / D-12",
+    "implementation": [
+      "integration branches (committed merges)"
+    ],
+    "tests": [
+      "git: merge commits 292b5aa (API), fc9f546+796e234 (FE)"
+    ],
+    "testTypes": [
+      "manual"
+    ],
+    "result": "PR #9 on API branch; PR #7 then PR #10 on FE branch; PR #8 ancestor preserved; original PR heads unchanged",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "log"
+    ],
+    "screenshots": [],
+    "api": [],
+    "db": [],
+    "log": [
+      "baseline/baseline-shas.txt",
+      "baseline/preflight.txt",
+      "baseline/pr8-preserved.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-BASE-2",
+    "criterion": "Overlaps in `globals.css` and `category-manager.tsx` resolved and regression-tested; migration history consistent; Razorpay excluded.",
+    "source": "ACCEPTED_ENGINEERING_DECISION",
+    "implementation": [
+      "trial merges, migration journal"
+    ],
+    "tests": [
+      "git merge-tree trial merges; journal check"
+    ],
+    "testTypes": [
+      "manual"
+    ],
+    "result": "0 shared files PR7/PR10, trial merges clean, migration journal 36/36 consistent, Razorpay files absent",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "log"
+    ],
+    "screenshots": [],
+    "api": [],
+    "db": [],
+    "log": [
+      "baseline/preflight.txt",
+      "baseline/api-migration-journal.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-BASE-3",
+    "criterion": "FE/API typecheck, lint, build pass; existing tests pass or pre-existing failures documented with evidence; Bulk Import passes FE→API E2E; both integration commit SHAs recorded; original PR branches untouched.",
+    "source": "ACCEPTED_ENGINEERING_DECISION",
+    "implementation": [],
+    "tests": [
+      "typecheck",
+      "lint",
+      "build",
+      "unit",
+      "api-e2e",
+      "api-integration",
+      "playwright import suites",
+      "PR #8 regression suites"
+    ],
+    "testTypes": [
+      "unit",
+      "api",
+      "integration",
+      "e2e"
+    ],
+    "result": "Typecheck, lint and build pass in both repos; FE unit 2679/2679; API unit 289, e2e 312, integration 13; all 27 Bulk Import browser/API specs pass (with a read-only member and a second tenant); PR #8 regression suites reviewed: 3 tests do not pass for the causes in the note; original PR branches untouched",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "log"
+    ],
+    "screenshots": [],
+    "api": [],
+    "db": [],
+    "log": [
+      "final2/fe-unit.txt",
+      "final2/fe-tsc.txt",
+      "final2/fe-lint.txt",
+      "final2/fe-build.txt",
+      "final2/api-unit.txt",
+      "final2/api-e2e.txt",
+      "final2/api-int.txt",
+      "final2/api-tsc.txt",
+      "final2/api-build.txt",
+      "final2/api-lint.txt",
+      "import-run/product-import-api.txt",
+      "import-run/product-import-csv.txt",
+      "import-run/product-import-xlsx.txt",
+      "import-run/product-import-db.txt",
+      "import-run/product-import-limits.txt",
+      "import-run/product-import-validation.txt",
+      "import-run/product-import-permissions.txt",
+      "baseline/baseline-shas.txt",
+      "baseline/pr8-preserved.txt"
+    ],
+    "note": "Not passing in the PR #8 regression run (not explained away): studio-evidence F12-8 compares analytics axis dates with dates captured on another day; studio-filters needs a product \"Adjustable Dumbbell Set\" that the local data no longer has; studio-evidence F4 (dark mode input border) fails by a sub-pixel colour difference of a transition in 2 of 3 runs. The staff palette expectation was updated to the accepted Studio change.",
+    "defects": []
+  },
+  {
+    "id": "AC-NAV-1",
+    "criterion": "Studio group visible with the five items; Import reachable from Products; Pages and Navigation remain under Online Store.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-10",
+    "implementation": [
+      "components/dashboard/nav-config.ts"
+    ],
+    "tests": [
+      "unit:nav-visibility (12)",
+      "e2e:studio-nav-group"
+    ],
+    "testTypes": [
+      "unit",
+      "e2e"
+    ],
+    "result": "Studio group shows Themes, Customize, Products, Categories, Collections; Pages/Navigation stay under Online Store; Import reachable from Products",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-NAV-1/owner-sidebar.png",
+        "url": "/dashboard",
+        "action": "sign in as owner",
+        "visible": "Studio group with five items"
+      },
+      {
+        "file": "AC-NAV-1/import-from-products.png",
+        "url": "/dashboard/products/import",
+        "action": "Products then Import",
+        "visible": "Import products page"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "final/e2e/studio-nav-group.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-NAV-2",
+    "criterion": "Members with `store:manage` see Themes and Customize; others do not; direct routes still open read-only.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-11",
+    "implementation": [
+      "nav-config.ts NAV_PERMISSION"
+    ],
+    "tests": [
+      "studio-restricted-members.spec.ts"
+    ],
+    "testTypes": [
+      "e2e"
+    ],
+    "result": "Owner and manager see Themes and Customize; read-only and catalogue-only members do not; their direct routes open Themes and the editor read-only (no Apply theme, no Publish, Undo disabled)",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-NAV-2/owner-sidebar.png",
+        "url": "/dashboard",
+        "action": "Signed in as the owner",
+        "visible": "Studio group with Themes and Customize"
+      },
+      {
+        "file": "AC-NAV-2/admin-sidebar.png",
+        "url": "/dashboard",
+        "action": "Signed in as the manager (all write)",
+        "visible": "Themes and Customize present, no Team members"
+      },
+      {
+        "file": "AC-NAV-2/readOnly-sidebar.png",
+        "url": "/dashboard",
+        "action": "Signed in as the read-only member",
+        "visible": "Catalogue items present, no Themes or Customize"
+      },
+      {
+        "file": "AC-NAV-2/catalogOnly-themes-read-only.png",
+        "url": "/dashboard/templates",
+        "action": "Catalogue-only member opens the Themes route directly",
+        "visible": "Themes list with previews only, no Apply theme"
+      },
+      {
+        "file": "AC-NAV-2/catalogOnly-editor-read-only.png",
+        "url": "/dashboard/templates/editor",
+        "action": "Catalogue-only member opens the editor directly",
+        "visible": "Editor with no Publish and disabled Undo"
+      },
+      {
+        "file": "AC-NAV-2/readOnly-editor-read-only.png",
+        "url": "/dashboard/templates/editor",
+        "action": "Read-only member opens the editor directly",
+        "visible": "Editor read-only"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "permissions/browser-nav.json",
+      "final2/studio/studio-restricted-members.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-NAV-3",
+    "criterion": "Products-only member sees only catalogue items; settings-only member sees only design items (read-floor behaviour respected); existing navigation and permission regression tests pass and sidebar tests are updated.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-11",
+    "implementation": [
+      "nav-config.ts"
+    ],
+    "tests": [
+      "studio-restricted-members.spec.ts",
+      "studio-sidebar.spec.ts",
+      "nav-visibility.test.ts"
+    ],
+    "testTypes": [
+      "e2e",
+      "unit"
+    ],
+    "result": "Design-only member sees only design items (plus Pages, Navigation, Settings); catalogue-only only catalogue items; no-access sees Overview, Pages, Navigation, Settings; catalogue routes fall back to the overview without an error page (D-008 fixed). Sidebar suites pass (studio-sidebar 11, nav-visibility unit 12); the staff palette expectation was updated to the accepted change",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-NAV-3/designOnly-sidebar.png",
+        "url": "/dashboard",
+        "action": "Signed in as the design-only member",
+        "visible": "Studio: Themes and Customize; Online Store; Settings; no catalogue items"
+      },
+      {
+        "file": "AC-NAV-3/catalogOnly-sidebar.png",
+        "url": "/dashboard",
+        "action": "Signed in as the catalogue-only member",
+        "visible": "Products, Categories, Collections, Inventory; no Themes or Customize"
+      },
+      {
+        "file": "AC-NAV-3/noAccess-sidebar.png",
+        "url": "/dashboard",
+        "action": "Signed in as the no-access member",
+        "visible": "Overview, Pages, Navigation, Settings only"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "permissions/browser-nav.json",
+      "final2/studio/studio-restricted-members.txt",
+      "final2/pr8/studio-sidebar.txt"
+    ],
+    "note": null,
+    "defects": [
+      "D-008"
+    ]
+  },
+  {
+    "id": "AC-PERM-1",
+    "criterion": "Read-only, write and no-access behaviour verified for `settings` and `products`; design permission never grants catalogue permission, and vice versa.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-7",
+    "implementation": [
+      "existing permissions.ts unchanged"
+    ],
+    "tests": [
+      "api-e2e:studio-permissions (7)"
+    ],
+    "testTypes": [
+      "api",
+      "db"
+    ],
+    "result": "Design-only, catalogue-only, read-only, no-access and owner/manager members tested at API and in the browser; design never implies catalogue and vice versa; the design-only member can publish and is sent to the overview from catalogue routes without an error; D-004 classified as intended",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "api",
+      "db",
+      "screenshot"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-PERM-1/designOnly-editor-can-publish.png",
+        "url": "/dashboard/templates/editor",
+        "action": "Design-only member opens the editor",
+        "visible": "Publish enabled"
+      },
+      {
+        "file": "AC-PERM-1/readOnly-products-no-add-import.png",
+        "url": "/dashboard/products",
+        "action": "Read-only member opens Products",
+        "visible": "List without Add or Import; the import route redirects"
+      }
+    ],
+    "api": [
+      "permissions/api-matrix.txt"
+    ],
+    "db": [
+      "presentations/api-e2e.txt"
+    ],
+    "log": [
+      "final2/studio/studio-restricted-members.txt",
+      "final2/studio/studio-restricted-members.txt"
+    ],
+    "note": "D-004 closed as not a defect (see defect register).",
+    "defects": [
+      "D-004",
+      "D-008"
+    ]
+  },
+  {
+    "id": "AC-PERM-2",
+    "criterion": "Direct API calls without permission rejected (save, publish, rollback, apply theme, catalogue writes, import); RLS blocks cross-tenant and unauthorized writes; Owner access intact.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-7",
+    "implementation": [],
+    "tests": [
+      "api-e2e:studio-permissions",
+      "api-e2e: full suite 305/305 incl. auth-tenancy, product-presentations"
+    ],
+    "testTypes": [
+      "api",
+      "db"
+    ],
+    "result": "Direct API calls without permission are 403; cross-tenant calls 404; RLS suites pass on a real pglite database",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "api",
+      "db"
+    ],
+    "screenshots": [],
+    "api": [
+      "permissions/api-matrix.txt"
+    ],
+    "db": [
+      "final/vitest-api-e2e.json"
+    ],
+    "log": [],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-CFG-1",
+    "criterion": "Every registered section and block type has applicable functional coverage; every confirmed configurable element is in the inventory with a verification case.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-13",
+    "implementation": [
+      "tests/unit/studio-registry-coverage.test.ts"
+    ],
+    "tests": [
+      "studio-registry-coverage.test.ts (5 tests)"
+    ],
+    "testTypes": [
+      "unit"
+    ],
+    "result": "255 element/look rows (18 sections and the real section/block pairs on each of 4 looks) persist, validate and render; each carries the style hook in the markup and display:none in the generated stylesheet when hidden; the known-gaps fixture is empty. Two accepted-but-never-drawn cases are named and tested (D-005, D-006), not skipped",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "log"
+    ],
+    "screenshots": [],
+    "api": [],
+    "db": [],
+    "log": [
+      "inventory/registry-coverage.json",
+      "final2/fe-unit.txt"
+    ],
+    "note": "Findings D-005 (slider hero headline mapping) and D-006 (group block accepted by nothing; column children never drawn) remain open and are pinned by tests.",
+    "defects": [
+      "D-003",
+      "D-005",
+      "D-006"
+    ]
+  },
+  {
+    "id": "AC-CFG-2",
+    "criterion": "All 9 themes and 4 looks pass the 7-step smoke test (open, select, change text, change style, change visibility, save and publish, verify storefront).",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-13",
+    "implementation": [
+      "tests/e2e/studio-theme-matrix.spec.ts"
+    ],
+    "tests": [
+      "e2e:studio-theme-matrix (9 themes x 7 steps)"
+    ],
+    "testTypes": [
+      "e2e"
+    ],
+    "result": "All 9 themes (4 looks) pass open, select, change text, change style, change visibility, publish and live storefront in one run; Haven and Stride change the headline on the first Hero slide (slider data). The earlier run was invalid (it re-tested Atelier) and has been replaced",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-CFG-2/atelier.png",
+        "url": "/dashboard/templates/editor",
+        "action": "apply atelier, edit, publish",
+        "visible": "atelier editor after publish"
+      },
+      {
+        "file": "AC-CFG-2/freshly.png",
+        "url": "/dashboard/templates/editor",
+        "action": "apply freshly, edit, publish",
+        "visible": "freshly editor after publish"
+      },
+      {
+        "file": "AC-CFG-2/haven.png",
+        "url": "/dashboard/templates/editor",
+        "action": "apply haven, edit, publish",
+        "visible": "haven editor after publish"
+      },
+      {
+        "file": "AC-CFG-2/lumire.png",
+        "url": "/dashboard/templates/editor",
+        "action": "apply lumire, edit, publish",
+        "visible": "lumire editor after publish"
+      },
+      {
+        "file": "AC-CFG-2/maison.png",
+        "url": "/dashboard/templates/editor",
+        "action": "apply maison, edit, publish",
+        "visible": "maison editor after publish"
+      },
+      {
+        "file": "AC-CFG-2/marketplace.png",
+        "url": "/dashboard/templates/editor",
+        "action": "apply marketplace, edit, publish",
+        "visible": "marketplace editor after publish"
+      },
+      {
+        "file": "AC-CFG-2/plain.png",
+        "url": "/dashboard/templates/editor",
+        "action": "apply plain, edit, publish",
+        "visible": "plain editor after publish"
+      },
+      {
+        "file": "AC-CFG-2/stride.png",
+        "url": "/dashboard/templates/editor",
+        "action": "apply stride, edit, publish",
+        "visible": "stride editor after publish"
+      },
+      {
+        "file": "AC-CFG-2/voltage.png",
+        "url": "/dashboard/templates/editor",
+        "action": "apply voltage, edit, publish",
+        "visible": "voltage editor after publish"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "inventory/smoke-matrix.json",
+      "final2/studio/studio-theme-matrix.txt"
+    ],
+    "note": "D-007: the previous evidence for this AC was invalid; replaced by this run. The run needed the local API throttle raised (D-014).",
+    "defects": [
+      "D-005",
+      "D-007",
+      "D-014"
+    ]
+  },
+  {
+    "id": "AC-CFG-3",
+    "criterion": "Text, style, visibility and base/tablet/mobile overrides persist and render after publish.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-13",
+    "implementation": [],
+    "tests": [
+      "studio-overrides.e2e-spec.ts",
+      "studio-config-persistence.spec.ts",
+      "studio-visibility-live.spec.ts"
+    ],
+    "testTypes": [
+      "api",
+      "e2e"
+    ],
+    "result": "Style (base/tablet/mobile, hidden), text and disable overrides round-trip through draft, publish and the public layout (API); in a browser the text override shows on the live storefront at desktop width and the mobile-hidden override hides the announcement bar at phone width; header and menu-link hiding verified live on 4 looks",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "api",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-CFG-3/live-desktop-text-override.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Published a text override on the announcement bar, opened the storefront at 1280",
+        "visible": "The replaced words are shown"
+      },
+      {
+        "file": "AC-CFG-3/live-mobile-announcement-hidden.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Same publish, storefront at 390",
+        "visible": "The announcement bar is hidden"
+      }
+    ],
+    "api": [
+      "final2/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "inventory/config-persistence-text.json",
+      "inventory/visibility-live.json",
+      "final2/studio/studio-config-persistence.txt",
+      "final2/studio/studio-visibility-live.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-CFG-4",
+    "criterion": "Adapter gaps are reported as defects and resolved before L1 is claimed complete; none silently accepted.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-13",
+    "implementation": [],
+    "tests": [
+      "studio-registry-coverage.test.ts",
+      "studio-visibility-live.spec.ts"
+    ],
+    "testTypes": [
+      "unit",
+      "e2e"
+    ],
+    "result": "All adapter gaps resolved (D-003) with unit coverage of every pair and browser proof on all four looks: the header is hidden on a phone and a menu link on a desktop, saved as a draft, published and correct on the live storefront",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-CFG-4/standard_editor-hide-controls.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Editor: Hide on this device switched on for the selected menu link",
+        "visible": "Style tab with the visibility switch"
+      },
+      {
+        "file": "AC-CFG-4/standard_live-mobile-header-hidden.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Live storefront at 390 after publishing the header hidden on mobile",
+        "visible": "No header"
+      },
+      {
+        "file": "AC-CFG-4/standard_live-desktop-link-hidden.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Live storefront at 1280 after publishing one menu link hidden",
+        "visible": "Header present, that link absent"
+      },
+      {
+        "file": "AC-CFG-4/boutique_editor-hide-controls.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Editor: Hide on this device switched on for the selected menu link",
+        "visible": "Style tab with the visibility switch"
+      },
+      {
+        "file": "AC-CFG-4/boutique_live-mobile-header-hidden.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Live storefront at 390 after publishing the header hidden on mobile",
+        "visible": "No header"
+      },
+      {
+        "file": "AC-CFG-4/boutique_live-desktop-link-hidden.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Live storefront at 1280 after publishing one menu link hidden",
+        "visible": "Header present, that link absent"
+      },
+      {
+        "file": "AC-CFG-4/sport_editor-hide-controls.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Editor: Hide on this device switched on for the selected menu link",
+        "visible": "Style tab with the visibility switch"
+      },
+      {
+        "file": "AC-CFG-4/sport_live-mobile-header-hidden.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Live storefront at 390 after publishing the header hidden on mobile",
+        "visible": "No header"
+      },
+      {
+        "file": "AC-CFG-4/sport_live-desktop-link-hidden.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Live storefront at 1280 after publishing one menu link hidden",
+        "visible": "Header present, that link absent"
+      },
+      {
+        "file": "AC-CFG-4/market_editor-hide-controls.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Editor: Hide on this device switched on for the selected menu link",
+        "visible": "Style tab with the visibility switch"
+      },
+      {
+        "file": "AC-CFG-4/market_live-mobile-header-hidden.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Live storefront at 390 after publishing the header hidden on mobile",
+        "visible": "No header"
+      },
+      {
+        "file": "AC-CFG-4/market_live-desktop-link-hidden.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Live storefront at 1280 after publishing one menu link hidden",
+        "visible": "Header present, that link absent"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "inventory/registry-coverage.json",
+      "inventory/visibility-live.json",
+      "final2/studio/studio-visibility-live.txt"
+    ],
+    "note": null,
+    "defects": [
+      "D-003"
+    ]
+  },
+  {
+    "id": "AC-CFG-5",
+    "criterion": "Draft goes to the right document; publish creates the expected version; rollback restores the previous configuration; stale or concurrent saves rejected; evidence recorded per inventory entry.",
+    "source": "ACCEPTED_ENGINEERING_DECISION",
+    "implementation": [],
+    "tests": [
+      "themes.e2e-spec.ts",
+      "studio-config-persistence.spec.ts"
+    ],
+    "testTypes": [
+      "api",
+      "e2e"
+    ],
+    "result": "Draft, publish, rollback and 409 covered by the API suites (312 pass); in the editor History restores an older published version and the live storefront follows; an out-of-date tab is refused (\"Someone else changed this design\") and does not overwrite the newer draft",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "api",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-CFG-5/history-before-restore.png",
+        "url": "/dashboard/templates/editor",
+        "action": "Opened Version history",
+        "visible": "Numbered versions with Restore"
+      },
+      {
+        "file": "AC-CFG-5/live-after-restore-shows-A.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Restored the older version",
+        "visible": "Storefront shows the restored content"
+      },
+      {
+        "file": "AC-CFG-5/stale-tab-refused.png",
+        "url": "/dashboard/templates/editor",
+        "action": "Saved from a tab opened before the draft changed",
+        "visible": "Conflict banner, newer draft kept"
+      }
+    ],
+    "api": [
+      "final2/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "inventory/config-persistence.json",
+      "final2/studio/studio-config-persistence.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-VP-1",
+    "criterion": "All eight virtual pages inventoried; applicable settings, text, style, visibility, responsive verified; one edit+publish flow per theme (9).",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-14",
+    "implementation": [
+      "lib/storefront/documents.ts (default pages)"
+    ],
+    "tests": [
+      "studio-virtual-pages.spec.ts",
+      "studio-virtual-pages.test.ts"
+    ],
+    "testTypes": [
+      "e2e",
+      "unit"
+    ],
+    "result": "All eight virtual pages (products, collections, search, cart, wishlist, content, about, contact) edit, publish and show the edit live; D-002 fixed without touching the shared colour rule",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-VP-1/products.png",
+        "url": "/s/urban-nest-demo/products",
+        "action": "Edited the page in the editor and published",
+        "visible": "The edited text on the live page"
+      },
+      {
+        "file": "AC-VP-1/collections.png",
+        "url": "/s/urban-nest-demo/collections",
+        "action": "Edited the page in the editor and published",
+        "visible": "The edited text on the live page"
+      },
+      {
+        "file": "AC-VP-1/search.png",
+        "url": "/s/urban-nest-demo/search",
+        "action": "Edited the page in the editor and published",
+        "visible": "The edited text on the live page"
+      },
+      {
+        "file": "AC-VP-1/cart.png",
+        "url": "/s/urban-nest-demo/cart",
+        "action": "Edited the page in the editor and published",
+        "visible": "The edited text on the live page"
+      },
+      {
+        "file": "AC-VP-1/wishlist.png",
+        "url": "/s/urban-nest-demo/wishlist",
+        "action": "Edited the page in the editor and published",
+        "visible": "The edited text on the live page"
+      },
+      {
+        "file": "AC-VP-1/about.png",
+        "url": "/s/urban-nest-demo/about",
+        "action": "Edited the page in the editor and published",
+        "visible": "The edited text on the live page"
+      },
+      {
+        "file": "AC-VP-1/contact.png",
+        "url": "/s/urban-nest-demo/contact",
+        "action": "Edited the page in the editor and published",
+        "visible": "The edited text on the live page"
+      },
+      {
+        "file": "AC-VP-1/content.png",
+        "url": "/s/urban-nest-demo/content",
+        "action": "Edited the page in the editor and published",
+        "visible": "The edited text on the live page"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "virtual-pages/flows.json",
+      "final2/pr8b/studio-virtual-pages.txt"
+    ],
+    "note": "Screenshots of the defect from the earlier pass are archived in defect-evidence/D-002-before-fix.",
+    "defects": [
+      "D-002",
+      "D-002b"
+    ]
+  },
+  {
+    "id": "AC-VP-2",
+    "criterion": "Reset restores that page's default and leaves other pages untouched.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-14",
+    "implementation": [],
+    "tests": [
+      "studio-virtual-pages.spec.ts"
+    ],
+    "testTypes": [
+      "e2e"
+    ],
+    "result": "Reset restores only that page (cart) to its default; the wishlist keeps its edit (asserted in the same run)",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-VP-2/cart-back-to-its-default.png",
+        "url": "/s/urban-nest-demo/cart",
+        "action": "Reset the cart page and published",
+        "visible": "The cart shows its default heading, not the edited one"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "virtual-pages/flows.json",
+      "final2/pr8b/studio-virtual-pages.txt"
+    ],
+    "note": null,
+    "defects": [
+      "D-002"
+    ]
+  },
+  {
+    "id": "AC-VP-3",
+    "criterion": "Search dynamic term, cart and wishlist state keep working after text edits.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-14",
+    "implementation": [],
+    "tests": [
+      "studio-virtual-state.spec.ts"
+    ],
+    "testTypes": [
+      "e2e"
+    ],
+    "result": "After the headings of search, cart and wishlist are edited and published: the shopper's search term still drives the results, an added product is listed in the edited cart, and a saved product is listed on the edited wishlist",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-VP-3/search-edited-term-and-results.png",
+        "url": "/s/urban-nest-demo/search?q=zzvp",
+        "action": "Searched for the test product",
+        "visible": "Edited heading and the matching product"
+      },
+      {
+        "file": "AC-VP-3/cart-edited-with-item.png",
+        "url": "/s/urban-nest-demo/cart",
+        "action": "Added the product to the bag",
+        "visible": "Edited cart heading and the item"
+      },
+      {
+        "file": "AC-VP-3/wishlist-edited-with-item.png",
+        "url": "/s/urban-nest-demo/wishlist",
+        "action": "Saved the product",
+        "visible": "Edited wishlist heading and the product"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "virtual-pages/state-flows.json",
+      "final2/studio/studio-virtual-state.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-PP-1",
+    "criterion": "Per-product draft persists, shared product template unchanged; publish exposes the right presentation on the right product only; drafts never public.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-15",
+    "implementation": [
+      "existing product presentation API"
+    ],
+    "tests": [
+      "studio-product-presentation.spec.ts",
+      "studio-presentation-looks.test.ts",
+      "product-presentations.e2e-spec.ts"
+    ],
+    "testTypes": [
+      "e2e",
+      "unit",
+      "api"
+    ],
+    "result": "Verified: the draft persists and is never public, the shared product template is unchanged, and publishing hides the chosen block on that product only (Stride in a browser; all four looks by unit test; D-009 fixed). Not verified as working: gallery layout, media position and focal point are ignored by the Stride and Marketplace galleries (D-010)",
+    "status": "IN_PROGRESS",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-PP-1/customizer-open.png",
+        "url": "/dashboard/templates/editor",
+        "action": "Opened the per-product customizer",
+        "visible": "Gallery layout, media position and block switches"
+      },
+      {
+        "file": "AC-PP-1/draft-saved-sku-hidden.png",
+        "url": "/dashboard/templates/editor",
+        "action": "Hid Description for the product",
+        "visible": "Draft saved, not published"
+      },
+      {
+        "file": "AC-PP-1/storefront-A-sku-hidden.png",
+        "url": "/s/urban-nest-demo/products/a",
+        "action": "Published this product",
+        "visible": "Description gone on that product"
+      },
+      {
+        "file": "AC-PP-1/storefront-B-unchanged.png",
+        "url": "/s/urban-nest-demo/products/b",
+        "action": "Opened another product",
+        "visible": "Description still shown"
+      }
+    ],
+    "api": [
+      "presentations/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "presentations/browser-flow.json",
+      "final2/studio/studio-product-presentation.txt"
+    ],
+    "note": "Exact blocker: D-010 needs a design decision for a stacked variant of each look gallery. Not marked passed.",
+    "defects": [
+      "D-009",
+      "D-010"
+    ]
+  },
+  {
+    "id": "AC-PP-2",
+    "criterion": "Reset restores store default for that product only; no override row renders the default without breaking.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-15",
+    "implementation": [
+      "existing product presentation API"
+    ],
+    "tests": [
+      "studio-product-presentation.spec.ts",
+      "product-presentations.e2e-spec.ts"
+    ],
+    "testTypes": [
+      "e2e",
+      "api"
+    ],
+    "result": "Reset restores the store design for that product only (browser); a product with no override renders the default (API and unit)",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "api",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-PP-2/storefront-A-reset-to-store-design.png",
+        "url": "/s/urban-nest-demo/products/a",
+        "action": "Clicked Reset to the store design",
+        "visible": "The product shows the store design again"
+      }
+    ],
+    "api": [
+      "final2/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "presentations/browser-flow.json"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-PP-3",
+    "criterion": "Stale update rejected without overwrite; conflict response and recovery verified.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-15",
+    "implementation": [
+      "existing product presentation API"
+    ],
+    "tests": [
+      "studio-product-presentation.spec.ts",
+      "product-presentations.e2e-spec.ts"
+    ],
+    "testTypes": [
+      "e2e",
+      "api"
+    ],
+    "result": "A second tab opened before another change is refused (\"Someone else changed the settings of ... Your unsaved changes were not saved\") and keeps the newer draft; \"Load the latest settings\" recovers",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "api",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-PP-3/stale-tab-refused.png",
+        "url": "/dashboard/templates/editor",
+        "action": "Changed the gallery layout from a stale tab",
+        "visible": "Conflict banner with Load the latest settings"
+      }
+    ],
+    "api": [
+      "final2/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "presentations/browser-flow.json"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-PP-4",
+    "criterion": "Tenant isolation on writes and public reads; storefront cache invalidation applied.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-15",
+    "implementation": [],
+    "tests": [
+      "product-presentations-isolation.e2e-spec.ts",
+      "studio-product-presentation.spec.ts"
+    ],
+    "testTypes": [
+      "api",
+      "e2e"
+    ],
+    "result": "Tenant isolation on writes and public reads passes in the API suites; cache invalidation observed: a publish and a reset appear on the live product page in about 2 s without waiting for expiry",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "api",
+      "log"
+    ],
+    "screenshots": [],
+    "api": [
+      "final2/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "presentations/browser-flow.json",
+      "final2/studio/studio-product-presentation.txt"
+    ],
+    "note": "The cache is refreshed by the editor action; an API-only publish is not reflected until the cache expires (D-011).",
+    "defects": [
+      "D-011"
+    ]
+  },
+  {
+    "id": "AC-PICK-1",
+    "criterion": "Picker lists the tenant's collections and stores the collection id; presentation settings unchanged.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-3",
+    "implementation": [
+      "lib/storefront/featured.ts",
+      "components/themes/editor/setting-field.tsx"
+    ],
+    "tests": [
+      "unit:collection-ref (7)",
+      "e2e:studio-collection-picker"
+    ],
+    "testTypes": [
+      "unit",
+      "e2e"
+    ],
+    "result": "Picker stores the collection id; survives reload; live layout contains the id; storefront shows the collection products",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-PICK-1/picker-selected.png",
+        "url": "/dashboard/templates/editor",
+        "action": "pick Best Sellers and publish",
+        "visible": "Collection Identifier shows Best Sellers"
+      },
+      {
+        "file": "AC-PICK-1/storefront.png",
+        "url": "/s/<store>",
+        "action": "open storefront",
+        "visible": "collection products visible"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "final/e2e/studio-collection-picker.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-PICK-2",
+    "criterion": "An existing slug value displays as the selected collection and still renders the list.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-3",
+    "implementation": [
+      "collectionSelectValue"
+    ],
+    "tests": [
+      "studio-collection-legacy-slug.spec.ts",
+      "collection-ref.test.ts"
+    ],
+    "testTypes": [
+      "e2e",
+      "unit"
+    ],
+    "result": "A Featured collection saved with the collection slug shows as that collection in the picker and the storefront still renders its list",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-PICK-2/legacy-slug-shown-as-selected.png",
+        "url": "/dashboard/templates/editor",
+        "action": "Draft with a slug-valued collection, opened Featured collection",
+        "visible": "The collection is selected, no \"Removed collection\" notice"
+      },
+      {
+        "file": "AC-PICK-2/storefront-still-renders-list.png",
+        "url": "/s/urban-nest-demo",
+        "action": "Published and opened the home page",
+        "visible": "The collection products are listed"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "final2/studio/studio-collection-legacy-slug.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-CDEL-1",
+    "criterion": "Collection referenced by a draft or by the published document shows a usage warning with section count and template/page locations; id and slug references detected; URLs in other text and historical versions not counted.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-8/D-9",
+    "implementation": [
+      "collection-usage.ts",
+      "collections.service.ts",
+      "collection-form.tsx"
+    ],
+    "tests": [
+      "api-e2e:collection-usage (10)",
+      "e2e:studio-collection-delete"
+    ],
+    "testTypes": [
+      "api",
+      "e2e"
+    ],
+    "result": "Draft and live references (id and slug) produce a warning naming section count, page and state; URLs/free text are not counted",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "api"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-CDEL-1/warning-draft.png",
+        "url": "/dashboard/collections/<id>",
+        "action": "click Delete",
+        "visible": "usage warning, draft"
+      },
+      {
+        "file": "AC-CDEL-1/warning-live.png",
+        "url": "/dashboard/collections/<id>",
+        "action": "click Delete",
+        "visible": "usage warning, live and draft"
+      }
+    ],
+    "api": [
+      "cdel/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "final/e2e/studio-collection-delete.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-CDEL-2",
+    "criterion": "Unused collection deletes via the existing flow; cancel changes nothing; confirm uses existing deletion.",
+    "source": "ACCEPTED_ENGINEERING_DECISION",
+    "implementation": [],
+    "tests": [
+      "api-e2e:collection-usage",
+      "e2e:studio-collection-delete"
+    ],
+    "testTypes": [
+      "api",
+      "e2e"
+    ],
+    "result": "Unused collection deletes through the existing flow; cancel changes nothing",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "api"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-CDEL-2/unused-delete-dialog.png",
+        "url": "/dashboard/collections/<id>",
+        "action": "click Delete on an unused collection",
+        "visible": "plain confirmation"
+      }
+    ],
+    "api": [
+      "cdel/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "final/e2e/studio-collection-delete.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-CDEL-3",
+    "criterion": "If references changed since the warning, the warning refreshes and confirmation is required again.",
+    "source": "ACCEPTED_ENGINEERING_DECISION",
+    "implementation": [],
+    "tests": [
+      "api-e2e:collection-usage (stale hash 409)",
+      "e2e:concurrent change"
+    ],
+    "testTypes": [
+      "api",
+      "e2e"
+    ],
+    "result": "A reference removed from a second tab after the warning gives a refreshed warning and requires a second confirmation; nothing deleted on the first confirm",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "api"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-CDEL-3/refreshed-warning.png",
+        "url": "/dashboard/collections/<id>",
+        "action": "confirm after concurrent change",
+        "visible": "design has changed message, refreshed text"
+      }
+    ],
+    "api": [
+      "cdel/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "final/e2e/studio-collection-delete.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-CDEL-4",
+    "criterion": "Lookup and deletion are tenant-scoped and need `catalog:manage`; failure leaves no partial deletion.",
+    "source": "ACCEPTED_ENGINEERING_DECISION",
+    "implementation": [],
+    "tests": [
+      "api-e2e:collection-usage (tenant, permission, refused delete keeps collection and products)"
+    ],
+    "testTypes": [
+      "api",
+      "db"
+    ],
+    "result": "Tenant-scoped (404 for another org), requires products write, refused delete leaves collection and product links intact",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "api",
+      "db"
+    ],
+    "screenshots": [],
+    "api": [
+      "cdel/api-e2e.txt"
+    ],
+    "db": [
+      "cdel/api-e2e.txt"
+    ],
+    "log": [],
+    "note": "DB evidence is the pglite e2e assertions on stored rows (collection exists, productCount unchanged).",
+    "defects": []
+  },
+  {
+    "id": "AC-CDEL-5",
+    "criterion": "Storefront hides the section for a deleted/empty collection; editor shows a hint; empty collections are not auto-deleted.",
+    "source": "ACCEPTED_ENGINEERING_DECISION",
+    "implementation": [],
+    "tests": [
+      "e2e:studio-collection-delete (after deletion)"
+    ],
+    "testTypes": [
+      "e2e"
+    ],
+    "result": "After deletion the editor shows Removed collection and the storefront renders without the section or an error",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-CDEL-5/editor-removed-collection.png",
+        "url": "/dashboard/templates/editor",
+        "action": "open the section",
+        "visible": "Removed collection hint"
+      },
+      {
+        "file": "AC-CDEL-5/storefront.png",
+        "url": "/s/<store>",
+        "action": "open storefront",
+        "visible": "page renders"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "final/e2e/studio-collection-delete.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-CAT-1",
+    "criterion": "Category delete preserves products (uncategorised) and promotes subcategories; dialog shows product count, subcategory count and names; cancel changes nothing.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-18",
+    "implementation": [
+      "lib/categories/hierarchy.ts",
+      "category-manager.tsx"
+    ],
+    "tests": [
+      "unit:category-deletion (7)",
+      "e2e:studio-category-delete"
+    ],
+    "testTypes": [
+      "unit",
+      "e2e"
+    ],
+    "result": "Dialog shows product count, subcategory count and names; cancel keeps all; confirm promotes subcategories to top level",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-CAT-1/delete-dialog.png",
+        "url": "/dashboard/categories",
+        "action": "Delete a parent category",
+        "visible": "counts and subcategory names"
+      },
+      {
+        "file": "AC-CAT-1/after-delete.png",
+        "url": "/dashboard/categories",
+        "action": "confirm delete",
+        "visible": "subcategories at top level"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "final/e2e/studio-category-delete.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-CAT-2",
+    "criterion": "Product deletion removes collection memberships; deleted and draft products absent from lists; order preserved.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-18",
+    "implementation": [],
+    "tests": [
+      "collection-membership.e2e-spec.ts"
+    ],
+    "testTypes": [
+      "api"
+    ],
+    "result": "Deleting a product removes its collection membership (row check); the others keep their saved order; draft products never reach a public list and appear when published",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "api"
+    ],
+    "screenshots": [],
+    "api": [
+      "final2/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-IMP-1",
+    "criterion": "Valid CSV/XLSX creates expected products; invalid rows yield row/column/message/value errors and nothing is created.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-5",
+    "implementation": [
+      "PR #9 API, PR #10 UI"
+    ],
+    "tests": [
+      "product-import-csv.spec.ts",
+      "product-import-xlsx.spec.ts",
+      "product-import-validation.spec.ts",
+      "product-import-db.spec.ts"
+    ],
+    "testTypes": [
+      "e2e"
+    ],
+    "result": "Valid CSV and XLSX create the expected products; invalid files create nothing and report row, column, message and value",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-IMP-1/csv-success.png",
+        "url": "/dashboard/products/import",
+        "action": "Imported a valid CSV",
+        "visible": "2 products imported"
+      },
+      {
+        "file": "AC-IMP-1/xlsx-success.png",
+        "url": "/dashboard/products/import",
+        "action": "Imported a valid XLSX",
+        "visible": "Products imported"
+      },
+      {
+        "file": "AC-IMP-1/invalid-rows-row-column-message-value.png",
+        "url": "/dashboard/products/import",
+        "action": "Imported an invalid CSV",
+        "visible": "No products imported; table of row, column, message, value"
+      },
+      {
+        "file": "AC-IMP-1/nothing-created-after-invalid-file.png",
+        "url": "/dashboard/products",
+        "action": "Searched for the invalid file rows",
+        "visible": "No rows"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "import-run/product-import-csv.txt",
+      "import-run/product-import-xlsx.txt",
+      "import-run/product-import-validation.txt",
+      "import-run/product-import-db.txt"
+    ],
+    "note": "The screenshots come from the import specs of this final run and were copied into the AC folder.",
+    "defects": []
+  },
+  {
+    "id": "AC-IMP-2",
+    "criterion": "Duplicate SKU/slug rejected; missing category fails without creating one; >500 rows rejected server-side.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-5",
+    "implementation": [],
+    "tests": [
+      "product-import-validation.spec.ts",
+      "product-import-limits.spec.ts",
+      "product-import-api.spec.ts",
+      "product-import.e2e-spec.ts"
+    ],
+    "testTypes": [
+      "e2e",
+      "api"
+    ],
+    "result": "Duplicate SKU/slug rejected; unknown categories are row errors and nothing is created (API); more than 500 rows rejected server-side and in the file check",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "api",
+      "log"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-IMP-2/more-than-500-rows-rejected.png",
+        "url": "/dashboard/products/import",
+        "action": "Chose a file with too many rows",
+        "visible": "Actionable rejection"
+      },
+      {
+        "file": "AC-IMP-2/501-rows-rejected.png",
+        "url": "/dashboard/products/import",
+        "action": "Imported 501 rows",
+        "visible": "Rejected"
+      }
+    ],
+    "api": [
+      "final2/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "import-run/product-import-limits.txt",
+      "import-run/product-import-api.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-IMP-3",
+    "criterion": "Unauthorized users cannot import; cross-tenant products inaccessible; persistence failure leaves no partial products.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-5",
+    "implementation": [],
+    "tests": [
+      "api-e2e:product-import",
+      "api-e2e:studio-permissions"
+    ],
+    "testTypes": [
+      "api",
+      "db"
+    ],
+    "result": "read-only 403, unauthenticated 401, tenant isolation, atomic rollback on failure",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "api",
+      "db"
+    ],
+    "screenshots": [],
+    "api": [
+      "import/api-e2e.txt",
+      "permissions/api-matrix.txt"
+    ],
+    "db": [
+      "import/api-e2e.txt"
+    ],
+    "log": [],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-IMP-4",
+    "criterion": "Full Studio FE→API E2E passes.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-5",
+    "implementation": [],
+    "tests": [
+      "product-import-*.spec.ts (7 files)"
+    ],
+    "testTypes": [
+      "e2e"
+    ],
+    "result": "Full FE-to-API import E2E passes on the final build: 27 specs including permissions with a read-only member (403, nothing written) and tenant isolation with a second tenant",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "log"
+    ],
+    "screenshots": [],
+    "api": [],
+    "db": [],
+    "log": [
+      "import-run/product-import-api.txt",
+      "import-run/product-import-csv.txt",
+      "import-run/product-import-xlsx.txt",
+      "import-run/product-import-db.txt",
+      "import-run/product-import-limits.txt",
+      "import-run/product-import-validation.txt",
+      "import-run/product-import-permissions.txt"
+    ],
+    "note": "Needs the restricted seed (tests/qa/seed-restricted-members.sql) and E2E_VIEWER_EMAIL=read-only@demo.test.",
+    "defects": []
+  },
+  {
+    "id": "AC-ERR-1",
+    "criterion": "API failure shows the shopper error state; Retry re-fetches from the server.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-16",
+    "implementation": [
+      "app/s/[slug]/error.tsx",
+      "components/storefront/error-state.tsx"
+    ],
+    "tests": [
+      "unit:storefront-error-state",
+      "e2e:studio-storefront-errors (fault proxy)"
+    ],
+    "testTypes": [
+      "unit",
+      "e2e"
+    ],
+    "result": "API down shows the neutral state, same URL, Retry causes a real server request (proxy counter) and recovers; no internals or dashboard link",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot",
+      "api"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-ERR-1/api-down.png",
+        "url": "/s/fault-*",
+        "action": "storefront API returns 500",
+        "visible": "temporarily unavailable + Try again"
+      },
+      {
+        "file": "AC-ERR-1/recovered.png",
+        "url": "/s/fault-*",
+        "action": "API healthy, click Try again",
+        "visible": "store renders"
+      }
+    ],
+    "api": [
+      "err/err-e2e.txt"
+    ],
+    "db": [],
+    "log": [],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-ERR-2",
+    "criterion": "Invalid published document and a throwing section are caught safely with no technical detail.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-16",
+    "implementation": [],
+    "tests": [
+      "unit:storefront-bad-document",
+      "e2e:studio-storefront-errors"
+    ],
+    "testTypes": [
+      "unit",
+      "e2e"
+    ],
+    "result": "A throwing section is caught by the boundary; an invalid or non-document published design now also shows the neutral state with Retry and no technical detail (D-001 fixed, verified through the fault proxy)",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "screenshot"
+    ],
+    "screenshots": [
+      {
+        "file": "AC-ERR-2/section-throws.png",
+        "url": "/s/fault-*",
+        "action": "published layout with a null section",
+        "visible": "neutral error state"
+      },
+      {
+        "file": "AC-ERR-2/invalid-document.png",
+        "url": "/s/fault-*",
+        "action": "published layout with invalid order",
+        "visible": "store page, no error text"
+      }
+    ],
+    "api": [],
+    "db": [],
+    "log": [
+      "err/err-e2e.txt",
+      "final2/errors/studio-storefront-errors.txt",
+      "final2/errors/studio-storefront-errors.txt"
+    ],
+    "note": null,
+    "defects": [
+      "D-001"
+    ]
+  },
+  {
+    "id": "AC-ERR-3",
+    "criterion": "No dashboard link on the state; dashboard error behaviour unchanged; publish, rollback and cache invalidation unchanged; no unpublished data exposed.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-16",
+    "implementation": [
+      "app/error.tsx untouched"
+    ],
+    "tests": [
+      "git diff: app/error.tsx unchanged",
+      "regression: studio suites"
+    ],
+    "testTypes": [
+      "manual",
+      "e2e"
+    ],
+    "result": "No dashboard link on the state; dashboard error page file unchanged; PR #8 suites that ran pass except date/data-dependent ones",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "log"
+    ],
+    "screenshots": [],
+    "api": [],
+    "db": [],
+    "log": [
+      "final/regression2.out",
+      "final/regression.out"
+    ],
+    "note": "Regression failures reviewed: staff palette snapshot (intended nav change), analytics axis dates, products filter data, timezone env.",
+    "defects": []
+  },
+  {
+    "id": "AC-NFR-1",
+    "criterion": "Existing limits and rate limits remain enforced.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-17",
+    "implementation": [],
+    "tests": [
+      "studio-limits.e2e-spec.ts",
+      "body-limits.e2e-spec.ts",
+      "product-import.e2e-spec.ts",
+      "auth-tenancy.e2e-spec.ts"
+    ],
+    "testTypes": [
+      "api",
+      "unit"
+    ],
+    "result": "Existing limits still hold: 25 sections per page, 500 products per collection, 500 import rows, request body limits, login/password/account rate limits and the global throttle; the collection delete rejects a malformed usage hash",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "api",
+      "log"
+    ],
+    "screenshots": [],
+    "api": [
+      "final2/api-e2e.txt"
+    ],
+    "db": [],
+    "log": [
+      "final2/fe-unit.txt"
+    ],
+    "note": "D-014: past the global throttle (120/min) the frontend treats the 429 session check as signed-out and loops between /login and /dashboard. Existing behaviour, not changed.",
+    "defects": [
+      "D-014"
+    ]
+  },
+  {
+    "id": "AC-NFR-2",
+    "criterion": "Import benchmark run; editor and storefront baselines recorded and reproducible by SHA.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-17",
+    "implementation": [
+      "tests/qa/studio-perf.ts"
+    ],
+    "tests": [
+      "perf run baseline and after"
+    ],
+    "testTypes": [
+      "manual"
+    ],
+    "result": "Draft/publish/rollback/storefront fetch/public reads and 500-row import measured on baseline-SHA API (4001) and final API (4000), 7 runs each",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "log"
+    ],
+    "screenshots": [],
+    "api": [],
+    "db": [],
+    "log": [
+      "perf/baseline.json",
+      "perf/after.json",
+      "perf/import-baseline.txt",
+      "perf/import-after.txt",
+      "baseline/baseline-shas.txt"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-NFR-3",
+    "criterion": "No unexplained regression versus baseline.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-17",
+    "implementation": [],
+    "tests": [
+      "perf comparison"
+    ],
+    "testTypes": [
+      "manual"
+    ],
+    "result": "medians: draft 31/31, publish 33/31, rollback 32/35, storefront fetch 157/135, public product read 15/14, layout 15/14 ms; import 1356/1337 ms; no regression. Same machine and database; the frontend was not separately baselined",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "log"
+    ],
+    "screenshots": [],
+    "api": [],
+    "db": [],
+    "log": [
+      "perf/baseline.json",
+      "perf/after.json"
+    ],
+    "note": null,
+    "defects": []
+  },
+  {
+    "id": "AC-ENH-1",
+    "criterion": "Prioritised proposal delivered, with existing / confirmed / proposed separated and AI items kept out of scope.",
+    "source": "ACCEPTED_ENGINEERING_DECISION D-6",
+    "implementation": [
+      "artifacts/qa/STUDIO_ENHANCEMENT_PROPOSAL.md"
+    ],
+    "tests": [
+      "proposal + no-AI search"
+    ],
+    "testTypes": [
+      "manual"
+    ],
+    "result": "Prioritised proposal written; no AI SDK/endpoint found in either repo",
+    "status": "PASSED_WITH_EVIDENCE",
+    "needs": [
+      "log"
+    ],
+    "screenshots": [],
+    "api": [],
+    "db": [],
+    "log": [
+      "proposal-no-ai-check.txt"
+    ],
+    "note": null,
+    "defects": []
+  }
+]

@@ -1,0 +1,73 @@
+
+> store-forge@0.1.0 build
+> next build
+
+▲ Next.js 16.4.5 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.ts took 133ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 24.6s
+  Running TypeScript ...
+  Finished TypeScript in 25.8s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/33) ...
+  Generating static pages using 7 workers (8/33) 
+  Generating static pages using 7 workers (16/33) 
+  Generating static pages using 7 workers (24/33) 
+✓ Generating static pages using 7 workers (33/33) in 1564ms
+  Finalizing page optimization ...
+
+Route (app)                                 Revalidate  Expire
+┌ ○ /                                               5m      1y
+├ ○ /_not-found                                     5m      1y
+├ ○ /about                                          5m      1y
+├ ƒ /admin
+├ ƒ /admin/account
+├ ƒ /admin/activity
+├ ƒ /admin/organizations
+├ ƒ /admin/organizations/[id]
+├ ƒ /admin/organizations/new
+├ ƒ /admin/settings
+├ ƒ /admin/team
+├ ƒ /admin/usage
+├ ○ /contact                                        5m      1y
+├ ƒ /dashboard
+├ ƒ /dashboard/analytics
+├ ƒ /dashboard/categories
+├ ƒ /dashboard/collections
+├ ƒ /dashboard/collections/[id]
+├ ƒ /dashboard/collections/new
+├ ƒ /dashboard/customers
+├ ƒ /dashboard/customers/[id]
+├ ƒ /dashboard/inventory
+├ ƒ /dashboard/navigation
+├ ƒ /dashboard/pages
+├ ƒ /dashboard/products
+├ ƒ /dashboard/products/[id]
+├ ƒ /dashboard/products/import
+├ ƒ /dashboard/products/new
+├ ƒ /dashboard/settings
+├ ƒ /dashboard/team
+├ ƒ /dashboard/templates
+├ ƒ /dashboard/templates/editor
+├ ○ /icon.png
+├ ƒ /login
+├ ƒ /no-workspace
+├ ƒ /s/[slug]
+├ ƒ /s/[slug]/[pageSlug]
+├ ƒ /s/[slug]/cart
+├ ƒ /s/[slug]/collections
+├ ƒ /s/[slug]/collections/[collectionSlug]
+├ ƒ /s/[slug]/products
+├ ƒ /s/[slug]/products/[productSlug]
+├ ƒ /s/[slug]/search
+└ ƒ /s/[slug]/wishlist
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+exit=0

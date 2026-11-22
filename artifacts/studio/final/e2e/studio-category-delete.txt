@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 tests\e2e\studio-category-delete.spec.ts:28:1 › category delete dialog names affected subcategories; cancel keeps everything; confirm promotes them (27.6s)
+
+  1 passed (31.7s)

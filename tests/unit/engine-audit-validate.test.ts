@@ -69,7 +69,7 @@ describe("Each of the seven kinds has its own root schema [AC-ENG-005]", () => {
   it("[AC-ENG-005] every kind rejects a wrong or missing schemaVersion and non-object input", () => {
     for (const kind of TEMPLATE_KINDS) {
       const base = SAMPLES[kind] as Record<string, unknown>;
-      for (const schemaVersion of [0, 2, "1", null, undefined, 1.5]) {
+      for (const schemaVersion of [0, 3, "1", null, undefined, 1.5]) {
         expect({ kind, schemaVersion, ok: getRootSchema(kind).safeParse({ ...base, schemaVersion }).success }).toEqual({
           kind,
           schemaVersion,

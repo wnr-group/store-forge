@@ -1,0 +1,600 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/product-import-api.spec.ts",
+      "--reporter=json,list"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/WNR/store-forge-integ/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "product-import-api.spec.ts",
+      "file": "product-import-api.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "AC-10 (API): no session is rejected with 401 and nothing is written",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 280,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:48.275Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-32355b211923bae03076",
+          "file": "product-import-api.spec.ts",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "AC-10 (API): a member without catalog:manage (products read) is rejected with 403 and nothing is written",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 167,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m403\u001b[39m\nReceived: \u001b[31m201\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m403\u001b[39m\nReceived: \u001b[31m201\u001b[39m\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts:77:24",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                      "column": 24,
+                      "line": 77
+                    },
+                    "snippet": " \u001b[90m 75 |\u001b[39m   \u001b[36mconst\u001b[39m before \u001b[33m=\u001b[39m total()\u001b[33m;\u001b[39m\n \u001b[90m 76 |\u001b[39m   \u001b[36mconst\u001b[39m res \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m post(viewer\u001b[33m,\u001b[39m org1\u001b[33m,\u001b[39m rows(id\u001b[33m,\u001b[39m \u001b[35m1\u001b[39m))\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 77 |\u001b[39m   expect(res\u001b[33m.\u001b[39mstatus())\u001b[33m.\u001b[39mtoBe(\u001b[35m403\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 78 |\u001b[39m   expect((\u001b[36mawait\u001b[39m res\u001b[33m.\u001b[39mjson())\u001b[33m.\u001b[39merror\u001b[33m.\u001b[39mcode)\u001b[33m.\u001b[39mtoBe(\u001b[32m\"FORBIDDEN\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 79 |\u001b[39m   expect(total())\u001b[33m.\u001b[39mtoBe(before)\u001b[33m;\u001b[39m\n \u001b[90m 80 |\u001b[39m   expect(count(org1\u001b[33m,\u001b[39m \u001b[32m`QA API ${id}%`\u001b[39m))\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                        "column": 24,
+                        "line": 77
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m403\u001b[39m\nReceived: \u001b[31m201\u001b[39m\n\n  75 |   const before = total();\n  76 |   const res = await post(viewer, org1, rows(id, 1));\n> 77 |   expect(res.status()).toBe(403);\n     |                        ^\n  78 |   expect((await res.json()).error.code).toBe(\"FORBIDDEN\");\n  79 |   expect(total()).toBe(before);\n  80 |   expect(count(org1, `QA API ${id}%`)).toBe(0);\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts:77:24"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:49.318Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\product-import-api-AC-10-A-42daa--403-and-nothing-is-written\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\product-import-api-AC-10-A-42daa--403-and-nothing-is-written\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "column": 24,
+                    "line": 77
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-73cc204b45a4a211e36a",
+          "file": "product-import-api.spec.ts",
+          "line": 74,
+          "column": 1
+        },
+        {
+          "title": "tenant isolation: a member of tenant 1 cannot import into tenant 2 by naming it in X-Organization-Id",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:49.655Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-963382adb4395d14fdb0",
+          "file": "product-import-api.spec.ts",
+          "line": 83,
+          "column": 1
+        },
+        {
+          "title": "tenant isolation: a tenant id smuggled inside a row cannot place the product in another tenant",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:49.655Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-8ff22e7bdd0601077e9f",
+          "file": "product-import-api.spec.ts",
+          "line": 91,
+          "column": 1
+        },
+        {
+          "title": "tenant isolation: the same SKU in two tenants never conflicts, and the other tenant's product is untouched",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:49.656Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-804c66b2a71102c981a1",
+          "file": "product-import-api.spec.ts",
+          "line": 101,
+          "column": 1
+        },
+        {
+          "title": "tenant isolation: another tenant's categories are not resolvable (row error, nothing created)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:49.656Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-4a9d7e07b277000529cf",
+          "file": "product-import-api.spec.ts",
+          "line": 110,
+          "column": 1
+        },
+        {
+          "title": "all-or-nothing: one invalid row among valid rows creates nothing; the error names row, column, message and value",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:49.657Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-097167df2c54778baee5",
+          "file": "product-import-api.spec.ts",
+          "line": 120,
+          "column": 1
+        },
+        {
+          "title": "all-or-nothing: a fully valid request creates every row with the manual-form defaults, owned by the caller's tenant",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:49.657Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-df29943b84426ed77bf9",
+          "file": "product-import-api.spec.ts",
+          "line": 138,
+          "column": 1
+        },
+        {
+          "title": "duplicate submission (server side): concurrent identical requests that carry a SKU yield exactly one product",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:49.657Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-2e21f93faa16ade937d8",
+          "file": "product-import-api.spec.ts",
+          "line": 164,
+          "column": 1
+        },
+        {
+          "title": "duplicate submission (server side), characterization: resubmitting rows WITHOUT a SKU creates them again (no idempotency protection)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\product-import-api.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T07:20:49.657Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "ee8163fc1acd9bd89420-09e3374acccbab501658",
+          "file": "product-import-api.spec.ts",
+          "line": 175,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T07:20:46.578Z",
+    "duration": 3108.8920000000003,
+    "expected": 1,
+    "skipped": 8,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

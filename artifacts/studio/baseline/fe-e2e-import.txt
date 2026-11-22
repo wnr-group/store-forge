@@ -1,0 +1,202 @@
+
+Running 27 tests using 1 worker
+
+  x   1 tests\e2e\product-import-api.spec.ts:65:1 › AC-10 (API): no session is rejected with 401 and nothing is written (0ms)
+  -   2 tests\e2e\product-import-api.spec.ts:74:1 › AC-10 (API): a member without catalog:manage (products read) is rejected with 403 and nothing is written
+  -   3 tests\e2e\product-import-api.spec.ts:83:1 › tenant isolation: a member of tenant 1 cannot import into tenant 2 by naming it in X-Organization-Id
+  -   4 tests\e2e\product-import-api.spec.ts:91:1 › tenant isolation: a tenant id smuggled inside a row cannot place the product in another tenant
+  -   5 tests\e2e\product-import-api.spec.ts:101:1 › tenant isolation: the same SKU in two tenants never conflicts, and the other tenant's product is untouched
+  -   6 tests\e2e\product-import-api.spec.ts:110:1 › tenant isolation: another tenant's categories are not resolvable (row error, nothing created)
+  -   7 tests\e2e\product-import-api.spec.ts:120:1 › all-or-nothing: one invalid row among valid rows creates nothing; the error names row, column, message and value
+  -   8 tests\e2e\product-import-api.spec.ts:138:1 › all-or-nothing: a fully valid request creates every row with the manual-form defaults, owned by the caller's tenant
+  -   9 tests\e2e\product-import-api.spec.ts:164:1 › duplicate submission (server side): concurrent identical requests that carry a SKU yield exactly one product
+  -  10 tests\e2e\product-import-api.spec.ts:175:1 › duplicate submission (server side), characterization: resubmitting rows WITHOUT a SKU creates them again (no idempotency protection)
+  x  11 tests\e2e\product-import-csv.spec.ts:6:1 › AC-11/14: a valid CSV creates the products as drafts with the manual-form defaults (1.5m)
+  ok 12 tests\e2e\product-import-csv.spec.ts:24:1 › the downloaded template has every column and a sample row (4.6s)
+  ok 13 tests\e2e\product-import-db.spec.ts:34:1 › AC-11 (UI + DB): a valid CSV persists every row for the signed-in tenant with the manual-form defaults (2.6s)
+xlsx created: QA XLSX 1 (draft); QA XLSX 2 (active)
+  ok 14 tests\e2e\product-import-db.spec.ts:54:1 › AC-11 (UI + DB): a valid XLSX persists its rows for the signed-in tenant (3.5s)
+  ok 15 tests\e2e\product-import-db.spec.ts:68:1 › AC-12/15 (UI + DB): a CSV with one invalid row imports nothing, shows the row error, and leaves the database unchanged (3.2s)
+server-action POSTs after a double-click: 1
+  ok 16 tests\e2e\product-import-db.spec.ts:83:1 › duplicate submission (UI): a double-click sends the import once; the database holds each row once (2.8s)
+500-row import: click to success banner = 2493 ms
+  ok 17 tests\e2e\product-import-limits.spec.ts:31:1 › 500 rows (the maximum) import in one request: all rows persist for the tenant, none leak, duration recorded (5.3s)
+  ok 18 tests\e2e\product-import-limits.spec.ts:56:1 › 501 rows are refused before any API call and nothing is written (3.0s)
+  ok 19 tests\e2e\product-import-limits.spec.ts:71:1 › a file over 1 MB is stopped in the browser: clear error, no request is sent, nothing is written (2.1s)
+API over-limit body: HTTP 413 {"success":false,"message":"Something went wrong. Please try again.","error":{"code":"HTTP_413","details":null},"timesta
+  ok 20 tests\e2e\product-import-limits.spec.ts:86:1 › the API itself answers a real HTTP 413 to an over-2 MB body on the import route and writes nothing (885ms)
+  ok 21 tests\e2e\product-import-permissions.spec.ts:5:1 › AC-10: the manager sees Import and can open the page (6.6s)
+  x  22 tests\e2e\product-import-permissions.spec.ts:14:1 › AC-10: an account without catalog:manage sees no Import button and is redirected away from the page (19.9s)
+  ok 23 tests\e2e\product-import-validation.spec.ts:13:1 › AC-12/14/16/15: invalid files import nothing; errors name row, column, message and value; the report downloads escaped (8.5s)
+  ok 24 tests\e2e\product-import-validation.spec.ts:53:1 › AC-13: file-level rejections are actionable (15.6s)
+  ok 25 tests\e2e\product-import-validation.spec.ts:72:1 › AC-12: an uncached formula cell is a row error and is never imported as a blank (6.3s)
+  x  26 tests\e2e\product-import-validation.spec.ts:82:1 › AC-12 (rule V-FE): a formula that evaluates to an error is a row error (1.5m)
+  x  27 tests\e2e\product-import-xlsx.spec.ts:5:1 › AC-11: a valid XLSX creates the products (1.5m)
+
+
+  1) tests\e2e\product-import-api.spec.ts:65:1 › AC-10 (API): no session is rejected with 401 and nothing is written 
+
+    Error: login admin@demo.test
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 429
+
+      25 |   const ctx = await request.newContext({ extraHTTPHeaders: { "x-internal-auth": BFF! } });
+      26 |   const res = await ctx.post(`${API}/auth/login`, { data: { email, password } });
+    > 27 |   expect(res.status(), `login ${email}`).toBe(200);
+         |                                          ^
+      28 |   return { ctx, memberships: (await res.json()).data.memberships };
+      29 | }
+      30 | const post = (s: { ctx: APIRequestContext }, org: string | null, rowsBody: unknown) =>
+        at login (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\product-import-api.spec.ts:27:42)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\product-import-api.spec.ts:46:13
+
+    Error Context: test-results\product-import-api-AC-10-A-a23c7--401-and-nothing-is-written\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\product-import-api-AC-10-A-a23c7--401-and-nothing-is-written\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\product-import-api-AC-10-A-a23c7--401-and-nothing-is-written\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\product-import-csv.spec.ts:6:1 › AC-11/14: a valid CSV creates the products as drafts with the manual-form defaults 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: page.waitForURL: Test timeout of 90000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers.ts:23
+
+      21 |   await page.locator("#password").fill(password());
+      22 |   await page.getByRole("button", { name: "Sign in" }).click();
+    > 23 |   await page.waitForURL(/\/dashboard/);
+         |              ^
+      24 | }
+      25 |
+      26 | const dir = join(process.cwd(), "artifacts", "qa", "screenshots", TICKET);
+        at login (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\helpers.ts:23:14)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\product-import-csv.spec.ts:8:3
+
+    Error Context: test-results\product-import-csv-AC-11-1-33202-th-the-manual-form-defaults\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\product-import-csv-AC-11-1-33202-th-the-manual-form-defaults\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\product-import-csv-AC-11-1-33202-th-the-manual-form-defaults\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests\e2e\product-import-permissions.spec.ts:14:1 › AC-10: an account without catalog:manage sees no Import button and is redirected away from the page 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('link', { name: 'Import' })
+    Expected: 0
+    Received: 1
+    Timeout:  15000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('link', { name: 'Import' }) with timeout 15000ms
+      - waiting for getByRole('link', { name: 'Import' })
+        33 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      17 |   await login(page, viewer!);
+      18 |   await page.goto("/dashboard/products");
+    > 19 |   await expect(page.getByRole("link", { name: "Import" })).toHaveCount(0);
+         |                                                            ^
+      20 |   await page.goto("/dashboard/products/import");
+      21 |   await expect(page).toHaveURL(/\/dashboard\/products$/);
+      22 |   await evidence(page, "AC-10-unauthorised.png");
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\product-import-permissions.spec.ts:19:60
+
+    Error Context: test-results\product-import-permissions-8e6da-directed-away-from-the-page\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\product-import-permissions-8e6da-directed-away-from-the-page\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\product-import-permissions-8e6da-directed-away-from-the-page\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests\e2e\product-import-validation.spec.ts:82:1 › AC-12 (rule V-FE): a formula that evaluates to an error is a row error 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: page.waitForURL: Test timeout of 90000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers.ts:23
+
+      21 |   await page.locator("#password").fill(password());
+      22 |   await page.getByRole("button", { name: "Sign in" }).click();
+    > 23 |   await page.waitForURL(/\/dashboard/);
+         |              ^
+      24 | }
+      25 |
+      26 | const dir = join(process.cwd(), "artifacts", "qa", "screenshots", TICKET);
+        at login (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\helpers.ts:23:14)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\product-import-validation.spec.ts:83:3
+
+    Error Context: test-results\product-import-validation--540dc--to-an-error-is-a-row-error\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\product-import-validation--540dc--to-an-error-is-a-row-error\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\product-import-validation--540dc--to-an-error-is-a-row-error\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) tests\e2e\product-import-xlsx.spec.ts:5:1 › AC-11: a valid XLSX creates the products ──────────
+
+    Test timeout of 90000ms exceeded.
+
+    Error: page.waitForURL: Test timeout of 90000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation until "load"
+    ============================================================
+
+       at helpers.ts:23
+
+      21 |   await page.locator("#password").fill(password());
+      22 |   await page.getByRole("button", { name: "Sign in" }).click();
+    > 23 |   await page.waitForURL(/\/dashboard/);
+         |              ^
+      24 | }
+      25 |
+      26 | const dir = join(process.cwd(), "artifacts", "qa", "screenshots", TICKET);
+        at login (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\helpers.ts:23:14)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\product-import-xlsx.spec.ts:6:3
+
+    Error Context: test-results\product-import-xlsx-AC-11-a-valid-XLSX-creates-the-products\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\product-import-xlsx-AC-11-a-valid-XLSX-creates-the-products\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\product-import-xlsx-AC-11-a-valid-XLSX-creates-the-products\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5 failed
+    tests\e2e\product-import-api.spec.ts:65:1 › AC-10 (API): no session is rejected with 401 and nothing is written 
+    tests\e2e\product-import-csv.spec.ts:6:1 › AC-11/14: a valid CSV creates the products as drafts with the manual-form defaults 
+    tests\e2e\product-import-permissions.spec.ts:14:1 › AC-10: an account without catalog:manage sees no Import button and is redirected away from the page 
+    tests\e2e\product-import-validation.spec.ts:82:1 › AC-12 (rule V-FE): a formula that evaluates to an error is a row error 
+    tests\e2e\product-import-xlsx.spec.ts:5:1 › AC-11: a valid XLSX creates the products ───────────
+  9 did not run
+  13 passed (6.2m)
+exit=1

@@ -1,0 +1,9 @@
+
+Running 4 tests using 1 worker
+
+  ok 1 tests\e2e\product-import-validation.spec.ts:13:1 › AC-12/14/16/15: invalid files import nothing; errors name row, column, message and value; the report downloads escaped (8.9s)
+  ok 2 tests\e2e\product-import-validation.spec.ts:53:1 › AC-13: file-level rejections are actionable (15.9s)
+  ok 3 tests\e2e\product-import-validation.spec.ts:72:1 › AC-12: an uncached formula cell is a row error and is never imported as a blank (6.5s)
+  ok 4 tests\e2e\product-import-validation.spec.ts:82:1 › AC-12 (rule V-FE): a formula that evaluates to an error is a row error (3.6s)
+
+  4 passed (38.1s)

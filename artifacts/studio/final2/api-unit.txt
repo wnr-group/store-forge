@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 C:/Users/Eshwar/WNR/store-forge-api-integ
+
+
+ Test Files  24 passed (24)
+      Tests  289 passed (289)
+   Start at  20:31:07
+   Duration  21.93s (transform 4.34s, setup 0ms, import 95.31s, tests 4.97s, environment 6ms)
+

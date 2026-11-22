@@ -1,0 +1,313 @@
+
+Running 4 tests using 1 worker
+
+  x  1 tests\e2e\studio-collection-delete.spec.ts:28:1 › unused: plain dialog, cancel keeps it, confirm deletes (51.3s)
+  x  2 tests\e2e\studio-collection-delete.spec.ts:43:1 › draft then published reference: warning names the section and state; cancel changes nothing (2.5m)
+  x  3 tests\e2e\studio-collection-delete.spec.ts:65:1 › references change between warning and confirmation: refreshed warning, second confirmation needed (2.5m)
+  x  4 tests\e2e\studio-collection-delete.spec.ts:88:1 › after deletion the section is hidden for shoppers and the editor keeps it with a hint (2.5m)
+
+
+  1) tests\e2e\studio-collection-delete.spec.ts:28:1 › unused: plain dialog, cancel keeps it, confirm deletes 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alertdialog')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alertdialog') with timeout 30000ms
+      - waiting for getByRole('alertdialog')
+
+
+      20 |   await page.getByRole("button", { name: /delete collection/i }).first().click();
+      21 |   const dialog = page.getByRole("alertdialog");
+    > 22 |   await expect(dialog).toBeVisible({ timeout: 30_000 });
+         |                        ^
+      23 |   return dialog;
+      24 | };
+      25 |
+        at openDelete (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-delete.spec.ts:22:24)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-delete.spec.ts:31:20
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:83:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-delete.spec.ts:29:3
+
+    Error Context: test-results\studio-collection-delete-u-554e6-el-keeps-it-confirm-deletes\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-collection-delete-u-554e6-el-keeps-it-confirm-deletes\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-collection-delete-u-554e6-el-keeps-it-confirm-deletes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\studio-collection-delete.spec.ts:43:1 › draft then published reference: warning names the section and state; cancel changes nothing 
+
+    Test timeout of 150000ms exceeded.
+
+    Error: locator.selectOption: Test ended.
+    Browser logs:
+
+    <launching> C:\Users\Eshwar\AppData\Local\ms-playwright\chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,HttpsUpgrades,HttpsFirstBalancedModeAutoEnable,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,AvoidCorsURLLoaderRestartOnRedirect,TcpPortRandomizationWin,OptimizationHints,NetworkTimeServiceQuerying,AimEnabled,PreconnectToSearch,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface,SkipListAccountsWithoutGaiaCookies --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-unsafe-swiftshader --edge-skip-compat-layer-relaunch --disable-stack-profiler --disable-infobars --disable-sync --do-not-de-elevate --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=C:\Users\Eshwar\AppData\Local\Temp\playwright_chromiumdev_profile-n89H8Y --remote-debugging-pipe --no-startup-window
+    <launched> pid=22376
+    [pid=22376][err] [1121/131507.917:INFO:CONSOLE:761] "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=22376][err] [1121/131508.089:INFO:CONSOLE:761] "[HMR] connected", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=22376][err] [1121/131509.816:INFO:CONSOLE:761] "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=22376][err] [1121/131510.019:INFO:CONSOLE:761] "[HMR] connected", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=22376][err] [1121/131513.016:INFO:CONSOLE:761] "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=22376][err] [1121/131513.125:INFO:CONSOLE:761] "[HMR] connected", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=22376][err] [1121/131517.668:INFO:CONSOLE:0] "The resource http://localhost:3100/_next/image?url=%2Fthemes%2Fatelier%2Fhero.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.", source: http://localhost:3100/dashboard/templates/editor (0)
+    [pid=22376] <gracefully close start>
+    Call log:
+      - waiting for getByLabel('Collection Identifier')
+        - locator resolved to <select id="_r_4_" aria-invalid="false" data-slot="native-select" class="h-[var(--control-h,2.25rem)] w-full min-w-0 appearance-none rounded-lg border border-input bg-transparent py-1 pr-8 pl-2.5 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30">…</select>
+      - attempting select option action
+        2 × waiting for element to be visible and enabled
+          - did not find some options
+        - retrying select option action
+        - waiting 20ms
+        2 × waiting for element to be visible and enabled
+          - did not find some options
+        - retrying select option action
+          - waiting 100ms
+        276 × waiting for element to be visible and enabled
+            - did not find some options
+          - retrying select option action
+            - waiting 500ms
+        - waiting for element to be visible and enabled
+
+
+       at support\studio-editor.ts:47
+
+      45 | export async function pickCollection(page: Page, next: string, opts: { publish?: boolean; previous?: string } = {}) {
+      46 |   await openFeaturedCollection(page);
+    > 47 |   await page.getByLabel("Collection Identifier").selectOption(next);
+         |                                                  ^
+      48 |   if (next) await waitForDraft(page, next);
+      49 |   else if (opts.previous) await waitForDraft(page, opts.previous, false);
+      50 |   if (opts.publish) await publishFromEditor(page);
+        at pickCollection (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-editor.ts:47:50)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-delete.spec.ts:46:5
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:83:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-delete.spec.ts:44:3
+
+    Error Context: test-results\studio-collection-delete-d-99e6e-tate-cancel-changes-nothing\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-collection-delete-d-99e6e-tate-cancel-changes-nothing\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-collection-delete-d-99e6e-tate-cancel-changes-nothing\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests\e2e\studio-collection-delete.spec.ts:65:1 › references change between warning and confirmation: refreshed warning, second confirmation needed 
+
+    Test timeout of 150000ms exceeded.
+
+    Error: browserContext._wrapApiCall: ENOENT: no such file or directory, open 'C:\Users\Eshwar\WNR\store-forge-integ\test-results\.playwright-artifacts-2\traces\screencast\page@823e27adf42fa1fb1bd3c622cffb76b9-1795247295821.jpeg'
+
+    Error: locator.selectOption: Test ended.
+    Browser logs:
+
+    <launching> C:\Users\Eshwar\AppData\Local\ms-playwright\chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,HttpsUpgrades,HttpsFirstBalancedModeAutoEnable,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,AvoidCorsURLLoaderRestartOnRedirect,TcpPortRandomizationWin,OptimizationHints,NetworkTimeServiceQuerying,AimEnabled,PreconnectToSearch,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface,SkipListAccountsWithoutGaiaCookies --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-unsafe-swiftshader --edge-skip-compat-layer-relaunch --disable-stack-profiler --disable-infobars --disable-sync --do-not-de-elevate --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=C:\Users\Eshwar\AppData\Local\Temp\playwright_chromiumdev_profile-lgyULf --remote-debugging-pipe --no-startup-window
+    <launched> pid=37792
+    [pid=37792][err] [1121/131744.928:INFO:CONSOLE:761] "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131745.197:INFO:CONSOLE:761] "[HMR] connected", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131745.859:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131750.494:INFO:CONSOLE:761] "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131750.821:INFO:CONSOLE:761] "[HMR] connected", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131753.527:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131754.449:INFO:CONSOLE:761] "[Fast Refresh] done in 1094ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131754.702:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131755.281:INFO:CONSOLE:761] "[Fast Refresh] done in 769ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131755.671:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131801.685:INFO:CONSOLE:761] "[Fast Refresh] done in 6223ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131802.395:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131803.971:INFO:CONSOLE:761] "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131804.037:INFO:CONSOLE:761] "[HMR] connected", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131804.936:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131806.064:INFO:CONSOLE:761] "[Fast Refresh] done in 1232ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131806.715:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131809.770:INFO:CONSOLE:0] "The resource http://localhost:3100/_next/image?url=%2Fthemes%2Fatelier%2Fhero.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.", source: http://localhost:3100/dashboard/templates/editor (0)
+    [pid=37792][err] [1121/131813.432:INFO:CONSOLE:761] "[Fast Refresh] done in 7091ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131813.605:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131814.813:INFO:CONSOLE:761] "[Fast Refresh] done in 1342ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131815.097:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131816.948:INFO:CONSOLE:761] "[Fast Refresh] done in 2011ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131817.255:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131817.964:INFO:CONSOLE:761] "[Fast Refresh] done in 814ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131818.324:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131819.530:INFO:CONSOLE:761] "[Fast Refresh] done in 1307ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131819.887:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131820.673:INFO:CONSOLE:761] "[Fast Refresh] done in 896ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131820.891:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131821.547:INFO:CONSOLE:761] "[Fast Refresh] done in 762ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131821.775:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131822.994:INFO:CONSOLE:0] "The resource http://localhost:3100/_next/image?url=%2Fthemes%2Fatelier%2Fhero.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.", source: http://localhost:3100/dashboard/templates/editor (0)
+    [pid=37792][err] [1121/131824.755:INFO:CONSOLE:761] "[Fast Refresh] done in 3089ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131824.987:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131826.055:INFO:CONSOLE:761] "[Fast Refresh] done in 1178ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131826.291:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131832.119:INFO:CONSOLE:761] "[Fast Refresh] done in 5942ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131832.342:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131835.916:INFO:CONSOLE:761] "[Fast Refresh] done in 3680ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131836.221:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131838.954:INFO:CONSOLE:761] "[Fast Refresh] done in 2839ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131839.145:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131840.665:INFO:CONSOLE:761] "[Fast Refresh] done in 1620ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131841.020:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131844.122:INFO:CONSOLE:0] "The resource http://localhost:3100/_next/image?url=%2Fthemes%2Fatelier%2Fhero.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.", source: http://localhost:3100/dashboard/templates/editor (0)
+    [pid=37792][err] [1121/131845.095:INFO:CONSOLE:761] "[Fast Refresh] done in 4187ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131845.369:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131847.015:INFO:CONSOLE:761] "[Fast Refresh] done in 1764ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131847.386:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131849.746:INFO:CONSOLE:761] "[Fast Refresh] done in 2472ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131849.965:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131850.489:INFO:CONSOLE:0] "The resource http://localhost:3100/_next/image?url=%2Fthemes%2Fatelier%2Fhero.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.", source: http://localhost:3100/dashboard/templates/editor (0)
+    [pid=37792][err] [1121/131850.593:INFO:CONSOLE:761] "[Fast Refresh] done in 734ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131850.863:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131851.591:INFO:CONSOLE:761] "[Fast Refresh] done in 835ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131851.820:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131852.395:INFO:CONSOLE:761] "[Fast Refresh] done in 691ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131852.643:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131854.286:INFO:CONSOLE:761] "[Fast Refresh] done in 1758ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131854.503:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131900.336:INFO:CONSOLE:761] "[Fast Refresh] done in 5937ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131900.551:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131901.116:INFO:CONSOLE:761] "[Fast Refresh] done in 676ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131901.399:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131901.966:INFO:CONSOLE:761] "[Fast Refresh] done in 680ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131902.204:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131903.055:INFO:CONSOLE:761] "[Fast Refresh] done in 969ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131903.278:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131903.888:INFO:CONSOLE:761] "[Fast Refresh] done in 717ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131904.140:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131904.861:INFO:CONSOLE:761] "[Fast Refresh] done in 828ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131905.072:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131905.831:INFO:CONSOLE:761] "[Fast Refresh] done in 862ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131906.044:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131906.825:INFO:CONSOLE:761] "[Fast Refresh] done in 882ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131907.049:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131909.465:INFO:CONSOLE:761] "[Fast Refresh] done in 2529ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131909.706:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131911.537:INFO:CONSOLE:761] "[Fast Refresh] done in 1941ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131911.742:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131912.464:INFO:CONSOLE:761] "[Fast Refresh] done in 823ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131912.717:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131913.643:INFO:CONSOLE:761] "[Fast Refresh] done in 1036ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131913.860:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131914.880:INFO:CONSOLE:761] "[Fast Refresh] done in 1122ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131915.100:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131927.640:INFO:CONSOLE:761] "[Fast Refresh] done in 12645ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131927.869:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131946.238:INFO:CONSOLE:761] "[Fast Refresh] done in 18478ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131946.485:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131951.948:INFO:CONSOLE:761] "[Fast Refresh] done in 5574ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131952.411:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131954.891:INFO:CONSOLE:761] "[Fast Refresh] done in 2580ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131955.096:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131955.523:INFO:CONSOLE:0] "The resource http://localhost:3100/_next/image?url=%2Fthemes%2Fatelier%2Fhero.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.", source: http://localhost:3100/dashboard/templates/editor (0)
+    [pid=37792][err] [1121/131958.425:INFO:CONSOLE:761] "[Fast Refresh] done in 3432ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/131958.735:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132001.081:INFO:CONSOLE:761] "[Fast Refresh] done in 2461ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132001.293:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132001.850:INFO:CONSOLE:761] "[Fast Refresh] done in 664ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132002.302:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132003.024:INFO:CONSOLE:761] "[Fast Refresh] done in 823ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132003.233:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132004.021:INFO:CONSOLE:761] "[Fast Refresh] done in 892ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132004.247:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132004.772:INFO:CONSOLE:761] "[Fast Refresh] done in 636ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132004.990:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132005.413:INFO:CONSOLE:0] "The resource http://localhost:3100/_next/image?url=%2Fthemes%2Fatelier%2Fhero.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.", source: http://localhost:3100/dashboard/templates/editor (0)
+    [pid=37792][err] [1121/132005.870:INFO:CONSOLE:761] "[Fast Refresh] done in 985ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132006.091:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132006.949:INFO:CONSOLE:761] "[Fast Refresh] done in 960ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132007.173:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132007.987:INFO:CONSOLE:761] "[Fast Refresh] done in 917ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132008.199:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132008.745:INFO:CONSOLE:761] "[Fast Refresh] done in 652ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132009.050:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132009.473:INFO:CONSOLE:761] "[Fast Refresh] done in 528ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132009.704:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132010.284:INFO:CONSOLE:761] "[Fast Refresh] done in 686ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132010.487:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132011.025:INFO:CONSOLE:761] "[Fast Refresh] done in 640ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132011.257:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132011.945:INFO:CONSOLE:761] "[Fast Refresh] done in 794ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132012.151:INFO:CONSOLE:0] "The resource http://localhost:3100/_next/image?url=%2Fthemes%2Fatelier%2Fhero.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.", source: http://localhost:3100/dashboard/templates/editor (0)
+    [pid=37792][err] [1121/132012.233:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132013.861:INFO:CONSOLE:761] "[Fast Refresh] done in 1740ms", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792][err] [1121/132016.840:INFO:CONSOLE:761] "[Fast Refresh] rebuilding", source: http://localhost:3100/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js (761)
+    [pid=37792] <gracefully close start>
+    Call log:
+      - waiting for getByLabel('Collection Identifier')
+        - locator resolved to <select id="_r_4_" aria-invalid="false" data-slot="native-select" class="h-[var(--control-h,2.25rem)] w-full min-w-0 appearance-none rounded-lg border border-input bg-transparent py-1 pr-8 pl-2.5 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30">…</select>
+      - attempting select option action
+        2 × waiting for element to be visible and enabled
+          - did not find some options
+        - retrying select option action
+        - waiting 20ms
+        2 × waiting for element to be visible and enabled
+          - did not find some options
+        - retrying select option action
+          - waiting 100ms
+        251 × waiting for element to be visible and enabled
+            - did not find some options
+          - retrying select option action
+            - waiting 500ms
+        - waiting for element to be visible and enabled
+
+
+       at support\studio-editor.ts:47
+
+      45 | export async function pickCollection(page: Page, next: string, opts: { publish?: boolean; previous?: string } = {}) {
+      46 |   await openFeaturedCollection(page);
+    > 47 |   await page.getByLabel("Collection Identifier").selectOption(next);
+         |                                                  ^
+      48 |   if (next) await waitForDraft(page, next);
+      49 |   else if (opts.previous) await waitForDraft(page, opts.previous, false);
+      50 |   if (opts.publish) await publishFromEditor(page);
+        at pickCollection (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-editor.ts:47:50)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-delete.spec.ts:68:5
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:83:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-delete.spec.ts:66:3
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-collection-delete-r-287bc--second-confirmation-needed\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-collection-delete-r-287bc--second-confirmation-needed\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests\e2e\studio-collection-delete.spec.ts:88:1 › after deletion the section is hidden for shoppers and the editor keeps it with a hint 
+
+    Test timeout of 150000ms exceeded.
+
+    Error: apiRequestContext._wrapApiCall: ENOENT: no such file or directory, copyfile 'C:\Users\Eshwar\WNR\store-forge-integ\test-results\.playwright-artifacts-3\traces\f36b2b83d4e0f0191d62-0b651bf674bd95291d81-recording3.network' -> 'C:\Users\Eshwar\WNR\store-forge-integ\test-results\.playwright-artifacts-3\traces\f36b2b83d4e0f0191d62-0b651bf674bd95291d81-recording3-pwnetcopy-1.network'
+
+    Error: browserContext.close: Target page, context or browser has been closed
+
+       at support\studio-session.ts:85
+
+      83 |     return await fn(await context.newPage());
+      84 |   } finally {
+    > 85 |     await context.close();
+         |     ^
+      86 |   }
+      87 | }
+      88 |
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:85:5)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-delete.spec.ts:89:3
+
+    Error: ENOENT: no such file or directory, open 'C:\Users\Eshwar\WNR\store-forge-integ\test-results\.playwright-artifacts-3\d99669f3f17fcb916722e7aab79eec27.zip'
+
+  4 failed
+    tests\e2e\studio-collection-delete.spec.ts:28:1 › unused: plain dialog, cancel keeps it, confirm deletes 
+    tests\e2e\studio-collection-delete.spec.ts:43:1 › draft then published reference: warning names the section and state; cancel changes nothing 
+    tests\e2e\studio-collection-delete.spec.ts:65:1 › references change between warning and confirmation: refreshed warning, second confirmation needed 
+    tests\e2e\studio-collection-delete.spec.ts:88:1 › after deletion the section is hidden for shoppers and the editor keeps it with a hint 

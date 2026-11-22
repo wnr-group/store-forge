@@ -1,0 +1,13 @@
+
+Running 8 tests using 1 worker
+
+  ok 1 tests\e2e\studio-scope.spec.ts:39:3 › merchant dashboard (scoped styling applies) › toolbar and header controls are 32px (5.4s)
+  ok 2 tests\e2e\studio-scope.spec.ts:52:3 › merchant dashboard (scoped styling applies) › dialog controls (portal) are 32px and error text is the darker red (3.0s)
+  ok 3 tests\e2e\studio-scope.spec.ts:62:3 › merchant dashboard (scoped styling applies) › dark mode: merchant error TEXT is the approved lighter red; the global --error token is unchanged (2.5s)
+  ok 4 tests\e2e\studio-scope.spec.ts:88:3 › Ctrl+K palette matches the sidebar › owner sees Team members in both (2.5s)
+  ok 5 tests\e2e\studio-scope.spec.ts:96:3 › Ctrl+K palette matches the sidebar › staff get no Team members, and nothing the sidebar hides (4.1s)
+  ok 6 tests\e2e\studio-scope.spec.ts:106:3 › outside the merchant scope (global defaults are unchanged) › login screen (1.2s)
+  ok 7 tests\e2e\studio-scope.spec.ts:118:3 › outside the merchant scope (global defaults are unchanged) › platform admin keeps the 36px select, 32px search and the global error red (3.5s)
+  ok 8 tests\e2e\studio-scope.spec.ts:137:3 › leaving the dashboard › signing out removes the scope marker (3.8s)
+
+  8 passed (30.4s)

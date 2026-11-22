@@ -1,0 +1,8 @@
+
+Running 1 test using 1 worker
+
+[{"page":"collections","edited":true,"live":true},{"page":"cart","edited":true,"live":true},{"page":"wishlist","edited":true,"live":true},{"page":"products","edited":true,"live":false,"note":"BLOCKED: Publish is disabled after the edit (invalid default document, defect D-002)"},{"page":"search","edited":true,"live":false,"note":"BLOCKED: Publish is disabled after the edit (invalid default document, defect D-002)"},{"page":"content","edited":false,"live":false,"note":"BLOCKED: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed"},{"page":"about","edited":true,"live":false,"note":"BLOCKED: Publish is disabled after the edit (invalid default document, defect D-002)"},{"page":"contact","edited":true,"live":false,"note":"BLOCKED: Publish is disabled after the edit (invalid default document, defect D-002)"}]
+  ok 1 tests\e2e\studio-virtual-pages.spec.ts:30:1 › all eight virtual pages: edit, publish, see it live; reset touches one page only (1.5m)
+
+  1 passed (1.6m)
+exit=0

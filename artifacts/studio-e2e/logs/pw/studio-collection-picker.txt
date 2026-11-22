@@ -1,0 +1,49 @@
+
+Running 1 test using 1 worker
+
+  x  1 tests\e2e\studio-collection-picker.spec.ts:9:1 › picking a collection stores its id, survives a reload, and the storefront shows it (1.2m)
+
+
+  1) tests\e2e\studio-collection-picker.spec.ts:9:1 › picking a collection stores its id, survives a reload, and the storefront shows it 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('alertdialog')
+    Expected: 0
+    Received: 1
+    Timeout:  60000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('alertdialog') with timeout 60000ms
+      - waiting for getByRole('alertdialog')
+        121 × locator resolved to 1 element
+            - unexpected value "1"
+
+
+       at support\studio-editor.ts:41
+
+      39 |   await expect(dialog.getByText("Publish your theme?")).toBeVisible();
+      40 |   await dialog.getByRole("button", { name: /publish/i }).last().click();
+    > 41 |   await expect(dialog).toHaveCount(0, { timeout: 60_000 });
+         |                        ^
+      42 | }
+      43 |
+      44 | /** Choose `next` in the Featured collection select ("" = Newest products). `previous` is the value being replaced, used to wait for the autosave when clearing. */
+        at publishFromEditor (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-editor.ts:41:24)
+        at pickCollection (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-editor.ts:50:21)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-picker.spec.ts:16:5
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-picker.spec.ts:10:3
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-collection-picker-p-844bf-and-the-storefront-shows-it\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-collection-picker-p-844bf-and-the-storefront-shows-it\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-collection-picker-p-844bf-and-the-storefront-shows-it\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-collection-picker.spec.ts:9:1 › picking a collection stores its id, survives a reload, and the storefront shows it 

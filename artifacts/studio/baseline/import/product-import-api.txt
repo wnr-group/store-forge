@@ -1,0 +1,45 @@
+
+Running 10 tests using 1 worker
+
+  ok  1 tests\e2e\product-import-api.spec.ts:65:1 › AC-10 (API): no session is rejected with 401 and nothing is written (280ms)
+  x   2 tests\e2e\product-import-api.spec.ts:74:1 › AC-10 (API): a member without catalog:manage (products read) is rejected with 403 and nothing is written (167ms)
+  -   3 tests\e2e\product-import-api.spec.ts:83:1 › tenant isolation: a member of tenant 1 cannot import into tenant 2 by naming it in X-Organization-Id
+  -   4 tests\e2e\product-import-api.spec.ts:91:1 › tenant isolation: a tenant id smuggled inside a row cannot place the product in another tenant
+  -   5 tests\e2e\product-import-api.spec.ts:101:1 › tenant isolation: the same SKU in two tenants never conflicts, and the other tenant's product is untouched
+  -   6 tests\e2e\product-import-api.spec.ts:110:1 › tenant isolation: another tenant's categories are not resolvable (row error, nothing created)
+  -   7 tests\e2e\product-import-api.spec.ts:120:1 › all-or-nothing: one invalid row among valid rows creates nothing; the error names row, column, message and value
+  -   8 tests\e2e\product-import-api.spec.ts:138:1 › all-or-nothing: a fully valid request creates every row with the manual-form defaults, owned by the caller's tenant
+  -   9 tests\e2e\product-import-api.spec.ts:164:1 › duplicate submission (server side): concurrent identical requests that carry a SKU yield exactly one product
+  -  10 tests\e2e\product-import-api.spec.ts:175:1 › duplicate submission (server side), characterization: resubmitting rows WITHOUT a SKU creates them again (no idempotency protection)
+
+
+  1) tests\e2e\product-import-api.spec.ts:74:1 › AC-10 (API): a member without catalog:manage (products read) is rejected with 403 and nothing is written 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 201
+
+      75 |   const before = total();
+      76 |   const res = await post(viewer, org1, rows(id, 1));
+    > 77 |   expect(res.status()).toBe(403);
+         |                        ^
+      78 |   expect((await res.json()).error.code).toBe("FORBIDDEN");
+      79 |   expect(total()).toBe(before);
+      80 |   expect(count(org1, `QA API ${id}%`)).toBe(0);
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\product-import-api.spec.ts:77:24
+
+    Error Context: test-results\product-import-api-AC-10-A-42daa--403-and-nothing-is-written\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\product-import-api-AC-10-A-42daa--403-and-nothing-is-written\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\product-import-api-AC-10-A-42daa--403-and-nothing-is-written\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\product-import-api.spec.ts:74:1 › AC-10 (API): a member without catalog:manage (products read) is rejected with 403 and nothing is written 
+  8 did not run
+  1 passed (3.1s)

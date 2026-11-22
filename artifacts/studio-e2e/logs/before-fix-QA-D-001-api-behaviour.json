@@ -1,0 +1,13 @@
+{
+  "v2_with_display": {
+    "status": 400,
+    "body": "{\"success\":false,\"message\":\"This design has problems that must be fixed first.\",\"error\":{\"code\":\"TEMPLATE_DOCUMENT_INVALID\",\"details\":{\"index.schemaVersion\":\"Schema version must be 1.\",\"index.sections.hero\":\"Unknown fields: display.\"}},\"timestamp\":\"2026-11-22T08:16:59.328Z\",\"path\":\"/api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft\"}"
+  },
+  "v1_with_display": {
+    "status": 400,
+    "body": "{\"success\":false,\"message\":\"This design has problems that must be fixed first.\",\"error\":{\"code\":\"TEMPLATE_DOCUMENT_INVALID\",\"details\":{\"index.sections.hero\":\"Unknown fields: display.\"}},\"timestamp\":\"2026-11-22T08:16:59.358Z\",\"path\":\"/api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft\"}"
+  },
+  "v1_plain_control": {
+    "status": 200
+  }
+}

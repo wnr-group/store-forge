@@ -1,0 +1,493 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-restricted-members.spec.ts",
+      "--reporter=json,list",
+      "--output=C:/Users/Eshwar/AppData/Local/Temp/pw-out"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/AppData/Local/Temp/pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-restricted-members.spec.ts",
+      "file": "studio-restricted-members.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "sidebar of the owner member",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5953,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:18:40.700Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-f666006288d55beb201c",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 28,
+          "column": 3
+        },
+        {
+          "title": "sidebar of the manager (all write) member",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8333,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:18:46.915Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-83ad555836d3fe5c5d99",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 28,
+          "column": 3
+        },
+        {
+          "title": "sidebar of the design-only (settings write) member",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6412,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:18:55.269Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-d16abee92a3c0ec7a902",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 28,
+          "column": 3
+        },
+        {
+          "title": "sidebar of the catalogue-only (products write) member",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4616,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:19:01.702Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-caf5270d241a6653bfb4",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 28,
+          "column": 3
+        },
+        {
+          "title": "sidebar of the read-only (everything read) member",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5471,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:19:06.343Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-bcfad3844c79ec7569b8",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 28,
+          "column": 3
+        },
+        {
+          "title": "sidebar of the no-access (everything none) member",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4128,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:19:11.845Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-21f4d83d244d45f64106",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 28,
+          "column": 3
+        },
+        {
+          "title": "design-only member: can customize and publish; the catalogue routes fall back to the overview without an error page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12603,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:19:15.996Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-9c3c327d666759de093e",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 45,
+          "column": 1
+        },
+        {
+          "title": "catalogOnly member: Themes and the editor open read-only (nothing can be applied or published)",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 31457,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: 'Themes' })\nExpected: visible\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByRole('heading', { name: 'Themes' }) with timeout 30000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Themes' })\u001b[22m\n\u001b[2m    - waiting for \"http://localhost:3100/dashboard\" navigation to finish...\u001b[22m\n\u001b[2m    - navigated to \"http://localhost:3100/dashboard\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: 'Themes' })\nExpected: visible\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByRole('heading', { name: 'Themes' }) with timeout 30000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Themes' })\u001b[22m\n\u001b[2m    - waiting for \"http://localhost:3100/dashboard\" navigation to finish...\u001b[22m\n\u001b[2m    - navigated to \"http://localhost:3100/dashboard\"\u001b[22m\n\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-restricted-members.spec.ts:64:67\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-restricted-members.spec.ts:62:5",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-restricted-members.spec.ts",
+                      "column": 67,
+                      "line": 64
+                    },
+                    "snippet": " \u001b[90m 62 |\u001b[39m     \u001b[36mawait\u001b[39m asUser(browser\u001b[33m,\u001b[39m who\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m (page) \u001b[33m=>\u001b[39m {\n \u001b[90m 63 |\u001b[39m       \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/dashboard/templates\"\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 64 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"heading\"\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m\"Themes\"\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m30_000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                   \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 65 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"button\"\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m\"Apply theme\"\u001b[39m }))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 66 |\u001b[39m       \u001b[36mawait\u001b[39m shot(page\u001b[33m,\u001b[39m \u001b[32m`AC-NAV-2_${who}-themes-read-only`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 67 |\u001b[39m       \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/dashboard/templates/editor\"\u001b[39m)\u001b[33m;\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-restricted-members.spec.ts",
+                        "column": 67,
+                        "line": 64
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: 'Themes' })\nExpected: visible\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByRole('heading', { name: 'Themes' }) with timeout 30000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Themes' })\u001b[22m\n\u001b[2m    - waiting for \"http://localhost:3100/dashboard\" navigation to finish...\u001b[22m\n\u001b[2m    - navigated to \"http://localhost:3100/dashboard\"\u001b[22m\n\n\n  62 |     await asUser(browser, who, async (page) => {\n  63 |       await page.goto(\"/dashboard/templates\");\n> 64 |       await expect(page.getByRole(\"heading\", { name: \"Themes\" })).toBeVisible({ timeout: 30_000 });\n     |                                                                   ^\n  65 |       await expect(page.getByRole(\"button\", { name: \"Apply theme\" })).toHaveCount(0);\n  66 |       await shot(page, `AC-NAV-2_${who}-themes-read-only`);\n  67 |       await page.goto(\"/dashboard/templates/editor\");\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-restricted-members.spec.ts:64:67\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-restricted-members.spec.ts:62:5"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:19:28.635Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-restricted-members--6cacd-an-be-applied-or-published-\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-restricted-members--6cacd-an-be-applied-or-published-\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-restricted-members.spec.ts",
+                    "column": 67,
+                    "line": 64
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-f99bee0d33da5b3ab982",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 61,
+          "column": 3
+        },
+        {
+          "title": "readOnly member: Themes and the editor open read-only (nothing can be applied or published)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7618,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:20:02.948Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-348473f7777c85379df0",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 61,
+          "column": 3
+        },
+        {
+          "title": "read-only member: sees the catalogue but cannot add or import; no-access member lands on the overview",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9963,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T09:20:10.813Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6825aa6a26a7be71797a-41e19f6e4f0c13478a64",
+          "file": "studio-restricted-members.spec.ts",
+          "line": 76,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-22T09:18:39.027Z",
+    "duration": 103149.159,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

@@ -17,6 +17,7 @@ import {
   removeCompanyMember,
   setCompanyMemberStatus,
   setCompanyStatus,
+  setCompanyStudioRollout,
   transferCompanyOwnership,
   updateCompany,
   updateCompanyStore,
@@ -143,5 +144,15 @@ export async function updatePlatformSettingsAction(input: unknown) {
     updateTag(BRANDING_TAG);
     revalidatePath("/", "layout");
     revalidatePath(ROUTES.admin, "layout");
+  });
+}
+
+export async function setCompanyStudioRolloutAction(tenantId: unknown, input: unknown) {
+  return guarded("org.edit", "admin.org.set_studio_rollout", async () => {
+    const id = parseInput(z.string().uuid(), tenantId);
+    const v = parseInput(z.object({ enabled: z.boolean(), reason: z.string().trim().min(1).max(500) }), input);
+    const result = await setCompanyStudioRollout(id, v.enabled, v.reason);
+    revalidatePath(ROUTES.admin, "layout");
+    return result;
   });
 }

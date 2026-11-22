@@ -10,6 +10,8 @@ import {
   getPublicPagesApi,
   getPublicProductApi,
   getStorefrontApi,
+  getPublicLandingPageApi,
+  type PublicLandingPageApi,
   type PublicCollectionApi,
   type PublicProductApi,
   type PublicLayoutApi,
@@ -247,3 +249,9 @@ export const getPublicPageLinks = cache(async (slug: string): Promise<PublicPage
 export const getPublicContentPage = cache(async (slug: string, pageSlug: string): Promise<PublicPageApi | null> =>
   notFoundToNull(() => getPublicPageApi(slug, pageSlug)),
 );
+
+/** One published landing page (kind = 'page'). Unknown or unpublished pages are null. */
+export const getPublicLandingPage = cache(async (slug: string, pageSlug: string): Promise<PublicLandingPageApi | null> =>
+  notFoundToNull(() => getPublicLandingPageApi(slug, pageSlug)),
+);
+

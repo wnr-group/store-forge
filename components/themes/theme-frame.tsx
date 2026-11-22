@@ -69,6 +69,8 @@ export type ThemeFrameProps = {
   cardTools?: CardTools | null;
   /** The product or collection a product or collection page shows. */
   resource?: Record<string, unknown>;
+  /** Editor and preview only: show the page as it will look at this instant (UTC ISO). Never applied in public mode. */
+  previewNow?: string;
   className?: string;
 };
 
@@ -133,7 +135,7 @@ function DeviceScreen({ width, height, scale, left, children }: { width: number;
  * space available. Nothing here is a mock-up, so what the merchant sees is what the storefront renders. Links and forms
  * inside never navigate; in editor mode a click selects the section or block under the pointer instead.
  */
-export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, onEditText, onEditBlocked, inspector = true, selectedSectionId, selectedBlockId, labelFor, zoom, resource, cardTools, className }: ThemeFrameProps) {
+export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, onEditText, onEditBlocked, inspector = true, selectedSectionId, selectedBlockId, labelFor, zoom, resource, cardTools, previewNow, className }: ThemeFrameProps) {
   const outer = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ sectionId: string; blockId?: string } | null>(null);
   // The text being edited in place, so a change of mode or a closed preview ends the edit cleanly.
@@ -179,10 +181,11 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
           groupHeader: headerGroup ?? undefined,
           groupFooter: footerGroup ?? undefined,
           groupAnnouncement: announcementGroup ?? undefined,
+          previewNow: mode === "public" ? undefined : previewNow,
         }}
       />
     ),
-    [document, mode, data, resource, theme, headerGroup, footerGroup, announcementGroup],
+    [document, mode, data, resource, theme, headerGroup, footerGroup, announcementGroup, previewNow],
   );
 
   const width = DEVICE_WIDTH[device];

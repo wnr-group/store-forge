@@ -1,0 +1,6 @@
+
+C:\Users\Eshwar\WNR\store-forge-integ\lib\templates\display-prune.ts
+  30:23  warning  '_endsAt' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (0 errors, 1 warning)
+

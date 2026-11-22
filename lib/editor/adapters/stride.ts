@@ -18,7 +18,7 @@ registerEditorAdapter(
     id: "stride",
     name: "Stride",
     looks: ["sport"],
-    blockSections: ["announcement-bar", "collection-banner", "footer", "hero", "image-banner", "image-with-text", "logo-list", "main-product", "multicolumn", "promotional-banner", "rich-text", "testimonials"],
+    blockSections: ["announcement-bar", "collection-banner", "footer", "hero", "image-banner", "image-with-text", "logo-list", "main-product", "multicolumn", "promotional-banner", "rich-text", "testimonials", "trust-badges"],
     blockTypes: { "image-with-text": ["button", "heading", "text"], "promotional-banner": ["button", "heading", "text", "column"] },
     hideOnly: { header: ["link", "button"], "collapsible-content": ["collapsible-item"] },
     // Its slides carry their own heading and text; the hero draws only the buttons added to it.

@@ -1,0 +1,14 @@
+               email               | role  | design  | capabilities 
+-----------------------------------+-------+---------+--------------
+ admin@demo.test                   | admin | publish | {attest}
+ catalog-only@demo.test            | admin | none    | {}
+ design-only@demo.test             | admin | publish | {}
+ e2e-reusable-restricted@demo.test | admin | read    | {}
+ no-access@demo.test               | staff | none    | {}
+ owner@demo.test                   | owner |         | {}
+ owner2-mwq2wnm2@demo.test         | owner |         | {}
+ owner2-mwqj88vw@demo.test         | owner |         | {}
+ read-only@demo.test               | staff | read    | {}
+ staff@demo.test                   | staff | read    | {}
+(10 rows)
+

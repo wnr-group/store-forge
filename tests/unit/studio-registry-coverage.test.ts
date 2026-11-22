@@ -136,9 +136,9 @@ const gapsOf = (r: Row): string[] => [
 describe("registry coverage per look", () => {
   const sections = Object.keys(registry.sections);
   const blocks = Object.keys(registry.blocks);
-  it("has the registry the plan was written against (18 sections, 22 blocks) and 4 looks", () => {
-    expect(sections).toHaveLength(18);
-    expect(blocks).toHaveLength(22);
+  it("has the registry the plan was written against (20 sections, 23 blocks) and 4 looks", () => {
+    expect(sections).toHaveLength(20);
+    expect(blocks).toHaveLength(23);
     expect(LOOK_IDS).toHaveLength(4);
   });
   it("every element on every look persists, validates, renders and is covered, or is dispositioned", () => {

@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 tests\e2e\studio-product-presentation.spec.ts:35:1 › per-product customizer: draft, publish, reset, stale tab, one product only (43.0s)
+
+  1 passed (46.2s)

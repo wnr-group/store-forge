@@ -7,6 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { ChevronDown, ChevronRight, Eye, EyeOff, GripVertical, Plus, Trash2 } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ComponentNode, TemplateDocument } from "@/lib/templates/document";
 import { cardKindOf } from "@/lib/templates/card-parts";
@@ -16,7 +17,12 @@ import { sectionTypesFor } from "@/lib/themes/editor/catalog";
 import type { EditorState } from "@/lib/themes/editor/state";
 import type { ThemeKind } from "@/lib/themes/types";
 import { cn } from "@/lib/utils";
+import { displayBadges, type DisplayBadge } from "@/lib/themes/editor/display-state";
 import { CardElements, type CardContext } from "./card-elements";
+import { useStudioCaps } from "./studio-context";
+import { availabilityOf } from "@/lib/templates/component-checks";
+import { unavailableReasonKey } from "@/lib/templates/studio-features";
+import { t } from "@/lib/i18n/messages";
 
 const registry = getRegistry();
 
@@ -47,10 +53,24 @@ type Props = {
   cardContext: CardContext;
   /** The look's editor adapter: it knows which accepted blocks the look never draws, so they are not offered. */
   adapter: ThemeEditorAdapter;
+  /** The preview clock (epoch ms) the display badges are worked out against. null: no badges (Studio is off). */
+  badgeNowMs?: number | null;
 };
 
+/** Scheduled, upcoming, expired and hidden-on-device marks for a section or block. */
+function DisplayBadges({ badges }: { badges: DisplayBadge[] }) {
+  if (badges.length === 0) return null;
+  return (
+    <span className="flex shrink-0 flex-wrap items-center gap-1" data-display-badges>
+      {badges.map((b) => (
+        <span key={b.kind} data-badge={b.kind} className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-medium", b.kind === "upcoming" ? "bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200" : b.kind === "expired" ? "bg-red-100 text-red-900 dark:bg-red-500/20 dark:text-red-200" : b.kind === "scheduled" ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200" : "bg-muted text-muted-foreground")}>{b.label}</span>
+      ))}
+    </span>
+  );
+}
+
 /** The page outline: announcement, header, the page's own (re-orderable) sections, and footer. */
-export function SectionsPanel({ state, groupIds, pageKind, actions, disabled, cardContext, adapter }: Props) {
+export function SectionsPanel({ state, groupIds, pageKind, actions, disabled, cardContext, adapter, badgeNowMs = null }: Props) {
   const regions: Region[] = [
     { label: "Announcement bar", docId: groupIds.announcement, kind: "group_announcement", editable: false },
     { label: "Header", docId: groupIds.header, kind: "group_header", editable: false },
@@ -59,12 +79,12 @@ export function SectionsPanel({ state, groupIds, pageKind, actions, disabled, ca
   ];
   return (
     <div className="space-y-5 p-3 sm:p-3.5">
-      {regions.map((r) => (r.docId && state.docs[r.docId] ? <Region key={r.kind} region={r} state={state} actions={actions} disabled={disabled} cardContext={cardContext} adapter={adapter} /> : null))}
+      {regions.map((r) => (r.docId && state.docs[r.docId] ? <Region key={r.kind} region={r} state={state} actions={actions} disabled={disabled} cardContext={cardContext} adapter={adapter} badgeNowMs={badgeNowMs} /> : null))}
     </div>
   );
 }
 
-function Region({ region, state, actions, disabled, cardContext, adapter }: { region: Region; state: EditorState; actions: SectionActions; disabled: boolean; cardContext: CardContext; adapter: ThemeEditorAdapter }) {
+function Region({ region, state, actions, disabled, cardContext, adapter, badgeNowMs }: { region: Region; state: EditorState; actions: SectionActions; disabled: boolean; cardContext: CardContext; adapter: ThemeEditorAdapter; badgeNowMs: number | null }) {
   const docId = region.docId!;
   const doc = state.docs[docId].document as unknown as TemplateDocument;
   const order = doc.order ?? [];
@@ -89,7 +109,7 @@ function Region({ region, state, actions, disabled, cardContext, adapter }: { re
         <SortableContext items={order} strategy={verticalListSortingStrategy} disabled={!region.editable || disabled}>
           <ul className="space-y-0.5">
             {order.map((id) => (
-              <SectionRow key={id} id={id} node={doc.sections[id]} docId={docId} state={state} actions={actions} sortable={region.editable} canRemove={region.editable} disabled={disabled} cardContext={cardContext} adapter={adapter} />
+              <SectionRow key={id} id={id} node={doc.sections[id]} docId={docId} state={state} actions={actions} sortable={region.editable} canRemove={region.editable} disabled={disabled} cardContext={cardContext} adapter={adapter} badgeNowMs={badgeNowMs} />
             ))}
           </ul>
         </SortableContext>
@@ -108,7 +128,7 @@ function Region({ region, state, actions, disabled, cardContext, adapter }: { re
   );
 }
 
-function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disabled, cardContext, adapter }: { id: string; node: ComponentNode | undefined; docId: string; state: EditorState; actions: SectionActions; sortable: boolean; canRemove: boolean; disabled: boolean; cardContext: CardContext; adapter: ThemeEditorAdapter }) {
+function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disabled, cardContext, adapter, badgeNowMs }: { id: string; node: ComponentNode | undefined; docId: string; state: EditorState; actions: SectionActions; sortable: boolean; canRemove: boolean; disabled: boolean; cardContext: CardContext; adapter: ThemeEditorAdapter; badgeNowMs: number | null }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: !sortable || disabled });
   const sel = state.selection;
   const selected = sel !== null && "sectionId" in sel && sel.docId === docId && sel.sectionId === id;
@@ -122,6 +142,7 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
   const hidden = Boolean(node?.disabled);
   const acceptable = useMemo(() => (def?.accepts ?? []).filter((t) => registry.blocks[t] && (adapter.drawsBlock?.(t, node?.type ?? "") ?? true)), [def, adapter, node?.type]);
   const [addBlockOpen, setAddBlockOpen] = useState(false);
+  const { features } = useStudioCaps();
 
   if (!node) return null;
   return (
@@ -137,6 +158,7 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
         <button type="button" onClick={() => actions.select(docId, id)} className={cn("min-w-0 flex-1 rounded px-1.5 py-1.5 text-left text-sm leading-snug break-words outline-none focus-visible:ring-2 focus-visible:ring-ring", selected ? "font-medium text-primary" : "text-foreground/90", hidden && "text-muted-foreground line-through")} aria-current={selected || undefined}>
           {name}
         </button>
+        {badgeNowMs !== null ? <DisplayBadges badges={displayBadges(node, badgeNowMs)} /> : null}
         {!sortable ? <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">Global</span> : blocks.length > 0 ? <span className={cn("shrink-0 px-1 text-[10px] text-muted-foreground", expanded && "hidden")}>{blocks.length}</span> : null}
         {blocks.length > 0 || hasCards ? (
           <button type="button" onClick={() => setOpen(!open)} aria-expanded={expanded} aria-label={expanded ? `Hide ${name} blocks` : `Show ${name} blocks`} className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted">
@@ -165,6 +187,7 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
                   <button type="button" onClick={() => actions.select(docId, id, blockId)} className="min-w-0 flex-1 py-1.5 text-left text-[13px] leading-snug break-words outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-current={blockSelected || undefined}>
                     {registry.blocks[block?.type ?? ""]?.name ?? block?.type}
                   </button>
+                  {badgeNowMs !== null ? <DisplayBadges badges={displayBadges(block, badgeNowMs)} /> : null}
                   <Button size="icon-xs" variant="ghost" aria-label="Move block up" disabled={disabled || index === 0} onClick={() => actions.moveBlock(docId, id, blockId, index - 1)}><ChevronDown className="rotate-180" aria-hidden /></Button>
                   <Button size="icon-xs" variant="ghost" aria-label="Move block down" disabled={disabled || index === blocks.length - 1} onClick={() => actions.moveBlock(docId, id, blockId, index + 1)}><ChevronDown aria-hidden /></Button>
                   <Button size="icon-xs" variant="ghost" aria-label="Remove block" disabled={disabled} onClick={() => actions.removeBlock(docId, id, blockId)} className="hover:text-destructive"><Trash2 aria-hidden /></Button>
@@ -181,9 +204,18 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
                 <ul className="mt-1 grid grid-cols-2 gap-1">
                   {acceptable.map((type) => (
                     <li key={type}>
-                      <Button size="xs" variant="outline" className="w-full" onClick={() => { actions.addBlock(docId, id, type); setAddBlockOpen(false); }}>
-                        {registry.blocks[type].name}
-                      </Button>
+                      {(() => {
+                        const avail = availabilityOf("block", type, features);
+                        const reason = avail.available ? undefined : t(unavailableReasonKey(avail.reasons));
+                        return (
+                          <>
+                            <Button size="xs" variant="outline" className="w-full" disabled={!avail.available} aria-describedby={reason ? `unavail-${id}-${type}` : undefined} onClick={() => { actions.addBlock(docId, id, type); setAddBlockOpen(false); }}>
+                              {registry.blocks[type].name}
+                            </Button>
+                            {reason ? <span id={`unavail-${id}-${type}`} className="mt-0.5 block text-[10px] text-muted-foreground">{reason}</span> : null}
+                          </>
+                        );
+                      })()}
                     </li>
                   ))}
                 </ul>
@@ -197,6 +229,8 @@ function SectionRow({ id, node, docId, state, actions, sortable, canRemove, disa
 }
 
 function AddSectionDialog({ open, kind, onClose, onPick }: { open: boolean; kind: ThemeKind; onClose: () => void; onPick: (type: string) => void }) {
+  const { features } = useStudioCaps();
+  const [search, setSearch] = useState("");
   const groups = useMemo(() => {
     const byCategory = new Map<string, { type: string; name: string; description?: string }[]>();
     for (const type of sectionTypesFor(kind)) {
@@ -207,29 +241,68 @@ function AddSectionDialog({ open, kind, onClose, onPick }: { open: boolean; kind
     }
     return [...byCategory.entries()];
   }, [kind]);
+
+  const query = search.trim().toLowerCase();
+  const filteredGroups = useMemo(() => {
+    return groups
+      .map(([category, items]) => {
+        const filtered = query
+          ? items.filter(
+              (s) =>
+                s.name.toLowerCase().includes(query) ||
+                (s.description && s.description.toLowerCase().includes(query)) ||
+                s.type.toLowerCase().includes(query),
+            )
+          : items;
+        return [category, filtered] as const;
+      })
+      .filter(([_, items]) => items.length > 0);
+  }, [groups, query]);
+
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) { setSearch(""); onClose(); } }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Add a section</DialogTitle>
           <DialogDescription>Sections are the building blocks of your page. You can change everything about them afterwards.</DialogDescription>
         </DialogHeader>
+        <div className="relative mb-1">
+          <Input
+            type="search"
+            placeholder="Search sections by name or description…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-9 text-xs"
+            autoFocus
+          />
+        </div>
         <div className="max-h-[60dvh] space-y-4 overflow-y-auto pr-1">
-          {groups.map(([category, items]) => (
-            <div key={category}>
-              <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">{category}</h4>
-              <ul className="grid gap-1.5 sm:grid-cols-2">
-                {items.map((s) => (
-                  <li key={s.type}>
-                    <button type="button" onClick={() => onPick(s.type)} className="w-full rounded-md border bg-card p-2.5 text-left transition-colors outline-none hover:border-primary focus-visible:ring-2 focus-visible:ring-ring">
-                      <span className="block text-sm font-medium">{s.name}</span>
-                      {s.description ? <span className="mt-0.5 line-clamp-2 block text-xs text-muted-foreground">{s.description}</span> : null}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {filteredGroups.length === 0 ? (
+            <p className="py-6 text-center text-xs text-muted-foreground">No sections match &quot;{search}&quot;</p>
+          ) : (
+            filteredGroups.map(([category, items]) => (
+              <div key={category}>
+                <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">{category}</h4>
+                <ul className="grid gap-1.5 sm:grid-cols-2">
+                  {items.map((s) => (
+                    <li key={s.type}>
+                      {(() => {
+                        const avail = availabilityOf("section", s.type, features);
+                        const reason = avail.available ? null : t(unavailableReasonKey(avail.reasons));
+                        return (
+                          <button type="button" disabled={!avail.available} aria-describedby={reason ? `unavail-${s.type}` : undefined} onClick={() => { setSearch(""); onPick(s.type); }} className="w-full rounded-md border bg-card p-2.5 text-left transition-colors outline-none hover:border-primary focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-border">
+                            <span className="block text-sm font-medium">{s.name}</span>
+                            {s.description ? <span className="mt-0.5 line-clamp-2 block text-xs text-muted-foreground">{s.description}</span> : null}
+                            {reason ? <span id={`unavail-${s.type}`} className="mt-1 block text-xs font-medium text-muted-foreground">{reason}</span> : null}
+                          </button>
+                        );
+                      })()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          )}
         </div>
       </DialogContent>
     </Dialog>

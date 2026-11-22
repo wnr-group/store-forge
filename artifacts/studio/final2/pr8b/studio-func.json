@@ -1,0 +1,686 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-func.spec.ts",
+      "--reporter=json,list",
+      "--output=C:/Users/Eshwar/AppData/Local/Temp/pw-out"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/AppData/Local/Temp/pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-func.spec.ts",
+      "file": "studio-func.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "loading state: Products shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 6,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:26.176Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-7a2d0762efa24672b263",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Categories shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 5,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:26.322Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-08ca9c6901a9b31dbee9",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Collections shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 4,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:26.356Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-3387d6a14dc95e9b131b",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Inventory shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:26.396Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-be8acaee2fc96aecbbf7",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Customers shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:26.417Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-48c94771dc1acccb2c7d",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Analytics shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:26.429Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-aa512da7a80182cc8138",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Settings shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:26.447Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-a22b207d4f6347a53225",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Team members shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:26.459Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-f95f9cc511be93066f1c",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "Inventory row action: Adjust opens the dialog, validates, and Cancel leaves the data alone",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7197,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:26.471Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-dbb5c61d8c8a66a58522",
+          "file": "studio-func.spec.ts",
+          "line": 66,
+          "column": 1
+        },
+        {
+          "title": "Products row actions: menu items, Edit link, publish/draft toggle, Duplicate and Delete on a test product",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 38146,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:42:33.687Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-0395c191a34e263ac6b5",
+          "file": "studio-func.spec.ts",
+          "line": 86,
+          "column": 1
+        },
+        {
+          "title": "Collections: add form validates, Cancel returns, create, edit, delete-confirm Cancel keeps it, Delete removes it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 23609,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:43:11.857Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-e845acae57c4ce9c599a",
+          "file": "studio-func.spec.ts",
+          "line": 129,
+          "column": 1
+        },
+        {
+          "title": "Settings: validation messages, a successful save with feedback that persists, and the original value restored",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15138,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:43:35.491Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-a73db000ff3866149cc8",
+          "file": "studio-func.spec.ts",
+          "line": 192,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T15:42:24.194Z",
+    "duration": 87989.118,
+    "expected": 4,
+    "skipped": 8,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

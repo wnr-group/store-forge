@@ -1,0 +1,187 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-qa-schema2.spec.ts",
+      "--reporter=json,list",
+      "--output=C:/Users/Eshwar/AppData/Local/Temp/pw-out"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/AppData/Local/Temp/pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-qa-schema2.spec.ts",
+      "file": "studio-qa-schema2.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "API behaviour for schema 2 + display on a Studio-enabled store (evidence only)",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6253,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-qa-schema2.spec.ts:26:22\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-qa-schema2.spec.ts:11:5",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-qa-schema2.spec.ts",
+                      "column": 22,
+                      "line": 26
+                    },
+                    "snippet": " \u001b[90m 24 |\u001b[39m       \u001b[36mconst\u001b[39m c \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m r\u001b[33m.\u001b[39mput(\u001b[32m`${API}/store/templates/${home.id}/draft`\u001b[39m\u001b[33m,\u001b[39m { headers\u001b[33m:\u001b[39m \u001b[33mH\u001b[39m\u001b[33m,\u001b[39m data\u001b[33m:\u001b[39m { document\u001b[33m:\u001b[39m base\u001b[33m,\u001b[39m expectedRevision\u001b[33m:\u001b[39m d\u001b[33m.\u001b[39mrevision } })\u001b[33m;\u001b[39m\n \u001b[90m 25 |\u001b[39m       out\u001b[33m.\u001b[39mv1_plain_control \u001b[33m=\u001b[39m { status\u001b[33m:\u001b[39m c\u001b[33m.\u001b[39mstatus() }\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 26 |\u001b[39m       expect(c\u001b[33m.\u001b[39mok())\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m   } \u001b[36mfinally\u001b[39m {\n \u001b[90m 29 |\u001b[39m     \u001b[36mawait\u001b[39m asUser(browser\u001b[33m,\u001b[39m \u001b[32m\"platform\"\u001b[39m\u001b[33m,\u001b[39m (p) \u001b[33m=>\u001b[39m p\u001b[33m.\u001b[39mcontext()\u001b[33m.\u001b[39mrequest\u001b[33m.\u001b[39mput(\u001b[32m`${API}/platform/organizations/${orgId}/studio-rollout`\u001b[39m\u001b[33m,\u001b[39m { headers\u001b[33m:\u001b[39m \u001b[33mH\u001b[39m\u001b[33m,\u001b[39m data\u001b[33m:\u001b[39m { enabled\u001b[33m:\u001b[39m \u001b[36mfalse\u001b[39m\u001b[33m,\u001b[39m reason\u001b[33m:\u001b[39m \u001b[32m\"QA cleanup\"\u001b[39m } }))\u001b[33m;\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-qa-schema2.spec.ts",
+                        "column": 22,
+                        "line": 26
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\n  24 |       const c = await r.put(`${API}/store/templates/${home.id}/draft`, { headers: H, data: { document: base, expectedRevision: d.revision } });\n  25 |       out.v1_plain_control = { status: c.status() };\n> 26 |       expect(c.ok()).toBe(true);\n     |                      ^\n  27 |     });\n  28 |   } finally {\n  29 |     await asUser(browser, \"platform\", (p) => p.context().request.put(`${API}/platform/organizations/${orgId}/studio-rollout`, { headers: H, data: { enabled: false, reason: \"QA cleanup\" } }));\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-qa-schema2.spec.ts:26:22\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-qa-schema2.spec.ts:11:5"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-22T08:51:25.501Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-qa-schema2-API-beha-d073d-nabled-store-evidence-only-\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-qa-schema2-API-beha-d073d-nabled-store-evidence-only-\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-qa-schema2.spec.ts",
+                    "column": 22,
+                    "line": 26
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "aac8258e674a6243d176-5f06a559c0496449d868",
+          "file": "studio-qa-schema2.spec.ts",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-22T08:51:23.621Z",
+    "duration": 9590.679,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

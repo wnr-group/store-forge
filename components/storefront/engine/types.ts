@@ -90,6 +90,13 @@ export interface RenderContext {
   collectionProducts?: Record<string, CollectionProductSummary[]>;
   theme?: Record<string, unknown>;
   mode?: RenderMode;
+  /**
+   * Public mode: the server clock (epoch ms) that schedules are evaluated against. Set once by the server component that renders the
+   * page and never read from a request; without it the renderer uses its own clock.
+   */
+  serverNow?: number;
+  /** Preview and editor modes only: show the page as it will look at this instant (ISO string or epoch ms). Ignored publicly. */
+  previewNow?: string | number;
   selectedOptions?: Record<string, string>;
   onSelectOption?: (option: string, value: string) => void;
   [key: string]: unknown;

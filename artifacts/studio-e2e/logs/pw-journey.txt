@@ -1,0 +1,7 @@
+
+Running 2 tests using 1 worker
+
+  ok 1 artifacts\studio-e2e\qa\journey.qa.ts:60:1 › journey: flag, device display rule, save, refresh, API, publish, storefront at three viewports (1.2m)
+  ok 2 artifacts\studio-e2e\qa\journey.qa.ts:128:1 › performance (lab, mobile 390x844, no throttling): 5 cold loads of the storefront home (19.3s)
+
+  2 passed (2.1m)

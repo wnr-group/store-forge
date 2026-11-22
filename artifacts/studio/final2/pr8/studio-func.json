@@ -1,0 +1,791 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-func.spec.ts",
+      "--reporter=json,list",
+      "--output=C:/Users/Eshwar/AppData/Local/Temp/pw-out"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/AppData/Local/Temp/pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-func.spec.ts",
+      "file": "studio-func.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "loading state: Products shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 7,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:41.346Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-7a2d0762efa24672b263",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Categories shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 8,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:41.532Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-08ca9c6901a9b31dbee9",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Collections shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 4,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:41.567Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-3387d6a14dc95e9b131b",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Inventory shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 2,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:41.606Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-be8acaee2fc96aecbbf7",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Customers shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:41.631Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-48c94771dc1acccb2c7d",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Analytics shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:41.644Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-aa512da7a80182cc8138",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Settings shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:41.656Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-a22b207d4f6347a53225",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "loading state: Team members shows its skeleton while the page loads, then the real page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                  "location": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                    "line": 39,
+                    "column": 10
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:41.667Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Loading skeletons are only observable on a production build with working sessions (set E2E_LOADING_STATES=1); not verified on the dev server.",
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts",
+                        "line": 39,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-f95f9cc511be93066f1c",
+          "file": "studio-func.spec.ts",
+          "line": 38,
+          "column": 3
+        },
+        {
+          "title": "Inventory row action: Adjust opens the dialog, validates, and Cancel leaves the data alone",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5498,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:41.677Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-dbb5c61d8c8a66a58522",
+          "file": "studio-func.spec.ts",
+          "line": 66,
+          "column": 1
+        },
+        {
+          "title": "Products row actions: menu items, Edit link, publish/draft toggle, Duplicate and Delete on a test product",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 15497,
+                  "error": {
+                    "message": "Error: products row actions: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"4a7fd90d-9db9-4a76-91da-572fade4dbe4\",\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+   \"fe93c35a-284e-4c48-9cb5-53b07998be60\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                    "stack": "Error: products row actions: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"4a7fd90d-9db9-4a76-91da-572fade4dbe4\",\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+   \"fe93c35a-284e-4c48-9cb5-53b07998be60\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at expectRestored (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts:51:72)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:122:7\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:87:3",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                      "column": 72,
+                      "line": 51
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39msupport\\studio-data.ts:51\n\n \u001b[90m 49 |\u001b[39m   \u001b[36mconst\u001b[39m strip \u001b[33m=\u001b[39m (s\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m \u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mstringify({ \u001b[33m...\u001b[39m\u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mparse(s)\u001b[33m,\u001b[39m updatedAt\u001b[33m:\u001b[39m undefined })\u001b[33m;\u001b[39m\n \u001b[90m 50 |\u001b[39m   expect(after\u001b[33m.\u001b[39mleftoverCustomers\u001b[33m,\u001b[39m \u001b[32m`${label}: no leftover test customer`\u001b[39m)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m   expect(after\u001b[33m.\u001b[39mleftoverProducts\u001b[33m,\u001b[39m \u001b[32m`${label}: no leftover test product`\u001b[39m)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m   \u001b[36mconst\u001b[39m diff \u001b[33m=\u001b[39m (a\u001b[33m:\u001b[39m string[]\u001b[33m,\u001b[39m b\u001b[33m:\u001b[39m string[]) \u001b[33m=>\u001b[39m \u001b[32m`missing now: [${a.filter((x) => !b.includes(x)).join(\",\")}] extra now: [${b.filter((x) => !a.includes(x)).join(\",\")}]`\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   \u001b[36mfor\u001b[39m (\u001b[36mconst\u001b[39m key \u001b[36mof\u001b[39m [\u001b[32m\"categories\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"collections\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"customersTop\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"productsTop\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"adjustments\"\u001b[39m] \u001b[36mas\u001b[39m \u001b[36mconst\u001b[39m) {\n \u001b[90m 54 |\u001b[39m     expect(after[key]\u001b[33m,\u001b[39m \u001b[32m`${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`\u001b[39m)\u001b[33m.\u001b[39mtoEqual(before[key])\u001b[33m;\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                        "column": 72,
+                        "line": 51
+                      },
+                      "message": "Error: products row actions: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"4a7fd90d-9db9-4a76-91da-572fade4dbe4\",\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+   \"fe93c35a-284e-4c48-9cb5-53b07998be60\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n   at support\\studio-data.ts:51\n\n  49 |   const strip = (s: string) => JSON.stringify({ ...JSON.parse(s), updatedAt: undefined });\n  50 |   expect(after.leftoverCustomers, `${label}: no leftover test customer`).toEqual([]);\n> 51 |   expect(after.leftoverProducts, `${label}: no leftover test product`).toEqual([]);\n     |                                                                        ^\n  52 |   const diff = (a: string[], b: string[]) => `missing now: [${a.filter((x) => !b.includes(x)).join(\",\")}] extra now: [${b.filter((x) => !a.includes(x)).join(\",\")}]`;\n  53 |   for (const key of [\"categories\", \"collections\", \"customersTop\", \"productsTop\", \"adjustments\"] as const) {\n  54 |     expect(after[key], `${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`).toEqual(before[key]);\n    at expectRestored (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts:51:72)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:122:7\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:87:3"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:14:47.190Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-func-Products-row-a-33f8e-nd-Delete-on-a-test-product\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-func-Products-row-a-33f8e-nd-Delete-on-a-test-product\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                    "column": 72,
+                    "line": 51
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-0395c191a34e263ac6b5",
+          "file": "studio-func.spec.ts",
+          "line": 86,
+          "column": 1
+        },
+        {
+          "title": "Collections: add form validates, Cancel returns, create, edit, delete-confirm Cancel keeps it, Delete removes it",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 28993,
+                  "error": {
+                    "message": "Error: collections: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"4a7fd90d-9db9-4a76-91da-572fade4dbe4\",\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+   \"fe93c35a-284e-4c48-9cb5-53b07998be60\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                    "stack": "Error: collections: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"4a7fd90d-9db9-4a76-91da-572fade4dbe4\",\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+   \"fe93c35a-284e-4c48-9cb5-53b07998be60\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at expectRestored (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts:51:72)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:185:7\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:130:3",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                      "column": 72,
+                      "line": 51
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39msupport\\studio-data.ts:51\n\n \u001b[90m 49 |\u001b[39m   \u001b[36mconst\u001b[39m strip \u001b[33m=\u001b[39m (s\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m \u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mstringify({ \u001b[33m...\u001b[39m\u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mparse(s)\u001b[33m,\u001b[39m updatedAt\u001b[33m:\u001b[39m undefined })\u001b[33m;\u001b[39m\n \u001b[90m 50 |\u001b[39m   expect(after\u001b[33m.\u001b[39mleftoverCustomers\u001b[33m,\u001b[39m \u001b[32m`${label}: no leftover test customer`\u001b[39m)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m   expect(after\u001b[33m.\u001b[39mleftoverProducts\u001b[33m,\u001b[39m \u001b[32m`${label}: no leftover test product`\u001b[39m)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m   \u001b[36mconst\u001b[39m diff \u001b[33m=\u001b[39m (a\u001b[33m:\u001b[39m string[]\u001b[33m,\u001b[39m b\u001b[33m:\u001b[39m string[]) \u001b[33m=>\u001b[39m \u001b[32m`missing now: [${a.filter((x) => !b.includes(x)).join(\",\")}] extra now: [${b.filter((x) => !a.includes(x)).join(\",\")}]`\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   \u001b[36mfor\u001b[39m (\u001b[36mconst\u001b[39m key \u001b[36mof\u001b[39m [\u001b[32m\"categories\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"collections\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"customersTop\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"productsTop\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"adjustments\"\u001b[39m] \u001b[36mas\u001b[39m \u001b[36mconst\u001b[39m) {\n \u001b[90m 54 |\u001b[39m     expect(after[key]\u001b[33m,\u001b[39m \u001b[32m`${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`\u001b[39m)\u001b[33m.\u001b[39mtoEqual(before[key])\u001b[33m;\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                        "column": 72,
+                        "line": 51
+                      },
+                      "message": "Error: collections: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"4a7fd90d-9db9-4a76-91da-572fade4dbe4\",\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+   \"fe93c35a-284e-4c48-9cb5-53b07998be60\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n   at support\\studio-data.ts:51\n\n  49 |   const strip = (s: string) => JSON.stringify({ ...JSON.parse(s), updatedAt: undefined });\n  50 |   expect(after.leftoverCustomers, `${label}: no leftover test customer`).toEqual([]);\n> 51 |   expect(after.leftoverProducts, `${label}: no leftover test product`).toEqual([]);\n     |                                                                        ^\n  52 |   const diff = (a: string[], b: string[]) => `missing now: [${a.filter((x) => !b.includes(x)).join(\",\")}] extra now: [${b.filter((x) => !a.includes(x)).join(\",\")}]`;\n  53 |   for (const key of [\"categories\", \"collections\", \"customersTop\", \"productsTop\", \"adjustments\"] as const) {\n  54 |     expect(after[key], `${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`).toEqual(before[key]);\n    at expectRestored (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts:51:72)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:185:7\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:130:3"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:15:05.431Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-func-Collections-ad-8cd35--keeps-it-Delete-removes-it\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-func-Collections-ad-8cd35--keeps-it-Delete-removes-it\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                    "column": 72,
+                    "line": 51
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-e845acae57c4ce9c599a",
+          "file": "studio-func.spec.ts",
+          "line": 129,
+          "column": 1
+        },
+        {
+          "title": "Settings: validation messages, a successful save with feedback that persists, and the original value restored",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 17074,
+                  "error": {
+                    "message": "Error: settings: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"4a7fd90d-9db9-4a76-91da-572fade4dbe4\",\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+   \"fe93c35a-284e-4c48-9cb5-53b07998be60\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                    "stack": "Error: settings: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"4a7fd90d-9db9-4a76-91da-572fade4dbe4\",\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+   \"fe93c35a-284e-4c48-9cb5-53b07998be60\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at expectRestored (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts:51:72)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:232:7\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:193:3",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                      "column": 72,
+                      "line": 51
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39msupport\\studio-data.ts:51\n\n \u001b[90m 49 |\u001b[39m   \u001b[36mconst\u001b[39m strip \u001b[33m=\u001b[39m (s\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m \u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mstringify({ \u001b[33m...\u001b[39m\u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mparse(s)\u001b[33m,\u001b[39m updatedAt\u001b[33m:\u001b[39m undefined })\u001b[33m;\u001b[39m\n \u001b[90m 50 |\u001b[39m   expect(after\u001b[33m.\u001b[39mleftoverCustomers\u001b[33m,\u001b[39m \u001b[32m`${label}: no leftover test customer`\u001b[39m)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m   expect(after\u001b[33m.\u001b[39mleftoverProducts\u001b[33m,\u001b[39m \u001b[32m`${label}: no leftover test product`\u001b[39m)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m   \u001b[36mconst\u001b[39m diff \u001b[33m=\u001b[39m (a\u001b[33m:\u001b[39m string[]\u001b[33m,\u001b[39m b\u001b[33m:\u001b[39m string[]) \u001b[33m=>\u001b[39m \u001b[32m`missing now: [${a.filter((x) => !b.includes(x)).join(\",\")}] extra now: [${b.filter((x) => !a.includes(x)).join(\",\")}]`\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   \u001b[36mfor\u001b[39m (\u001b[36mconst\u001b[39m key \u001b[36mof\u001b[39m [\u001b[32m\"categories\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"collections\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"customersTop\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"productsTop\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"adjustments\"\u001b[39m] \u001b[36mas\u001b[39m \u001b[36mconst\u001b[39m) {\n \u001b[90m 54 |\u001b[39m     expect(after[key]\u001b[33m,\u001b[39m \u001b[32m`${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`\u001b[39m)\u001b[33m.\u001b[39mtoEqual(before[key])\u001b[33m;\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                        "column": 72,
+                        "line": 51
+                      },
+                      "message": "Error: settings: no leftover test product\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"4a7fd90d-9db9-4a76-91da-572fade4dbe4\",\u001b[39m\n\u001b[31m+   \"c2883477-fbf0-4206-93a7-a94933cf4e79\",\u001b[39m\n\u001b[31m+   \"fe93c35a-284e-4c48-9cb5-53b07998be60\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n   at support\\studio-data.ts:51\n\n  49 |   const strip = (s: string) => JSON.stringify({ ...JSON.parse(s), updatedAt: undefined });\n  50 |   expect(after.leftoverCustomers, `${label}: no leftover test customer`).toEqual([]);\n> 51 |   expect(after.leftoverProducts, `${label}: no leftover test product`).toEqual([]);\n     |                                                                        ^\n  52 |   const diff = (a: string[], b: string[]) => `missing now: [${a.filter((x) => !b.includes(x)).join(\",\")}] extra now: [${b.filter((x) => !a.includes(x)).join(\",\")}]`;\n  53 |   for (const key of [\"categories\", \"collections\", \"customersTop\", \"productsTop\", \"adjustments\"] as const) {\n  54 |     expect(after[key], `${label}: ${key} restored (${diff(before[key], after[key])}; before ${before[key].length}, after ${after[key].length})`).toEqual(before[key]);\n    at expectRestored (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts:51:72)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:232:7\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:89:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-func.spec.ts:193:3"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T15:15:39.316Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-func-Settings-valid-29822-the-original-value-restored\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\AppData\\Local\\Temp\\pw-out\\studio-func-Settings-valid-29822-the-original-value-restored\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-data.ts",
+                    "column": 72,
+                    "line": 51
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "83fe556c4d9f3c530bf5-a73db000ff3866149cc8",
+          "file": "studio-func.spec.ts",
+          "line": 192,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T15:14:40.036Z",
+    "duration": 78897.766,
+    "expected": 1,
+    "skipped": 8,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

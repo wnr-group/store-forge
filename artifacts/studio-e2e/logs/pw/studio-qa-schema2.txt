@@ -1,0 +1,36 @@
+
+Running 1 test using 1 worker
+
+  x  1 tests\e2e\studio-qa-schema2.spec.ts:6:1 › API behaviour for schema 2 + display on a Studio-enabled store (evidence only) (6.3s)
+
+
+  1) tests\e2e\studio-qa-schema2.spec.ts:6:1 › API behaviour for schema 2 + display on a Studio-enabled store (evidence only) 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      24 |       const c = await r.put(`${API}/store/templates/${home.id}/draft`, { headers: H, data: { document: base, expectedRevision: d.revision } });
+      25 |       out.v1_plain_control = { status: c.status() };
+    > 26 |       expect(c.ok()).toBe(true);
+         |                      ^
+      27 |     });
+      28 |   } finally {
+      29 |     await asUser(browser, "platform", (p) => p.context().request.put(`${API}/platform/organizations/${orgId}/studio-rollout`, { headers: H, data: { enabled: false, reason: "QA cleanup" } }));
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-qa-schema2.spec.ts:26:22
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-qa-schema2.spec.ts:11:5
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-qa-schema2-API-beha-d073d-nabled-store-evidence-only-\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-qa-schema2-API-beha-d073d-nabled-store-evidence-only-\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-qa-schema2-API-beha-d073d-nabled-store-evidence-only-\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-qa-schema2.spec.ts:6:1 › API behaviour for schema 2 + display on a Studio-enabled store (evidence only) 

@@ -1,0 +1,134 @@
+
+Running 4 tests using 1 worker
+
+  x  1 tests\e2e\studio-storefront-errors.spec.ts:24:1 › API unavailable: shopper state, no internals, same URL, Retry re-fetches from the server and recovers (346ms)
+  x  2 tests\e2e\studio-storefront-errors.spec.ts:41:1 › Retry while the API is still down stays on the shopper state and asks the server again (389ms)
+  x  3 tests\e2e\studio-storefront-errors.spec.ts:55:1 › invalid published document shows the neutral error state with no technical detail (535ms)
+  x  4 tests\e2e\studio-storefront-errors.spec.ts:65:1 › a section that throws while rendering is caught by the boundary (361ms)
+
+
+  1) tests\e2e\studio-storefront-errors.spec.ts:24:1 › API unavailable: shopper state, no internals, same URL, Retry re-fetches from the server and recovers 
+
+    Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100
+    Call log:
+      - → GET http://127.0.0.1:4100/__fault/mode?mode=http500
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+
+      10 | const INVALID_DOCUMENT = "bad-order";
+      11 | const THROWING_SECTION = "null-section";
+    > 12 | const setMode = (page: Page, mode: string) => page.request.get(`${PROXY}/__fault/mode?mode=${mode}`);
+         |                                                            ^
+      13 | const requests = async (page: Page) => ((await (await page.request.get(`${PROXY}/__fault/stats`)).json()) as { storefrontRequests: number }).storefrontRequests;
+      14 | const fresh = () => `fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
+      15 |
+        at setMode (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-storefront-errors.spec.ts:12:60)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-storefront-errors.spec.ts:26:9
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-A-4f9e5-rom-the-server-and-recovers\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-A-4f9e5-rom-the-server-and-recovers\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-A-4f9e5-rom-the-server-and-recovers\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\studio-storefront-errors.spec.ts:41:1 › Retry while the API is still down stays on the shopper state and asks the server again 
+
+    Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100
+    Call log:
+      - → GET http://127.0.0.1:4100/__fault/mode?mode=http500
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+
+      10 | const INVALID_DOCUMENT = "bad-order";
+      11 | const THROWING_SECTION = "null-section";
+    > 12 | const setMode = (page: Page, mode: string) => page.request.get(`${PROXY}/__fault/mode?mode=${mode}`);
+         |                                                            ^
+      13 | const requests = async (page: Page) => ((await (await page.request.get(`${PROXY}/__fault/stats`)).json()) as { storefrontRequests: number }).storefrontRequests;
+      14 | const fresh = () => `fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
+      15 |
+        at setMode (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-storefront-errors.spec.ts:12:60)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-storefront-errors.spec.ts:43:9
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-R-53c85-e-and-asks-the-server-again\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-R-53c85-e-and-asks-the-server-again\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-R-53c85-e-and-asks-the-server-again\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests\e2e\studio-storefront-errors.spec.ts:55:1 › invalid published document shows the neutral error state with no technical detail 
+
+    Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100
+    Call log:
+      - → GET http://127.0.0.1:4100/__fault/mode?mode=bad-order
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+
+      10 | const INVALID_DOCUMENT = "bad-order";
+      11 | const THROWING_SECTION = "null-section";
+    > 12 | const setMode = (page: Page, mode: string) => page.request.get(`${PROXY}/__fault/mode?mode=${mode}`);
+         |                                                            ^
+      13 | const requests = async (page: Page) => ((await (await page.request.get(`${PROXY}/__fault/stats`)).json()) as { storefrontRequests: number }).storefrontRequests;
+      14 | const fresh = () => `fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
+      15 |
+        at setMode (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-storefront-errors.spec.ts:12:60)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-storefront-errors.spec.ts:57:9
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-i-905bf-te-with-no-technical-detail\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-i-905bf-te-with-no-technical-detail\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-i-905bf-te-with-no-technical-detail\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests\e2e\studio-storefront-errors.spec.ts:65:1 › a section that throws while rendering is caught by the boundary 
+
+    Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:4100
+    Call log:
+      - → GET http://127.0.0.1:4100/__fault/mode?mode=null-section
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+
+      10 | const INVALID_DOCUMENT = "bad-order";
+      11 | const THROWING_SECTION = "null-section";
+    > 12 | const setMode = (page: Page, mode: string) => page.request.get(`${PROXY}/__fault/mode?mode=${mode}`);
+         |                                                            ^
+      13 | const requests = async (page: Page) => ((await (await page.request.get(`${PROXY}/__fault/stats`)).json()) as { storefrontRequests: number }).storefrontRequests;
+      14 | const fresh = () => `fault-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
+      15 |
+        at setMode (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-storefront-errors.spec.ts:12:60)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-storefront-errors.spec.ts:67:9
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-a-162d3-g-is-caught-by-the-boundary\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-a-162d3-g-is-caught-by-the-boundary\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-storefront-errors-a-162d3-g-is-caught-by-the-boundary\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    tests\e2e\studio-storefront-errors.spec.ts:24:1 › API unavailable: shopper state, no internals, same URL, Retry re-fetches from the server and recovers 
+    tests\e2e\studio-storefront-errors.spec.ts:41:1 › Retry while the API is still down stays on the shopper state and asks the server again 
+    tests\e2e\studio-storefront-errors.spec.ts:55:1 › invalid published document shows the neutral error state with no technical detail 
+    tests\e2e\studio-storefront-errors.spec.ts:65:1 › a section that throws while rendering is caught by the boundary 

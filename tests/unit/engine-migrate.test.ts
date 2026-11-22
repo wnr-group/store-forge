@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyMigrationSteps, MIGRATION_STEPS, migrateDocument } from "../../lib/templates/engine/migrate";
-import { DOCUMENT_SCHEMA_VERSION } from "../../lib/templates/document";
+import { DOCUMENT_SCHEMA_VERSION, LATEST_SCHEMA_VERSION } from "../../lib/templates/document";
 
 /** Freezes the whole value so any write to the input throws in strict mode (ES modules are strict). */
 function deepFreeze<T>(value: T): T {
@@ -230,14 +230,15 @@ describe("Engine Migrate is chain-ready [AC-ENG-015]", () => {
   };
 
   it("[AC-ENG-015] the shipped step table is empty today, and holds a step for every version below the current one", () => {
-    // Today CURRENT is 1, so there is nothing to migrate from. Bumping DOCUMENT_SCHEMA_VERSION without adding the
-    // matching step makes this fail: a version-N document must always be able to reach the current version.
+    // New documents are still written at schemaVersion 1 (DOCUMENT_SCHEMA_VERSION); schema 2 (display rules) is read and
+    // reached lazily through step 1 -> 2. Bumping LATEST_SCHEMA_VERSION without adding the matching step makes this fail:
+    // a version-N document must always be able to reach the latest version.
     expect(DOCUMENT_SCHEMA_VERSION).toBe(1);
-    expect(Object.keys(MIGRATION_STEPS)).toEqual([]);
-    for (let version = 1; version < DOCUMENT_SCHEMA_VERSION; version++) {
+    expect(LATEST_SCHEMA_VERSION).toBe(2);
+    for (let version = 1; version < LATEST_SCHEMA_VERSION; version++) {
       expect(typeof MIGRATION_STEPS[version]).toBe("function");
     }
-    expect(Object.keys(MIGRATION_STEPS)).toHaveLength(DOCUMENT_SCHEMA_VERSION - 1);
+    expect(Object.keys(MIGRATION_STEPS)).toHaveLength(LATEST_SCHEMA_VERSION - 1);
     expect(Object.isFrozen(MIGRATION_STEPS)).toBe(true);
     // The identity case of the real table: a current-version document needs no step.
     const doc = { schemaVersion: DOCUMENT_SCHEMA_VERSION, layout: "classic", sections: {}, order: [] };

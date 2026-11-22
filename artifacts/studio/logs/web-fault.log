@@ -1,0 +1,529 @@
+▲ Next.js 16.4.5 (Turbopack)
+- Local:         http://localhost:3100
+- Network:       http://172.22.192.1:3100
+- Environments: .env.local
+✓ Ready in 613ms
+✓ Running next.config.ts took 71ms
+
+ GET /login 200 in 2.2s (next.js: 1585ms, proxy.ts: 110ms, application-code: 528ms)
+ GET / 200 in 1002ms (next.js: 336ms, proxy.ts: 14ms, application-code: 651ms)
+ GET / 200 in 296ms (next.js: 5ms, proxy.ts: 6ms, application-code: 286ms)
+{"time":"2026-11-21T08:04:40.107Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248278985-6960","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:04:40.129Z","level":"error","event":"request_error","path":"/s/fault-1795248278985-6960","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:04:40.137Z","level":"error","event":"request_error","path":"/s/fault-1795248278985-6960","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+{"time":"2026-11-21T08:04:40.174Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248278985-6960","status":500}
+ GET /s/fault-1795248278985-6960 500 in 1162ms (next.js: 962ms, proxy.ts: 9ms, application-code: 191ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+ GET /s/fault-1795248278985-6960 200 in 797ms (next.js: 548ms, proxy.ts: 14ms, application-code: 236ms)
+{"time":"2026-11-21T08:04:43.519Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248283364-6145","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:04:43.523Z","level":"error","event":"request_error","path":"/s/fault-1795248283364-6145","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:04:43.535Z","level":"error","event":"request_error","path":"/s/fault-1795248283364-6145","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+{"time":"2026-11-21T08:04:43.569Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248283364-6145","status":500}
+ GET /s/fault-1795248283364-6145 500 in 220ms (next.js: 81ms, proxy.ts: 7ms, application-code: 132ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+{"time":"2026-11-21T08:04:44.760Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248283364-6145","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:04:44.768Z","level":"error","event":"request_error","path":"/s/fault-1795248283364-6145","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components-payload","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:04:44.788Z","level":"error","event":"request_error","path":"/s/fault-1795248283364-6145","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components-payload","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+ GET /s/fault-1795248283364-6145 200 in 421ms (next.js: 243ms, proxy.ts: 20ms, application-code: 159ms)
+ GET /s/fault-1795248285108-1197 200 in 484ms (next.js: 101ms, proxy.ts: 9ms, application-code: 373ms)
+ GET /s/fault-1795248318774-2214/search 200 in 2.0s (next.js: 1841ms, proxy.ts: 9ms, application-code: 175ms)
+ GET / 200 in 756ms (next.js: 175ms, proxy.ts: 8ms, application-code: 572ms)
+ GET / 200 in 316ms (next.js: 5ms, proxy.ts: 4ms, application-code: 308ms)
+{"time":"2026-11-21T08:06:13.786Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248373635-9364","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:06:13.790Z","level":"error","event":"request_error","path":"/s/fault-1795248373635-9364","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:06:13.797Z","level":"error","event":"request_error","path":"/s/fault-1795248373635-9364","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+{"time":"2026-11-21T08:06:13.830Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248373635-9364","status":500}
+ GET /s/fault-1795248373635-9364 500 in 165ms (next.js: 52ms, proxy.ts: 6ms, application-code: 107ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+ GET /s/fault-1795248373635-9364 200 in 535ms (next.js: 350ms, proxy.ts: 22ms, application-code: 163ms)
+{"time":"2026-11-21T08:06:17.449Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248377282-3082","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:06:17.452Z","level":"error","event":"request_error","path":"/s/fault-1795248377282-3082","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:06:17.458Z","level":"error","event":"request_error","path":"/s/fault-1795248377282-3082","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+{"time":"2026-11-21T08:06:17.480Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248377282-3082","status":500}
+ GET /s/fault-1795248377282-3082 500 in 191ms (next.js: 93ms, proxy.ts: 7ms, application-code: 91ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+{"time":"2026-11-21T08:06:18.601Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248377282-3082","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:06:18.606Z","level":"error","event":"request_error","path":"/s/fault-1795248377282-3082","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components-payload","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:06:18.619Z","level":"error","event":"request_error","path":"/s/fault-1795248377282-3082","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components-payload","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+ GET /s/fault-1795248377282-3082 200 in 331ms (next.js: 195ms, proxy.ts: 11ms, application-code: 126ms)
+ GET /s/fault-1795248379019-7649 200 in 186ms (next.js: 16ms, proxy.ts: 9ms, application-code: 161ms)
+ GET /s/fault-1795248411970-9083/search 200 in 281ms (next.js: 79ms, proxy.ts: 9ms, application-code: 194ms)
+ GET / 200 in 620ms (next.js: 232ms, proxy.ts: 5ms, application-code: 382ms)
+ GET / 200 in 277ms (next.js: 17ms, proxy.ts: 9ms, application-code: 251ms)
+{"time":"2026-11-21T08:08:03.331Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248483198-1884","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:08:03.336Z","level":"error","event":"request_error","path":"/s/fault-1795248483198-1884","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:08:03.341Z","level":"error","event":"request_error","path":"/s/fault-1795248483198-1884","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+{"time":"2026-11-21T08:08:03.366Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248483198-1884","status":500}
+ GET /s/fault-1795248483198-1884 500 in 137ms (next.js: 35ms, proxy.ts: 8ms, application-code: 94ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+ GET /s/fault-1795248483198-1884 200 in 248ms (next.js: 17ms, proxy.ts: 9ms, application-code: 222ms)
+{"time":"2026-11-21T08:08:06.269Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248486146-5836","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:08:06.275Z","level":"error","event":"request_error","path":"/s/fault-1795248486146-5836","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:08:06.283Z","level":"error","event":"request_error","path":"/s/fault-1795248486146-5836","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+{"time":"2026-11-21T08:08:06.327Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248486146-5836","status":500}
+ GET /s/fault-1795248486146-5836 500 in 172ms (next.js: 19ms, proxy.ts: 8ms, application-code: 145ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+{"time":"2026-11-21T08:08:07.535Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248486146-5836","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:08:07.540Z","level":"error","event":"request_error","path":"/s/fault-1795248486146-5836","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components-payload","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:08:07.547Z","level":"error","event":"request_error","path":"/s/fault-1795248486146-5836","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components-payload","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+ GET /s/fault-1795248486146-5836 200 in 278ms (next.js: 118ms, proxy.ts: 12ms, application-code: 148ms)
+ GET /s/fault-1795248487877-797 200 in 381ms (next.js: 11ms, proxy.ts: 6ms, application-code: 364ms)
+⨯ TypeError: Cannot read properties of null (reading 'blocks')
+    at resolveDocumentWithBindings (components\storefront\engine\renderer.tsx:88:57)
+    at TemplateRenderer (components\storefront\engine\renderer.tsx:119:15)
+  86 |   for (const [secId, section] of Object.entries(doc.sections || {})) {
+  87 |     const resolvedBlocks: Record<string, ComponentNode> = {};
+> 88 |     for (const [blkId, block] of Object.entries(section.blocks || {})) {
+     |                                                         ^
+  89 |       resolvedBlocks[blkId] = {
+  90 |         ...block,
+  91 |         settings: resolveNodeSettings(block.settings, context, mode), {
+  digest: '4154385316'
+}
+{"time":"2026-11-21T08:08:41.508Z","level":"error","event":"request_error","path":"/s/fault-1795248521216-7389","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"server-rendering","error":{"name":"TypeError","message":"Cannot read properties of null (reading 'blocks')","digest":"4154385316"}}
+ GET /s/fault-1795248521216-7389 500 in 375ms (next.js: 17ms, proxy.ts: 7ms, application-code: 351ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+ GET / 200 in 507ms (next.js: 223ms, proxy.ts: 9ms, application-code: 275ms)
+ GET / 200 in 325ms (next.js: 6ms, proxy.ts: 8ms, application-code: 311ms)
+{"time":"2026-11-21T08:09:06.066Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248545942-4388","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:09:06.070Z","level":"error","event":"request_error","path":"/s/fault-1795248545942-4388","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:09:06.076Z","level":"error","event":"request_error","path":"/s/fault-1795248545942-4388","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+{"time":"2026-11-21T08:09:06.098Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248545942-4388","status":500}
+ GET /s/fault-1795248545942-4388 500 in 124ms (next.js: 29ms, proxy.ts: 7ms, application-code: 88ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+ GET /s/fault-1795248545942-4388 200 in 253ms (next.js: 37ms, proxy.ts: 11ms, application-code: 206ms)
+{"time":"2026-11-21T08:09:09.123Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248549040-7405","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:09:09.126Z","level":"error","event":"request_error","path":"/s/fault-1795248549040-7405","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:09:09.130Z","level":"error","event":"request_error","path":"/s/fault-1795248549040-7405","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+{"time":"2026-11-21T08:09:09.173Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248549040-7405","status":500}
+ GET /s/fault-1795248549040-7405 500 in 133ms (next.js: 15ms, proxy.ts: 6ms, application-code: 112ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+{"time":"2026-11-21T08:09:10.097Z","level":"error","event":"api_error","path":"/public/storefronts/fault-1795248549040-7405","status":500}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:09:10.105Z","level":"error","event":"request_error","path":"/s/fault-1795248549040-7405","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components-payload","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+⨯ Error [AppError]: Something went wrong. Please try again.
+    at toAppError (lib\api\client.ts:86:10)
+    at apiRequest (lib\api\client.ts:125:11)
+    at async getStorefrontApi (lib\api\endpoints\public-api.ts:26:4)
+    at async (services\storefront.service.ts:63:15)
+  84 |   const message = status >= 500 || !body?.message ? FALLBACK : body.message;
+  85 |   const structured = body?.error?.code && STRUCTURED_DETAIL_CODES.has(body.error.code) ? body.error.details : undefined;
+> 86 |   return new AppError(code, message, fieldErrors(body?.error?.details), structured);
+     |          ^
+  87 | }
+  88 |
+  89 | export type ApiResult<T> = { data: T; meta?: PageMeta }; {
+  code: 'UNKNOWN',
+  fieldErrors: undefined,
+  details: undefined,
+  digest: '1605886559'
+}
+{"time":"2026-11-21T08:09:10.118Z","level":"error","event":"request_error","path":"/s/fault-1795248549040-7405","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"react-server-components-payload","error":{"name":"AppError","code":"UNKNOWN","message":"Something went wrong. Please try again.","digest":"1605886559"}}
+ GET /s/fault-1795248549040-7405 200 in 204ms (next.js: 56ms, proxy.ts: 11ms, application-code: 137ms)
+ GET /s/fault-1795248550525-2228 200 in 314ms (next.js: 17ms, proxy.ts: 10ms, application-code: 288ms)
+⨯ TypeError: Cannot read properties of null (reading 'blocks')
+    at resolveDocumentWithBindings (components\storefront\engine\renderer.tsx:88:57)
+    at TemplateRenderer (components\storefront\engine\renderer.tsx:119:15)
+  86 |   for (const [secId, section] of Object.entries(doc.sections || {})) {
+  87 |     const resolvedBlocks: Record<string, ComponentNode> = {};
+> 88 |     for (const [blkId, block] of Object.entries(section.blocks || {})) {
+     |                                                         ^
+  89 |       resolvedBlocks[blkId] = {
+  90 |         ...block,
+  91 |         settings: resolveNodeSettings(block.settings, context, mode), {
+  digest: '4154385316'
+}
+{"time":"2026-11-21T08:09:12.084Z","level":"error","event":"request_error","path":"/s/fault-1795248551686-8857","method":"GET","route":"/s/[slug]","routeType":"render","renderSource":"server-rendering","error":{"name":"TypeError","message":"Cannot read properties of null (reading 'blocks')","digest":"4154385316"}}
+ GET /s/fault-1795248551686-8857 500 in 417ms (next.js: 235ms, proxy.ts: 7ms, application-code: 175ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+[?25h

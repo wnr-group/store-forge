@@ -1,0 +1,42 @@
+[
+  {
+    "page": "products",
+    "edited": true,
+    "live": true
+  },
+  {
+    "page": "collections",
+    "edited": true,
+    "live": true
+  },
+  {
+    "page": "search",
+    "edited": true,
+    "live": true
+  },
+  {
+    "page": "cart",
+    "edited": true,
+    "live": true
+  },
+  {
+    "page": "wishlist",
+    "edited": true,
+    "live": true
+  },
+  {
+    "page": "content",
+    "edited": true,
+    "live": true
+  },
+  {
+    "page": "about",
+    "edited": true,
+    "live": true
+  },
+  {
+    "page": "contact",
+    "edited": true,
+    "live": true
+  }
+]

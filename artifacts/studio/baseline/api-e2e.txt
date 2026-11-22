@@ -1,0 +1,362 @@
+
+ RUN  v4.1.12 C:/Users/Eshwar/WNR/store-forge-api-integ
+
+ ❯ test/session.e2e-spec.ts (21 tests | 16 failed) 3563ms
+       × with includeProfile false still sets the session cookies but skips the profile lookup 46ms
+       × signs an existing account in, sets HttpOnly cookies and returns the safe profile with roles and organizations 8ms
+       × works for a Platform Admin and for a user without an organization, granting nothing extra 5ms
+       × rejects wrong credentials with the existing message, sets no cookie and creates nothing 10ms
+       × validates input like the existing form: trimmed lower-case e-mail, non-empty password up to 72 characters 9ms
+       × the cookie alone restores the identity, the roles and the tenant access, exactly as the Bearer token would 6ms
+       × a Platform Admin session reaches /platform but not tenant data 4ms
+       × a member session carries only the module access the Owner granted 5ms
+       × without a cookie the same routes answer 401, and an invalid Bearer header is never rescued by a cookie 9ms
+       × a tampered or truncated cookie is a signed-out visitor, not an error page 4ms
+       × an expired access token is reported as TOKEN_EXPIRED; refreshing issues a new session and rotates the refresh token 4ms
+       × with no usable refresh token it clears the cookies and answers 401 5ms
+       × revokes the session at Supabase and clears every cookie; the old refresh token no longer works 4ms
+       × is safe when already signed out 3ms
+       × protects state-changing requests that ride on the cookie, but not reads or Bearer calls 7ms
+       × answers CORS preflights for the frontend origin only, with credentials 13ms
+ ❯ test/app.e2e-spec.ts (7 tests | 1 failed) 314ms
+     × allows the configured CORS origin and not others 7ms
+[31m[Nest] 11852  - [39m21/11/2026, 12:37:37 pm [31m  ERROR[39m [38;5;3m[PlatformOrganizationsService] [39m[31mprovisioning failed (owner dbec52fc-8351-43d0-a973-33666ef5ec44, auth user removed: true): Failed query: select public.platform_provision_tenant(
+          $1::uuid, $2, $3, $4,
+          $5, $6, $7, $8) as result
+params: dbec52fc-8351-43d0-a973-33666ef5ec44,Company 40,Store 40,store-40,,,,irys4q | public_id_taken[39m
+[31m[Nest] 11852  - [39m21/11/2026, 12:37:37 pm [31m  ERROR[39m [38;5;3m[AllExceptionsFilter] [39m[31mUnhandled exception on POST /api/v1/platform/organizations[39m
+Error: Failed query: select public.platform_provision_tenant(
+          $1::uuid, $2, $3, $4,
+          $5, $6, $7, $8) as result
+params: dbec52fc-8351-43d0-a973-33666ef5ec44,Company 40,Store 40,store-40,,,,irys4q
+    at PglitePreparedQuery.queryWithCache (file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/drizzle-orm/pg-core/session.js:41:15)
+    at C:/Users/Eshwar/WNR/store-forge-api-integ/src/modules/platform-admin/organizations/organizations.service.ts:323:9
+    at async file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/@electric-sql/pglite/dist/chunk-UYHX356B.js:8:1303
+[31m[Nest] 37592  - [39m21/11/2026, 12:38:04 pm [31m  ERROR[39m [38;5;3m[AllExceptionsFilter] [39m[31mUnhandled exception on POST /api/v1/platform/organizations[39m
+Error: boom
+    at FakeAuthAdmin.createConfirmedUser (C:/Users/Eshwar/WNR/store-forge-api-integ/test/support/app.ts:90:13)
+    at PlatformOrganizationsService.create (C:/Users/Eshwar/WNR/store-forge-api-integ/src/modules/platform-admin/organizations/organizations.service.ts:381:40)
+[31m[Nest] 45120  - [39m21/11/2026, 12:38:34 pm [31m  ERROR[39m [38;5;3m[AllExceptionsFilter] [39m[31mUnhandled exception on POST /api/v1/products/import[39m
+Error: forced failure
+    at ProductsService.<anonymous> (C:/Users/Eshwar/WNR/store-forge-api-integ/test/product-import.e2e-spec.ts:335:34)
+    at ProductsService.insertNewProductInTx (file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/@vitest/spy/dist/index.js:332:34)
+    at C:/Users/Eshwar/WNR/store-forge-api-integ/src/modules/products/product-import.service.ts:152:38
+    at async file:///C:/Users/Eshwar/WNR/store-forge-api-integ/node_modules/@electric-sql/pglite/dist/chunk-UYHX356B.js:8:1303
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/app.e2e-spec.ts > API foundation (e2e) > allows the configured CORS origin and not others
+AssertionError: expected undefined to be 'http://localhost:3000' // Object.is equality
+
+- Expected:
+"http://localhost:3000"
+
++ Received:
+undefined
+
+ ❯ test/app.e2e-spec.ts:93:60
+     91|       .get('/api/v1/health')
+     92|       .set('Origin', 'http://localhost:3000');
+     93|     expect(allowed.headers['access-control-allow-origin']).toBe(
+       |                                                            ^
+     94|       'http://localhost:3000',
+     95|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > login > with includeProfile false still sets the session cookies but skips the profile lookup
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:111:12
+    109|             includeProfile: false,
+    110|           })
+    111|           .expect(200);
+       |            ^
+    112|         expect(res.body.data).toEqual({
+    113|           id: w.alice,
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > login > signs an existing account in, sets HttpOnly cookies and returns the safe profile with roles and organizations
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:123:73
+    121|
+    122|       it('signs an existing account in, sets HttpOnly cookies and retu…
+    123|         const res = await login('Alice@Example.test ', PASSWORDS.alice…
+       |                                                                         ^
+    124|           200,
+    125|         );
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > login > works for a Platform Admin and for a user without an organization, granting nothing extra
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:164:67
+    162|       it('works for a Platform Admin and for a user without an organiz…
+    163|         const admin = (
+    164|           await login('super@example.test', PASSWORDS.superAdmin).expe…
+       |                                                                   ^
+    165|         ).body.data;
+    166|         expect(admin).toMatchObject({
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > login > rejects wrong credentials with the existing message, sets no cookie and creates nothing
+Error: expected 401 "Unauthorized", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:191:52
+    189|           ['nobody@example.test', 'whatever-pass-1'], // unknown e-mai…
+    190|         ]) {
+    191|           const res = await login(email, password).expect(401);
+       |                                                    ^
+    192|           expect(res.body).toMatchObject({
+    193|             success: false,
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > login > validates input like the existing form: trimmed lower-case e-mail, non-empty password up to 72 characters
+Error: expected 400 "Bad Request", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:208:42
+    206|
+    207|       it('validates input like the existing form: trimmed lower-case e…
+    208|         await login('not-an-email', 'x').expect(400);
+       |                                          ^
+    209|         await login('alice@example.test', '').expect(400);
+    210|         await login('alice@example.test', 'x'.repeat(73)).expect(400);
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > session restoration (browser refresh) > the cookie alone restores the identity, the roles and the tenant access, exactly as the Bearer token would
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:245:62
+    243|         const jar = new Jar();
+    244|         jar.absorb(
+    245|           await login('alice@example.test', PASSWORDS.alice).expect(20…
+       |                                                              ^
+    246|         );
+    247|         const api = (path: string) =>
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > session restoration (browser refresh) > a Platform Admin session reaches /platform but not tenant data
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:275:67
+    273|         const jar = new Jar();
+    274|         jar.absorb(
+    275|           await login('super@example.test', PASSWORDS.superAdmin).expe…
+       |                                                                   ^
+    276|         );
+    277|         expect(
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > session restoration (browser refresh) > a member session carries only the module access the Owner granted
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:294:64
+    292|         const jar = new Jar();
+    293|         jar.absorb(
+    294|           await login('reader@example.test', PASSWORDS.reader).expect(…
+       |                                                                ^
+    295|         );
+    296|         await request(http())
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > session restoration (browser refresh) > without a cookie the same routes answer 401, and an invalid Bearer header is never rescued by a cookie
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:310:62
+    308|         const jar = new Jar();
+    309|         jar.absorb(
+    310|           await login('alice@example.test', PASSWORDS.alice).expect(20…
+       |                                                              ^
+    311|         );
+    312|         const res = await request(http())
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > session restoration (browser refresh) > a tampered or truncated cookie is a signed-out visitor, not an error page
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:323:62
+    321|         const jar = new Jar();
+    322|         jar.absorb(
+    323|           await login('alice@example.test', PASSWORDS.alice).expect(20…
+       |                                                              ^
+    324|         );
+    325|         const value = jar.cookies.get(COOKIE)!.value;
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > refresh with rotation > an expired access token is reported as TOKEN_EXPIRED; refreshing issues a new session and rotates the refresh token
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:361:62
+    359|         const jar = new Jar();
+    360|         jar.absorb(
+    361|           await login('alice@example.test', PASSWORDS.alice).expect(20…
+       |                                                              ^
+    362|         );
+    363|         await expire(jar);
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > refresh with rotation > with no usable refresh token it clears the cookies and answers 401
+Error: expected 401 "Unauthorized", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:412:72
+    410|             .post('/api/v1/auth/refresh')
+    411|             .set('Origin', ORIGIN);
+    412|           const res = await (cookie ? req.set('Cookie', cookie) : req)…
+       |                                                                        ^
+    413|             401,
+    414|           );
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > logout > revokes the session at Supabase and clears every cookie; the old refresh token no longer works
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:429:62
+    427|         const jar = new Jar();
+    428|         jar.absorb(
+    429|           await login('alice@example.test', PASSWORDS.alice).expect(20…
+       |                                                              ^
+    430|         );
+    431|         const cookieBefore = jar.header();
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > logout > is safe when already signed out
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:460:12
+    458|           .post('/api/v1/auth/logout')
+    459|           .set('Origin', ORIGIN)
+    460|           .expect(200);
+       |            ^
+    461|         expect(res.body.data.signedOut).toBe(true);
+    462|         expect(
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > CSRF protection and CORS > protects state-changing requests that ride on the cookie, but not reads or Bearer calls
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ test/session.e2e-spec.ts:505:62
+    503|         const jar = new Jar();
+    504|         jar.absorb(
+    505|           await login('alice@example.test', PASSWORDS.alice).expect(20…
+       |                                                              ^
+    506|         );
+    507|         const post = (origin?: string) => {
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:535:14
+ ❯ node_modules/supertest/lib/test.js:591:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:568:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:432:23
+ ❯ localAssert node_modules/supertest/lib/test.js:382:38
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:126:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/17]⎯
+
+ FAIL  test/session.e2e-spec.ts > cookie session: login, restore, refresh, logout (e2e) > CSRF protection and CORS > answers CORS preflights for the frontend origin only, with credentials
+AssertionError: expected undefined to be 'http://localhost:3000' // Object.is equality
+
+- Expected:
+"http://localhost:3000"
+
++ Received:
+undefined
+
+ ❯ test/session.e2e-spec.ts:542:59
+    540|           .set('Origin', ORIGIN)
+    541|           .set('Access-Control-Request-Method', 'POST');
+    542|         expect(ok.headers['access-control-allow-origin']).toBe(ORIGIN);
+       |                                                           ^
+    543|         expect(ok.headers['access-control-allow-credentials']).toBe('t…
+    544|         const denied = await request(http())
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/17]⎯
+
+
+ Test Files  2 failed | 15 passed (17)
+      Tests  17 failed | 269 passed (286)
+   Start at  12:37:18
+   Duration  96.31s (transform 1.79s, setup 0ms, import 38.61s, tests 53.85s, environment 2ms)
+
+exit=1

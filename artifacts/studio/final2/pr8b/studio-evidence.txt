@@ -1,0 +1,94 @@
+
+Running 10 tests using 1 worker
+
+  ok  1 tests\e2e\studio-evidence.spec.ts:27:3 › F4/F2 merchant controls, dialog and error text (light) (9.4s)
+  x   2 tests\e2e\studio-evidence.spec.ts:27:3 › F4/F2 merchant controls, dialog and error text (dark) (2.1s)
+  ok  3 tests\e2e\studio-evidence.spec.ts:94:3 › Admin and Login keep their original rendering (light) (8.0s)
+  ok  4 tests\e2e\studio-evidence.spec.ts:94:3 › Admin and Login keep their original rendering (dark) (4.9s)
+  ok  5 tests\e2e\studio-evidence.spec.ts:133:3 › F1 command palette › owner: Team members is offered, and nothing else changed from origin/main (4.8s)
+  ok  6 tests\e2e\studio-evidence.spec.ts:155:3 › F1 command palette › staff: palette equals the sidebar by label and destination, with no Team (5.2s)
+  ok  7 tests\e2e\studio-evidence.spec.ts:178:3 › F1 command palette › owner: choosing an entry navigates to the same destination as its sidebar link (11.1s)
+  ok  8 tests\e2e\studio-evidence.spec.ts:197:3 › F1 command palette › staff cannot reach Team by URL or through the API (4.8s)
+  x   9 tests\e2e\studio-evidence.spec.ts:220:1 › F12-8 Analytics chart axis ticks are identical to origin/main (2.5s)
+  ok 10 tests\e2e\studio-evidence.spec.ts:231:1 › tooling self-check: rendered contrast helper reproduces a known pair (3.4s)
+
+
+  1) tests\e2e\studio-evidence.spec.ts:27:3 › F4/F2 merchant controls, dialog and error text (dark) 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "oklab(0.724644 0.128594 0.0494419 / 0.5)"
+    Received: "oklab(0.777383 0.0207789 0.0350861 / 0.652139)"
+
+      49 |         expect(d.parentSelect, "dialog NativeSelect (portal)").toBeCloseTo(32, 0);
+      50 |         // Fills and borders must be exactly what origin/main renders.
+    > 51 |         expect(d.invalidInputBorder).toBe(before.invalidInputBorder);
+         |                                      ^
+      52 |         expect(d.invalidInputBackground).toBe(before.invalidInputBackground);
+      53 |         if (scheme === "light") {
+      54 |           expect(d.errorText.fg, "merchant light error text colour").toEqual({ r: 184, g: 50, b: 50 });
+        at scheme.scheme (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-evidence.spec.ts:51:38)
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-evidence.spec.ts:28:5
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-evidence-F4-F2-merc-90a98-dialog-and-error-text-dark-\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-evidence-F4-F2-merc-90a98-dialog-and-error-text-dark-\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-evidence-F4-F2-merc-90a98-dialog-and-error-text-dark-\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\studio-evidence.spec.ts:220:1 › F12-8 Analytics chart axis ticks are identical to origin/main 
+
+    Error: x-axis tick labels identical
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   "20 Oct",
+        "23 Oct",
+        "26 Oct",
+        "29 Oct",
+        "1 Nov",
+        "3 Nov",
+        "5 Nov",
+        "7 Nov",
+        "9 Nov",
+        "11 Nov",
+        "14 Nov",
+    -   "18 Nov",
+    +   "17 Nov",
+    +   "21 Nov",
+      ]
+
+      222 |     const axis = await measureChartAxis(page);
+      223 |     const before = baseline<typeof axis>("chartAxis");
+    > 224 |     expect(axis.ticks, "x-axis tick labels identical").toEqual(before.ticks);
+          |                                                        ^
+      225 |     record(info, ["F12-8"], "chart x-axis ticks", { before: before.ticks, after: axis.ticks });
+      226 |     await capture(page, info, { ac: ["F12-8"], folder: "F12-timezone", name: "analytics-chart-axis", note: "Analytics 'Sales over time' chart: x-axis tick labels equal those measured on origin/main.", target: page.locator(".recharts-wrapper").first() });
+      227 |   });
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-evidence.spec.ts:224:56
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-evidence.spec.ts:221:3
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-evidence-F12-8-Anal-551e4-re-identical-to-origin-main\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-evidence-F12-8-Anal-551e4-re-identical-to-origin-main\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-evidence-F12-8-Anal-551e4-re-identical-to-origin-main\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\e2e\studio-evidence.spec.ts:27:3 › F4/F2 merchant controls, dialog and error text (dark) ─
+    tests\e2e\studio-evidence.spec.ts:220:1 › F12-8 Analytics chart axis ticks are identical to origin/main 
+  8 passed (1.1m)

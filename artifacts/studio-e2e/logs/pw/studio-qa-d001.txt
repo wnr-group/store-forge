@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 tests\e2e\studio-qa-d001.spec.ts:31:1 › display rule: configure, save, refresh, API state, live storefront (33.4s)
+
+  1 passed (52.7s)

@@ -23,6 +23,7 @@ const BLOCKS: Record<string, ElementSpec | null> = {
   "link-column": TEXT,
   "social-link": TEXT,
   "social-share": MINIMAL,
+  "trust-badge": MINIMAL,
   testimonial: TEXT,
   "collapsible-item": TEXT,
   "collapsible-info": TEXT,

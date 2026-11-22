@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { DOCUMENT_SCHEMA_VERSION, type TemplateKind } from "../document";
+import { type TemplateKind } from "../document";
 import { THEME_GROUPS, isThemeGroup, themeSettingDescriptors } from "../registry/theme-settings";
 import { compileSettings } from "./compile";
 import { checkDescriptorStructure } from "./descriptor-check";
 import type { SettingDescriptor } from "./descriptors";
 import { isFontKey, isValidWeight, type FontKey } from "./fonts";
-import { componentNodeSchema, groupTemplateSchema, pageTemplateSchema, socialLinksSchema } from "./schema";
+import { componentNodeSchema, groupTemplateSchema, pageTemplateSchema, schemaVersionSchema, socialLinksSchema } from "./schema";
 import { getForTenant } from "./tenant-cache";
 import { PAGES_GROUP, PAGE_KEYS } from "../../storefront/pages";
 
@@ -62,7 +62,7 @@ export function buildThemeSettingsSchema(descriptors: SettingDescriptor[] = them
   // Pages the engine generates (all products, cart ...) that the merchant has designed: whole page documents, by page key.
   shape[PAGES_GROUP] = z.object(Object.fromEntries(PAGE_KEYS.map((k) => [k, pageTemplateSchema.optional()]))).strict().optional();
   return z.object({
-    schemaVersion: z.literal(DOCUMENT_SCHEMA_VERSION),
+    schemaVersion: schemaVersionSchema,
     settings: z.object(shape).strict().optional(),
     sections: z.record(z.string(), componentNodeSchema).optional(),
     order: z.array(z.string()).optional(),

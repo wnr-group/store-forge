@@ -1,0 +1,10 @@
+
+Running 5 tests using 1 worker
+
+  ok 1 tests\e2e\studio-f6a.spec.ts:27:3 › F6a-1: Add category is in the PageHeader, once, level with the title, at every viewport (light) (4.4s)
+  ok 2 tests\e2e\studio-f6a.spec.ts:27:3 › F6a-1: Add category is in the PageHeader, once, level with the title, at every viewport (dark) (2.3s)
+  ok 3 tests\e2e\studio-f6a.spec.ts:61:1 › F6a-2/F6a-4: the header button opens the existing dialog; empty submit shows the existing validation; Escape, X and Cancel return focus to it (4.1s)
+  ok 4 tests\e2e\studio-f6a.spec.ts:92:1 › F6a-5: seeded hierarchy is grouped and intact: parent then child, no Parent column, Add subcategory only on top-level rows, top-level-only parents, hierarchical labels on the product pages (11.0s)
+  ok 5 tests\e2e\studio-f6a.spec.ts:137:1 › F6a-3/F6a-5: create a category and a subcategory through the UI (focus returns after a successful save), hierarchy and product labels update, then delete both (19.8s)
+
+  5 passed (44.6s)

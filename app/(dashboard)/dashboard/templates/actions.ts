@@ -35,6 +35,22 @@ import {
   resetPresentation,
   savePresentationDraft,
 } from "@/services/presentation.service";
+import {
+  createReusableSection,
+  deleteReusableSection,
+  discardDraft,
+  getChangeLedger,
+  getCurrentReview,
+  getDraftChanges,
+  getReadinessReport,
+  getSpeedStats,
+  getStudioSettings,
+  getStudioStatus,
+  listReusableSections,
+  requestReview,
+  updateReusableSection,
+  updateStudioSettings,
+} from "@/services/studio.service";
 
 /**
  * Server actions behind the Theme Store and the editor. The browser (TanStack Query) calls these; each one runs on the
@@ -148,6 +164,9 @@ async function refreshStorefront() {
   await invalidateStorefront();
 }
 
+/** Whether Studio is on for this store. Never fails: any error reads as off. */
+export const getStudioStatusAction = async () => run(() => getStudioStatus());
+
 export const listPresentationsAction = async () => run(() => listPresentations());
 
 /** Sorts never-published products into empty drafts (nothing to publish) and real ones; unreadable ones are in neither. */
@@ -201,3 +220,79 @@ export async function resetPresentationAction(productId: unknown) {
     { operation: "product-presentation.reset" },
   );
 }
+
+export const getReadinessReportAction = async (templateId?: unknown) =>
+  run(() => getReadinessReport(templateId ? parseInput(idSchema, templateId) : undefined));
+
+export const getStudioSettingsAction = async () => run(() => getStudioSettings());
+
+export const updateStudioSettingsAction = async (input: unknown) =>
+  run(() =>
+    updateStudioSettings(
+      parseInput(
+        z.object({
+          reviewDisclosureText: z.string().trim().min(1).max(500).optional(),
+          reviewDisclosureLanguage: z
+            .string()
+            .trim()
+            .regex(/^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/)
+            .optional(),
+        }),
+        input,
+      ),
+    ),
+  );
+
+export const getSpeedStatsAction = async () => run(() => getSpeedStats());
+
+export const requestReviewAction = async () => run(() => requestReview());
+
+export const getCurrentReviewAction = async () => run(() => getCurrentReview());
+
+export const getDraftChangesAction = async () => run(() => getDraftChanges());
+
+export const getChangeLedgerAction = async (templateId?: unknown) =>
+  run(() => getChangeLedger(templateId ? parseInput(idSchema, templateId) : undefined));
+
+export const discardDraftAction = async (input: unknown) =>
+  run(async () => {
+    const v = parseInput(z.object({ templateId: idSchema, reason: z.string().trim().min(1).max(500) }), input);
+    const result = await discardDraft(v.templateId, v.reason);
+    revalidatePath(ROUTES.templates);
+    return result;
+  });
+
+export const listReusableSectionsAction = async () => run(() => listReusableSections());
+
+export const createReusableSectionAction = async (input: unknown) =>
+  run(() =>
+    createReusableSection(
+      parseInput(
+        z.object({
+          componentId: z.string().min(1).max(64),
+          name: z.string().min(1).max(100),
+          description: z.string().max(300).optional(),
+          content: z.record(z.string(), z.unknown()),
+        }),
+        input,
+      ),
+    ),
+  );
+
+export const updateReusableSectionAction = async (input: unknown) =>
+  run(() => {
+    const v = parseInput(
+      z.object({
+        id: idSchema,
+        name: z.string().min(1).max(100).optional(),
+        description: z.string().max(300).optional(),
+        content: z.record(z.string(), z.unknown()).optional(),
+      }),
+      input,
+    );
+    return updateReusableSection(v.id, { name: v.name, description: v.description, content: v.content });
+  });
+
+export const deleteReusableSectionAction = async (id: unknown) =>
+  run(() => deleteReusableSection(parseInput(idSchema, id)));
+

@@ -1,0 +1,393 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-viewports.spec.ts",
+      "--reporter=json,list"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/WNR/store-forge-integ/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-viewports.spec.ts",
+      "file": "studio-viewports.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "after: 768px light merchant, admin and login",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7083,
+                  "error": {
+                    "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.",
+                    "stack": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-viewports.spec.ts:38:7",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                      "column": 17,
+                      "line": 25
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39msupport\\studio-session.ts:25\n\n \u001b[90m 23 |\u001b[39m   \u001b[36mif\u001b[39m (who \u001b[33m===\u001b[39m \u001b[32m\"staff\"\u001b[39m) \u001b[36mreturn\u001b[39m \u001b[33mSTAFF\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 24 |\u001b[39m   \u001b[36mconst\u001b[39m e \u001b[33m=\u001b[39m process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mE2E_PLATFORM_ADMIN_EMAIL\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39me) \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m   \u001b[36mreturn\u001b[39m e\u001b[33m;\u001b[39m\n \u001b[90m 27 |\u001b[39m }\n \u001b[90m 28 |\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                        "column": 17,
+                        "line": 25
+                      },
+                      "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n\n   at support\\studio-session.ts:25\n\n  23 |   if (who === \"staff\") return STAFF;\n  24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;\n> 25 |   if (!e) throw new Error(\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\");\n     |                 ^\n  26 |   return e;\n  27 | }\n  28 |\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-viewports.spec.ts:38:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:35:09.041Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-viewports-after-768px-light-merchant-admin-and-login\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-viewports-after-768px-light-merchant-admin-and-login\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                    "column": 17,
+                    "line": 25
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3f7f3ab4f5f4ceb884d1-0a97075dd18da04330f6",
+          "file": "studio-viewports.spec.ts",
+          "line": 26,
+          "column": 5
+        },
+        {
+          "title": "after: 768px dark merchant, admin and login",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7315,
+                  "error": {
+                    "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.",
+                    "stack": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-viewports.spec.ts:38:7",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                      "column": 17,
+                      "line": 25
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39msupport\\studio-session.ts:25\n\n \u001b[90m 23 |\u001b[39m   \u001b[36mif\u001b[39m (who \u001b[33m===\u001b[39m \u001b[32m\"staff\"\u001b[39m) \u001b[36mreturn\u001b[39m \u001b[33mSTAFF\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 24 |\u001b[39m   \u001b[36mconst\u001b[39m e \u001b[33m=\u001b[39m process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mE2E_PLATFORM_ADMIN_EMAIL\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39me) \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m   \u001b[36mreturn\u001b[39m e\u001b[33m;\u001b[39m\n \u001b[90m 27 |\u001b[39m }\n \u001b[90m 28 |\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                        "column": 17,
+                        "line": 25
+                      },
+                      "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n\n   at support\\studio-session.ts:25\n\n  23 |   if (who === \"staff\") return STAFF;\n  24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;\n> 25 |   if (!e) throw new Error(\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\");\n     |                 ^\n  26 |   return e;\n  27 | }\n  28 |\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-viewports.spec.ts:38:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:35:19.420Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-viewports-after-768px-dark-merchant-admin-and-login\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-viewports-after-768px-dark-merchant-admin-and-login\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                    "column": 17,
+                    "line": 25
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3f7f3ab4f5f4ceb884d1-2a404cec22e8f102ad4f",
+          "file": "studio-viewports.spec.ts",
+          "line": 26,
+          "column": 5
+        },
+        {
+          "title": "after: 390px light merchant, admin and login",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6729,
+                  "error": {
+                    "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.",
+                    "stack": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-viewports.spec.ts:38:7",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                      "column": 17,
+                      "line": 25
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39msupport\\studio-session.ts:25\n\n \u001b[90m 23 |\u001b[39m   \u001b[36mif\u001b[39m (who \u001b[33m===\u001b[39m \u001b[32m\"staff\"\u001b[39m) \u001b[36mreturn\u001b[39m \u001b[33mSTAFF\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 24 |\u001b[39m   \u001b[36mconst\u001b[39m e \u001b[33m=\u001b[39m process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mE2E_PLATFORM_ADMIN_EMAIL\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39me) \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m   \u001b[36mreturn\u001b[39m e\u001b[33m;\u001b[39m\n \u001b[90m 27 |\u001b[39m }\n \u001b[90m 28 |\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                        "column": 17,
+                        "line": 25
+                      },
+                      "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n\n   at support\\studio-session.ts:25\n\n  23 |   if (who === \"staff\") return STAFF;\n  24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;\n> 25 |   if (!e) throw new Error(\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\");\n     |                 ^\n  26 |   return e;\n  27 | }\n  28 |\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-viewports.spec.ts:38:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:35:29.585Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-viewports-after-390px-light-merchant-admin-and-login\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-viewports-after-390px-light-merchant-admin-and-login\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                    "column": 17,
+                    "line": 25
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3f7f3ab4f5f4ceb884d1-50acea4bae40b392d94e",
+          "file": "studio-viewports.spec.ts",
+          "line": 26,
+          "column": 5
+        },
+        {
+          "title": "after: 390px dark merchant, admin and login",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6940,
+                  "error": {
+                    "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.",
+                    "stack": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-viewports.spec.ts:38:7",
+                    "location": {
+                      "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                      "column": 17,
+                      "line": 25
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39msupport\\studio-session.ts:25\n\n \u001b[90m 23 |\u001b[39m   \u001b[36mif\u001b[39m (who \u001b[33m===\u001b[39m \u001b[32m\"staff\"\u001b[39m) \u001b[36mreturn\u001b[39m \u001b[33mSTAFF\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 24 |\u001b[39m   \u001b[36mconst\u001b[39m e \u001b[33m=\u001b[39m process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mE2E_PLATFORM_ADMIN_EMAIL\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39me) \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m   \u001b[36mreturn\u001b[39m e\u001b[33m;\u001b[39m\n \u001b[90m 27 |\u001b[39m }\n \u001b[90m 28 |\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                        "column": 17,
+                        "line": 25
+                      },
+                      "message": "Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\n\n   at support\\studio-session.ts:25\n\n  23 |   if (who === \"staff\") return STAFF;\n  24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;\n> 25 |   if (!e) throw new Error(\"Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.\");\n     |                 ^\n  26 |   return e;\n  27 | }\n  28 |\n    at emailOf (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:25:17)\n    at freshLogin (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:34:39)\n    at sessionFor (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:66:16)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:77:19)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-viewports.spec.ts:38:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-21T12:35:39.308Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-viewports-after-390px-dark-merchant-admin-and-login\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-viewports-after-390px-dark-merchant-admin-and-login\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts",
+                    "column": 17,
+                    "line": 25
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3f7f3ab4f5f4ceb884d1-d83f108bba0117c102e0",
+          "file": "studio-viewports.spec.ts",
+          "line": 26,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T12:35:06.810Z",
+    "duration": 41386.081999999995,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

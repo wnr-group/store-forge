@@ -17,6 +17,8 @@ const COMMON = [
   "multicolumn",
   "logo-list",
   "collapsible-content",
+  "countdown",
+  "trust-badges",
 ] as const;
 
 const BY_KIND: Record<ThemeKind, readonly string[]> = {

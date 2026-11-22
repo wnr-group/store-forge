@@ -1,0 +1,130 @@
+
+Running 4 tests using 1 worker
+
+  x  1 tests\e2e\studio-viewports.spec.ts:26:5 › after: 768px light merchant, admin and login (7.1s)
+  x  2 tests\e2e\studio-viewports.spec.ts:26:5 › after: 768px dark merchant, admin and login (7.3s)
+  x  3 tests\e2e\studio-viewports.spec.ts:26:5 › after: 390px light merchant, admin and login (6.7s)
+  x  4 tests\e2e\studio-viewports.spec.ts:26:5 › after: 390px dark merchant, admin and login (6.9s)
+
+
+  1) tests\e2e\studio-viewports.spec.ts:26:5 › after: 768px light merchant, admin and login ────────
+
+    Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.
+
+       at support\studio-session.ts:25
+
+      23 |   if (who === "staff") return STAFF;
+      24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;
+    > 25 |   if (!e) throw new Error("Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.");
+         |                 ^
+      26 |   return e;
+      27 | }
+      28 |
+        at emailOf (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:25:17)
+        at freshLogin (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:34:39)
+        at sessionFor (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:66:16)
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:77:19)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-viewports.spec.ts:38:7
+
+    Error Context: test-results\studio-viewports-after-768px-light-merchant-admin-and-login\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-viewports-after-768px-light-merchant-admin-and-login\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-viewports-after-768px-light-merchant-admin-and-login\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\studio-viewports.spec.ts:26:5 › after: 768px dark merchant, admin and login ─────────
+
+    Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.
+
+       at support\studio-session.ts:25
+
+      23 |   if (who === "staff") return STAFF;
+      24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;
+    > 25 |   if (!e) throw new Error("Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.");
+         |                 ^
+      26 |   return e;
+      27 | }
+      28 |
+        at emailOf (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:25:17)
+        at freshLogin (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:34:39)
+        at sessionFor (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:66:16)
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:77:19)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-viewports.spec.ts:38:7
+
+    Error Context: test-results\studio-viewports-after-768px-dark-merchant-admin-and-login\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-viewports-after-768px-dark-merchant-admin-and-login\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-viewports-after-768px-dark-merchant-admin-and-login\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests\e2e\studio-viewports.spec.ts:26:5 › after: 390px light merchant, admin and login ────────
+
+    Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.
+
+       at support\studio-session.ts:25
+
+      23 |   if (who === "staff") return STAFF;
+      24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;
+    > 25 |   if (!e) throw new Error("Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.");
+         |                 ^
+      26 |   return e;
+      27 | }
+      28 |
+        at emailOf (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:25:17)
+        at freshLogin (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:34:39)
+        at sessionFor (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:66:16)
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:77:19)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-viewports.spec.ts:38:7
+
+    Error Context: test-results\studio-viewports-after-390px-light-merchant-admin-and-login\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-viewports-after-390px-light-merchant-admin-and-login\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-viewports-after-390px-light-merchant-admin-and-login\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests\e2e\studio-viewports.spec.ts:26:5 › after: 390px dark merchant, admin and login ─────────
+
+    Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.
+
+       at support\studio-session.ts:25
+
+      23 |   if (who === "staff") return STAFF;
+      24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;
+    > 25 |   if (!e) throw new Error("Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.");
+         |                 ^
+      26 |   return e;
+      27 | }
+      28 |
+        at emailOf (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:25:17)
+        at freshLogin (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:34:39)
+        at sessionFor (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:66:16)
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:77:19)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-viewports.spec.ts:38:7
+
+    Error Context: test-results\studio-viewports-after-390px-dark-merchant-admin-and-login\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-viewports-after-390px-dark-merchant-admin-and-login\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-viewports-after-390px-dark-merchant-admin-and-login\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    tests\e2e\studio-viewports.spec.ts:26:5 › after: 768px light merchant, admin and login ─────────
+    tests\e2e\studio-viewports.spec.ts:26:5 › after: 768px dark merchant, admin and login ──────────
+    tests\e2e\studio-viewports.spec.ts:26:5 › after: 390px light merchant, admin and login ─────────
+    tests\e2e\studio-viewports.spec.ts:26:5 › after: 390px dark merchant, admin and login ──────────

@@ -114,3 +114,13 @@ export const getPublicPageApi = async (slug: string, pageSlug: string) =>
 /** The published design of a page assigned to one product or collection (falls back to the store default). */
 export const getPublicLayoutForApi = async (slug: string, kind: "product" | "collection", resource: string) =>
   (await apiRequest<PublicLayoutApi>(`/public/storefronts/${encodeURIComponent(slug)}/layout`, { anonymous: true, cache: storefrontCache(slug), query: { kind, resource } })).data;
+
+/** `GET /public/storefronts/:slug/landing-pages/:pageSlug`: published landing page (kind = 'page'). */
+export type PublicLandingPageApi = {
+  template: { name: string; slug: string; version_number: number; document: Record<string, unknown> };
+  page: { slug: string; title: string; description: string | null; seoTitle: string | null; seoDescription: string | null };
+};
+
+export const getPublicLandingPageApi = async (slug: string, pageSlug: string) =>
+  (await apiRequest<PublicLandingPageApi>(`/public/storefronts/${encodeURIComponent(slug)}/landing-pages/${encodeURIComponent(pageSlug)}`, { anonymous: true, cache: storefrontCache(slug) })).data;
+

@@ -1,0 +1,52 @@
+FE changed files since baseline:
+app/(dashboard)/dashboard/collections/actions.ts
+app/s/[slug]/error.tsx
+components/categories/category-manager.tsx
+components/collections/collection-form.tsx
+components/dashboard/nav-config.ts
+components/storefront/error-state.tsx
+components/themes/editor/setting-field.tsx
+lib/api/endpoints/collection-api.ts
+lib/categories/hierarchy.ts
+lib/collections/usage.ts
+lib/storefront/featured.ts
+services/collection.service.ts
+tests/e2e/helpers.ts
+tests/e2e/studio-category-delete.spec.ts
+tests/e2e/studio-collection-delete.spec.ts
+tests/e2e/studio-collection-picker.spec.ts
+tests/e2e/studio-nav-group.spec.ts
+tests/e2e/studio-storefront-errors.spec.ts
+tests/e2e/studio-theme-matrix.spec.ts
+tests/e2e/studio-virtual-pages.spec.ts
+tests/e2e/support/shot-path.ts
+tests/e2e/support/studio-editor.ts
+tests/fixtures/studio-known-gaps.json
+tests/qa/storefront-fault-proxy.mjs
+tests/qa/studio-closeout.ts
+tests/qa/studio-perf.ts
+tests/unit/category-deletion.test.ts
+tests/unit/collection-customer-service-api.test.ts
+tests/unit/collection-ref.test.ts
+tests/unit/collection-usage.test.ts
+tests/unit/nav-visibility.test.ts
+tests/unit/shot-path.test.ts
+tests/unit/storefront-bad-document.test.ts
+tests/unit/storefront-error-state.test.ts
+tests/unit/studio-registry-coverage.test.ts
+tests/unit/studio-virtual-pages.test.ts
+
+added-line findings:
+581:+    console.log(JSON.stringify(results));
+986:+}).listen(PORT, "127.0.0.1", () => console.log(`fault proxy on ${PORT} -> ${TARGET}`));
+1059:+  console.log(JSON.stringify({ passed: count("PASSED_WITH_EVIDENCE"), failed: count("FAILED"), blocked: count("BLOCKED"), inProgress: count("IN_PROGRESS"), notStarted: count("NOT_STARTED"), rejected: problems.length }));
+1129:+console.log(JSON.stringify(result.results, null, 2));
+1284:+    console.log("variants that throw:", thrown.join(", ") || "none");
+(none above = clean)
+migration/dependency changes:
+none
+env files tracked:
+none
+ M artifacts/qa/playwright-report/index.html
+ M artifacts/qa/screenshots/STUDIO-UI-ENHANCEMENT/F1-command-palette/after-owner-palette-scrolled.png
+ M artifacts/qa/screenshots/STUDIO-UI-ENHANCEMENT/F1-command-palette/after-owner-team-visible.png

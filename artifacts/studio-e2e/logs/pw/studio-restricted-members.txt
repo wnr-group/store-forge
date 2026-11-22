@@ -1,0 +1,55 @@
+
+Running 10 tests using 1 worker
+
+  ok  1 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the owner member (6.0s)
+  ok  2 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the manager (all write) member (8.3s)
+  ok  3 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the design-only (settings write) member (6.4s)
+  ok  4 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the catalogue-only (products write) member (4.6s)
+  ok  5 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the read-only (everything read) member (5.5s)
+  ok  6 tests\e2e\studio-restricted-members.spec.ts:28:3 › sidebar of the no-access (everything none) member (4.1s)
+  ok  7 tests\e2e\studio-restricted-members.spec.ts:45:1 › design-only member: can customize and publish; the catalogue routes fall back to the overview without an error page (12.6s)
+  x   8 tests\e2e\studio-restricted-members.spec.ts:61:3 › catalogOnly member: Themes and the editor open read-only (nothing can be applied or published) (31.5s)
+  ok  9 tests\e2e\studio-restricted-members.spec.ts:61:3 › readOnly member: Themes and the editor open read-only (nothing can be applied or published) (7.6s)
+  ok 10 tests\e2e\studio-restricted-members.spec.ts:76:1 › read-only member: sees the catalogue but cannot add or import; no-access member lands on the overview (10.0s)
+
+
+  1) tests\e2e\studio-restricted-members.spec.ts:61:3 › catalogOnly member: Themes and the editor open read-only (nothing can be applied or published) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Themes' })
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Themes' }) with timeout 30000ms
+      - waiting for getByRole('heading', { name: 'Themes' })
+        - waiting for "http://localhost:3100/dashboard" navigation to finish...
+        - navigated to "http://localhost:3100/dashboard"
+
+
+      62 |     await asUser(browser, who, async (page) => {
+      63 |       await page.goto("/dashboard/templates");
+    > 64 |       await expect(page.getByRole("heading", { name: "Themes" })).toBeVisible({ timeout: 30_000 });
+         |                                                                   ^
+      65 |       await expect(page.getByRole("button", { name: "Apply theme" })).toHaveCount(0);
+      66 |       await shot(page, `AC-NAV-2_${who}-themes-read-only`);
+      67 |       await page.goto("/dashboard/templates/editor");
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-restricted-members.spec.ts:64:67
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-restricted-members.spec.ts:62:5
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-restricted-members--6cacd-an-be-applied-or-published-\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-restricted-members--6cacd-an-be-applied-or-published-\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-restricted-members--6cacd-an-be-applied-or-published-\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-restricted-members.spec.ts:61:3 › catalogOnly member: Themes and the editor open read-only (nothing can be applied or published) 
+  9 passed (1.7m)

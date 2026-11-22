@@ -1,0 +1,109 @@
+
+Running 10 tests using 1 worker
+
+  ok  1 tests\e2e\studio-evidence.spec.ts:27:3 › F4/F2 merchant controls, dialog and error text (light) (9.4s)
+  ok  2 tests\e2e\studio-evidence.spec.ts:27:3 › F4/F2 merchant controls, dialog and error text (dark) (5.6s)
+  ok  3 tests\e2e\studio-evidence.spec.ts:94:3 › Admin and Login keep their original rendering (light) (8.5s)
+  ok  4 tests\e2e\studio-evidence.spec.ts:94:3 › Admin and Login keep their original rendering (dark) (6.0s)
+  ok  5 tests\e2e\studio-evidence.spec.ts:133:3 › F1 command palette › owner: Team members is offered, and nothing else changed from origin/main (3.4s)
+  x   6 tests\e2e\studio-evidence.spec.ts:155:3 › F1 command palette › staff: palette equals the sidebar by label and destination, with no Team (5.2s)
+  ok  7 tests\e2e\studio-evidence.spec.ts:175:3 › F1 command palette › owner: choosing an entry navigates to the same destination as its sidebar link (15.6s)
+  ok  8 tests\e2e\studio-evidence.spec.ts:194:3 › F1 command palette › staff cannot reach Team by URL or through the API (6.8s)
+  x   9 tests\e2e\studio-evidence.spec.ts:217:1 › F12-8 Analytics chart axis ticks are identical to origin/main (3.2s)
+  ok 10 tests\e2e\studio-evidence.spec.ts:228:1 › tooling self-check: rendered contrast helper reproduces a known pair (4.0s)
+
+
+  1) tests\e2e\studio-evidence.spec.ts:155:3 › F1 command palette › staff: palette equals the sidebar by label and destination, with no Team 
+
+    Error: same labels as origin/main for this member
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 0
+
+    @@ -4,11 +4,9 @@
+        "Categories",
+        "Collections",
+        "Inventory",
+        "Customers",
+        "Analytics",
+    -   "Themes",
+    -   "Customize",
+        "Pages",
+        "Navigation",
+        "Settings",
+      ]
+
+      162 |       expect(palette).not.toContain("Team members");
+      163 |       expect([...palette].sort(), "same labels as the sidebar").toEqual(Object.keys(sidebar).sort());
+    > 164 |       expect(palette, "same labels as origin/main for this member").toEqual(baseline<string[]>("palette.staff"));
+          |                                                                     ^
+      165 |       record(info, ["F1-2", "F1-3"], "staff palette vs sidebar", { palette, sidebar });
+      166 |       await capture(page, info, { ac: ["F1-3"], folder: "F1-command-palette", name: "staff-palette-sidebar-parity", note: "Staff's palette (top of the list): same entries as the sidebar." });
+      167 |       await page.getByRole("listbox").evaluate((el) => {
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-evidence.spec.ts:164:69
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:83:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-evidence.spec.ts:156:5
+
+    Error Context: test-results\studio-evidence-F1-command-f80f9-nd-destination-with-no-Team\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-evidence-F1-command-f80f9-nd-destination-with-no-Team\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-evidence-F1-command-f80f9-nd-destination-with-no-Team\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\studio-evidence.spec.ts:217:1 › F12-8 Analytics chart axis ticks are identical to origin/main 
+
+    Error: x-axis tick labels identical
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   "20 Oct",
+        "23 Oct",
+        "26 Oct",
+        "29 Oct",
+        "1 Nov",
+        "3 Nov",
+        "5 Nov",
+        "7 Nov",
+        "9 Nov",
+        "11 Nov",
+        "14 Nov",
+    -   "18 Nov",
+    +   "17 Nov",
+    +   "21 Nov",
+      ]
+
+      219 |     const axis = await measureChartAxis(page);
+      220 |     const before = baseline<typeof axis>("chartAxis");
+    > 221 |     expect(axis.ticks, "x-axis tick labels identical").toEqual(before.ticks);
+          |                                                        ^
+      222 |     record(info, ["F12-8"], "chart x-axis ticks", { before: before.ticks, after: axis.ticks });
+      223 |     await capture(page, info, { ac: ["F12-8"], folder: "F12-timezone", name: "analytics-chart-axis", note: "Analytics 'Sales over time' chart: x-axis tick labels equal those measured on origin/main.", target: page.locator(".recharts-wrapper").first() });
+      224 |   });
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-evidence.spec.ts:221:56
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:83:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-evidence.spec.ts:218:3
+
+    Error Context: test-results\studio-evidence-F12-8-Anal-551e4-re-identical-to-origin-main\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-evidence-F12-8-Anal-551e4-re-identical-to-origin-main\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-evidence-F12-8-Anal-551e4-re-identical-to-origin-main\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\e2e\studio-evidence.spec.ts:155:3 › F1 command palette › staff: palette equals the sidebar by label and destination, with no Team 
+    tests\e2e\studio-evidence.spec.ts:217:1 › F12-8 Analytics chart axis ticks are identical to origin/main 
+  8 passed (1.3m)

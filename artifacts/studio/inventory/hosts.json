@@ -1,0 +1,490 @@
+{
+ "out": {
+  "announcement-bar": {
+   "accepts": [
+    "text",
+    "link",
+    "social-link"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "header": {
+   "accepts": [
+    "link",
+    "button"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "footer": {
+   "accepts": [
+    "link-column",
+    "social-link",
+    "text",
+    "heading"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "hero": {
+   "accepts": [
+    "heading",
+    "text",
+    "button",
+    "hero-slide"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "image-banner": {
+   "accepts": [
+    "heading",
+    "text",
+    "button"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "rich-text": {
+   "accepts": [
+    "heading",
+    "text",
+    "button"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "image-with-text": {
+   "accepts": [
+    "heading",
+    "text",
+    "button"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "multicolumn": {
+   "accepts": [
+    "column"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "collapsible-content": {
+   "accepts": [
+    "collapsible-item"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "testimonials": {
+   "accepts": [
+    "testimonial"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "product-grid": {
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "settings"
+    ]
+   }
+  },
+  "collection-list": {
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "settings"
+    ]
+   }
+  },
+  "featured-collection": {
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "settings"
+    ]
+   }
+  },
+  "collection-banner": {
+   "accepts": [
+    "heading",
+    "text"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "main-product": {
+   "accepts": [
+    "product-title",
+    "product-price",
+    "product-compare-at-price",
+    "product-sku",
+    "product-type",
+    "product-category",
+    "product-description",
+    "variant-picker",
+    "collapsible-info",
+    "social-share",
+    "image",
+    "button",
+    "text",
+    "heading"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "related-products": {
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "settings"
+    ]
+   }
+  },
+  "promotional-banner": {
+   "accepts": [
+    "heading",
+    "text",
+    "button",
+    "column"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  },
+  "logo-list": {
+   "accepts": [
+    "image"
+   ],
+   "x": 1,
+   "ignore": {
+    "blocks": [
+     "type",
+     "name",
+     "category",
+     "accepts",
+     "maxChildren",
+     "settings"
+    ]
+   }
+  }
+ },
+ "pairs": [
+  "standard|announcement-bar|text|vis",
+  "standard|announcement-bar|link|vis",
+  "standard|announcement-bar|social-link|vis",
+  "standard|header|link|vis",
+  "standard|header|button|vis",
+  "standard|footer|link-column|vis",
+  "standard|footer|social-link|vis",
+  "standard|footer|text|vis",
+  "standard|footer|heading|vis",
+  "standard|hero|heading|vis",
+  "standard|hero|text|vis",
+  "standard|hero|button|vis",
+  "standard|hero|hero-slide|NULL",
+  "standard|image-banner|heading|vis",
+  "standard|image-banner|text|vis",
+  "standard|image-banner|button|vis",
+  "standard|rich-text|heading|vis",
+  "standard|rich-text|text|vis",
+  "standard|rich-text|button|vis",
+  "standard|image-with-text|heading|vis",
+  "standard|image-with-text|text|vis",
+  "standard|image-with-text|button|vis",
+  "standard|multicolumn|column|vis",
+  "standard|collapsible-content|collapsible-item|vis",
+  "standard|testimonials|testimonial|vis",
+  "standard|collection-banner|heading|vis",
+  "standard|collection-banner|text|vis",
+  "standard|main-product|product-title|vis",
+  "standard|main-product|product-price|vis",
+  "standard|main-product|product-compare-at-price|vis",
+  "standard|main-product|product-sku|vis",
+  "standard|main-product|product-type|vis",
+  "standard|main-product|product-category|vis",
+  "standard|main-product|product-description|vis",
+  "standard|main-product|variant-picker|vis",
+  "standard|main-product|collapsible-info|vis",
+  "standard|main-product|social-share|vis",
+  "standard|main-product|image|vis",
+  "standard|main-product|button|vis",
+  "standard|main-product|text|vis",
+  "standard|main-product|heading|vis",
+  "standard|promotional-banner|heading|vis",
+  "standard|promotional-banner|text|vis",
+  "standard|promotional-banner|button|vis",
+  "standard|promotional-banner|column|vis",
+  "standard|logo-list|image|vis",
+  "boutique|announcement-bar|text|NULL",
+  "boutique|announcement-bar|link|NULL",
+  "boutique|announcement-bar|social-link|NULL",
+  "boutique|header|link|vis",
+  "boutique|header|button|vis",
+  "boutique|footer|link-column|vis",
+  "boutique|footer|social-link|vis",
+  "boutique|footer|text|vis",
+  "boutique|footer|heading|vis",
+  "boutique|hero|heading|vis",
+  "boutique|hero|text|vis",
+  "boutique|hero|button|vis",
+  "boutique|hero|hero-slide|NULL",
+  "boutique|image-banner|heading|vis",
+  "boutique|image-banner|text|vis",
+  "boutique|image-banner|button|vis",
+  "boutique|rich-text|heading|NULL",
+  "boutique|rich-text|text|NULL",
+  "boutique|rich-text|button|NULL",
+  "boutique|image-with-text|heading|vis",
+  "boutique|image-with-text|text|vis",
+  "boutique|image-with-text|button|vis",
+  "boutique|multicolumn|column|vis",
+  "boutique|collapsible-content|collapsible-item|vis",
+  "boutique|testimonials|testimonial|vis",
+  "boutique|collection-banner|heading|vis",
+  "boutique|collection-banner|text|vis",
+  "boutique|main-product|product-title|vis",
+  "boutique|main-product|product-price|vis",
+  "boutique|main-product|product-compare-at-price|vis",
+  "boutique|main-product|product-sku|vis",
+  "boutique|main-product|product-type|vis",
+  "boutique|main-product|product-category|vis",
+  "boutique|main-product|product-description|vis",
+  "boutique|main-product|variant-picker|vis",
+  "boutique|main-product|collapsible-info|vis",
+  "boutique|main-product|social-share|vis",
+  "boutique|main-product|image|vis",
+  "boutique|main-product|button|vis",
+  "boutique|main-product|text|vis",
+  "boutique|main-product|heading|vis",
+  "boutique|promotional-banner|heading|vis",
+  "boutique|promotional-banner|text|vis",
+  "boutique|promotional-banner|button|vis",
+  "boutique|promotional-banner|column|vis",
+  "boutique|logo-list|image|vis",
+  "sport|announcement-bar|text|NULL",
+  "sport|announcement-bar|link|NULL",
+  "sport|announcement-bar|social-link|NULL",
+  "sport|header|link|NULL",
+  "sport|header|button|NULL",
+  "sport|footer|link-column|NULL",
+  "sport|footer|social-link|NULL",
+  "sport|footer|text|NULL",
+  "sport|footer|heading|NULL",
+  "sport|hero|heading|vis",
+  "sport|hero|text|vis",
+  "sport|hero|button|vis",
+  "sport|hero|hero-slide|NULL",
+  "sport|image-banner|heading|NULL",
+  "sport|image-banner|text|NULL",
+  "sport|image-banner|button|NULL",
+  "sport|rich-text|heading|NULL",
+  "sport|rich-text|text|NULL",
+  "sport|rich-text|button|NULL",
+  "sport|image-with-text|heading|NULL",
+  "sport|image-with-text|text|NULL",
+  "sport|image-with-text|button|vis",
+  "sport|multicolumn|column|vis",
+  "sport|collapsible-content|collapsible-item|NULL",
+  "sport|testimonials|testimonial|NULL",
+  "sport|collection-banner|heading|NULL",
+  "sport|collection-banner|text|NULL",
+  "sport|main-product|product-title|vis",
+  "sport|main-product|product-price|vis",
+  "sport|main-product|product-compare-at-price|vis",
+  "sport|main-product|product-sku|vis",
+  "sport|main-product|product-type|vis",
+  "sport|main-product|product-category|vis",
+  "sport|main-product|product-description|vis",
+  "sport|main-product|variant-picker|vis",
+  "sport|main-product|collapsible-info|vis",
+  "sport|main-product|social-share|vis",
+  "sport|main-product|image|vis",
+  "sport|main-product|button|vis",
+  "sport|main-product|text|vis",
+  "sport|main-product|heading|vis",
+  "sport|promotional-banner|heading|NULL",
+  "sport|promotional-banner|text|NULL",
+  "sport|promotional-banner|button|vis",
+  "sport|promotional-banner|column|NULL",
+  "sport|logo-list|image|NULL",
+  "market|announcement-bar|text|NULL",
+  "market|announcement-bar|link|NULL",
+  "market|announcement-bar|social-link|NULL",
+  "market|header|link|NULL",
+  "market|header|button|NULL",
+  "market|footer|link-column|NULL",
+  "market|footer|social-link|NULL",
+  "market|footer|text|NULL",
+  "market|footer|heading|NULL",
+  "market|hero|heading|vis",
+  "market|hero|text|vis",
+  "market|hero|button|vis",
+  "market|hero|hero-slide|NULL",
+  "market|image-banner|heading|vis",
+  "market|image-banner|text|vis",
+  "market|image-banner|button|vis",
+  "market|rich-text|heading|NULL",
+  "market|rich-text|text|NULL",
+  "market|rich-text|button|NULL",
+  "market|image-with-text|heading|vis",
+  "market|image-with-text|text|vis",
+  "market|image-with-text|button|vis",
+  "market|multicolumn|column|vis",
+  "market|collapsible-content|collapsible-item|vis",
+  "market|testimonials|testimonial|vis",
+  "market|collection-banner|heading|NULL",
+  "market|collection-banner|text|NULL",
+  "market|main-product|product-title|vis",
+  "market|main-product|product-price|vis",
+  "market|main-product|product-compare-at-price|vis",
+  "market|main-product|product-sku|vis",
+  "market|main-product|product-type|vis",
+  "market|main-product|product-category|vis",
+  "market|main-product|product-description|vis",
+  "market|main-product|variant-picker|vis",
+  "market|main-product|collapsible-info|vis",
+  "market|main-product|social-share|vis",
+  "market|main-product|image|vis",
+  "market|main-product|button|vis",
+  "market|main-product|text|vis",
+  "market|main-product|heading|vis",
+  "market|promotional-banner|heading|vis",
+  "market|promotional-banner|text|vis",
+  "market|promotional-banner|button|vis",
+  "market|promotional-banner|column|vis",
+  "market|logo-list|image|vis"
+ ]
+}

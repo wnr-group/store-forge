@@ -1,0 +1,433 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Users\\Eshwar\\node_modules\\node-win-x64\\bin\\node.exe",
+      "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/studio-timezone.spec.ts",
+      "--reporter=json,list"
+    ],
+    "configFile": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\playwright.config.ts",
+    "rootDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Eshwar/WNR/store-forge-integ/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/Eshwar/WNR/store-forge-integ/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 90000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ],
+      [
+        "list"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3100",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "studio-timezone.spec.ts",
+      "file": "studio-timezone.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "store-timezone dates (server TZ=UTC, browser America/Los_Angeles, store Asia/Kolkata)",
+          "file": "studio-timezone.spec.ts",
+          "line": 57,
+          "column": 6,
+          "specs": [
+            {
+              "title": "browser and server timezones really differ from the store's",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 3680,
+                      "error": {
+                        "message": "Error: start the frontend with TZ=UTC and export E2E_SERVER_TZ=UTC\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"UTC\"\u001b[39m\nReceived: \u001b[31mundefined\u001b[39m",
+                        "stack": "Error: start the frontend with TZ=UTC and export E2E_SERVER_TZ=UTC\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"UTC\"\u001b[39m\nReceived: \u001b[31mundefined\u001b[39m\n    at timezoneId (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-timezone.spec.ts:63:104)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:83:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-timezone.spec.ts:59:5",
+                        "location": {
+                          "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-timezone.spec.ts",
+                          "column": 104,
+                          "line": 63
+                        },
+                        "snippet": " \u001b[90m 61 |\u001b[39m       \u001b[36mconst\u001b[39m tz \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m \u001b[33mIntl\u001b[39m\u001b[33m.\u001b[39m\u001b[33mDateTimeFormat\u001b[39m()\u001b[33m.\u001b[39mresolvedOptions()\u001b[33m.\u001b[39mtimeZone)\u001b[33m;\u001b[39m\n \u001b[90m 62 |\u001b[39m       expect(tz)\u001b[33m.\u001b[39mtoBe(\u001b[33mBROWSER_TZ\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 63 |\u001b[39m       expect(process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mE2E_SERVER_TZ\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"start the frontend with TZ=UTC and export E2E_SERVER_TZ=UTC\"\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[32m\"UTC\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 64 |\u001b[39m       record(info\u001b[33m,\u001b[39m [\u001b[32m\"F12-7\"\u001b[39m]\u001b[33m,\u001b[39m \u001b[32m\"timezone setup\"\u001b[39m\u001b[33m,\u001b[39m { storeTz\u001b[33m:\u001b[39m \u001b[36mawait\u001b[39m storeTimezone(page)\u001b[33m,\u001b[39m serverTZ\u001b[33m:\u001b[39m process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mE2E_SERVER_TZ\u001b[39m\u001b[33m,\u001b[39m browserTZ\u001b[33m:\u001b[39m tz })\u001b[33m;\u001b[39m\n \u001b[90m 65 |\u001b[39m     }\u001b[33m,\u001b[39m { timezoneId\u001b[33m:\u001b[39m \u001b[33mBROWSER_TZ\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 66 |\u001b[39m   })\u001b[33m;\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-timezone.spec.ts",
+                            "column": 104,
+                            "line": 63
+                          },
+                          "message": "Error: start the frontend with TZ=UTC and export E2E_SERVER_TZ=UTC\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"UTC\"\u001b[39m\nReceived: \u001b[31mundefined\u001b[39m\n\n  61 |       const tz = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);\n  62 |       expect(tz).toBe(BROWSER_TZ);\n> 63 |       expect(process.env.E2E_SERVER_TZ, \"start the frontend with TZ=UTC and export E2E_SERVER_TZ=UTC\").toBe(\"UTC\");\n     |                                                                                                        ^\n  64 |       record(info, [\"F12-7\"], \"timezone setup\", { storeTz: await storeTimezone(page), serverTZ: process.env.E2E_SERVER_TZ, browserTZ: tz });\n  65 |     }, { timezoneId: BROWSER_TZ });\n  66 |   });\n    at timezoneId (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-timezone.spec.ts:63:104)\n    at asUser (C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\support\\studio-session.ts:83:12)\n    at C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-timezone.spec.ts:59:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:34:33.654Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-timezone-store-time-b42fc-lly-differ-from-the-store-s\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\test-results\\studio-timezone-store-time-b42fc-lly-differ-from-the-store-s\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Eshwar\\WNR\\store-forge-integ\\tests\\e2e\\studio-timezone.spec.ts",
+                        "column": 104,
+                        "line": 63
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "9a070c2b14fed958136a-982bb473c01b6a2b2072",
+              "file": "studio-timezone.spec.ts",
+              "line": 58,
+              "column": 3
+            },
+            {
+              "title": "Customers list",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5133,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:34:39.288Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9a070c2b14fed958136a-11bdadb7592e7fad67c6",
+              "file": "studio-timezone.spec.ts",
+              "line": 68,
+              "column": 3
+            },
+            {
+              "title": "Customer detail",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2448,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:34:44.569Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9a070c2b14fed958136a-1aa52302499858002ae4",
+              "file": "studio-timezone.spec.ts",
+              "line": 101,
+              "column": 3
+            },
+            {
+              "title": "Inventory recent adjustments",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3257,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:34:47.035Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9a070c2b14fed958136a-cf312ee40f4ee7a00cb2",
+              "file": "studio-timezone.spec.ts",
+              "line": 124,
+              "column": 3
+            },
+            {
+              "title": "Overview recent orders",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3412,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:34:50.315Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9a070c2b14fed958136a-33120af6e91a22bd961e",
+              "file": "studio-timezone.spec.ts",
+              "line": 163,
+              "column": 5
+            },
+            {
+              "title": "Analytics recent orders",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3970,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:34:53.751Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9a070c2b14fed958136a-acf4ad8e60faeabe286f",
+              "file": "studio-timezone.spec.ts",
+              "line": 163,
+              "column": 5
+            },
+            {
+              "title": "Products Updated column (client component) and no hydration error",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3700,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:34:57.739Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9a070c2b14fed958136a-4bd4c8887505a44cfa67",
+              "file": "studio-timezone.spec.ts",
+              "line": 186,
+              "column": 3
+            },
+            {
+              "title": "how many real records discriminate between store, server and browser time (no data is created)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 708,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-21T12:35:01.464Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9a070c2b14fed958136a-92526356e4cdce9b8180",
+              "file": "studio-timezone.spec.ts",
+              "line": 213,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-21T12:34:31.443Z",
+    "duration": 31956.159000000003,
+    "expected": 7,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

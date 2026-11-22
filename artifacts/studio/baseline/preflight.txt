@@ -1,0 +1,24 @@
+date: 2026-11-21T12:28:04+05:30
+== store-forge-integ integrate/pr7-santu-templates-on-main HEAD=ebe5abe
+AM tests/unit/boutique-look.test.ts
+?? artifacts/studio/
+  staged: 279
+== store-forge-api-integ integrate/pr9-santu-themes-on-main HEAD=1b29a4b
+  no unstaged/untracked
+  staged: 86
+FE origin/main ebe5abe
+FE origin/feat/template-adding 9502223
+FE origin/feat/product-bulk-import-ui 9b2ce17
+API origin/main 1b29a4b
+API origin/feat/template-api 5a105d5
+FE staged vs PR7 head:
+API staged vs PR9 head:
+shared PR7/PR10: 0
+trial FE PR7+PR10: 0a6df4f111b9e73d2852dbaffe7ce78907164597 
+trial API main+PR9: a755ccd6ee779c8c4e21d29bd58cc49940673dbf 
+FE#7 OPEN
+FE#8 MERGED
+FE#10 OPEN
+API#9 OPEN
+/c/Users/Eshwar/WNR/store-forge-api-integ/.env.example
+/c/Users/Eshwar/WNR/store-forge-integ/.env.example

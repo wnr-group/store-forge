@@ -1,0 +1,19 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./tests/timing-files" without a file extension (vitest.config.mts:2:35). Add the file extension
+  - import "./vitest.shared" without a file extension (vitest.config.mts:3:45). Add the file extension
+  - ESM syntax in a file loaded as CommonJS (vitest.shared.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+  - ESM syntax in a file loaded as CommonJS (tests/timing-files.ts:5:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+
+ RUN  v5.1.0 C:/Users/Eshwar/WNR/store-forge-integ
+
+
+ Test Files  124 passed (124)
+      Tests  2623 passed (2623)
+   Start at  12:34:15
+   Duration  35.70s (import 65%, tests 21%, transform 12%, worker 2%)
+
+    Isolate  124 workers spawned · ~238ms startup each (spawn + environment, per file)
+             at least ~9.60s faster with isolate: false — reuses workers across files instead of one per file
+
+exit=0

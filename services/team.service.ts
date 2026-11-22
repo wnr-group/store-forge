@@ -1,5 +1,5 @@
 import "server-only";
-import type { MemberPermissions } from "@/lib/domain/enums";
+import type { MemberCapability, MemberPermissions } from "@/lib/domain/enums";
 import {
   createMemberApi,
   listTeamApi,
@@ -29,6 +29,7 @@ export type TeamMemberRow = {
   status: "active" | "disabled";
   joinedAt: Date;
   permissions: MemberPermissions;
+  capabilities: MemberCapability[];
 };
 
 export const toTeamRow = (m: TeamMemberApi): TeamMemberRow => ({
@@ -39,6 +40,7 @@ export const toTeamRow = (m: TeamMemberApi): TeamMemberRow => ({
   status: m.status === "disabled" ? "disabled" : "active",
   joinedAt: new Date(m.joinedAt),
   permissions: m.permissions as MemberPermissions,
+  capabilities: (m.capabilities ?? []) as MemberCapability[],
 });
 
 export async function listTeam(): Promise<TeamMemberRow[]> {
@@ -56,7 +58,7 @@ export async function createMember(input: CreateMemberInput) {
 export async function updateMember(input: UpdateMemberInput): Promise<void> {
   const v = parseInput(updateMemberSchema, input);
   const { tenant } = await requireActiveTenant("members:manage");
-  await updateMemberApi(tenant.id, v.userId, { fullName: v.fullName, permissions: v.permissions });
+  await updateMemberApi(tenant.id, v.userId, { fullName: v.fullName, permissions: v.permissions, capabilities: v.capabilities });
 }
 
 /** Deactivate (status 'disabled': no access at all, reversible) or re-activate a member. */

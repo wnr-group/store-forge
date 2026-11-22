@@ -1,0 +1,48 @@
+
+Running 11 tests using 1 worker
+
+  ok  1 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 600px height (light) (6.6s)
+  ok  2 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 700px height (light) (3.5s)
+  ok  3 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 800px height (light) (4.1s)
+  ok  4 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 900px height (light) (3.4s)
+  ok  5 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 600px height (dark) (3.5s)
+  ok  6 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 700px height (dark) (3.2s)
+  ok  7 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 800px height (dark) (3.8s)
+  ok  8 tests\e2e\studio-sidebar.spec.ts:60:5 › owner sidebar at 900px height (dark) (3.6s)
+  ok  9 tests\e2e\studio-sidebar.spec.ts:94:1 › staff sidebar at 700px height still reaches every item (4.8s)
+  x  10 tests\e2e\studio-sidebar.spec.ts:113:1 › Platform Admin sidebar is unchanged (no scroll cue, original link height) (835ms)
+  ok 11 tests\e2e\studio-sidebar.spec.ts:130:1 › navigating reveals the active item in a clipped sidebar (4.9s)
+
+
+  1) tests\e2e\studio-sidebar.spec.ts:113:1 › Platform Admin sidebar is unchanged (no scroll cue, original link height) 
+
+    Error: Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.
+
+       at support\studio-session.ts:25
+
+      23 |   if (who === "staff") return STAFF;
+      24 |   const e = process.env.E2E_PLATFORM_ADMIN_EMAIL;
+    > 25 |   if (!e) throw new Error("Set E2E_PLATFORM_ADMIN_EMAIL to use the Platform Admin account.");
+         |                 ^
+      26 |   return e;
+      27 | }
+      28 |
+        at emailOf (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:25:17)
+        at freshLogin (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:34:39)
+        at sessionFor (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:66:16)
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:77:19)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-sidebar.spec.ts:114:3
+
+    Error Context: test-results\studio-sidebar-Platform-Ad-2161c-l-cue-original-link-height-\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\studio-sidebar-Platform-Ad-2161c-l-cue-original-link-height-\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\studio-sidebar-Platform-Ad-2161c-l-cue-original-link-height-\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-sidebar.spec.ts:113:1 › Platform Admin sidebar is unchanged (no scroll cue, original link height) 
+  10 passed (48.4s)

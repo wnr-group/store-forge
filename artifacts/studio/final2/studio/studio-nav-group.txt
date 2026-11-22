@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 tests\e2e\studio-nav-group.spec.ts:8:1 › owner: Studio group order, Online Store keeps Pages/Navigation, Import is reachable from Products (6.5s)
+
+  1 passed (8.9s)

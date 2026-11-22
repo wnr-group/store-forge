@@ -11,6 +11,8 @@ export type OrganizationSummaryApi = {
   publicId: string;
   role: string;
   permissions: Record<string, string>;
+  /** Independent grants ('attest', 'discard'); the Owner holds all of them. */
+  capabilities?: string[];
   joinedAt: string;
 };
 
@@ -19,6 +21,7 @@ export type CurrentOrganizationApi = {
   role: string;
   roleLabel: string;
   permissions: Record<string, string>;
+  capabilities?: string[];
   access: { module: string; label: string; level: string }[];
   store: StoreApi | null;
 };

@@ -1,0 +1,43 @@
+
+Running 1 test using 1 worker
+
+  x  1 tests\e2e\studio-collection-picker.spec.ts:9:1 › picking a collection stores its id, survives a reload, and the storefront shows it (37.6s)
+
+
+  1) tests\e2e\studio-collection-picker.spec.ts:9:1 › picking a collection stores its id, survives a reload, and the storefront shows it 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 30000ms exceeded while waiting on the predicate
+
+       at support\studio-editor.ts:16
+
+      14 |   await expect
+      15 |     .poll(async () => JSON.stringify((await apiGet<{ document: unknown }>(page, `/store/templates/${t.id}`)).document).includes(needle), { timeout: 30_000 })
+    > 16 |     .toBe(present);
+         |      ^
+      17 | }
+      18 |
+      19 | /** Makes sure the store has a theme draft (applies the first theme from the Themes page when the editor redirects there). */
+        at waitForDraft (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-editor.ts:16:6)
+        at pickCollection (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-editor.ts:48:13)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-picker.spec.ts:16:5
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-collection-picker.spec.ts:10:3
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-collection-picker-p-844bf-and-the-storefront-shows-it\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-collection-picker-p-844bf-and-the-storefront-shows-it\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-collection-picker-p-844bf-and-the-storefront-shows-it\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-collection-picker.spec.ts:9:1 › picking a collection stores its id, survives a reload, and the storefront shows it 

@@ -24,11 +24,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LEVEL_LABELS, MODULE_LABELS, presetOf, ROLE_PRESET_KEYS, ROLE_PRESETS, roleLabel } from "@/lib/auth/permissions";
-import { MODULES, type AccessLevel, type MemberPermissions } from "@/lib/domain/enums";
+import { CAPABILITY_LABELS, LEVEL_LABELS, MODULE_LABELS, presetOf, ROLE_PRESET_KEYS, ROLE_PRESETS, roleLabel } from "@/lib/auth/permissions";
+import { MEMBER_CAPABILITIES, MODULES, type AccessLevel, type MemberCapability, type MemberPermissions } from "@/lib/domain/enums";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { useReturnFocus } from "@/lib/hooks/use-return-focus";
-import { createMemberSchema, updateMemberSchema, type CreateMemberInput, type PermissionsInput } from "@/lib/validations/team";
+import { createMemberSchema, permissionsToForm, updateMemberSchema, type CreateMemberInput, type PermissionsInput } from "@/lib/validations/team";
 
 export type MemberRow = {
   userId: string;
@@ -37,22 +37,15 @@ export type MemberRow = {
   role: "owner" | "admin" | "staff";
   status: "active" | "disabled";
   permissions: MemberPermissions;
+  capabilities?: MemberCapability[];
   isSelf: boolean;
 };
-
-/** Stored permissions -> the full set of levels the form edits (missing module = none; settings are always readable). */
-const toForm = (p: MemberPermissions): PermissionsInput => ({
-  products: (p.products ?? "none") as PermissionsInput["products"],
-  orders: (p.orders === "write" ? "read" : (p.orders ?? "none")) as PermissionsInput["orders"],
-  customers: (p.customers ?? "none") as PermissionsInput["customers"],
-  settings: (p.settings === "write" ? "write" : "read") as PermissionsInput["settings"],
-});
 
 /**
  * Role = a preset for the access rows below. Picking one fills them in; changing a row afterwards makes the role
  * read "Custom". Only the access levels are saved, so the role is always derived from them.
  */
-function RoleField({ id, value, onChange, disabled }: { id: string; value: PermissionsInput; onChange: (v: PermissionsInput) => void; disabled: boolean }) {
+function RoleField({ id, value, onChange, disabled }: { id: string; value: PermissionsInput; onChange: (v: PermissionsInput, capabilities: MemberCapability[]) => void; disabled: boolean }) {
   const current = presetOf(value);
   return (
     <FormField id={id} label="Role" required hint={current === "custom" ? "Access was adjusted below. Pick a role to reset it." : ROLE_PRESETS[current].hint}>
@@ -62,7 +55,9 @@ function RoleField({ id, value, onChange, disabled }: { id: string; value: Permi
         disabled={disabled}
         onChange={(e) => {
           const key = e.target.value;
-          if (key !== "custom") onChange({ ...ROLE_PRESETS[key as keyof typeof ROLE_PRESETS].permissions } as PermissionsInput);
+          if (key === "custom") return;
+          const preset = ROLE_PRESETS[key as keyof typeof ROLE_PRESETS];
+          onChange({ ...preset.permissions } as PermissionsInput, [...preset.capabilities]);
         }}
       >
         {ROLE_PRESET_KEYS.map((k) => (
@@ -75,7 +70,7 @@ function RoleField({ id, value, onChange, disabled }: { id: string; value: Permi
 }
 
 /** One access level per module. The Owner can raise or revoke any of them at any time. */
-function PermissionFields({ idPrefix, value, onChange, disabled, error }: { idPrefix: string; value: PermissionsInput; onChange: (v: PermissionsInput) => void; disabled: boolean; error?: string }) {
+function PermissionFields({ idPrefix, value, onChange, capabilities, onCapabilities, disabled, error }: { idPrefix: string; value: PermissionsInput; onChange: (v: PermissionsInput) => void; capabilities: MemberCapability[]; onCapabilities: (c: MemberCapability[]) => void; disabled: boolean; error?: string }) {
   return (
     <fieldset className="space-y-2" disabled={disabled}>
       <legend className="text-sm font-medium">Access</legend>
@@ -87,7 +82,7 @@ function PermissionFields({ idPrefix, value, onChange, disabled, error }: { idPr
             <span className="block text-xs text-muted-foreground">{MODULE_LABELS[m].hint}</span>
           </label>
           <div className="w-36 shrink-0">
-            <NativeSelect id={`${idPrefix}-${m}`} value={value[m]} onChange={(e) => onChange({ ...value, [m]: e.target.value as AccessLevel })}>
+            <NativeSelect id={`${idPrefix}-${m}`} value={value[m] ?? "none"} onChange={(e) => onChange({ ...value, [m]: e.target.value as AccessLevel })}>
               {MODULE_LABELS[m].levels.map((l) => (
                 <option key={l} value={l}>{LEVEL_LABELS[l]}</option>
               ))}
@@ -95,6 +90,16 @@ function PermissionFields({ idPrefix, value, onChange, disabled, error }: { idPr
           </div>
         </div>
       ))}
+      <div className="space-y-1.5 rounded-lg border p-2.5">
+        <p className="text-sm font-medium">Studio capabilities</p>
+        <p className="text-xs text-muted-foreground">Granted on their own: they do not need, and are not implied by, any design level.</p>
+        {MEMBER_CAPABILITIES.map((c) => (
+          <label key={c} className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={capabilities.includes(c)} onChange={(e) => onCapabilities(e.target.checked ? [...capabilities, c] : capabilities.filter((x) => x !== c))} />
+            {CAPABILITY_LABELS[c]}
+          </label>
+        ))}
+      </div>
       {error ? <p role="alert" className="text-sm text-error">{error}</p> : null}
     </fieldset>
   );
@@ -114,6 +119,7 @@ export function AddMemberDialog({ open, onOpenChange, finalFocus, create = creat
   const router = useRouter();
   const [v, setV] = useState({ fullName: "", email: "", password: "" });
   const [permissions, setPermissions] = useState<PermissionsInput>({ ...ROLE_PRESETS.viewer.permissions } as PermissionsInput);
+  const [capabilities, setCapabilities] = useState<MemberCapability[]>([...ROLE_PRESETS.viewer.capabilities]);
   const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
   const set = (k: keyof typeof v, value: string) => {
     setV((cur) => ({ ...cur, [k]: value }));
@@ -121,11 +127,11 @@ export function AddMemberDialog({ open, onOpenChange, finalFocus, create = creat
   };
   const common = (k: "fullName" | "email" | "password", id: string) => ({
     id, value: v[k], onChange: (e: React.ChangeEvent<HTMLInputElement>) => set(k, e.target.value),
-    onBlur: () => validateField(createMemberSchema, { ...v, permissions }, k), disabled: pending, "aria-invalid": Boolean(errors[k]), "aria-describedby": `${id}-msg`,
+    onBlur: () => validateField(createMemberSchema, { ...v, permissions, capabilities }, k), disabled: pending, "aria-invalid": Boolean(errors[k]), "aria-describedby": `${id}-msg`,
   });
 
   const submit = () => {
-    const payload = { ...v, permissions };
+    const payload = { ...v, permissions, capabilities };
     if (!validate(createMemberSchema, payload)) return;
     send(async () => {
       const res = await create(payload);
@@ -157,8 +163,8 @@ export function AddMemberDialog({ open, onOpenChange, finalFocus, create = creat
           <FormField id="tm-password" label="Initial password" required error={errors.password} hint="At least 8 characters with a letter and a number.">
             <PasswordInput {...common("password", "tm-password")} aria-required autoComplete="new-password" />
           </FormField>
-          <RoleField id="tm-role" value={permissions} onChange={setPermissions} disabled={pending} />
-          <PermissionFields idPrefix="tm-perm" value={permissions} onChange={setPermissions} disabled={pending} error={errors.permissions} />
+          <RoleField id="tm-role" value={permissions} onChange={(p, c) => { setPermissions(p); setCapabilities(c); }} disabled={pending} />
+          <PermissionFields idPrefix="tm-perm" value={permissions} onChange={setPermissions} capabilities={capabilities} onCapabilities={setCapabilities} disabled={pending} error={errors.permissions} />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>Cancel</Button>
             <Button type="submit" disabled={pending}>
@@ -173,7 +179,7 @@ export function AddMemberDialog({ open, onOpenChange, finalFocus, create = creat
 
 function EditMemberDialog({ member, onClose }: { member: MemberRow; onClose: () => void }) {
   const router = useRouter();
-  const [v, setV] = useState({ userId: member.userId, fullName: member.fullName ?? "", permissions: toForm(member.permissions) });
+  const [v, setV] = useState({ userId: member.userId, fullName: member.fullName ?? "", permissions: permissionsToForm(member.permissions), capabilities: member.capabilities ?? [] });
   const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
 
   const submit = () => {
@@ -202,8 +208,8 @@ function EditMemberDialog({ member, onClose }: { member: MemberRow; onClose: () 
           <FormField id="em-name" label="Member name" required error={errors.fullName}>
             <Input id="em-name" value={v.fullName} onChange={(e) => { setV({ ...v, fullName: e.target.value }); clear("fullName"); }} onBlur={() => validateField(updateMemberSchema, v, "fullName")} aria-invalid={Boolean(errors.fullName)} aria-describedby="em-name-msg" aria-required disabled={pending} autoFocus />
           </FormField>
-          <RoleField id="em-role" value={v.permissions} onChange={(permissions) => setV({ ...v, permissions })} disabled={pending} />
-          <PermissionFields idPrefix="em-perm" value={v.permissions} onChange={(permissions) => setV({ ...v, permissions })} disabled={pending} error={errors.permissions} />
+          <RoleField id="em-role" value={v.permissions} onChange={(permissions, capabilities) => setV({ ...v, permissions, capabilities })} disabled={pending} />
+          <PermissionFields idPrefix="em-perm" value={v.permissions} onChange={(permissions) => setV({ ...v, permissions })} capabilities={v.capabilities} onCapabilities={(capabilities) => setV({ ...v, capabilities })} disabled={pending} error={errors.permissions} />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={pending}>Cancel</Button>
             <Button type="submit" disabled={pending}>

@@ -4,7 +4,7 @@
  * rules independently through RLS (role policies plus the restrictive per-module policies, in the store-forge-api
  * repository's migrations 0002 and 0018) - keep the two in sync.
  */
-import { MEMBERSHIP_ROLES, MODULES, type AccessLevel, type MemberPermissions, type MembershipRole, type Module } from "@/lib/domain/enums";
+import { MEMBER_CAPABILITIES, MEMBERSHIP_ROLES, MODULES, type AccessLevel, type MemberCapability, type MemberPermissions, type MembershipRole, type Module } from "@/lib/domain/enums";
 
 export const ROLES = MEMBERSHIP_ROLES;
 export type Role = MembershipRole;
@@ -14,22 +14,37 @@ export function isRole(value: unknown): value is Role {
 }
 
 /** What the signed-in member may do: their role (the Owner row is special) plus the Owner-granted module access. */
-export type Actor = { role: Role; permissions: MemberPermissions };
+export type Actor = {
+  role: Role;
+  permissions: MemberPermissions;
+  /** Independent grants ('attest', 'discard'); they do not depend on any level. The Owner holds all of them. */
+  capabilities?: readonly MemberCapability[];
+};
+
+/** none < read < write < publish. Only the `design` module has the `publish` level. */
+const LEVEL_RANK: Record<AccessLevel, number> = { none: 0, read: 1, write: 2, publish: 3 };
 
 /**
- * The effective level of `actor` on a module. The Owner always has full access. Store settings are readable by
- * every member (the dashboard needs them), so 'settings' never drops below 'read'.
+ * The effective level of `actor` on a module. The Owner always has full access ('publish' on design, 'write' on the
+ * other modules). Store settings are readable by every member (the dashboard needs them), so 'settings' never drops
+ * below 'read'. A level a module does not offer ('publish' outside design) counts as 'write'.
  */
 export function accessLevel(actor: Actor, module: Module): AccessLevel {
-  if (actor.role === "owner") return "write";
+  if (actor.role === "owner") return module === "design" ? "publish" : "write";
   const level = actor.permissions[module] ?? "none";
-  return module === "settings" && level === "none" ? "read" : level;
+  if (module === "settings" && level === "none") return "read";
+  return level === "publish" && module !== "design" ? "write" : level;
 }
 
-export const canAccess = (actor: Actor, module: Module, need: "read" | "write") => {
-  const level = accessLevel(actor, module);
-  return level === "write" || (level === "read" && need === "read");
-};
+export const canAccess = (actor: Actor, module: Module, need: Exclude<AccessLevel, "none">) => LEVEL_RANK[accessLevel(actor, module)] >= LEVEL_RANK[need];
+
+/** The capabilities `role` effectively holds: the Owner has all of them, others what was granted. */
+export function effectiveCapabilities(role: Role, granted: readonly MemberCapability[] | null | undefined): MemberCapability[] {
+  return role === "owner" ? [...MEMBER_CAPABILITIES] : MEMBER_CAPABILITIES.filter((c) => (granted ?? []).includes(c));
+}
+
+/** Does the actor hold this capability? The Owner holds every capability. */
+export const hasCapability = (actor: Actor, capability: MemberCapability) => actor.role === "owner" || (actor.capabilities ?? []).includes(capability);
 
 /** Permission name -> rule. A rule is either owner-only or "this level on this module". */
 const PERMISSIONS = {
@@ -48,14 +63,25 @@ const PERMISSIONS = {
   "customers:view": { module: "customers", need: "read" },
   "customers:manage": { module: "customers", need: "write" },
   "customers:delete": { module: "customers", need: "write" },
-} as const satisfies Record<string, { any: true } | { ownerOnly: true } | { module: Module; need: "read" | "write" }>;
+  // Studio. Editing never publishes: draft work needs `write`, going live needs `publish`.
+  "design:view": { module: "design", need: "read" },
+  "design:edit": { module: "design", need: "write" },
+  "design:publish": { module: "design", need: "publish" },
+  // Independent capabilities, not levels: neither needs (nor implies) any design level.
+  "design:attest": { capability: "attest" },
+  "design:discard": { capability: "discard" },
+} as const satisfies Record<
+  string,
+  { any: true } | { ownerOnly: true } | { capability: MemberCapability } | { module: Module; need: Exclude<AccessLevel, "none"> }
+>;
 
 export type Permission = keyof typeof PERMISSIONS;
 
 export function can(actor: Actor, permission: Permission): boolean {
-  const rule: { any?: true; ownerOnly?: true; module?: Module; need?: "read" | "write" } = PERMISSIONS[permission];
+  const rule: { any?: true; ownerOnly?: true; capability?: MemberCapability; module?: Module; need?: Exclude<AccessLevel, "none"> } = PERMISSIONS[permission];
   if (rule.any) return true;
   if (rule.ownerOnly) return actor.role === "owner";
+  if (rule.capability) return hasCapability(actor, rule.capability);
   return canAccess(actor, rule.module!, rule.need!);
 }
 
@@ -70,6 +96,11 @@ export const canViewCustomers = (a: Actor) => can(a, "customers:view");
 export const canManageCustomers = (a: Actor) => can(a, "customers:manage");
 export const canDeleteCustomers = (a: Actor) => can(a, "customers:delete");
 export const canManageMembers = (a: Actor) => can(a, "members:manage");
+export const canViewDesign = (a: Actor) => can(a, "design:view");
+export const canEditDesign = (a: Actor) => can(a, "design:edit");
+export const canPublishDesign = (a: Actor) => can(a, "design:publish");
+export const canAttestDesign = (a: Actor) => can(a, "design:attest");
+export const canDiscardDesign = (a: Actor) => can(a, "design:discard");
 
 /** Members are stored with the broadest non-owner role; what they can actually do is decided by their permissions. */
 export const MEMBER_ROLE = "admin" as const satisfies Role;
@@ -80,9 +111,13 @@ export const MODULE_LABELS: Record<Module, { label: string; hint: string; levels
   orders: { label: "Orders", hint: "Orders are read-only for now.", levels: ["none", "read"] },
   customers: { label: "Customers", hint: "Customer records and notes.", levels: ["none", "read", "write"] },
   settings: { label: "Store settings", hint: "Store details, contact info and logo.", levels: ["read", "write"] },
+  design: { label: "Store design", hint: "Studio: view the design, edit drafts, publish. Attest and discard are granted separately.", levels: ["none", "read", "write", "publish"] },
 };
 
-export const LEVEL_LABELS: Record<AccessLevel, string> = { none: "No access", read: "Read", write: "Read & write" };
+/** Label for the independent capabilities. */
+export const CAPABILITY_LABELS: Record<MemberCapability, string> = { attest: "Attest design compliance", discard: "Discard design drafts" };
+
+export const LEVEL_LABELS: Record<AccessLevel, string> = { none: "No access", read: "Read", write: "Read & write", publish: "Read, write & publish" };
 
 /** What a member can reach, one entry per module they have any access to (modules set to none are left out). */
 export function accessEntries(role: Role, permissions: MemberPermissions): { module: Module; label: string; level: AccessLevel }[] {
@@ -106,19 +141,23 @@ export const ROLE_PRESETS = {
   manager: {
     label: "Manager",
     hint: "Manages products, customers and store settings.",
-    permissions: { products: "write", orders: "read", customers: "write", settings: "write" },
+    permissions: { products: "write", orders: "read", customers: "write", settings: "write", design: "publish" },
+    // Today's Managers keep every design power they had, plus the attest capability (API migration 0036).
+    capabilities: ["attest"],
   },
   staff: {
     label: "Staff",
     hint: "Manages products and customers; can only view orders and store settings.",
-    permissions: { products: "write", orders: "read", customers: "write", settings: "read" },
+    permissions: { products: "write", orders: "read", customers: "write", settings: "read", design: "read" },
+    capabilities: [],
   },
   viewer: {
     label: "Viewer",
     hint: "Can look at everything but change nothing.",
-    permissions: { products: "read", orders: "read", customers: "read", settings: "read" },
+    permissions: { products: "read", orders: "read", customers: "read", settings: "read", design: "read" },
+    capabilities: [],
   },
-} as const satisfies Record<string, { label: string; hint: string; permissions: Record<Module, AccessLevel> }>;
+} as const satisfies Record<string, { label: string; hint: string; permissions: Record<Module, AccessLevel>; capabilities: readonly MemberCapability[] }>;
 
 export type RolePresetKey = keyof typeof ROLE_PRESETS;
 export const ROLE_PRESET_KEYS = Object.keys(ROLE_PRESETS) as RolePresetKey[];
@@ -126,7 +165,9 @@ export const ROLE_PRESET_KEYS = Object.keys(ROLE_PRESETS) as RolePresetKey[];
 /** Which preset these levels equal, or "custom". Missing modules count as no access (settings: read); orders write counts as read. */
 export function presetOf(permissions: MemberPermissions): RolePresetKey | "custom" {
   const actor: Actor = { role: "admin", permissions };
-  const level = (m: Module) => {
+  const level = (m: Module): AccessLevel => {
+    // A member stored before the design module existed is labelled as the API's migration 0036 converts it.
+    if (m === "design" && permissions.design === undefined) return accessLevel(actor, "settings") === "write" ? "publish" : "read";
     const l = accessLevel(actor, m);
     return m === "orders" && l === "write" ? "read" : l;
   };

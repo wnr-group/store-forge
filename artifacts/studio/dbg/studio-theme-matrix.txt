@@ -1,0 +1,38 @@
+
+Running 1 test using 1 worker
+
+  x  1 tests\e2e\studio-theme-matrix.spec.ts:83:1 › 9 themes pass the editor smoke test (open, select, text, style, visibility, publish, storefront) (2.0m)
+
+
+  1) tests\e2e\studio-theme-matrix.spec.ts:83:1 › 9 themes pass the editor smoke test (open, select, text, style, visibility, publish, storefront) 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "Lumière: expect(locator).toBeVisible() failed",
+    + ]
+
+      88 |   writeFileSync("artifacts/studio/inventory/smoke-matrix.json", JSON.stringify({ takenAt: new Date().toISOString(), rows }, null, 2));
+      89 |   const failed = rows.filter((r) => Object.values(r.steps).some((v) => v === false));
+    > 90 |   expect(failed.map((r) => `${r.theme}: ${r.notes.join(" | ")}`)).toEqual([]);
+         |                                                                   ^
+      91 | });
+      92 |
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-theme-matrix.spec.ts:90:67
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-theme-matrix-9-them-78d50-ibility-publish-storefront-\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-theme-matrix-9-them-78d50-ibility-publish-storefront-\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-theme-matrix-9-them-78d50-ibility-publish-storefront-\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-theme-matrix.spec.ts:83:1 › 9 themes pass the editor smoke test (open, select, text, style, visibility, publish, storefront) 

@@ -1,0 +1,514 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./tests/timing-files" without a file extension (vitest.config.mts:2:35). Add the file extension
+  - import "./vitest.shared" without a file extension (vitest.config.mts:3:45). Add the file extension
+  - ESM syntax in a file loaded as CommonJS (vitest.shared.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+  - ESM syntax in a file loaded as CommonJS (tests/timing-files.ts:5:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+
+ RUN  v5.1.0 C:/Users/Eshwar/WNR/store-forge-integ
+
+stderr | tests/unit/studio-registry-coverage.test.ts > registry coverage per look > every element on every look persists, validates, renders and is covered, or is dispositioned
+Received `false` for a non-boolean attribute `prefetch`.
+
+If you want to write it to the DOM, pass a string instead: prefetch="false" or prefetch={value.toString()}.
+
+If you used to conditionally omit it with prefetch={condition && value}, pass prefetch={condition ? value : undefined} instead.
+
+ ❯ tests/unit/studio-registry-coverage.test.ts (2 tests | 1 failed) 848ms
+   ❯ registry coverage per look (2)
+     × every element on every look persists, validates, renders and is covered, or is dispositioned 844ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/studio-registry-coverage.test.ts > registry coverage per look > every element on every look persists, validates, renders and is covered, or is dispositioned
+AssertionError: undispositioned gaps (see artifacts/studio/inventory/registry-coverage.json):
+standard:section:announcement-bar:text-override
+standard:section:header:visibility
+standard:section:header:text-override
+standard:section:footer:text-override
+standard:section:hero:text-override
+standard:section:image-banner:text-override
+standard:section:rich-text:text-override
+standard:section:image-with-text:text-override
+standard:section:multicolumn:text-override
+standard:section:collapsible-content:text-override
+standard:section:testimonials:text-override
+standard:section:product-grid:text-override
+standard:section:collection-list:text-override
+standard:section:featured-collection:text-override
+standard:section:collection-banner:text-override
+standard:section:main-product:text-override
+standard:section:related-products:text-override
+standard:section:promotional-banner:text-override
+standard:section:logo-list:text-override
+standard:block:heading:text-override
+standard:block:text:text-override
+standard:block:button:text-override
+standard:block:image:visibility
+standard:block:image:text-override
+standard:block:link:text-override
+standard:block:link-column:text-override
+standard:block:social-link:text-override
+standard:block:column:text-override
+standard:block:collapsible-item:text-override
+standard:block:testimonial:text-override
+standard:block:group:visibility
+standard:block:group:text-override
+standard:block:product-title:visibility
+standard:block:product-title:text-override
+standard:block:product-price:visibility
+standard:block:product-price:text-override
+standard:block:product-compare-at-price:visibility
+standard:block:product-compare-at-price:text-override
+standard:block:product-sku:visibility
+standard:block:product-sku:text-override
+standard:block:product-type:visibility
+standard:block:product-type:text-override
+standard:block:product-category:visibility
+standard:block:product-category:text-override
+standard:block:product-description:visibility
+standard:block:product-description:text-override
+standard:block:variant-picker:visibility
+standard:block:variant-picker:text-override
+standard:block:collapsible-info:visibility
+standard:block:collapsible-info:text-override
+standard:block:social-share:visibility
+standard:block:social-share:text-override
+standard:block:hero-slide:visibility
+standard:block:hero-slide:text-override
+boutique:section:announcement-bar:text-override
+boutique:section:header:visibility
+boutique:section:header:text-override
+boutique:section:footer:text-override
+boutique:section:hero:text-override
+boutique:section:image-banner:text-override
+boutique:section:rich-text:text-override
+boutique:section:image-with-text:text-override
+boutique:section:multicolumn:text-override
+boutique:section:collapsible-content:text-override
+boutique:section:testimonials:text-override
+boutique:section:product-grid:text-override
+boutique:section:collection-list:text-override
+boutique:section:featured-collection:text-override
+boutique:section:collection-banner:text-override
+boutique:section:main-product:text-override
+boutique:section:related-products:text-override
+boutique:section:promotional-banner:text-override
+boutique:section:logo-list:text-override
+boutique:block:heading:text-override
+boutique:block:text:visibility
+boutique:block:text:text-override
+boutique:block:button:text-override
+boutique:block:image:visibility
+boutique:block:image:text-override
+boutique:block:link:visibility
+boutique:block:link:text-override
+boutique:block:link-column:text-override
+boutique:block:social-link:visibility
+boutique:block:social-link:text-override
+boutique:block:column:text-override
+boutique:block:collapsible-item:text-override
+boutique:block:testimonial:text-override
+boutique:block:group:visibility
+boutique:block:group:text-override
+boutique:block:product-title:visibility
+boutique:block:product-title:text-override
+boutique:block:product-price:visibility
+boutique:block:product-price:text-override
+boutique:block:product-compare-at-price:visibility
+boutique:block:product-compare-at-price:text-override
+boutique:block:product-sku:visibility
+boutique:block:product-sku:text-override
+boutique:block:product-type:visibility
+boutique:block:product-type:text-override
+boutique:block:product-category:visibility
+boutique:block:product-category:text-override
+boutique:block:product-description:visibility
+boutique:block:product-description:text-override
+boutique:block:variant-picker:visibility
+boutique:block:variant-picker:text-override
+boutique:block:collapsible-info:visibility
+boutique:block:collapsible-info:text-override
+boutique:block:social-share:visibility
+boutique:block:social-share:text-override
+boutique:block:hero-slide:visibility
+boutique:block:hero-slide:text-override
+sport:section:announcement-bar:text-override
+sport:section:header:visibility
+sport:section:header:text-override
+sport:section:footer:text-override
+sport:section:hero:text-override
+sport:section:image-banner:text-override
+sport:section:rich-text:text-override
+sport:section:image-with-text:text-override
+sport:section:multicolumn:text-override
+sport:section:collapsible-content:text-override
+sport:section:testimonials:text-override
+sport:section:product-grid:text-override
+sport:section:collection-list:text-override
+sport:section:featured-collection:text-override
+sport:section:collection-banner:text-override
+sport:section:main-product:text-override
+sport:section:related-products:text-override
+sport:section:promotional-banner:text-override
+sport:section:logo-list:text-override
+sport:block:heading:visibility
+sport:block:heading:text-override
+sport:block:text:visibility
+sport:block:text:text-override
+sport:block:button:visibility
+sport:block:button:text-override
+sport:block:image:visibility
+sport:block:image:text-override
+sport:block:link:visibility
+sport:block:link:text-override
+sport:block:link-column:visibility
+sport:block:link-column:text-override
+sport:block:social-link:visibility
+sport:block:social-link:text-override
+sport:block:column:text-override
+sport:block:collapsible-item:visibility
+sport:block:collapsible-item:text-override
+sport:block:testimonial:visibility
+sport:block:testimonial:text-override
+sport:block:group:visibility
+sport:block:group:text-override
+sport:block:product-title:visibility
+sport:block:product-title:text-override
+sport:block:product-price:visibility
+sport:block:product-price:text-override
+sport:block:product-compare-at-price:visibility
+sport:block:product-compare-at-price:text-override
+sport:block:product-sku:visibility
+sport:block:product-sku:text-override
+sport:block:product-type:visibility
+sport:block:product-type:text-override
+sport:block:product-category:visibility
+sport:block:product-category:text-override
+sport:block:product-description:visibility
+sport:block:product-description:text-override
+sport:block:variant-picker:visibility
+sport:block:variant-picker:text-override
+sport:block:collapsible-info:visibility
+sport:block:collapsible-info:text-override
+sport:block:social-share:visibility
+sport:block:social-share:text-override
+sport:block:hero-slide:visibility
+sport:block:hero-slide:text-override
+market:section:announcement-bar:text-override
+market:section:header:visibility
+market:section:header:text-override
+market:section:footer:text-override
+market:section:hero:text-override
+market:section:image-banner:text-override
+market:section:rich-text:text-override
+market:section:image-with-text:text-override
+market:section:multicolumn:text-override
+market:section:collapsible-content:text-override
+market:section:testimonials:text-override
+market:section:product-grid:text-override
+market:section:collection-list:text-override
+market:section:featured-collection:text-override
+market:section:collection-banner:text-override
+market:section:main-product:text-override
+market:section:related-products:text-override
+market:section:promotional-banner:text-override
+market:section:logo-list:text-override
+market:block:heading:visibility
+market:block:heading:text-override
+market:block:text:visibility
+market:block:text:text-override
+market:block:button:visibility
+market:block:button:text-override
+market:block:image:visibility
+market:block:image:text-override
+market:block:link:visibility
+market:block:link:text-override
+market:block:link-column:visibility
+market:block:link-column:text-override
+market:block:social-link:visibility
+market:block:social-link:text-override
+market:block:column:text-override
+market:block:collapsible-item:text-override
+market:block:testimonial:text-override
+market:block:group:visibility
+market:block:group:text-override
+market:block:product-title:visibility
+market:block:product-title:text-override
+market:block:product-price:visibility
+market:block:product-price:text-override
+market:block:product-compare-at-price:visibility
+market:block:product-compare-at-price:text-override
+market:block:product-sku:visibility
+market:block:product-sku:text-override
+market:block:product-type:visibility
+market:block:product-type:text-override
+market:block:product-category:visibility
+market:block:product-category:text-override
+market:block:product-description:visibility
+market:block:product-description:text-override
+market:block:variant-picker:visibility
+market:block:variant-picker:text-override
+market:block:collapsible-info:visibility
+market:block:collapsible-info:text-override
+market:block:social-share:visibility
+market:block:social-share:text-override
+market:block:hero-slide:visibility
+market:block:hero-slide:text-override: expected [ …(233) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "standard:section:announcement-bar:text-override",
++   "standard:section:header:visibility",
++   "standard:section:header:text-override",
++   "standard:section:footer:text-override",
++   "standard:section:hero:text-override",
++   "standard:section:image-banner:text-override",
++   "standard:section:rich-text:text-override",
++   "standard:section:image-with-text:text-override",
++   "standard:section:multicolumn:text-override",
++   "standard:section:collapsible-content:text-override",
++   "standard:section:testimonials:text-override",
++   "standard:section:product-grid:text-override",
++   "standard:section:collection-list:text-override",
++   "standard:section:featured-collection:text-override",
++   "standard:section:collection-banner:text-override",
++   "standard:section:main-product:text-override",
++   "standard:section:related-products:text-override",
++   "standard:section:promotional-banner:text-override",
++   "standard:section:logo-list:text-override",
++   "standard:block:heading:text-override",
++   "standard:block:text:text-override",
++   "standard:block:button:text-override",
++   "standard:block:image:visibility",
++   "standard:block:image:text-override",
++   "standard:block:link:text-override",
++   "standard:block:link-column:text-override",
++   "standard:block:social-link:text-override",
++   "standard:block:column:text-override",
++   "standard:block:collapsible-item:text-override",
++   "standard:block:testimonial:text-override",
++   "standard:block:group:visibility",
++   "standard:block:group:text-override",
++   "standard:block:product-title:visibility",
++   "standard:block:product-title:text-override",
++   "standard:block:product-price:visibility",
++   "standard:block:product-price:text-override",
++   "standard:block:product-compare-at-price:visibility",
++   "standard:block:product-compare-at-price:text-override",
++   "standard:block:product-sku:visibility",
++   "standard:block:product-sku:text-override",
++   "standard:block:product-type:visibility",
++   "standard:block:product-type:text-override",
++   "standard:block:product-category:visibility",
++   "standard:block:product-category:text-override",
++   "standard:block:product-description:visibility",
++   "standard:block:product-description:text-override",
++   "standard:block:variant-picker:visibility",
++   "standard:block:variant-picker:text-override",
++   "standard:block:collapsible-info:visibility",
++   "standard:block:collapsible-info:text-override",
++   "standard:block:social-share:visibility",
++   "standard:block:social-share:text-override",
++   "standard:block:hero-slide:visibility",
++   "standard:block:hero-slide:text-override",
++   "boutique:section:announcement-bar:text-override",
++   "boutique:section:header:visibility",
++   "boutique:section:header:text-override",
++   "boutique:section:footer:text-override",
++   "boutique:section:hero:text-override",
++   "boutique:section:image-banner:text-override",
++   "boutique:section:rich-text:text-override",
++   "boutique:section:image-with-text:text-override",
++   "boutique:section:multicolumn:text-override",
++   "boutique:section:collapsible-content:text-override",
++   "boutique:section:testimonials:text-override",
++   "boutique:section:product-grid:text-override",
++   "boutique:section:collection-list:text-override",
++   "boutique:section:featured-collection:text-override",
++   "boutique:section:collection-banner:text-override",
++   "boutique:section:main-product:text-override",
++   "boutique:section:related-products:text-override",
++   "boutique:section:promotional-banner:text-override",
++   "boutique:section:logo-list:text-override",
++   "boutique:block:heading:text-override",
++   "boutique:block:text:visibility",
++   "boutique:block:text:text-override",
++   "boutique:block:button:text-override",
++   "boutique:block:image:visibility",
++   "boutique:block:image:text-override",
++   "boutique:block:link:visibility",
++   "boutique:block:link:text-override",
++   "boutique:block:link-column:text-override",
++   "boutique:block:social-link:visibility",
++   "boutique:block:social-link:text-override",
++   "boutique:block:column:text-override",
++   "boutique:block:collapsible-item:text-override",
++   "boutique:block:testimonial:text-override",
++   "boutique:block:group:visibility",
++   "boutique:block:group:text-override",
++   "boutique:block:product-title:visibility",
++   "boutique:block:product-title:text-override",
++   "boutique:block:product-price:visibility",
++   "boutique:block:product-price:text-override",
++   "boutique:block:product-compare-at-price:visibility",
++   "boutique:block:product-compare-at-price:text-override",
++   "boutique:block:product-sku:visibility",
++   "boutique:block:product-sku:text-override",
++   "boutique:block:product-type:visibility",
++   "boutique:block:product-type:text-override",
++   "boutique:block:product-category:visibility",
++   "boutique:block:product-category:text-override",
++   "boutique:block:product-description:visibility",
++   "boutique:block:product-description:text-override",
++   "boutique:block:variant-picker:visibility",
++   "boutique:block:variant-picker:text-override",
++   "boutique:block:collapsible-info:visibility",
++   "boutique:block:collapsible-info:text-override",
++   "boutique:block:social-share:visibility",
++   "boutique:block:social-share:text-override",
++   "boutique:block:hero-slide:visibility",
++   "boutique:block:hero-slide:text-override",
++   "sport:section:announcement-bar:text-override",
++   "sport:section:header:visibility",
++   "sport:section:header:text-override",
++   "sport:section:footer:text-override",
++   "sport:section:hero:text-override",
++   "sport:section:image-banner:text-override",
++   "sport:section:rich-text:text-override",
++   "sport:section:image-with-text:text-override",
++   "sport:section:multicolumn:text-override",
++   "sport:section:collapsible-content:text-override",
++   "sport:section:testimonials:text-override",
++   "sport:section:product-grid:text-override",
++   "sport:section:collection-list:text-override",
++   "sport:section:featured-collection:text-override",
++   "sport:section:collection-banner:text-override",
++   "sport:section:main-product:text-override",
++   "sport:section:related-products:text-override",
++   "sport:section:promotional-banner:text-override",
++   "sport:section:logo-list:text-override",
++   "sport:block:heading:visibility",
++   "sport:block:heading:text-override",
++   "sport:block:text:visibility",
++   "sport:block:text:text-override",
++   "sport:block:button:visibility",
++   "sport:block:button:text-override",
++   "sport:block:image:visibility",
++   "sport:block:image:text-override",
++   "sport:block:link:visibility",
++   "sport:block:link:text-override",
++   "sport:block:link-column:visibility",
++   "sport:block:link-column:text-override",
++   "sport:block:social-link:visibility",
++   "sport:block:social-link:text-override",
++   "sport:block:column:text-override",
++   "sport:block:collapsible-item:visibility",
++   "sport:block:collapsible-item:text-override",
++   "sport:block:testimonial:visibility",
++   "sport:block:testimonial:text-override",
++   "sport:block:group:visibility",
++   "sport:block:group:text-override",
++   "sport:block:product-title:visibility",
++   "sport:block:product-title:text-override",
++   "sport:block:product-price:visibility",
++   "sport:block:product-price:text-override",
++   "sport:block:product-compare-at-price:visibility",
++   "sport:block:product-compare-at-price:text-override",
++   "sport:block:product-sku:visibility",
++   "sport:block:product-sku:text-override",
++   "sport:block:product-type:visibility",
++   "sport:block:product-type:text-override",
++   "sport:block:product-category:visibility",
++   "sport:block:product-category:text-override",
++   "sport:block:product-description:visibility",
++   "sport:block:product-description:text-override",
++   "sport:block:variant-picker:visibility",
++   "sport:block:variant-picker:text-override",
++   "sport:block:collapsible-info:visibility",
++   "sport:block:collapsible-info:text-override",
++   "sport:block:social-share:visibility",
++   "sport:block:social-share:text-override",
++   "sport:block:hero-slide:visibility",
++   "sport:block:hero-slide:text-override",
++   "market:section:announcement-bar:text-override",
++   "market:section:header:visibility",
++   "market:section:header:text-override",
++   "market:section:footer:text-override",
++   "market:section:hero:text-override",
++   "market:section:image-banner:text-override",
++   "market:section:rich-text:text-override",
++   "market:section:image-with-text:text-override",
++   "market:section:multicolumn:text-override",
++   "market:section:collapsible-content:text-override",
++   "market:section:testimonials:text-override",
++   "market:section:product-grid:text-override",
++   "market:section:collection-list:text-override",
++   "market:section:featured-collection:text-override",
++   "market:section:collection-banner:text-override",
++   "market:section:main-product:text-override",
++   "market:section:related-products:text-override",
++   "market:section:promotional-banner:text-override",
++   "market:section:logo-list:text-override",
++   "market:block:heading:visibility",
++   "market:block:heading:text-override",
++   "market:block:text:visibility",
++   "market:block:text:text-override",
++   "market:block:button:visibility",
++   "market:block:button:text-override",
++   "market:block:image:visibility",
++   "market:block:image:text-override",
++   "market:block:link:visibility",
++   "market:block:link:text-override",
++   "market:block:link-column:visibility",
++   "market:block:link-column:text-override",
++   "market:block:social-link:visibility",
++   "market:block:social-link:text-override",
++   "market:block:column:text-override",
++   "market:block:collapsible-item:text-override",
++   "market:block:testimonial:text-override",
++   "market:block:group:visibility",
++   "market:block:group:text-override",
++   "market:block:product-title:visibility",
++   "market:block:product-title:text-override",
++   "market:block:product-price:visibility",
++   "market:block:product-price:text-override",
++   "market:block:product-compare-at-price:visibility",
++   "market:block:product-compare-at-price:text-override",
++   "market:block:product-sku:visibility",
++   "market:block:product-sku:text-override",
++   "market:block:product-type:visibility",
++   "market:block:product-type:text-override",
++   "market:block:product-category:visibility",
++   "market:block:product-category:text-override",
++   "market:block:product-description:visibility",
++   "market:block:product-description:text-override",
++   "market:block:variant-picker:visibility",
++   "market:block:variant-picker:text-override",
++   "market:block:collapsible-info:visibility",
++   "market:block:collapsible-info:text-override",
++   "market:block:social-share:visibility",
++   "market:block:social-share:text-override",
++   "market:block:hero-slide:visibility",
++   "market:block:hero-slide:text-override",
++ ]
+
+ ❯ tests/unit/studio-registry-coverage.test.ts:100:119
+     98|     const known = new Set((JSON.parse(readFileSync("tests/fixtures/stu…
+     99|     const open = rows.flatMap(gapsOf).filter((k) => !known.has(k));
+    100|     expect(open, `undispositioned gaps (see artifacts/studio/inventory…
+       |                                                                                                                       ^
+    101|   });
+    102| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  13:41:39
+   Duration  4.01s (transform 39%, import 36%, tests 25%)
+

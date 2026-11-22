@@ -1,0 +1,9 @@
+
+Running 4 tests using 1 worker
+
+  ok 1 tests\e2e\studio-collection-delete.spec.ts:29:1 › unused: plain dialog, cancel keeps it, confirm deletes (21.4s)
+  ok 2 tests\e2e\studio-collection-delete.spec.ts:44:1 › draft then published reference: warning names the section and state; cancel changes nothing (42.3s)
+  ok 3 tests\e2e\studio-collection-delete.spec.ts:66:1 › references change between warning and confirmation: refreshed warning, second confirmation needed (28.5s)
+  ok 4 tests\e2e\studio-collection-delete.spec.ts:89:1 › after deletion the section is hidden for shoppers and the editor keeps it with a hint (38.6s)
+
+  4 passed (2.3m)

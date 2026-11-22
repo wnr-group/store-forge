@@ -1,0 +1,12 @@
+
+Running 7 tests using 1 worker
+
+  -  1 tests\e2e\studio-baseline.spec.ts:33:5 › baseline light › merchant: products toolbar, category dialog, product banner (light)
+  -  2 tests\e2e\studio-baseline.spec.ts:49:5 › baseline light › admin and login (light)
+  -  3 tests\e2e\studio-baseline.spec.ts:33:5 › baseline dark › merchant: products toolbar, category dialog, product banner (dark)
+  -  4 tests\e2e\studio-baseline.spec.ts:49:5 › baseline dark › admin and login (dark)
+  -  5 tests\e2e\studio-baseline.spec.ts:66:1 › baseline: command palette contents (owner and staff)
+  -  6 tests\e2e\studio-baseline.spec.ts:75:1 › baseline: analytics chart axis ticks
+  -  7 tests\e2e\studio-baseline.spec.ts:84:1 › baseline: the six date surfaces as the original app renders them (server TZ=UTC, browser America/Los_Angeles)
+
+  7 skipped

@@ -27,6 +27,7 @@ export const ROUTES = {
   analytics: "/dashboard/analytics",
   team: "/dashboard/team",
   settings: "/dashboard/settings",
+  reviews: "/dashboard/reviews",
   templates: "/dashboard/templates",
   themeEditor: "/dashboard/templates/editor",
   pages: "/dashboard/pages",

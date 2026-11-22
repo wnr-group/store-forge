@@ -17,7 +17,7 @@ registerEditorAdapter(
     looks: ["standard"],
     blockSections: [
       "announcement-bar", "collapsible-content", "collection-banner", "footer", "header", "hero", "image-banner", "image-with-text",
-      "logo-list", "main-product", "multicolumn", "promotional-banner", "rich-text", "testimonials",
+      "logo-list", "main-product", "multicolumn", "promotional-banner", "rich-text", "testimonials", "trust-badges",
     ],
   }),
   { asFallback: true },
@@ -30,7 +30,7 @@ registerEditorAdapter(
     name: "Maison",
     looks: ["boutique"],
     // Sections Maison draws through the engine's blocks (its own hero, header, promotional banner) or marks itself (testimonials).
-    blockSections: ["announcement-bar", "collapsible-content", "collection-banner", "footer", "header", "hero", "image-banner", "image-with-text", "logo-list", "main-product", "multicolumn", "promotional-banner", "rich-text", "testimonials"],
+    blockSections: ["announcement-bar", "collapsible-content", "collection-banner", "footer", "header", "hero", "image-banner", "image-with-text", "logo-list", "main-product", "multicolumn", "promotional-banner", "rich-text", "testimonials", "trust-badges"],
     // Maison's hero is a single composition; it never draws slides.
     notDrawn: { hero: ["hero-slide"] },
   }),
@@ -41,7 +41,7 @@ registerEditorAdapter(
     name: "Marketplace",
     looks: ["market"],
     // Marketplace draws its own header (menu links and button, marked by the header itself) and banners; its footer, rich text, announcement bar and collection banner use the engine's blocks.
-    blockSections: ["announcement-bar", "collapsible-content", "collection-banner", "footer", "hero", "image-banner", "image-with-text", "logo-list", "main-product", "multicolumn", "promotional-banner", "rich-text", "testimonials"],
+    blockSections: ["announcement-bar", "collapsible-content", "collection-banner", "footer", "hero", "image-banner", "image-with-text", "logo-list", "main-product", "multicolumn", "promotional-banner", "rich-text", "testimonials", "trust-badges"],
     hideOnly: { header: ["link", "button"] },
     // Its slides carry their own heading and text; the hero draws only the buttons added to it.
     notDrawn: { hero: ["heading", "text"] },

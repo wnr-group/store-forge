@@ -1,0 +1,71 @@
+
+Running 1 test using 1 worker
+
+[{"page":"products","edited":false,"live":false,"note":"BLOCKED: products: no settings field holds \"ALL PRODUCTS\""},{"page":"collections","edited":false,"live":false,"note":"BLOCKED: collections: no settings field holds \"COLLECTIONS\""},{"page":"search","edited":false,"live":false,"note":"BLOCKED: search: no settings field holds \"SEARCH\""},{"page":"about","edited":false,"live":false,"note":"BLOCKED: about: no settings field holds \"MADE FOR PEOPLE WHO KEEP MOVING.\""},{"page":"contact","edited":false,"live":false,"note":"BLOCKED: contact: no settings field holds \"LET'S TALK.\""},{"page":"cart","edited":true,"live":true},{"page":"wishlist","edited":true,"live":true},{"page":"content","edited":true,"live":true}]
+  x  1 tests\e2e\studio-virtual-pages.spec.ts:42:1 › all eight virtual pages: edit, publish, see it live; reset touches one page only (23.2s)
+
+
+  1) tests\e2e\studio-virtual-pages.spec.ts:42:1 › all eight virtual pages: edit, publish, see it live; reset touches one page only 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 32
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "edited": false,
+    +     "live": false,
+    +     "note": "BLOCKED: products: no settings field holds \"ALL PRODUCTS\"",
+    +     "page": "products",
+    +   },
+    +   Object {
+    +     "edited": false,
+    +     "live": false,
+    +     "note": "BLOCKED: collections: no settings field holds \"COLLECTIONS\"",
+    +     "page": "collections",
+    +   },
+    +   Object {
+    +     "edited": false,
+    +     "live": false,
+    +     "note": "BLOCKED: search: no settings field holds \"SEARCH\"",
+    +     "page": "search",
+    +   },
+    +   Object {
+    +     "edited": false,
+    +     "live": false,
+    +     "note": "BLOCKED: about: no settings field holds \"MADE FOR PEOPLE WHO KEEP MOVING.\"",
+    +     "page": "about",
+    +   },
+    +   Object {
+    +     "edited": false,
+    +     "live": false,
+    +     "note": "BLOCKED: contact: no settings field holds \"LET'S TALK.\"",
+    +     "page": "contact",
+    +   },
+    + ]
+
+      73 |     writeFileSync("artifacts/studio/virtual-pages/flows.json", JSON.stringify(results, null, 2));
+      74 |     console.log(JSON.stringify(results));
+    > 75 |     expect(results.filter((r) => !r.live)).toEqual([]);
+         |                                            ^
+      76 |
+      77 |     await openEditor(page);
+      78 |     await page.getByLabel("Page to edit").selectOption({ label: LABEL.cart });
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-virtual-pages.spec.ts:75:44
+        at asUser (C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\support\studio-session.ts:89:12)
+        at C:\Users\Eshwar\WNR\store-forge-integ\tests\e2e\studio-virtual-pages.spec.ts:43:3
+
+    Error Context: ..\..\AppData\Local\Temp\pw-out\studio-virtual-pages-all-e-de373-reset-touches-one-page-only\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\AppData\Local\Temp\pw-out\studio-virtual-pages-all-e-de373-reset-touches-one-page-only\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\AppData\Local\Temp\pw-out\studio-virtual-pages-all-e-de373-reset-touches-one-page-only\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\studio-virtual-pages.spec.ts:42:1 › all eight virtual pages: edit, publish, see it live; reset touches one page only 

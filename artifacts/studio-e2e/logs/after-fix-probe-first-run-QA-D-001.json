@@ -1,0 +1,13 @@
+{
+  "v2_with_display": {
+    "status": 200,
+    "body": "{\"success\":true,\"message\":\"Draft saved successfully\",\"data\":{\"id\":\"5db6315a-bde6-4488-a50c-53633c761b92\",\"kind\":\"index\",\"name\":\"Atelier index\",\"status\":\"active\",\"isDefault\":true,\"revision\":194,\"publicationState\":\"published_with_changes\",\"publishedVersion\":127,\"publishedAt\":\"2026-11-22T08:39:45.925Z\",\"updatedAt\":\"2026-11-22T08:51:31.615Z\",\"document\":{\"order\":[\"hero\",\"why\",\"best\",\"promo\",\"spotlight\""
+  },
+  "v1_with_display": {
+    "status": 409,
+    "body": "{\"success\":false,\"message\":\"Someone else changed this design. Reload to see their changes before saving.\",\"error\":{\"code\":\"TEMPLATE_REVISION_CONFLICT\",\"details\":{\"revision\":\"Current revision is 194.\"}},\"timestamp\":\"2026-11-22T08:51:31.665Z\",\"path\":\"/api/v1/store/templates/5db6315a-bde6-4488-a50c-53633c761b92/draft\"}"
+  },
+  "v1_plain_control": {
+    "status": 409
+  }
+}

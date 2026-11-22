@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, MessageSquare, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -6,9 +6,10 @@ export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: b
 
 /** Permission a member needs to see a nav item. Items not listed here are visible to everyone. */
 const NAV_PERMISSION: Record<string, Permission> = {
-  // Design items are shown only to members who can change the design; their pages stay readable by URL (read-only editor).
-  [ROUTES.templates]: "store:manage",
-  [ROUTES.themeEditor]: "store:manage",
+  // Design items are shown only to members who can change the design (design:edit); a read-only member can still open
+  // the pages by URL (read-only editor, design:view).
+  [ROUTES.templates]: "design:edit",
+  [ROUTES.themeEditor]: "design:edit",
   [ROUTES.products]: "catalog:view",
   [ROUTES.categories]: "catalog:view",
   [ROUTES.collections]: "catalog:view",
