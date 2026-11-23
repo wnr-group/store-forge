@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ROUTES } from "@/config/app";
 import { minorToInput } from "@/lib/money";
+import { GST_RATES_BPS, rateLabel } from "@/lib/tax/rates";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { cn } from "@/lib/utils";
 import { uuid } from "@/lib/utils/uuid";
@@ -42,6 +43,9 @@ type Values = {
   trackInventory: boolean;
   quantity: string;
   lowStockThreshold: string;
+  weightGrams: string;
+  taxRateBps: string;
+  hsnCode: string;
   status: "draft" | "active";
   options: OptionDraft[];
   variants: VariantDraft[];
@@ -64,7 +68,7 @@ type Props = {
 
 function toValues(currency: string, d?: ProductDetail): Values {
   if (!d) {
-    return { name: "", slug: "", shortDescription: "", description: "", productType: "", categoryId: "", collectionIds: [], sku: "", price: "", compareAtPrice: "", cost: "", trackInventory: true, quantity: "0", lowStockThreshold: "5", status: "draft", options: [], variants: [], images: [] };
+    return { name: "", slug: "", shortDescription: "", description: "", productType: "", categoryId: "", collectionIds: [], sku: "", price: "", compareAtPrice: "", cost: "", trackInventory: true, quantity: "0", lowStockThreshold: "5", weightGrams: "0", taxRateBps: "", hsnCode: "", status: "draft", options: [], variants: [], images: [] };
   }
   const p = d.product;
   const pathById = new Map(d.images.map((i) => [i.id, i.storagePath]));
@@ -83,6 +87,9 @@ function toValues(currency: string, d?: ProductDetail): Values {
     trackInventory: p.trackInventory,
     quantity: String(p.quantity),
     lowStockThreshold: String(p.lowStockThreshold),
+    weightGrams: String(p.weightGrams ?? 0),
+    taxRateBps: p.taxRateBps === null || p.taxRateBps === undefined ? "" : String(p.taxRateBps),
+    hsnCode: p.hsnCode ?? "",
     status: p.status,
     options: d.options.map((o) => ({ name: o.name, values: o.values })),
     variants: d.variants.map((v) => ({
@@ -134,6 +141,9 @@ export function ProductForm({ mode, currency, categories, collections, initial, 
       trackInventory: values.trackInventory,
       quantity: values.quantity,
       lowStockThreshold: values.lowStockThreshold,
+      weightGrams: values.weightGrams,
+      taxRateBps: values.taxRateBps,
+      hsnCode: values.hsnCode,
       status: values.status,
       options: values.options,
       variants: values.variants.map((x) => ({ ...x, quantity: x.quantity })),
@@ -229,6 +239,27 @@ export function ProductForm({ mode, currency, categories, collections, initial, 
               </FormField>
               <FormField id="cost" label="Cost per item" optional error={err("cost")} hint="Only you see this.">
                 <MoneyInput id="cost" symbol={symbol} {...reg("cost")} invalid={Boolean(err("cost"))} disabled={disabled} />
+              </FormField>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Shipping & GST" description="Used to price delivery by weight and to charge the right GST at checkout.">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <FormField id="weightGrams" label="Weight (grams)" error={err("weightGrams")} hint="Packed weight of one unit. 0 means not set.">
+                <Input id="weightGrams" inputMode="numeric" {...reg("weightGrams")} aria-invalid={Boolean(err("weightGrams"))} aria-describedby="weightGrams-msg" disabled={disabled} />
+              </FormField>
+              <FormField id="taxRateBps" label="GST rate" optional error={err("taxRateBps")} hint="Leave on the default to use your store rate.">
+                <NativeSelect id="taxRateBps" {...reg("taxRateBps")} aria-invalid={Boolean(err("taxRateBps"))} aria-describedby="taxRateBps-msg" disabled={disabled}>
+                  <option value="">Store default</option>
+                  {GST_RATES_BPS.map((r) => (
+                    <option key={r} value={r}>
+                      {rateLabel(r)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </FormField>
+              <FormField id="hsnCode" label="HSN / SAC code" optional error={err("hsnCode")} hint="4, 6 or 8 digits, printed on tax lines.">
+                <Input id="hsnCode" inputMode="numeric" maxLength={8} {...reg("hsnCode")} aria-invalid={Boolean(err("hsnCode"))} aria-describedby="hsnCode-msg" disabled={disabled} />
               </FormField>
             </div>
           </SectionCard>

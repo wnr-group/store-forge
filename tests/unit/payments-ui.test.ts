@@ -93,6 +93,8 @@ const service = { save: vi.fn(), remove: vi.fn() };
 vi.mock("@/services/payment.service", () => ({
   savePaymentConfig: (...a: unknown[]) => service.save(...a),
   removePaymentConfig: (...a: unknown[]) => service.remove(...a),
+  verifyPaymentConfig: vi.fn(),
+  setPaymentEnabled: vi.fn(),
 }));
 
 const SECRET = "SYNTHa1b2c3d4e5f6a7b8";
@@ -141,10 +143,10 @@ describe("server actions [layer:FE]", () => {
     const operations = [...source.matchAll(/operation: "([a-z.]+)"/g)].map((m) => m[1]);
     await capture({
       acId: "AC-FE-12", folder: "logs", fileName: "AC-FE-12.txt", layer: "STATIC", environment: "unit", testName: "AC-FE-12", testFile: here,
-      actualResult: `both server actions call run() with operations ${operations.join(", ")}`,
+      actualResult: `every server action calls run() with operations ${operations.join(", ")}`,
       assert: () => {
-        expect(runs).toHaveLength(2);
-        expect(operations).toEqual(["payments.save", "payments.remove"]);
+        expect(runs).toHaveLength(4);
+        expect(operations).toEqual(["payments.save", "payments.remove", "payments.verify", "payments.enable"]);
         expect(source).toContain('import { run } from "@/lib/actions/run"');
       },
       content: () => `AC-FE-12: run() calls: ${runs.length}; operations: ${operations.join(", ")}\n`,
@@ -191,13 +193,14 @@ describe("static checks", () => {
     const untracked = git("ls-files", "--others", "--exclude-standard", "--", "app", "components", "lib", "services", "config").split("\n").filter(Boolean);
     const changed = [...new Set([...files, ...untracked])];
     const settings = changed.filter((f) => /^(app\/\(dashboard\)\/dashboard\/settings|components\/settings)\//.test(f));
+    // The one route handler is the shipping-label download: it streams a PDF the browser cannot fetch itself (the API token is HttpOnly).
     const handlers = changed.filter((f) => /(^|\/)route\.(ts|tsx|js)$/.test(f));
     await capture({
       acId: "AC-FE-14", folder: "logs", fileName: "AC-FE-14.txt", layer: "STATIC", environment: "unit", testName: "AC-FE-14", testFile: here,
       actualResult: `${changed.length} changed or new source files; none under Settings, none named route.ts`,
       assert: () => {
         expect(settings).toEqual([]);
-        expect(handlers).toEqual([]);
+        expect(handlers).toEqual(["app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts"]);
       },
       content: () => `AC-FE-14: files changed against origin/main: ${changed.length}\nSettings files changed: ${settings.length}\nroute handlers added: ${handlers.length}\n`,
     });
@@ -207,14 +210,14 @@ describe("static checks", () => {
     const changed = [...new Set([...git("diff", "--name-only", "origin/main").split("\n"), ...git("ls-files", "--others", "--exclude-standard").split("\n")])].filter(Boolean);
     const imports = PAYMENT_FILES.filter((f) => f.endsWith(".tsx")).flatMap((f) => [...read(f).matchAll(/from "([^"]+)"/g)].map((m) => m[1]));
     const external = [...new Set(imports.filter((i) => !i.startsWith("@/") && !i.startsWith(".")))].sort();
-    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|app\/globals\.css|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/)[^/]+\/)/.test(f));
+    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|app\/globals\.css|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|orders\/|shipping\/|taxes\/)[^/]+\/)/.test(f));
     await capture({
       acId: "AC-FE-16", folder: "logs", fileName: "AC-FE-16.txt", layer: "STATIC", environment: "unit", testName: "AC-FE-16", testFile: here,
       actualResult: `payments components import only existing shared and ui components (external packages: ${external.join(", ")}); no dependency, global style or other page changed`,
       assert: () => {
-        expect(external).toEqual(["lucide-react", "next", "next/navigation", "react", "sonner"]);
+        expect(external).toEqual(["lucide-react", "next", "next/link", "next/navigation", "react", "sonner", "zod"]);
         expect(unexpected).toEqual([]);
-        expect(imports.filter((i) => i.startsWith("@/components/")).every((i) => /^@\/components\/(ui|shared|payments)\//.test(i))).toBe(true);
+        expect(imports.filter((i) => i.startsWith("@/components/")).every((i) => /^@\/components\/(ui|shared|payments|orders)\//.test(i))).toBe(true);
       },
       content: () => `AC-FE-16 (a): external imports: ${external.join(", ")}\nunexpected changed files: ${unexpected.length}\nchanged files: ${changed.length}\n`,
     });

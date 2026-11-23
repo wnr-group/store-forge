@@ -95,7 +95,7 @@ describe("payment service [layer:FE]", () => {
     const { savePaymentConfig } = await import("@/services/payment.service");
     api.save.mockResolvedValue(configured);
     const result = await savePaymentConfig({ keyId: KEY_ID, keySecret: SECRET });
-    expect(result).toEqual({ configured: true, keyIdMasked: "rzp_test_••••5678", mode: "test", webhookSecretConfigured: false, updatedAt: new Date("2026-11-19T12:45:00.000Z"), updatedByName: "Alice" });
+    expect(result).toEqual({ configured: true, keyIdMasked: "rzp_test_••••5678", mode: "test", webhookSecretConfigured: false, enabled: false, verificationStatus: "unverified", verifiedAt: null, verificationError: null, webhookPath: null, updatedAt: new Date("2026-11-19T12:45:00.000Z"), updatedByName: "Alice" });
     expect(JSON.stringify(result)).not.toContain(SECRET);
   });
 

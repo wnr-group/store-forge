@@ -98,6 +98,21 @@ export const productInputSchema = z
     trackInventory: z.boolean().default(true),
     quantity: wholeNumber("Inventory quantity").default(0),
     lowStockThreshold: wholeNumber("Low-stock threshold").default(5),
+    /** Packed shipping weight per unit, in grams. 0 = not set (weight-based shipping is then not offered for a cart holding it). */
+    weightGrams: wholeNumber("Weight").default(0),
+    /** GST rate in basis points (1800 = 18%); blank = the store default. The API accepts only the official slabs. */
+    taxRateBps: z
+      .union([z.string(), z.number()])
+      .nullish()
+      .transform((v) => (v === null || v === undefined || String(v).trim() === "" ? null : Number(v)))
+      .refine((n) => n === null || [0, 25, 300, 500, 1200, 1800, 2800, 4000].includes(n), "Choose a valid GST rate."),
+    /** HSN (goods) or SAC (services) code, 4, 6 or 8 digits. */
+    hsnCode: z
+      .string()
+      .trim()
+      .regex(/^(d{4}|d{6}|d{8})?$/, "Enter a 4, 6 or 8 digit HSN/SAC code.")
+      .nullish()
+      .transform((v) => v || null),
     status: z.enum(PRODUCT_STATUSES, { error: "Please select a valid status." }).default("draft"),
     options: z.array(optionSchema).max(3, "At most 3 options.").default([]),
     variants: z.array(variantSchema).max(MAX_VARIANTS, `At most ${MAX_VARIANTS} variants.`).default([]),

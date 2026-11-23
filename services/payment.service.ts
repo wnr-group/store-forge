@@ -1,5 +1,5 @@
 import "server-only";
-import { getPaymentConfigApi, removePaymentConfigApi, savePaymentConfigApi, type PaymentConfigApi } from "@/lib/api/endpoints/payment-api";
+import { getPaymentConfigApi, removePaymentConfigApi, savePaymentConfigApi, setPaymentEnabledApi, verifyPaymentConfigApi, type PaymentConfigApi } from "@/lib/api/endpoints/payment-api";
 import { AppError } from "@/lib/errors";
 import { requireActiveTenant } from "@/lib/tenant/context";
 import { paymentConfigSchema } from "@/lib/validations/payments";
@@ -16,11 +16,11 @@ export const PAYMENTS_UNAVAILABLE_MESSAGE = "Payment settings are temporarily un
 
 export type PaymentConfig =
   | { configured: false }
-  | { configured: true; keyIdMasked: string; mode: "test" | "live"; webhookSecretConfigured: boolean; updatedAt: Date; updatedByName: string | null };
+  | { configured: true; keyIdMasked: string; mode: "test" | "live"; webhookSecretConfigured: boolean; enabled: boolean; verificationStatus: "unverified" | "verified" | "failed"; verifiedAt: Date | null; verificationError: string | null; webhookPath: string | null; updatedAt: Date; updatedByName: string | null };
 
 const toConfig = (c: PaymentConfigApi): PaymentConfig =>
   c.configured
-    ? { configured: true, keyIdMasked: c.keyIdMasked, mode: c.mode, webhookSecretConfigured: c.webhookSecretConfigured ?? false, updatedAt: new Date(c.updatedAt), updatedByName: c.updatedByName }
+    ? { configured: true, keyIdMasked: c.keyIdMasked, mode: c.mode, webhookSecretConfigured: c.webhookSecretConfigured ?? false, enabled: c.enabled ?? false, verificationStatus: c.verificationStatus ?? "unverified", verifiedAt: c.verifiedAt ? new Date(c.verifiedAt) : null, verificationError: c.verificationError ?? null, webhookPath: c.webhookPath ?? null, updatedAt: new Date(c.updatedAt), updatedByName: c.updatedByName }
     : { configured: false };
 
 /** The API answers 503 PAYMENTS_UNAVAILABLE when its encryption key is missing or unusable; show the exact Owner message. */
@@ -48,4 +48,21 @@ export async function savePaymentConfig(input: unknown): Promise<PaymentConfig> 
 export async function removePaymentConfig(): Promise<void> {
   const { tenant } = await requireActiveTenant("payments:manage");
   await mapped(() => removePaymentConfigApi(tenant.id));
+}
+
+/** Checks the saved keys with Razorpay. 503 PAYMENT_PROVIDER_UNAVAILABLE (Razorpay unreachable) is shown as a retry message. */
+export async function verifyPaymentConfig(): Promise<PaymentConfig> {
+  const { tenant } = await requireActiveTenant("payments:manage");
+  try {
+    return toConfig(await mapped(() => verifyPaymentConfigApi(tenant.id)));
+  } catch (error) {
+    if (error instanceof AppError && error.apiCode === "PAYMENT_PROVIDER_UNAVAILABLE") throw new AppError("UNKNOWN", "Razorpay could not be reached. Try again in a moment.");
+    throw error;
+  }
+}
+
+/** Turns Razorpay on or off at checkout. The API refuses to turn it on before a successful check. */
+export async function setPaymentEnabled(enabled: boolean): Promise<PaymentConfig> {
+  const { tenant } = await requireActiveTenant("payments:manage");
+  return toConfig(await mapped(() => setPaymentEnabledApi(tenant.id, enabled)));
 }

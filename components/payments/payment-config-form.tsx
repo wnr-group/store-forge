@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { removePaymentConfigAction, savePaymentConfigAction } from "@/app/(dashboard)/dashboard/payments/actions";
+import { removePaymentConfigAction, savePaymentConfigAction, setPaymentEnabledAction, verifyPaymentConfigAction } from "@/app/(dashboard)/dashboard/payments/actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { FormField } from "@/components/shared/form-field";
 import { PasswordInput } from "@/components/shared/password-input";
@@ -17,9 +18,62 @@ import { paymentConfigSchema } from "@/lib/validations/payments";
 /** What the page knows about the saved credentials. The Key Secret is never part of it. */
 export type PaymentConfigView =
   | { configured: false }
-  | { configured: true; keyIdMasked: string; mode: "test" | "live"; webhookSecretConfigured: boolean; updatedAtLabel: string; updatedByName: string | null };
+  | { configured: true; keyIdMasked: string; mode: "test" | "live"; webhookSecretConfigured: boolean; enabled: boolean; verificationStatus: "unverified" | "verified" | "failed"; verificationError: string | null; verifiedAtLabel: string | null; webhookPath: string | null; updatedAtLabel: string; updatedByName: string | null };
 
 const EMPTY = { keyId: "", keySecret: "", webhookSecret: "" };
+
+/**
+ * The connection status and the two switches that put Razorpay at checkout: check the saved keys with Razorpay, then turn it
+ * on. The API refuses to turn it on before a successful check, and replacing the keys turns it off again.
+ */
+function RazorpayStatus({ config }: { config: Extract<PaymentConfigView, { configured: true }> }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const verify = () =>
+    start(async () => {
+      const res = await verifyPaymentConfigAction();
+      if (!res.ok) return void toast.error(res.error);
+      if (res.data?.status === "verified") toast.success("Connected to Razorpay. You can turn it on now.");
+      else toast.error(res.data?.error ?? "Razorpay did not accept these keys.");
+      router.refresh();
+    });
+  const toggle = () =>
+    start(async () => {
+      const res = await setPaymentEnabledAction(!config.enabled);
+      if (!res.ok) return void toast.error(res.error);
+      toast.success(config.enabled ? "Razorpay is off at checkout" : "Razorpay is on at checkout");
+      router.refresh();
+    });
+  const status = config.verificationStatus;
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={status === "verified" ? "default" : "secondary"}>{status === "verified" ? "Connection verified" : status === "failed" ? "Check failed" : "Not verified yet"}</Badge>
+        <Badge variant={config.enabled ? "default" : "outline"}>{config.enabled ? "On at checkout" : "Off at checkout"}</Badge>
+      </div>
+      {status === "verified" && config.verifiedAtLabel ? <p className="text-muted-foreground">Checked with Razorpay {config.verifiedAtLabel}.</p> : null}
+      {status === "failed" && config.verificationError ? (
+        <p role="alert" className="text-destructive">
+          {config.verificationError}
+        </p>
+      ) : null}
+      {status !== "verified" ? <p className="text-muted-foreground">Check the keys with Razorpay, then turn Razorpay on so shoppers can pay online.</p> : null}
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" variant="outline" size="sm" onClick={verify} disabled={pending}>
+          {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} Check connection
+        </Button>
+        <Button type="button" size="sm" variant={config.enabled ? "outline" : "default"} onClick={toggle} disabled={pending || (!config.enabled && status !== "verified")}>
+          {config.enabled ? "Turn off at checkout" : "Turn on at checkout"}
+        </Button>
+      </div>
+      {config.webhookPath ? (
+        <p className="text-xs text-muted-foreground">
+          Webhook address for Razorpay (Settings, Webhooks): <code className="break-all rounded bg-muted px-1 py-0.5 font-mono">{config.webhookPath}</code> on your API host.
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * Owner-only Razorpay credentials. "Configured" means saved, NOT verified: nothing is sent to Razorpay. The Key Secret input
@@ -91,7 +145,7 @@ export function PaymentConfigForm({ config }: { config: PaymentConfigView }) {
                 <p>
                   Key ID <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">{config.keyIdMasked}</code>
                 </p>
-                <p className="text-muted-foreground">These credentials are saved, not verified. Store Forge does not contact Razorpay.</p>
+                <RazorpayStatus config={config} />
                 <p className="text-muted-foreground">
                   Last updated {config.updatedAtLabel} by {config.updatedByName ?? "a former team member"}
                 </p>
