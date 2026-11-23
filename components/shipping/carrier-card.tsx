@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { disconnectCarrierAction, saveCarrierAction, setCarrierDefaultAction, setCarrierEnabledAction, testCarrierAction, verifyCarrierAction } from "@/app/(dashboard)/dashboard/shipping/actions";
 import { ActionButton, ActionDialog } from "@/components/shared/action-dialog";
 import { FormField } from "@/components/shared/form-field";
+import { CarrierLogo } from "@/components/shipping/carrier-logo";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,12 +74,15 @@ export function CarrierCard({ carrier }: { carrier: CarrierApi }) {
   return (
     <Card>
       <CardHeader className="flex-row flex-wrap items-start justify-between gap-2">
-        <div>
-          <CardTitle className="flex flex-wrap items-center gap-2 text-base">
-            {carrier.name}
-            {c.isDefault ? <StatusBadge tone="info">Default</StatusBadge> : null}
-          </CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">{carrier.integrationNotes}</p>
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <CarrierLogo code={carrier.code} name={carrier.name} />
+          <div className="min-w-0">
+            <CardTitle className="flex flex-wrap items-center gap-2 text-base">
+              {carrier.name}
+              {c.isDefault ? <StatusBadge tone="info">Default</StatusBadge> : null}
+            </CardTitle>
+            <p className="mt-1 text-xs text-muted-foreground">{carrier.integrationNotes}</p>
+          </div>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {c.connected ? <StatusBadge tone={c.verificationStatus === "verified" ? "active" : c.verificationStatus === "failed" ? "danger" : "warning"}>{c.verificationStatus === "verified" ? "Verified" : c.verificationStatus === "failed" ? "Check failed" : "Not verified"}</StatusBadge> : <StatusBadge tone="draft">Not connected</StatusBadge>}
