@@ -18,6 +18,8 @@ export class AppError extends Error {
     public readonly fieldErrors?: Record<string, string>,
     /** The API's machine code (e.g. `PAYMENTS_UNAVAILABLE`), when the error came from the API. Never shown to users. */
     public readonly apiCode?: string,
+    /** Typed, allow-listed structured details (for example the rows of a failed import). Never raw API internals. */
+    public readonly details?: unknown,
   ) {
     super(message);
     this.name = "AppError";
@@ -38,7 +40,7 @@ export function toFailure(error: unknown): Extract<ActionResult, { ok: false }> 
     throw error;
   }
   if (error instanceof AppError) {
-    return { ok: false, error: error.message, code: error.code, fieldErrors: error.fieldErrors };
+    return { ok: false, error: error.message, code: error.code, fieldErrors: error.fieldErrors, details: error.details };
   }
   // Logged without bound SQL parameters, tokens, connection strings or e-mail addresses (see lib/observability/log.ts).
   logEvent("error", "unhandled", { error: describeError(error) });
