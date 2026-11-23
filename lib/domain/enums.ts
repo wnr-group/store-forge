@@ -42,11 +42,22 @@ export type CollectionStatus = (typeof COLLECTION_STATUSES)[number];
 export const INVENTORY_REASONS = ["restock", "correction", "return", "damage", "sale", "other"] as const;
 export type InventoryReason = (typeof INVENTORY_REASONS)[number];
 
-export const ORDER_STATUSES = ["pending", "paid", "fulfilled", "cancelled", "refunded"] as const;
+export const ORDER_STATUSES = [
+  "pending_payment",
+  "confirmed",
+  "processing",
+  "ready_to_ship",
+  "shipped",
+  "out_for_delivery",
+  "delivered",
+  "cancelled",
+  "failed",
+  "returned",
+] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 /** Order statuses that count as revenue in analytics and customer totals. */
-export const REVENUE_ORDER_STATUSES = ["paid", "fulfilled"] as const satisfies readonly OrderStatus[];
+export const REVENUE_ORDER_STATUSES = ["confirmed", "processing", "ready_to_ship", "shipped", "out_for_delivery", "delivered"] as const satisfies readonly OrderStatus[];
 
 /** Same shape as SLUG_PATTERN but allows the 1-char-per-end minimum used for catalog slugs (2-80 chars). */
 export const CATALOG_SLUG_PATTERN = "^[a-z0-9]+(-[a-z0-9]+)*$";

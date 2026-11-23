@@ -69,7 +69,7 @@ describe("analytics in API mode", () => {
     getAnalyticsApi.mockResolvedValue({
       range: 30, hasOrders: true, totalSalesMinor: 12345, previousSalesMinor: 100, orders: 4, customers: 2, averageOrderMinor: 3086,
       series: [{ day: "2026-03-01", salesMinor: 1, orders: 1 }], bestSellers: [{ name: "Tee", units: 2, salesMinor: 10 }],
-      recentOrders: [{ id: "o1", orderNumber: 1, status: "paid", totalMinor: 5, placedAt: "2026-03-01T10:00:00.000Z", customerName: null }],
+      recentOrders: [{ id: "o1", orderNumber: 1, status: "confirmed", totalMinor: 5, placedAt: "2026-03-01T10:00:00.000Z", customerName: null }],
       lowStock: [], currency: "INR", timezone: "Asia/Kolkata",
     });
     const { getAnalytics } = await import("@/services/analytics.service");
