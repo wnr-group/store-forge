@@ -47,6 +47,7 @@ const PERMISSIONS = {
   "catalog:manage": { module: "products", need: "write" },
   "catalog:delete": { module: "products", need: "write" },
   "orders:view": { module: "orders", need: "read" },
+  "orders:manage": { module: "orders", need: "write" },
   "customers:view": { module: "customers", need: "read" },
   "customers:manage": { module: "customers", need: "write" },
   "customers:delete": { module: "customers", need: "write" },
@@ -68,6 +69,7 @@ export const canViewCatalog = (a: Actor) => can(a, "catalog:view");
 export const canManageCatalog = (a: Actor) => can(a, "catalog:manage");
 export const canDeleteCatalog = (a: Actor) => can(a, "catalog:delete");
 export const canViewOrders = (a: Actor) => can(a, "orders:view");
+export const canManageOrders = (a: Actor) => can(a, "orders:manage");
 export const canViewCustomers = (a: Actor) => can(a, "customers:view");
 export const canManageCustomers = (a: Actor) => can(a, "customers:manage");
 export const canDeleteCustomers = (a: Actor) => can(a, "customers:delete");
@@ -80,7 +82,7 @@ export const MEMBER_ROLE = "admin" as const satisfies Role;
 /** Label for the Owner-granted modules, in the order the team screens show them. */
 export const MODULE_LABELS: Record<Module, { label: string; hint: string; levels: readonly AccessLevel[] }> = {
   products: { label: "Products & inventory", hint: "Products, categories, collections, stock and images.", levels: ["none", "read", "write"] },
-  orders: { label: "Orders", hint: "Orders are read-only for now.", levels: ["none", "read"] },
+  orders: { label: "Orders", hint: "View orders, and with write access move them through their lifecycle and cancel them.", levels: ["none", "read", "write"] },
   customers: { label: "Customers", hint: "Customer records and notes.", levels: ["none", "read", "write"] },
   settings: { label: "Store settings", hint: "Store details, contact info and logo.", levels: ["read", "write"] },
 };
@@ -103,7 +105,7 @@ export function summarizePermissions(role: Role, permissions: MemberPermissions)
 /**
  * Roles an Owner can pick when adding or editing a member. A role is only a preset for the access levels below it:
  * nothing but the permissions is stored, and a member whose levels match no preset shows as "Custom".
- * (Orders are read-only for now, so no preset gives write on orders.)
+ * (No preset gives write on orders: the Owner grants it per member with a custom setup.)
  */
 export const ROLE_PRESETS = {
   manager: {
@@ -126,12 +128,11 @@ export const ROLE_PRESETS = {
 export type RolePresetKey = keyof typeof ROLE_PRESETS;
 export const ROLE_PRESET_KEYS = Object.keys(ROLE_PRESETS) as RolePresetKey[];
 
-/** Which preset these levels equal, or "custom". Missing modules count as no access (settings: read); orders write counts as read. */
+/** Which preset these levels equal, or "custom". Missing modules count as no access (settings: read). */
 export function presetOf(permissions: MemberPermissions): RolePresetKey | "custom" {
   const actor: Actor = { role: "admin", permissions };
   const level = (m: Module) => {
-    const l = accessLevel(actor, m);
-    return m === "orders" && l === "write" ? "read" : l;
+    return accessLevel(actor, m);
   };
   return ROLE_PRESET_KEYS.find((k) => MODULES.every((m) => level(m) === ROLE_PRESETS[k].permissions[m])) ?? "custom";
 }
