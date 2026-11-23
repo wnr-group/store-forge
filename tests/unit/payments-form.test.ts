@@ -11,7 +11,7 @@ describe("the Payments form [layer:FE]", () => {
     const { PaymentConfigForm } = await import("@/components/payments/payment-config-form");
     return renderToStaticMarkup(createElement(PaymentConfigForm, { config }));
   };
-  const configured = { configured: true as const, keyIdMasked: "rzp_test_••••5678", mode: "test" as const, updatedAtLabel: "19 Nov 2026, 6:15 pm UTC", updatedByName: "Alice Owner" };
+  const configured = { configured: true as const, keyIdMasked: "rzp_test_••••5678", mode: "test" as const, webhookSecretConfigured: false, updatedAtLabel: "19 Nov 2026, 6:15 pm UTC", updatedByName: "Alice Owner" };
 
   it("AC-FE-13: shows the masked Key ID and a Test or Live badge from the API's mode", async () => {
     const test = await render(configured);

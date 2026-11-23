@@ -16,11 +16,11 @@ export const PAYMENTS_UNAVAILABLE_MESSAGE = "Payment settings are temporarily un
 
 export type PaymentConfig =
   | { configured: false }
-  | { configured: true; keyIdMasked: string; mode: "test" | "live"; updatedAt: Date; updatedByName: string | null };
+  | { configured: true; keyIdMasked: string; mode: "test" | "live"; webhookSecretConfigured: boolean; updatedAt: Date; updatedByName: string | null };
 
 const toConfig = (c: PaymentConfigApi): PaymentConfig =>
   c.configured
-    ? { configured: true, keyIdMasked: c.keyIdMasked, mode: c.mode, updatedAt: new Date(c.updatedAt), updatedByName: c.updatedByName }
+    ? { configured: true, keyIdMasked: c.keyIdMasked, mode: c.mode, webhookSecretConfigured: c.webhookSecretConfigured ?? false, updatedAt: new Date(c.updatedAt), updatedByName: c.updatedByName }
     : { configured: false };
 
 /** The API answers 503 PAYMENTS_UNAVAILABLE when its encryption key is missing or unusable; show the exact Owner message. */

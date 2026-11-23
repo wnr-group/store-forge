@@ -17,9 +17,9 @@ import { paymentConfigSchema } from "@/lib/validations/payments";
 /** What the page knows about the saved credentials. The Key Secret is never part of it. */
 export type PaymentConfigView =
   | { configured: false }
-  | { configured: true; keyIdMasked: string; mode: "test" | "live"; updatedAtLabel: string; updatedByName: string | null };
+  | { configured: true; keyIdMasked: string; mode: "test" | "live"; webhookSecretConfigured: boolean; updatedAtLabel: string; updatedByName: string | null };
 
-const EMPTY = { keyId: "", keySecret: "" };
+const EMPTY = { keyId: "", keySecret: "", webhookSecret: "" };
 
 /**
  * Owner-only Razorpay credentials. "Configured" means saved, NOT verified: nothing is sent to Razorpay. The Key Secret input
@@ -39,9 +39,11 @@ export function PaymentConfigForm({ config }: { config: PaymentConfigView }) {
   });
 
   const submit = () => {
-    if (!validate(paymentConfigSchema, v)) return;
+    // An empty webhook secret is left out, so a saved one is kept.
+    const payload = v.webhookSecret === "" ? { keyId: v.keyId, keySecret: v.keySecret } : v;
+    if (!validate(paymentConfigSchema, payload)) return;
     send(async () => {
-      const res = await savePaymentConfigAction(v);
+      const res = await savePaymentConfigAction(payload);
       if (!res.ok) {
         fail(res);
         return;
@@ -82,6 +84,7 @@ export function PaymentConfigForm({ config }: { config: PaymentConfigView }) {
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={config.configured ? "default" : "secondary"}>{config.configured ? "Configured (saved)" : "Not configured"}</Badge>
               {config.configured ? <Badge variant="outline">{config.mode === "live" ? "Live" : "Test"}</Badge> : null}
+              {config.configured ? <Badge variant={config.webhookSecretConfigured ? "default" : "secondary"}>{config.webhookSecretConfigured ? "Webhook secret saved" : "No webhook secret"}</Badge> : null}
             </div>
             {config.configured ? (
               <div className="space-y-1 text-sm">
@@ -110,6 +113,18 @@ export function PaymentConfigForm({ config }: { config: PaymentConfigView }) {
               hint={config.configured ? "Secret saved, enter a new value to replace it" : "Stored encrypted. You will not be able to view it again."}
             >
               <PasswordInput {...props("keySecret", "pay-key-secret")} aria-required autoComplete="new-password" spellCheck={false} />
+            </FormField>
+            <FormField
+              id="pay-webhook-secret"
+              label="Webhook Secret"
+              error={errors.webhookSecret}
+              hint={
+                config.configured && config.webhookSecretConfigured
+                  ? "Webhook secret saved. Leave empty to keep it, or enter a new value to replace it."
+                  : "Optional. The secret you set in Razorpay under Settings > Webhooks. Stored encrypted."
+              }
+            >
+              <PasswordInput {...props("webhookSecret", "pay-webhook-secret")} autoComplete="new-password" spellCheck={false} />
             </FormField>
           </div>
           {formError && Object.keys(errors).length === 0 ? (

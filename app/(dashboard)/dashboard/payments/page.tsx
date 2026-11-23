@@ -19,7 +19,7 @@ export default async function PaymentsPage() {
   if (!canManagePayments(active)) redirect(ROUTES.dashboard);
   const config = await getPaymentConfig();
   const view: PaymentConfigView = config.configured
-    ? { configured: true, keyIdMasked: config.keyIdMasked, mode: config.mode, updatedAtLabel: formatUpdatedAt(config.updatedAt), updatedByName: config.updatedByName }
+    ? { configured: true, keyIdMasked: config.keyIdMasked, mode: config.mode, webhookSecretConfigured: config.webhookSecretConfigured, updatedAtLabel: formatUpdatedAt(config.updatedAt), updatedByName: config.updatedByName }
     : { configured: false };
 
   return (

@@ -12,6 +12,8 @@ export type PaymentConfigApi =
       configured: true;
       keyIdMasked: string;
       mode: "test" | "live";
+      /** True when a webhook secret is saved. The secret itself is never returned. */
+      webhookSecretConfigured: boolean;
       /** ISO string. */
       updatedAt: string;
       /** The person who last saved it, or null when they are no longer on the team. */
@@ -21,7 +23,7 @@ export type PaymentConfigApi =
 export const getPaymentConfigApi = async (organizationId: string) =>
   (await apiRequest<PaymentConfigApi>("/payments/razorpay", { organizationId })).data;
 
-export const savePaymentConfigApi = async (organizationId: string, input: { keyId: string; keySecret: string }) =>
+export const savePaymentConfigApi = async (organizationId: string, input: { keyId: string; keySecret: string; webhookSecret?: string }) =>
   (await apiRequest<PaymentConfigApi>("/payments/razorpay", { method: "PUT", json: input, organizationId })).data;
 
 export const removePaymentConfigApi = async (organizationId: string) => {

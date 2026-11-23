@@ -17,7 +17,7 @@ vi.mock("@/lib/api/endpoints/payment-api", () => ({
   removePaymentConfigApi: (...a: unknown[]) => api.remove(...a),
 }));
 
-const configured = { configured: true, keyIdMasked: "rzp_test_••••5678", mode: "test", updatedAt: "2026-11-19T12:45:00.000Z", updatedByName: "Alice" };
+const configured = { configured: true, keyIdMasked: "rzp_test_••••5678", mode: "test", webhookSecretConfigured: false, updatedAt: "2026-11-19T12:45:00.000Z", updatedByName: "Alice" };
 
 beforeEach(() => {
   // mockReset drops implementations too, so a rejection set by one test never leaks into the next.
@@ -95,7 +95,7 @@ describe("payment service [layer:FE]", () => {
     const { savePaymentConfig } = await import("@/services/payment.service");
     api.save.mockResolvedValue(configured);
     const result = await savePaymentConfig({ keyId: KEY_ID, keySecret: SECRET });
-    expect(result).toEqual({ configured: true, keyIdMasked: "rzp_test_••••5678", mode: "test", updatedAt: new Date("2026-11-19T12:45:00.000Z"), updatedByName: "Alice" });
+    expect(result).toEqual({ configured: true, keyIdMasked: "rzp_test_••••5678", mode: "test", webhookSecretConfigured: false, updatedAt: new Date("2026-11-19T12:45:00.000Z"), updatedByName: "Alice" });
     expect(JSON.stringify(result)).not.toContain(SECRET);
   });
 
