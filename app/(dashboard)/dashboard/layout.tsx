@@ -16,7 +16,9 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { ROUTES, SIDEBAR_COOKIE } from "@/config/app";
 import { canViewDashboard, ROLE_LABELS } from "@/lib/auth/permissions";
-import { hiddenNavHrefs } from "@/components/dashboard/nav-config";
+import { PlanNotice } from "@/components/billing/plan-notice";
+import { hiddenFeatureHrefs, hiddenNavHrefs } from "@/components/dashboard/nav-config";
+import { getMyEntitlements } from "@/services/billing.service";
 import { AppError } from "@/lib/errors";
 import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
 import { requireWorkspace } from "@/lib/tenant/context";
@@ -46,7 +48,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const collapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "1";
   // One source for the sidebar and the Ctrl+K palette, so they always list the same sections.
   const navKey = active.role === "owner" ? "owner" : "merchant";
-  const hiddenNav = hiddenNavHrefs(active);
+  // What the plan includes is for display only (menu and notices): if it cannot be read, show everything; the API enforces the plan regardless.
+  const plan = await getMyEntitlements().catch(() => null);
+  const hiddenNav = [...hiddenNavHrefs(active), ...(plan ? hiddenFeatureHrefs(Object.fromEntries(plan.features.map((f) => [f.key, f.enabled]))) : [])];
 
   return (
     <MerchantScope>
@@ -87,6 +91,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         }
       >
+        {plan ? <PlanNotice plan={plan} isOwner={active.role === "owner"} /> : null}
         {children}
       </AppShell>
     </MerchantScope>

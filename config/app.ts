@@ -36,6 +36,7 @@ export const ROUTES = {
   team: "/dashboard/team",
   orders: "/dashboard/orders",
   payments: "/dashboard/payments",
+  billing: "/dashboard/billing",
   transactions: "/dashboard/payments/transactions",
   refunds: "/dashboard/payments/refunds",
   shipping: "/dashboard/shipping",

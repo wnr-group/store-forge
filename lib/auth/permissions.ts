@@ -42,6 +42,8 @@ const PERMISSIONS = {
   "members:manage": { ownerOnly: true },
   // The tenant's Razorpay credentials. Owner-only here, in the API and in RLS (the API repository's migration 0034).
   "payments:manage": { ownerOnly: true },
+  // What the organization owes StoreForge for its plan (invoices, paying them). Owner-only here and in the API; the Platform Admin side is separate.
+  "billing:manage": { ownerOnly: true },
   // Products, categories, collections, inventory.
   "catalog:view": { module: "products", need: "read" },
   "catalog:manage": { module: "products", need: "write" },
@@ -89,6 +91,7 @@ export const canManageCustomers = (a: Actor) => can(a, "customers:manage");
 export const canDeleteCustomers = (a: Actor) => can(a, "customers:delete");
 export const canManageMembers = (a: Actor) => can(a, "members:manage");
 export const canManagePayments = (a: Actor) => can(a, "payments:manage");
+export const canManageBilling = (a: Actor) => can(a, "billing:manage");
 export const canManageCarriers = (a: Actor) => can(a, "carriers:manage");
 export const canViewShipping = (a: Actor) => can(a, "shipping:view");
 export const canManageShipping = (a: Actor) => can(a, "shipping:manage");

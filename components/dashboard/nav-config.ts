@@ -25,6 +25,18 @@ const NAV_PERMISSION: Record<string, Permission> = {
 export const hiddenNavHrefs = (actor: Actor): string[] =>
   NAV_ITEMS.filter((i) => NAV_PERMISSION[i.href] && !can(actor, NAV_PERMISSION[i.href])).map((i) => i.href);
 
+/** Screens that belong to one plan feature. Hidden when the plan lacks it; the API refuses the calls whatever the menu shows. */
+const NAV_FEATURE: Record<string, string> = {
+  [ROUTES.discounts]: "discount_codes",
+  [ROUTES.campaigns]: "marketing_campaigns",
+  [ROUTES.abandonedCarts]: "abandoned_cart_recovery",
+  [ROUTES.analytics]: "advanced_reports",
+};
+
+/** hrefs whose feature is switched off for this organization. `enabled` is the plan's answer per feature key. */
+export const hiddenFeatureHrefs = (enabled: Readonly<Record<string, boolean>>): string[] =>
+  Object.entries(NAV_FEATURE).filter(([, key]) => enabled[key] === false).map(([href]) => href);
+
 /** Only list pages that exist - no placeholder navigation. */
 export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.dashboard, label: "Overview", icon: LayoutDashboard, exact: true },
@@ -51,6 +63,7 @@ export const NAV_ITEMS: NavItem[] = [
 export const OWNER_NAV_ITEMS: NavItem[] = [
   ...NAV_ITEMS.slice(0, -1),
   { href: ROUTES.team, label: "Team members", icon: UserCog, group: "Workspace" },
+  { href: ROUTES.billing, label: "Plan & billing", icon: Receipt, group: "Workspace" },
   { href: ROUTES.payments, label: "Payments", icon: CreditCard, group: "Workspace" },
   NAV_ITEMS[NAV_ITEMS.length - 1],
 ];

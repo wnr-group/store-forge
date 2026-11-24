@@ -201,9 +201,11 @@ describe("static checks", () => {
       assert: () => {
         expect(settings).toEqual([]);
         expect(handlers).toEqual([
-          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
-          // Platform Administration: the invoice PDF download, same reason as the label.
+          // The order git lists them in: Platform Administration invoice PDF (the API token is HttpOnly, so the browser cannot fetch it; moves no money), the shipping label,
+          // then the Owner's own StoreForge invoice PDF. Paying an invoice reuses the storefront's Razorpay loader, so no new Razorpay host appears.
           "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
+          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
+          "app/(dashboard)/dashboard/billing/invoices/[id]/download/route.ts",
         ]);
       },
       content: () => `AC-FE-14: files changed against origin/main: ${changed.length}\nSettings files changed: ${settings.length}\nroute handlers added: ${handlers.length}\n`,
@@ -214,7 +216,7 @@ describe("static checks", () => {
     const changed = [...new Set([...git("diff", "--name-only", "origin/main").split("\n"), ...git("ls-files", "--others", "--exclude-standard").split("\n")])].filter(Boolean);
     const imports = PAYMENT_FILES.filter((f) => f.endsWith(".tsx")).flatMap((f) => [...read(f).matchAll(/from "([^"]+)"/g)].map((m) => m[1]));
     const external = [...new Set(imports.filter((i) => !i.startsWith("@/") && !i.startsWith(".")))].sort();
-    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|app\/globals\.css|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/)[^/]+\/)/.test(f));
+    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|app\/globals\.css|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|billing\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/)[^/]+\/)/.test(f));
     await capture({
       acId: "AC-FE-16", folder: "logs", fileName: "AC-FE-16.txt", layer: "STATIC", environment: "unit", testName: "AC-FE-16", testFile: here,
       actualResult: `payments components import only existing shared and ui components (external packages: ${external.join(", ")}); no dependency, global style or other page changed`,

@@ -41,13 +41,22 @@ on the server, every action checks it before calling the API, and the API and th
 
 Money is shown from integer minor units with `formatMoney`; a missing figure is shown as a dash, never as zero.
 
+## The store owner's side
+
+The Owner of a store sees **Plan & billing** (`/dashboard/billing`) in the Workspace menu. Nobody else does; the page, the service, the API and the database each check Owner access again.
+
+| Route | What it does |
+|---|---|
+| `/dashboard/billing` | Plan, status, renewal date, usage against each limit, included features, unpaid invoices with a Pay button, recent invoices |
+| `/dashboard/billing/invoices` | All invoices, filterable by status |
+| `/dashboard/billing/invoices/[id]` | One invoice, its payments, Pay and Download PDF |
+
+* **Paying.** The server action asks the API to create a Razorpay order for the amount stored on the invoice (never an amount from the browser). The page opens Razorpay Checkout with the order and the public key id, then sends Razorpay's three success values back. The API checks the signature and asks Razorpay itself before it marks the invoice paid; the browser's "success" is never trusted. Card details are typed into Razorpay's window and never reach StoreForge. The Checkout script loader is the storefront's (`loadRazorpay`), so there is still one Razorpay host reference in the app.
+* **Notices.** A notice above every dashboard page appears when the subscription is not active or a limit is close or reached (`GET /entitlements`, any member). Only the Owner is linked to the billing page.
+* **Menu follows the plan.** Discounts, Campaigns, Abandoned carts and Analytics are hidden when the plan lacks the matching feature. This is display only: the API refuses those calls anyway. If the plan cannot be read, nothing is hidden.
+* **Plan changes** are made by StoreForge, not bought here. There is no recurring (auto-debit) billing; each cycle is an invoice the Owner pays.
+
 ## Not built yet
 
-* **The store owner's side.** A tenant Owner cannot yet see their plan, usage notices or invoices in the merchant dashboard, pay an invoice
-  with Razorpay Checkout, or have screens hidden for features their plan lacks. The API is ready for all of it (`GET /entitlements`,
-  `/billing/*`, `POST /billing/invoices/:id/pay`, `POST /billing/payments/verify`). It needs the Razorpay Checkout script on the Owner's
-  billing page, which the static guards in `tests/unit/payments-guard-and-scope.test.ts` currently forbid outside the storefront checkout:
-  that rule needs a deliberate, reviewed exception.
-* Browser tests (Playwright) for the new screens. They need a running API and Supabase; the logic they sit on is unit tested
-  (`tests/unit/platform-roles.test.ts`, `tests/unit/admin-commercial.test.ts`).
-* Visual review in a browser: the screens follow the existing admin patterns and components, but have only been compiled and tested for logic.
+* Browser tests (Playwright) for the new screens. They need a running API, Supabase and Razorpay test keys; the logic they sit on is unit tested (`tests/unit/platform-roles.test.ts`, `admin-commercial.test.ts`, `owner-billing.test.ts`).
+* Visual review in a browser: the screens follow the existing patterns and components, but have only been compiled and tested for logic. The Razorpay Checkout flow has not been run against Razorpay.

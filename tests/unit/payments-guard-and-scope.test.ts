@@ -90,9 +90,9 @@ describe("error mapping through the save action [layer:FE]", () => {
 
 describe("regression and scope [layer:FE]", () => {
   it("AC-REG-03: the Owner navigation is unchanged apart from the new Payments entry", () => {
-    const withoutPayments = OWNER_NAV_ITEMS.filter((n) => n.href !== ROUTES.payments).map((n) => n.href);
+    const withoutPayments = OWNER_NAV_ITEMS.filter((n) => n.href !== ROUTES.payments && n.href !== ROUTES.billing).map((n) => n.href); // Plan & billing came later, with Platform Administration
     expect(withoutPayments).toEqual([...NAV_ITEMS.slice(0, -1).map((n) => n.href), ROUTES.team, ROUTES.settings]);
-    expect(OWNER_NAV_ITEMS).toHaveLength(NAV_ITEMS.length + 2);
+    expect(OWNER_NAV_ITEMS).toHaveLength(NAV_ITEMS.length + 3);
   });
 
   it("AC-REG-10: Settings stays the last Workspace entry and keeps its route", () => {
@@ -179,9 +179,11 @@ describe("static scans [layer:STATIC]", () => {
         expect(deps).toEqual([]);
         expect(hosts).toEqual(["components/storefront/checkout/razorpay.ts"]);
         expect(handlers).toEqual([
-          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
-          // Platform Administration: streams an invoice PDF the browser cannot fetch itself (the API token is HttpOnly). Moves no money.
+          // The order git lists them in: Platform Administration invoice PDF (the API token is HttpOnly, so the browser cannot fetch it; moves no money), the shipping label,
+          // then the Owner's own StoreForge invoice PDF. Paying an invoice reuses the storefront's Razorpay loader, so no new Razorpay host appears.
           "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
+          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
+          "app/(dashboard)/dashboard/billing/invoices/[id]/download/route.ts",
         ]);
       },
       content: () => `AC-SCOPE-02: razorpay dependencies: ${deps.length}; razorpay hosts in changed source: ${hosts.length}; route handlers added: ${handlers.length}\n`,
