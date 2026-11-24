@@ -1,12 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { createBrowserStore } from "@/components/storefront/browser-store";
 import { consentKey, parseConsent, type Consent } from "@/lib/tracking/consent";
 import { GA4_MEASUREMENT_ID, META_PIXEL_ID, toGa4, toMeta, type TrackEvent } from "@/lib/tracking/events";
 import { loadFbq, stopFbq, type FbqDocument, type FbqWindow } from "@/lib/tracking/fbq";
 import { loadGtag, stopGtag, type GtagDocument, type GtagWindow } from "@/lib/tracking/gtag";
+import { scrubRecoveryToken } from "@/lib/tracking/url-scrub";
 
 /** What the API says this store may load (`GET /public/stores/:slug/tracking`). Public identifiers only. */
 export type TrackingConfig = { providers: { provider: string; config: Record<string, string> }[]; consentRequired: boolean };
@@ -53,6 +54,16 @@ export function TrackingProvider({ slug, config, children }: { slug: string; con
   }, [config]);
   const services = useMemo<Tracker["services"]>(() => [...(measurementId ? (["ga4"] as const) : []), ...(pixelId ? (["meta_pixel"] as const) : [])], [measurementId, pixelId]);
   const available = services.length > 0;
+
+  // First of all, before any effect that can load or call an analytics script: a cart recovery token must not be in the page address,
+  // because those scripts report the address. (Layout effects run before every normal effect.)
+  useLayoutEffect(() => {
+    try {
+      scrubRecoveryToken(window.location, (url) => window.history.replaceState(null, "", url), window.sessionStorage);
+    } catch {
+      // Storage or history unavailable: nothing was kept, and the address is left as it was.
+    }
+  }, []);
 
   const store = useMemo(() => createBrowserStore(consentKey(slug), true), [slug]);
   const raw = useSyncExternalStore(store.subscribe, store.read, () => null);

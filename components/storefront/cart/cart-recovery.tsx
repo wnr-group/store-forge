@@ -1,12 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { recoverCartAction } from "@/app/s/[slug]/cart/actions";
 import { lineKey } from "@/lib/cart/cart";
 import { savePrefill } from "@/lib/checkout/cart-key";
+import { clearRecoveryToken, pendingRecoveryToken } from "@/lib/tracking/url-scrub";
 import { useOptionalCart } from "./cart-provider";
 
 const TOKEN = /^[A-Za-z0-9_-]{43}$/;
+
+/** This tab's storage, or null when the browser blocks it (reading the property itself can throw). */
+const tabStorage = (): Storage | null => {
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+};
 
 /**
  * Opened from a recovery link (`/cart?recover=TOKEN`): puts the saved items back in the bag and says so. Items the shopper already
@@ -16,21 +26,18 @@ const TOKEN = /^[A-Za-z0-9_-]{43}$/;
  */
 export function CartRecovery() {
   const cart = useOptionalCart();
-  const search = useSyncExternalStore(
-    () => () => {},
-    () => window.location.search,
-    () => "",
-  );
-  const token = new URLSearchParams(search).get("recover");
   const [message, setMessage] = useState<{ tone: "ok" | "problem"; text: string } | null>(null);
   const done = useRef<string | null>(null);
 
   const ready = cart?.ready ?? false;
   useEffect(() => {
-    if (!cart || !ready || !token || !TOKEN.test(token) || done.current === token) return;
+    if (!cart || !ready) return;
+    // The storefront layout already took the token out of the address (so no analytics script could report it) and kept it for this tab.
+    const tab = tabStorage();
+    const token = pendingRecoveryToken(tab);
+    if (!token || !TOKEN.test(token) || done.current === token) return;
     done.current = token;
-    // The token is single-purpose and is not kept in the address bar once it has been used.
-    window.history.replaceState(null, "", window.location.pathname);
+    clearRecoveryToken(tab);
     void recoverCartAction({ storeSlug: cart.storeSlug, token }).then((r) => {
       if (!r.ok || !r.data) {
         setMessage({ tone: "problem", text: "This link no longer works: the bag it saved has expired or already been used. Your current bag is untouched." });
@@ -57,7 +64,7 @@ export function CartRecovery() {
       if (unavailable > 0) parts.push(`${unavailable === 1 ? "One item is" : `${unavailable} items are`} no longer available and could not be added.`);
       setMessage({ tone: "ok", text: parts.join(" ") });
     });
-  }, [cart, ready, token]);
+  }, [cart, ready]);
 
   if (!message) return null;
   return (
