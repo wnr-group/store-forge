@@ -21,7 +21,8 @@ export type CartApi = {
   drawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
-  add: (input: AddInput, options?: { openDrawer?: boolean }) => boolean;
+  /** `silent`: restoring a saved bag, not the shopper choosing an item now (no toast, no add-to-bag analytics event). */
+  add: (input: AddInput, options?: { openDrawer?: boolean; silent?: boolean }) => boolean;
   setQuantity: (key: string, quantity: number) => void;
   remove: (key: string) => void;
   /** Empties the bag (after an order has been placed). */
@@ -96,10 +97,10 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
         }
         commit(result.cart);
         // Analytics never sees the theme editor's or the preview's in-memory bag, and can never get in the way of adding.
-        if (persist) track({ type: "add_to_cart", currency, items: [{ id: result.line.productSlug, name: result.line.name, variant: result.line.variantTitle, priceMinor: result.line.unitPriceMinor, quantity: clampQuantity(input.quantity ?? 1) }] });
+        if (persist && !options?.silent) track({ type: "add_to_cart", currency, items: [{ id: result.line.productSlug, name: result.line.name, variant: result.line.variantTitle, priceMinor: result.line.unitPriceMinor, quantity: clampQuantity(input.quantity ?? 1) }] });
         const label = result.line.variantTitle ? `${result.line.name} (${result.line.variantTitle})` : result.line.name;
-        setToast({ id: ++toastId.current, message: `${label} added to your bag` });
-        if (options?.openDrawer !== false) setDrawerOpen(true);
+        if (!options?.silent) setToast({ id: ++toastId.current, message: `${label} added to your bag` });
+        if (options?.openDrawer !== false && !options?.silent) setDrawerOpen(true);
         return true;
       },
       setQuantity: (key, quantity) => commit(setQuantity(current(), key, quantity)),

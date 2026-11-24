@@ -4,17 +4,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { paymentOptionsAction, placeOrderAction, quoteAction, shippingOptionsAction } from "@/app/s/[slug]/checkout/actions";
+import { checkpointCartAction } from "@/app/s/[slug]/cart/actions";
+import { paymentOptionsAction, placeOrderAction, quoteAction, shippingOptionsAction, validateDiscountAction } from "@/app/s/[slug]/checkout/actions";
 import type { PaymentMethodKind, PaymentOptionsApi, QuoteApi, ShippingQuoteApi } from "@/lib/api/endpoints/checkout-api";
 import { formatBagPrice } from "@/lib/cart/format";
 import { INDIAN_STATE_NAMES } from "@/lib/checkout/states";
+import { clearCartKey, getCartKey, takePrefill } from "@/lib/checkout/cart-key";
 import { newIdempotencyKey, rememberOrder } from "@/lib/checkout/my-orders";
 import { publicImageUrl } from "@/lib/storage/paths";
-import { addressSchema, customerSchema, PINCODE_PATTERN } from "@/lib/validations/checkout";
+import { addressSchema, customerSchema, PHONE_PATTERN, PINCODE_PATTERN } from "@/lib/validations/checkout";
 import { cn } from "@/lib/utils";
 import { useOptionalCart } from "../cart/cart-provider";
 import { useTracker } from "../tracking/tracking-provider";
 import type { SectionProps } from "../engine/looks";
+import { DiscountBox } from "./discount-box";
 import { Field, formatDays, INPUT, MUTED, Notice, PageTitle, PRIMARY_BUTTON, Row, SHELL, TaxBreakdown } from "./checkout-ui";
 import { payWithRazorpay } from "./razorpay";
 
@@ -49,6 +52,17 @@ const ISSUE_TEXT: Record<string, (name: string, i: CheckoutIssue) => string> = {
   PRICE_CHANGED: (n) => `The price of ${n} has changed.`,
 };
 
+/** The API's refusal of a discount code carries its `reason` (EXPIRED, USAGE_LIMIT, MIN_SUBTOTAL ...). */
+const isDiscountRefusal = (details: unknown): boolean => typeof details === "object" && details !== null && typeof (details as { reason?: unknown }).reason === "string";
+
+const browserStorage = (): Storage | null => {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+};
+
 const issuesOf = (details: unknown): CheckoutIssue[] => {
   const list = (details as { issues?: unknown } | undefined)?.issues;
   return Array.isArray(list) ? (list as CheckoutIssue[]) : [];
@@ -78,6 +92,11 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const attempt = useRef<{ signature: string; key: string } | null>(null);
   const placed = useRef(false);
+  // A discount code: the server says whether it works and what it is worth (a preview here, priced again by the quote and the order).
+  const [discount, setDiscount] = useState<{ code: string; discountMinor: number } | null>(null);
+  const [discountError, setDiscountError] = useState<string | null>(null);
+  const [discountChecking, setDiscountChecking] = useState(false);
+  const [remindMe, setRemindMe] = useState(false);
 
   const storeSlug = cart?.storeSlug ?? "";
   const currency = cart?.currency ?? "INR";
@@ -95,9 +114,70 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
     if (track({ type: "begin_checkout", currency: cart?.currency ?? "INR", items })) began.current = true;
   }, [track, isPreview, ready, lines, cart?.currency]);
 
+
   const payload = useMemo(() => lines.map((l) => ({ productSlug: l.productSlug, variantId: l.variantId, quantity: l.quantity, expectedUnitPriceMinor: l.unitPriceMinor })), [lines]);
   const linesSignature = JSON.stringify(payload);
   const set = (patch: Partial<FormState>) => setForm((f) => ({ ...f, ...patch }));
+
+  const emailValid = customerSchema.shape.email.safeParse(form.email).success;
+
+  // What a recovery link left for this checkout: the email and name the shopper gave before.
+  useEffect(() => {
+    if (isPreview || !storeSlug) return;
+    const saved = takePrefill(storeSlug, browserStorage());
+    // Read once from this browser after mounting (reading it while rendering would differ from the server's page).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (saved) setForm((f) => ({ ...f, email: f.email || saved.email || "", fullName: f.fullName || saved.fullName || "" }));
+  }, [isPreview, storeSlug]);
+
+  // Once there is an email, keep a copy of the bag with the store, so it can be recovered if the shopper leaves. This never blocks or
+  // slows the checkout: it runs a moment after typing stops, and a failure is ignored.
+  useEffect(() => {
+    if (isPreview || !ready || lines.length === 0 || !emailValid || !storeSlug) return;
+    const timer = window.setTimeout(() => {
+      const phone = form.phone.trim();
+      void checkpointCartAction({
+        storeSlug,
+        cartKey: getCartKey(storeSlug, browserStorage()),
+        lines: JSON.parse(linesSignature),
+        customer: { email: form.email.trim(), fullName: form.fullName.trim() || undefined, phone: PHONE_PATTERN.test(phone) ? phone : undefined },
+        marketingConsent: remindMe,
+      });
+    }, 1500);
+    return () => window.clearTimeout(timer);
+  }, [isPreview, ready, lines.length, linesSignature, emailValid, form.email, form.fullName, form.phone, remindMe, storeSlug]);
+
+  async function applyDiscount(code: string) {
+    setDiscountChecking(true);
+    setDiscountError(null);
+    const r = await validateDiscountAction({ storeSlug, code, lines: JSON.parse(linesSignature), customerEmail: emailValid ? form.email.trim() : undefined });
+    setDiscountChecking(false);
+    if (!r.ok) return setDiscountError(r.error);
+    const d = r.data!;
+    if (d.valid && d.code) setDiscount({ code: d.code, discountMinor: d.discountMinor });
+    else setDiscountError(d.message ?? "This discount code is not valid.");
+  }
+
+  // The bag changed: ask again what the code is worth now (it may no longer apply).
+  const appliedCode = discount?.code;
+  useEffect(() => {
+    if (!appliedCode || isPreview) return;
+    let current = true;
+    void validateDiscountAction({ storeSlug, code: appliedCode, lines: JSON.parse(linesSignature), customerEmail: emailValid ? form.email.trim() : undefined }).then((r) => {
+      if (!current) return;
+      const d = r.ok ? r.data! : null;
+      if (d?.valid && d.code) setDiscount((prev) => (prev && prev.code === d.code ? { code: d.code!, discountMinor: d.discountMinor } : prev));
+      else {
+        setDiscount(null);
+        setDiscountError(d?.message ?? (r.ok ? "This discount code is no longer valid." : r.error));
+      }
+    });
+    return () => {
+      current = false;
+    };
+    // Only a different bag (or a different code) is worth asking again about.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appliedCode, linesSignature, storeSlug, isPreview]);
 
   // Once per visit, check the saved bag against the store's live products (a removed product or a new price shows up here).
   const checked = useRef(false);
@@ -164,12 +244,18 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
   const method: PaymentMethodKind | null = pref === "cod" ? (codAllowedHere ? "cod" : fallback) : pref === "razorpay" ? (options?.razorpayAvailable ? "razorpay" : fallback) : fallback;
 
   // The full price, exactly as the order will be priced.
-  const quoteKey = active && addressReady && !!method && (!needsMethod || !!chosen) && shippingFresh && !(shipping?.configured && !shipping.deliverable) ? `${linesSignature}|${addressKey}|${method}|${methodId ?? ""}` : null;
+  const quoteKey = active && addressReady && !!method && (!needsMethod || !!chosen) && shippingFresh && !(shipping?.configured && !shipping.deliverable) ? `${linesSignature}|${addressKey}|${method}|${methodId ?? ""}|${discount?.code ?? ""}` : null;
   useEffect(() => {
     if (!quoteKey) return;
     let current = true;
-    void quoteAction({ storeSlug, lines: JSON.parse(linesSignature), address: { state: form.state, city: form.city.trim() || undefined, postalCode: form.postalCode.trim() }, paymentMethod: method, shippingMethodId: methodId ?? undefined }).then((r) => {
+    void quoteAction({ storeSlug, lines: JSON.parse(linesSignature), address: { state: form.state, city: form.city.trim() || undefined, postalCode: form.postalCode.trim() }, paymentMethod: method, shippingMethodId: methodId ?? undefined, discountCode: discount?.code, customerEmail: emailValid ? form.email.trim() : undefined }).then((r) => {
       if (!current) return;
+      // The code stopped working (a limit was reached, the bag no longer qualifies): say why and price the bag without it.
+      if (!r.ok && isDiscountRefusal(r.details)) {
+        setDiscount(null);
+        setDiscountError(r.error);
+        return;
+      }
       setQuoteRes(r.ok ? { key: quoteKey, data: r.data!, error: null, issues: [] } : { key: quoteKey, data: null, error: r.error, issues: issuesOf("details" in r ? r.details : undefined) });
     });
     return () => {
@@ -219,6 +305,8 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
       billingAddress: form.billingSame ? undefined : { fullName: form.bFullName, phone: form.bPhone, line1: form.bLine1, line2: form.bLine2 || undefined, city: form.bCity, state: form.bState, postalCode: form.bPostalCode },
       paymentMethod: method,
       shippingMethodId: chosen?.methodId,
+      discountCode: discount?.code,
+      cartKey: getCartKey(storeSlug, browserStorage()),
     };
     // The same key for the same cart and details, so a double click or a retry after a dropped connection cannot place two orders.
     const signature = JSON.stringify(body);
@@ -229,6 +317,13 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
     const result = await placeOrderAction({ ...body, idempotencyKey: attempt.current.key });
     if (!result.ok) {
       setSubmitting(false);
+      if (isDiscountRefusal(result.details)) {
+        // The order was NOT placed: the code no longer works. Show why, take it off, and let the shopper decide.
+        setDiscount(null);
+        setDiscountError(result.error);
+        setFormError("Your discount code could not be used, so the order was not placed. Check the new total, then place it again.");
+        return;
+      }
       if (result.fieldErrors) setErrors(result.fieldErrors);
       const found = issuesOf(result.details);
       setSubmitIssues(found);
@@ -243,6 +338,8 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
     if (order.accessToken) rememberOrder(storeSlug, { orderNumber: order.orderNumber, token: order.accessToken, placedAt: new Date().toISOString() });
     const token = order.accessToken;
     cart.clear();
+    // The next bag is a new one.
+    clearCartKey(storeSlug, browserStorage());
     const go = (flag?: string) => router.push(`/orders/${order.orderNumber}${flag ? `?${flag}` : ""}`);
     if (order.paymentMethod === "cod" || !token) return go("placed=1");
     const outcome = await payWithRazorpay({ storeSlug, orderNumber: order.orderNumber, token }, context.store.name);
@@ -295,6 +392,11 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
                   <input id="co-phone" type="tel" inputMode="tel" className={INPUT} autoComplete="tel" placeholder="10-digit mobile" value={form.phone} onChange={(e) => set({ phone: e.target.value })} aria-invalid={!!err("phone")} />
                 </Field>
               </div>
+              <p className={cn("text-[12px]", MUTED)}>If you leave before paying, we keep your bag and email so you can pick up where you stopped. Nothing is sent to you unless you tick the box below.</p>
+              <label className="flex items-start gap-3 text-[13px]">
+                <input type="checkbox" checked={remindMe} onChange={(e) => setRemindMe(e.target.checked)} className="mt-0.5 size-4 accent-[var(--primary)]" />
+                <span>Email me a reminder about my bag and occasional offers from this store.</span>
+              </label>
             </fieldset>
 
             <fieldset className="grid gap-5">
@@ -474,8 +576,12 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
                 );
               })}
             </ul>
+            <div className="mt-6 border-t border-border pt-6">
+              <DiscountBox applied={discount} error={discountError} checking={discountChecking} onApply={(code) => void applyDiscount(code)} onRemove={() => { setDiscount(null); setDiscountError(null); }} money={money} />
+            </div>
             <dl className="mt-6 grid gap-[13px] border-t border-border pt-6 text-[14px]">
               <Row label="Subtotal" value={money(quote?.subtotalMinor ?? subtotal)} />
+              {discount ? <Row label={`Discount (${discount.code})`} value={`- ${money(quote?.discountMinor ?? discount.discountMinor)}`} /> : null}
               <Row label="Shipping" value={quote ? (quote.shippingMinor === 0 && chosen ? "Free" : money(quote.shippingMinor)) : chosen ? (chosen.chargeMinor === 0 ? "Free" : money(chosen.chargeMinor)) : "Enter address"} />
               {quote && quote.codFeeMinor > 0 ? <Row label="Cash on delivery charge" value={money(quote.codFeeMinor)} /> : null}
               {quote ? <Row label={quote.taxInclusive ? "GST (included)" : "GST"} value={money(quote.taxMinor)} /> : null}
@@ -486,7 +592,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
               </div>
             ) : null}
             <dl className="mt-6">
-              <Row strong label="Total" value={quote ? money(quote.totalMinor) : money(subtotal)} />
+              <Row strong label="Total" value={quote ? money(quote.totalMinor) : money(Math.max(0, subtotal - (discount?.discountMinor ?? 0)))} />
             </dl>
             {!quote ? <p className={cn("mt-3 text-[11px]", MUTED)}>The final total, with delivery and GST, appears once your address and payment method are chosen.</p> : null}
 

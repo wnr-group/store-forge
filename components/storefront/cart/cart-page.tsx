@@ -8,6 +8,7 @@ import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
 import type { SectionProps } from "../engine/looks";
 import { useOptionalCart } from "./cart-provider";
+import { CartRecovery } from "./cart-recovery";
 import { CheckoutButton } from "./cart-drawer";
 import { QtyStepper } from "./qty-stepper";
 
@@ -45,6 +46,7 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
 
   if (!cart) return null;
   const { lines } = cart;
+  const recovery = isPreview ? null : <CartRecovery />;
   const currency = cart.currency;
 
   return (
@@ -67,6 +69,8 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
       <h1 className="mt-6 border-b border-border pb-8 text-[2.5rem] leading-[1.05] tracking-[-0.01em] text-foreground md:mt-[30px] md:pb-10 md:text-[3.5rem]" style={DISPLAY}>
         Your bag
       </h1>
+
+      {recovery}
 
       {notice ? (
         <p role="status" className="mt-6 border border-border bg-white px-4 py-3 text-[13px] text-foreground">

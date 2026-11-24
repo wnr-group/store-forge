@@ -33,6 +33,16 @@ export const lineSchema = z.object({
   expectedUnitPriceMinor: z.number().int().min(0).optional(),
 });
 
+/** A discount code as the shopper types it: capitals, letters, digits, hyphen and underscore. The API decides whether it works. */
+export const discountCodeSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(/^[A-Z0-9][A-Z0-9_-]{2,31}$/, "Enter a valid discount code.");
+
+/** The random id the browser keeps for its cart (see lib/checkout/cart-key.ts). */
+export const cartKeySchema = z.string().regex(/^[A-Za-z0-9_-]{16,128}$/);
+
 export const storeSlugSchema = z.string().min(1).max(100).regex(/^[a-z0-9-]+$/);
 export const methodSchema = z.enum(["razorpay", "cod"]);
 
@@ -46,6 +56,8 @@ export const placeOrderSchema = z.object({
   billingAddress: addressSchema.optional(),
   paymentMethod: methodSchema,
   shippingMethodId: z.string().uuid().optional(),
+  discountCode: discountCodeSchema.optional(),
+  cartKey: cartKeySchema.optional(),
 });
 
 export type PlaceOrderFormInput = z.input<typeof placeOrderSchema>;

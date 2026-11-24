@@ -11,10 +11,11 @@ import {
   placeOrderApi,
   reportRazorpayFailureApi,
   startRazorpayApi,
+  validateDiscountApi,
   verifyRazorpayApi,
 } from "@/lib/api/endpoints/checkout-api";
 import { AppError } from "@/lib/errors";
-import { addressSchema, lineSchema, methodSchema, placeOrderSchema, storeSlugSchema } from "@/lib/validations/checkout";
+import { addressSchema, discountCodeSchema, lineSchema, methodSchema, placeOrderSchema, storeSlugSchema } from "@/lib/validations/checkout";
 import { parseInput } from "@/lib/validations/parse";
 
 /**
@@ -42,8 +43,16 @@ export async function shippingOptionsAction(input: unknown) {
 
 export async function quoteAction(input: unknown) {
   return run(async () => {
-    const v = parseInput(cartInput.extend({ shippingMethodId: z.string().uuid().optional() }), input);
-    return getQuoteApi(v.storeSlug, { address: v.address, lines: v.lines, paymentMethod: v.paymentMethod, shippingMethodId: v.shippingMethodId });
+    const v = parseInput(cartInput.extend({ shippingMethodId: z.string().uuid().optional(), discountCode: discountCodeSchema.optional(), customerEmail: z.string().trim().max(254).email().optional() }), input);
+    return getQuoteApi(v.storeSlug, { address: v.address, lines: v.lines, paymentMethod: v.paymentMethod, shippingMethodId: v.shippingMethodId, discountCode: v.discountCode, customerEmail: v.customerEmail });
+  });
+}
+
+/** Does this code work for this bag, and for how much? The API decides; an unusable code is a normal answer, not a failure. */
+export async function validateDiscountAction(input: unknown) {
+  return run(async () => {
+    const v = parseInput(z.object({ storeSlug: storeSlugSchema, code: discountCodeSchema, lines: z.array(lineSchema).min(1).max(50), customerEmail: z.string().trim().max(254).email().optional() }), input);
+    return validateDiscountApi(v.storeSlug, { code: v.code, lines: v.lines, customerEmail: v.customerEmail });
   });
 }
 

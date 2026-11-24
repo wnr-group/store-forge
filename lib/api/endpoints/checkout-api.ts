@@ -63,6 +63,9 @@ export type OrderTaxApi = {
 export type QuoteApi = {
   currency: string;
   subtotalMinor: number;
+  /** Taken off the items by the discount code; 0 without one. */
+  discountMinor: number;
+  discountCode: string | null;
   shippingMinor: number;
   codFeeMinor: number;
   taxMinor: number;
@@ -131,7 +134,7 @@ export const getShippingOptionsApi = async (slug: string, input: { address: { st
 
 export const getQuoteApi = async (
   slug: string,
-  input: { address: { state: string; city?: string; postalCode: string }; lines: CheckoutLineApi[]; paymentMethod?: PaymentMethodKind; shippingMethodId?: string },
+  input: { address: { state: string; city?: string; postalCode: string }; lines: CheckoutLineApi[]; paymentMethod?: PaymentMethodKind; shippingMethodId?: string; discountCode?: string; customerEmail?: string },
 ) => (await apiRequest<QuoteApi>(`${base(slug)}/checkout/quote`, { method: "POST", json: input, anonymous: true, timeoutMs: 30_000 })).data;
 
 export type PlaceOrderInput = {
@@ -142,6 +145,9 @@ export type PlaceOrderInput = {
   billingAddress?: AddressApi;
   paymentMethod: PaymentMethodKind;
   shippingMethodId?: string;
+  discountCode?: string;
+  /** The browser's cart id, so the saved cart can be marked as bought. */
+  cartKey?: string;
 };
 
 export const placeOrderApi = async (slug: string, input: PlaceOrderInput, idempotencyKey: string) =>
@@ -163,3 +169,26 @@ export const verifyRazorpayApi = async (slug: string, orderNumber: number, token
 
 export const reportRazorpayFailureApi = async (slug: string, orderNumber: number, token: string, body: { razorpay_order_id: string; razorpay_payment_id: string }) =>
   (await apiRequest<PublicOrderApi>(`${base(slug)}/orders/${orderNumber}/payments/razorpay/failed`, { method: "POST", json: body, anonymous: true, headers: tokenHeader(token), timeoutMs: 30_000 })).data;
+
+/** `POST /public/stores/:slug/discounts/validate`: does a code work for this cart, and for how much. An answer, not an error. */
+export type DiscountCheckApi = { valid: boolean; code: string | null; discountMinor: number; eligibleSubtotalMinor: number; reason: string | null; message: string | null; minSubtotalMinor: number | null };
+
+export const validateDiscountApi = async (slug: string, input: { code: string; lines: CheckoutLineApi[]; customerEmail?: string }) =>
+  (await apiRequest<DiscountCheckApi>(`${base(slug)}/discounts/validate`, { method: "POST", json: input, anonymous: true, timeoutMs: 30_000 })).data;
+
+/** `POST /public/stores/:slug/cart/checkpoint`: saves the cart of a shopper who gave an email, so it can be recovered. */
+export type CartCheckpointInput = { cartKey: string; lines: { productSlug: string; variantId: string | null; quantity: number }[]; customer: { email: string; fullName?: string; phone?: string }; marketingConsent?: boolean };
+
+export const checkpointCartApi = async (slug: string, input: CartCheckpointInput) =>
+  (await apiRequest<{ saved: boolean }>(`${base(slug)}/cart/checkpoint`, { method: "POST", json: input, anonymous: true })).data;
+
+/** `GET /public/stores/:slug/cart/recovery/:token`: what a saved cart held, priced now. */
+export type CartRecoveryApi = {
+  email: string | null;
+  customerName: string | null;
+  lines: { productSlug: string; variantId: string | null; quantity: number; name: string; unitPriceMinor: number; priceChanged: boolean }[];
+  issues: { code: string; productSlug: string; variantId: string | null }[];
+};
+
+export const openCartRecoveryApi = async (slug: string, token: string) =>
+  (await apiRequest<CartRecoveryApi>(`${base(slug)}/cart/recovery/${encodeURIComponent(token)}`, { anonymous: true })).data;
