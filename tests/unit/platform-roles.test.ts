@@ -55,3 +55,15 @@ describe("platform roles", () => {
       expect(labels).toContain(wanted);
   });
 });
+
+describe("where platform staff land after sign-in", () => {
+  it("sends every platform role with no workspace to the admin area, and nobody else", async () => {
+    const { defaultHomePath, identityFromLogin } = await import("@/lib/auth/home");
+    for (const level of PLATFORM_LEVELS) {
+      const id = identityFromLogin({ platformAdminLevel: level, memberships: [] });
+      expect(defaultHomePath(id), level).toBe("/admin");
+    }
+    expect(defaultHomePath(identityFromLogin({ platformAdminLevel: null, memberships: [] }))).toBe("/dashboard");
+    expect(defaultHomePath(identityFromLogin({ platformAdminLevel: "billing_admin", memberships: [{}] }))).toBe("/dashboard");
+  });
+});
