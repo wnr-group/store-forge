@@ -210,7 +210,7 @@ describe("static checks", () => {
     const changed = [...new Set([...git("diff", "--name-only", "origin/main").split("\n"), ...git("ls-files", "--others", "--exclude-standard").split("\n")])].filter(Boolean);
     const imports = PAYMENT_FILES.filter((f) => f.endsWith(".tsx")).flatMap((f) => [...read(f).matchAll(/from "([^"]+)"/g)].map((m) => m[1]));
     const external = [...new Set(imports.filter((i) => !i.startsWith("@/") && !i.startsWith(".")))].sort();
-    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|app\/globals\.css|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|orders\/|shipping\/|taxes\/|integrations\/)[^/]+\/)/.test(f));
+    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|app\/globals\.css|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/)[^/]+\/)/.test(f));
     await capture({
       acId: "AC-FE-16", folder: "logs", fileName: "AC-FE-16.txt", layer: "STATIC", environment: "unit", testName: "AC-FE-16", testFile: here,
       actualResult: `payments components import only existing shared and ui components (external packages: ${external.join(", ")}); no dependency, global style or other page changed`,

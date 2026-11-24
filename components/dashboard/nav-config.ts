@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, Plug, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Megaphone, ShoppingBasket, TicketPercent, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, Plug, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -16,6 +16,9 @@ const NAV_PERMISSION: Record<string, Permission> = {
   [ROUTES.shipping]: "shipping:view",
   [ROUTES.taxes]: "tax:view",
   [ROUTES.integrations]: "integrations:view",
+  [ROUTES.discounts]: "marketing:view",
+  [ROUTES.campaigns]: "marketing:view",
+  [ROUTES.abandonedCarts]: "marketing:view",
 };
 
 /** hrefs the member may not open, for the sidebar to hide (the pages and the database check again). */
@@ -32,6 +35,9 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.categories, label: "Categories", icon: FolderTree, group: "Catalog" },
   { href: ROUTES.collections, label: "Collections", icon: Layers, group: "Catalog" },
   { href: ROUTES.inventory, label: "Inventory", icon: Boxes, group: "Catalog" },
+  { href: ROUTES.discounts, label: "Discounts", icon: TicketPercent, group: "Marketing" },
+  { href: ROUTES.campaigns, label: "Campaigns", icon: Megaphone, group: "Marketing" },
+  { href: ROUTES.abandonedCarts, label: "Abandoned carts", icon: ShoppingBasket, group: "Marketing" },
   { href: ROUTES.customers, label: "Customers", icon: Users, group: "Insights" },
   { href: ROUTES.analytics, label: "Analytics", icon: BarChart3, group: "Insights" },
   { href: ROUTES.templates, label: "Themes", icon: Palette, group: "Online Store", exact: true },
