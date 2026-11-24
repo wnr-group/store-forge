@@ -36,6 +36,7 @@ export const ROUTES = {
   shippingMethods: "/dashboard/shipping/methods",
   shipments: "/dashboard/shipping/shipments",
   taxes: "/dashboard/taxes",
+  integrations: "/dashboard/integrations",
   settings: "/dashboard/settings",
   templates: "/dashboard/templates",
   themeEditor: "/dashboard/templates/editor",

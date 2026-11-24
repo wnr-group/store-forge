@@ -88,7 +88,7 @@ export type PlacedOrderApi = {
   shippingMethodName: string | null;
   shippingZoneName: string | null;
   shippingDays: { min: number; max: number } | null;
-  items: { name: string; sku: string | null; quantity: number; unitPriceMinor: number; totalMinor: number }[];
+  items: { name: string; sku: string | null; /** The product handle (null if the product was deleted); lets analytics name it as when it was viewed. */ productSlug?: string | null; quantity: number; unitPriceMinor: number; totalMinor: number }[];
   reservationExpiresAt: string | null;
   accessToken: string | null;
   replayed: boolean;

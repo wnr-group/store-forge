@@ -13,6 +13,7 @@ import { publicImageUrl } from "@/lib/storage/paths";
 import { addressSchema, customerSchema, PINCODE_PATTERN } from "@/lib/validations/checkout";
 import { cn } from "@/lib/utils";
 import { useOptionalCart } from "../cart/cart-provider";
+import { useTracker } from "../tracking/tracking-provider";
 import type { SectionProps } from "../engine/looks";
 import { Field, formatDays, INPUT, MUTED, Notice, PageTitle, PRIMARY_BUTTON, Row, SHELL, TaxBreakdown } from "./checkout-ui";
 import { payWithRazorpay } from "./razorpay";
@@ -84,6 +85,15 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
   const ready = cart?.ready ?? false;
   const subtotal = cart?.subtotalMinor ?? 0;
   const revalidate = cart?.revalidate;
+
+  // Once per visit, as soon as there is a bag to check out and the shopper has agreed to analytics.
+  const { track } = useTracker();
+  const began = useRef(false);
+  useEffect(() => {
+    if (began.current || isPreview || !ready || lines.length === 0) return;
+    const items = lines.map((l) => ({ id: l.productSlug, name: l.name, variant: l.variantTitle, priceMinor: l.unitPriceMinor, quantity: l.quantity }));
+    if (track({ type: "begin_checkout", currency: cart?.currency ?? "INR", items })) began.current = true;
+  }, [track, isPreview, ready, lines, cart?.currency]);
 
   const payload = useMemo(() => lines.map((l) => ({ productSlug: l.productSlug, variantId: l.variantId, quantity: l.quantity, expectedUnitPriceMinor: l.unitPriceMinor })), [lines]);
   const linesSignature = JSON.stringify(payload);

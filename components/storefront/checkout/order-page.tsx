@@ -6,10 +6,23 @@ import { cancelOrderAction, getOrderAction } from "@/app/s/[slug]/checkout/actio
 import type { PublicOrderApi } from "@/lib/api/endpoints/checkout-api";
 import { formatBagPrice } from "@/lib/cart/format";
 import { readMyOrders, tokenFor, type MyOrder } from "@/lib/checkout/my-orders";
+import { markPurchaseTracked, wasPurchaseTracked } from "@/lib/tracking/purchase-guard";
 import { cn } from "@/lib/utils";
 import type { SectionProps } from "../engine/looks";
 import { formatDays, labelOf, MUTED, Notice, PageTitle, PAYMENT_LABELS, PRIMARY_BUTTON, Row, SECONDARY_BUTTON, SHELL, STATUS_LABELS, TaxBreakdown } from "./checkout-ui";
+import { useTracker } from "../tracking/tracking-provider";
 import { payWithRazorpay } from "./razorpay";
+
+/** Order statuses that count as a sale. */
+const SALE_STATUSES = new Set(["confirmed", "processing", "ready_to_ship", "shipped", "out_for_delivery", "delivered"]);
+
+const browserStorage = (): Storage | null => {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+};
 
 const dateTime = (iso: string) => new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
 
@@ -32,6 +45,20 @@ export function OrderPageSection({ context, sectionId }: SectionProps) {
   const token = useRef<string | null>(null);
   const isPreview = context.mode === "preview" || context.mode === "editor";
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
+
+  // A purchase is reported once, and only for an order this visit placed or paid (never for an old order opened again).
+  const { track } = useTracker();
+  const sawUnpaid = useRef(false);
+  useEffect(() => {
+    if (isPreview || load.state !== "ok") return;
+    const o = load.order;
+    if (o.status === "pending_payment") sawUnpaid.current = true;
+    if (!SALE_STATUSES.has(o.status) || (!params.get("placed") && !sawUnpaid.current)) return;
+    if (wasPurchaseTracked(browserStorage(), storeSlug, o.orderNumber)) return;
+    const items = o.items.map((i) => ({ id: i.productSlug ?? i.sku ?? i.name, name: i.name, priceMinor: i.unitPriceMinor, quantity: i.quantity }));
+    const sent = track({ type: "purchase", transactionId: String(o.orderNumber), currency: o.currency, items, discountMinor: o.discountMinor, shippingMinor: o.shippingMinor + o.codFeeMinor, taxMinor: o.taxMinor });
+    if (sent) markPurchaseTracked(browserStorage(), storeSlug, o.orderNumber);
+  }, [load, params, track, storeSlug, isPreview]);
 
   const refresh = useCallback(async () => {
     if (!token.current) return;

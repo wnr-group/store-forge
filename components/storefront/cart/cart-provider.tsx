@@ -1,9 +1,10 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { addLine, emptyCart, itemCount, reconcile, removeLine, setQuantity, subtotalMinor, type AddInput, type Cart, type CartLine, type LineCheck } from "@/lib/cart/cart";
+import { addLine, clampQuantity, emptyCart, itemCount, reconcile, removeLine, setQuantity, subtotalMinor, type AddInput, type Cart, type CartLine, type LineCheck } from "@/lib/cart/cart";
 import { checkCartAction } from "@/app/s/[slug]/cart/actions";
 import { createCartStore, parseSnapshot } from "./cart-store";
+import { useTracker } from "../tracking/tracking-provider";
 
 export type CartToast = { id: number; message: string };
 
@@ -45,6 +46,7 @@ export function useCart(): CartApi {
 }
 
 export function CartProvider({ storeSlug, currency, persist, children }: { storeSlug: string; currency: string; persist: boolean; children: React.ReactNode }) {
+  const { track } = useTracker();
   const store = useMemo(() => createCartStore(storeSlug, persist), [storeSlug, persist]);
   const raw = useSyncExternalStore(store.subscribe, store.read, () => null);
   const ready = useSyncExternalStore(
@@ -93,6 +95,8 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
           return false;
         }
         commit(result.cart);
+        // Analytics never sees the theme editor's or the preview's in-memory bag, and can never get in the way of adding.
+        if (persist) track({ type: "add_to_cart", currency, items: [{ id: result.line.productSlug, name: result.line.name, variant: result.line.variantTitle, priceMinor: result.line.unitPriceMinor, quantity: clampQuantity(input.quantity ?? 1) }] });
         const label = result.line.variantTitle ? `${result.line.name} (${result.line.variantTitle})` : result.line.name;
         setToast({ id: ++toastId.current, message: `${label} added to your bag` });
         if (options?.openDrawer !== false) setDrawerOpen(true);
@@ -120,7 +124,7 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
       dismissToast: () => setToast(null),
       notify: (message) => setToast({ id: ++toastId.current, message }),
     }),
-    [storeSlug, currency, persist, cart, ready, drawerOpen, toast, commit, current],
+    [storeSlug, currency, persist, cart, ready, drawerOpen, toast, commit, current, track],
   );
 
   return <CartContext.Provider value={api}>{children}</CartContext.Provider>;

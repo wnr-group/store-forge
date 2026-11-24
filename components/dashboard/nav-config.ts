@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, Plug, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -15,6 +15,7 @@ const NAV_PERMISSION: Record<string, Permission> = {
   [ROUTES.orders]: "orders:view",
   [ROUTES.shipping]: "shipping:view",
   [ROUTES.taxes]: "tax:view",
+  [ROUTES.integrations]: "integrations:view",
 };
 
 /** hrefs the member may not open, for the sidebar to hide (the pages and the database check again). */
@@ -37,6 +38,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.themeEditor, label: "Customize", icon: PenTool, group: "Online Store" },
   { href: ROUTES.pages, label: "Pages", icon: FileText, group: "Online Store" },
   { href: ROUTES.navigation, label: "Navigation", icon: Menu, group: "Online Store" },
+  { href: ROUTES.integrations, label: "Integrations", icon: Plug, group: "Workspace" },
   { href: ROUTES.settings, label: "Settings", icon: Settings, group: "Workspace" },
 ];
 
