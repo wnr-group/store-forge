@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { addLine, itemCount, reconcile, removeLine, setQuantity, subtotalMinor, type AddInput, type Cart, type CartLine, type LineCheck } from "@/lib/cart/cart";
+import { addLine, emptyCart, itemCount, reconcile, removeLine, setQuantity, subtotalMinor, type AddInput, type Cart, type CartLine, type LineCheck } from "@/lib/cart/cart";
 import { checkCartAction } from "@/app/s/[slug]/cart/actions";
 import { createCartStore, parseSnapshot } from "./cart-store";
 
@@ -23,6 +23,8 @@ export type CartApi = {
   add: (input: AddInput, options?: { openDrawer?: boolean }) => boolean;
   setQuantity: (key: string, quantity: number) => void;
   remove: (key: string) => void;
+  /** Empties the bag (after an order has been placed). */
+  clear: () => void;
   /** Re-checks every line against the store's live products and applies the result. Null when the check could not run. */
   revalidate: () => Promise<{ removed: string[]; priceChanged: string[] } | null>;
   toast: CartToast | null;
@@ -98,6 +100,7 @@ export function CartProvider({ storeSlug, currency, persist, children }: { store
       },
       setQuantity: (key, quantity) => commit(setQuantity(current(), key, quantity)),
       remove: (key) => commit(removeLine(current(), key)),
+      clear: () => commit(emptyCart()),
       revalidate: async () => {
         const before = current();
         if (before.lines.length === 0) return { removed: [], priceChanged: [] };

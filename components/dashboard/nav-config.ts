@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, CreditCard, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -12,6 +12,9 @@ const NAV_PERMISSION: Record<string, Permission> = {
   [ROUTES.inventory]: "catalog:view",
   [ROUTES.customers]: "customers:view",
   [ROUTES.analytics]: "orders:view",
+  [ROUTES.orders]: "orders:view",
+  [ROUTES.shipping]: "shipping:view",
+  [ROUTES.taxes]: "tax:view",
 };
 
 /** hrefs the member may not open, for the sidebar to hide (the pages and the database check again). */
@@ -21,6 +24,9 @@ export const hiddenNavHrefs = (actor: Actor): string[] =>
 /** Only list pages that exist - no placeholder navigation. */
 export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.dashboard, label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: ROUTES.orders, label: "Orders", icon: ShoppingCart, group: "Sales" },
+  { href: ROUTES.shipping, label: "Shipping", icon: Truck, group: "Sales" },
+  { href: ROUTES.taxes, label: "Taxes", icon: Landmark, group: "Sales" },
   { href: ROUTES.products, label: "Products", icon: Package, group: "Catalog" },
   { href: ROUTES.categories, label: "Categories", icon: FolderTree, group: "Catalog" },
   { href: ROUTES.collections, label: "Collections", icon: Layers, group: "Catalog" },

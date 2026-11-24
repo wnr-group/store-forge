@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { PaymentConfigForm, type PaymentConfigView } from "@/components/payments/payment-config-form";
+import { CodSettingsForm } from "@/components/payments/cod-settings-form";
+import { PaymentsNav } from "@/components/payments/payments-nav";
 import { PageHeader } from "@/components/shared/page-header";
 import { ROUTES } from "@/config/app";
 import { canManagePayments } from "@/lib/auth/permissions";
 import { requireWorkspace } from "@/lib/tenant/context";
+import { getCodSettings } from "@/services/payment-ledger.service";
 import { getPaymentConfig } from "@/services/payment.service";
 
 export const metadata: Metadata = { title: "Payments" };
@@ -14,19 +17,21 @@ const formatUpdatedAt = (at: Date) =>
   `${new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }).format(at)} UTC`;
 
 export default async function PaymentsPage() {
-  const { active } = await requireWorkspace();
+  const { active, store } = await requireWorkspace();
   // Owner-only. The service, the API and the database repeat this check; this is just the friendly redirect.
   if (!canManagePayments(active)) redirect(ROUTES.dashboard);
-  const config = await getPaymentConfig();
+  const [config, cod] = await Promise.all([getPaymentConfig(), getCodSettings()]);
   const view: PaymentConfigView = config.configured
-    ? { configured: true, keyIdMasked: config.keyIdMasked, mode: config.mode, updatedAtLabel: formatUpdatedAt(config.updatedAt), updatedByName: config.updatedByName }
+    ? { configured: true, keyIdMasked: config.keyIdMasked, mode: config.mode, webhookSecretConfigured: config.webhookSecretConfigured, enabled: config.enabled, verificationStatus: config.verificationStatus, verificationError: config.verificationError, verifiedAtLabel: config.verifiedAt ? formatUpdatedAt(config.verifiedAt) : null, webhookPath: config.webhookPath, updatedAtLabel: formatUpdatedAt(config.updatedAt), updatedByName: config.updatedByName }
     : { configured: false };
 
   return (
     <>
-      <PageHeader title="Payments" description={`Razorpay keys for ${active.tenant.name}.`} />
-      <div className="max-w-5xl">
+      <PageHeader title="Payments" description={`How ${active.tenant.name} gets paid: Razorpay for online payments, and cash on delivery.`} />
+      <PaymentsNav />
+      <div className="grid max-w-5xl gap-6">
         <PaymentConfigForm config={view} />
+        <CodSettingsForm cod={cod} currency={store?.currency ?? "INR"} />
       </div>
     </>
   );
