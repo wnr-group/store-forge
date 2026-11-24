@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { BarChart3, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { BarChart3, CheckCircle2, Loader2, Megaphone, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { removeIntegrationAction, setIntegrationEnabledAction, testIntegrationAction } from "@/app/(dashboard)/dashboard/integrations/actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import type { IntegrationEventApi, IntegrationTestApi } from "@/lib/api/endpoints/integrations-api";
 import { Ga4Form } from "./ga4-form";
+import { MetaPixelForm } from "./meta-pixel-form";
 
 export type IntegrationView = {
   provider: string;
@@ -22,6 +23,9 @@ export type IntegrationView = {
   validationStatus: "unverified" | "valid" | "invalid" | null;
   validationError: string | null;
   config: Record<string, string>;
+  /** The name and value of the public identifier this provider is set up with (e.g. Measurement ID, Pixel ID). */
+  identifierLabel: string;
+  identifierKey: string;
   /** Already formatted in the store's time zone, e.g. "24 Nov 2026". */
   updatedLabel: string | null;
   updatedByYou: boolean;
@@ -85,7 +89,7 @@ export function IntegrationCard({ view, canManage }: { view: IntegrationView; ca
       <CardHeader className="flex-row items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-md border bg-secondary text-muted-foreground" aria-hidden>
-            <BarChart3 className="size-4" />
+            {view.provider === "meta_pixel" ? <Megaphone className="size-4" /> : <BarChart3 className="size-4" />}
           </span>
           <div className="min-w-0 space-y-1">
             <CardTitle className="text-sm font-semibold">{view.name}</CardTitle>
@@ -109,8 +113,8 @@ export function IntegrationCard({ view, canManage }: { view: IntegrationView; ca
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Measurement ID</dt>
-            <dd className="mt-1 font-mono text-[13px]">{view.config.measurementId ?? "None"}</dd>
+            <dt className="text-xs text-muted-foreground">{view.identifierLabel}</dt>
+            <dd className="mt-1 break-all font-mono text-[13px]">{view.config[view.identifierKey] ?? "None"}</dd>
           </div>
           <div>
             <dt className="text-xs text-muted-foreground">Last updated</dt>
@@ -118,7 +122,7 @@ export function IntegrationCard({ view, canManage }: { view: IntegrationView; ca
           </div>
         </dl>
 
-        {!view.configured ? <p className="text-sm text-muted-foreground">Add your Measurement ID, then switch it on. Nothing is sent to Google until you do, and then only for shoppers who agree to analytics.</p> : null}
+        {!view.configured ? <p className="text-sm text-muted-foreground">Add your {view.identifierLabel}, then switch it on. Nothing is sent to {view.name} until you do, and then only for shoppers who agree to analytics.</p> : null}
 
         <div className="flex flex-wrap gap-2">
           {canManage ? (
@@ -177,11 +181,12 @@ export function IntegrationCard({ view, canManage }: { view: IntegrationView; ca
       </CardContent>
 
       {view.provider === "ga4" ? <Ga4Form open={configuring} onOpenChange={setConfiguring} measurementId={view.config.measurementId ?? ""} configured={view.configured} /> : null}
+      {view.provider === "meta_pixel" ? <MetaPixelForm open={configuring} onOpenChange={setConfiguring} pixelId={view.config.pixelId ?? ""} configured={view.configured} /> : null}
       <ConfirmDialog
         open={removing}
         onOpenChange={setRemoving}
         title={`Remove ${view.name}?`}
-        description="The saved Measurement ID is deleted and your store stops sending data to Google Analytics right away. Data already in Google Analytics stays there."
+        description={`The saved ${view.identifierLabel} is deleted and your store stops sending data to ${view.name} right away. Data already sent stays there.`}
         confirmLabel="Remove"
         successMessage={`${view.name} removed`}
         onConfirm={async () => {

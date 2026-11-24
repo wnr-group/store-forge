@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { consentCopy } from "@/lib/tracking/consent";
 import { useTracker } from "./tracking-provider";
 
 /**
@@ -9,7 +10,7 @@ import { useTracker } from "./tracking-provider";
  * on any theme.
  */
 export function ConsentBanner() {
-  const { available, consent, setConsent } = useTracker();
+  const { available, consent, setConsent, services } = useTracker();
   const [reopened, setReopened] = useState(false);
   if (!available) return null;
 
@@ -33,7 +34,7 @@ export function ConsentBanner() {
     <section aria-label="Cookie consent" className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-xl rounded-md border border-border bg-background p-4 text-[13px] text-foreground shadow-md sm:left-auto sm:right-3 sm:mx-0">
       <p className="font-medium">Help us improve this store</p>
       <p className="mt-1 text-muted-foreground">
-        We would like to use Google Analytics to see which pages and products are popular. It sets cookies in your browser and sends anonymous usage data to Google. The store works the same if you say no.
+        {consentCopy(services)} The store works the same if you say no.
         {consent ? ` Your current choice: ${consent === "granted" ? "analytics on" : "analytics off"}.` : ""}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">

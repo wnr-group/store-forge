@@ -8,7 +8,7 @@ import { parseInput } from "@/lib/validations/parse";
 import { removeIntegration, saveIntegration, setIntegrationEnabled, testIntegration } from "@/services/integrations.service";
 
 /** The providers this page knows. The API refuses any other with a 404, so this list only keeps junk away from it. */
-const provider = z.enum(["ga4"]);
+const provider = z.enum(["ga4", "meta_pixel"]);
 const value = z.string().trim().max(100);
 
 // The tenant is never an argument: integrations.service resolves it from the verified session and checks the permission first.

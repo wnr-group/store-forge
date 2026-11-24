@@ -6,6 +6,7 @@ import { cancelOrderAction, getOrderAction } from "@/app/s/[slug]/checkout/actio
 import type { PublicOrderApi } from "@/lib/api/endpoints/checkout-api";
 import { formatBagPrice } from "@/lib/cart/format";
 import { readMyOrders, tokenFor, type MyOrder } from "@/lib/checkout/my-orders";
+import { purchaseEventId } from "@/lib/tracking/events";
 import { markPurchaseTracked, wasPurchaseTracked } from "@/lib/tracking/purchase-guard";
 import { cn } from "@/lib/utils";
 import type { SectionProps } from "../engine/looks";
@@ -56,7 +57,7 @@ export function OrderPageSection({ context, sectionId }: SectionProps) {
     if (!SALE_STATUSES.has(o.status) || (!params.get("placed") && !sawUnpaid.current)) return;
     if (wasPurchaseTracked(browserStorage(), storeSlug, o.orderNumber)) return;
     const items = o.items.map((i) => ({ id: i.productSlug ?? i.sku ?? i.name, name: i.name, priceMinor: i.unitPriceMinor, quantity: i.quantity }));
-    const sent = track({ type: "purchase", transactionId: String(o.orderNumber), currency: o.currency, items, discountMinor: o.discountMinor, shippingMinor: o.shippingMinor + o.codFeeMinor, taxMinor: o.taxMinor });
+    const sent = track({ type: "purchase", transactionId: String(o.orderNumber), eventId: purchaseEventId(String(o.orderNumber)), currency: o.currency, items, discountMinor: o.discountMinor, shippingMinor: o.shippingMinor + o.codFeeMinor, taxMinor: o.taxMinor });
     if (sent) markPurchaseTracked(browserStorage(), storeSlug, o.orderNumber);
   }, [load, params, track, storeSlug, isPreview]);
 

@@ -24,6 +24,8 @@ export default async function IntegrationsPage() {
     validationStatus: i.validationStatus,
     validationError: i.validationError,
     config: i.config,
+    identifierLabel: i.fields[0]?.label ?? "ID",
+    identifierKey: i.fields[0]?.key ?? "",
     updatedLabel: i.updatedAt ? formatDate(new Date(i.updatedAt), timezone) : null,
     updatedByYou: i.updatedByYou,
     history: (details[idx]?.history ?? []).map((e) => ({ action: e.action, note: e.note, byYou: e.byYou, when: formatDateTime(new Date(e.createdAt), timezone) })),

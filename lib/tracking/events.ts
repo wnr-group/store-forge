@@ -31,6 +31,8 @@ export type TrackEvent =
       shippingMinor: number;
       taxMinor: number;
       couponCode?: string | null;
+      /** Overrides the event id Meta is given (default: `purchaseEventId(transactionId)`). */
+      eventId?: string;
     };
 
 /** GA4 accepts at most 200 items per event; a store bag holds at most 50 lines. */
@@ -92,3 +94,42 @@ export function toGa4(event: TrackEvent): Ga4Event {
 
 /** A Measurement ID as the API stores it; checked again in the browser before it is put into a script address. */
 export const GA4_MEASUREMENT_ID = /^G-[A-Z0-9]{10}$/;
+
+// --- Meta Pixel ---------------------------------------------------------------------------------------------------------------
+
+/** A Meta Pixel ID as the API stores it (15 or 16 digits); checked again in the browser before it reaches a script call. */
+export const META_PIXEL_ID = /^[0-9]{15,16}$/;
+
+/**
+ * The event id of a purchase. It is the same on every report of that order, from this browser now and from a server later
+ * (a Conversions API call carrying this id), which is how Meta knows they are ONE purchase and counts it once.
+ */
+export const purchaseEventId = (transactionId: string) => `purchase_${transactionId}`;
+
+export type MetaEvent = { name: string; params: Record<string, unknown>; eventId: string };
+
+const metaContents = (items: readonly TrackItem[]) => items.slice(0, MAX_ITEMS).map((i) => ({ id: i.id, quantity: i.quantity, item_price: toMajor(i.priceMinor) }));
+
+/**
+ * The Meta standard event for `event`: PageView, ViewContent, AddToCart, InitiateCheckout, Purchase. `newId` makes the event id of
+ * the events that have no natural one (a page view is not an order); a purchase always uses its order's id.
+ */
+export function toMeta(event: TrackEvent, newId: () => string): MetaEvent {
+  if (event.type === "page_view") return { name: "PageView", params: {}, eventId: newId() };
+  const items = event.items;
+  const base = { content_type: "product", content_ids: items.slice(0, MAX_ITEMS).map((i) => i.id), contents: metaContents(items), currency: event.currency };
+  switch (event.type) {
+    case "view_item":
+      return { name: "ViewContent", params: { ...base, ...(items.length === 1 ? { content_name: items[0].name } : {}), value: toMajor(itemsValueMinor(items)) }, eventId: newId() };
+    case "add_to_cart":
+      return { name: "AddToCart", params: { ...base, ...(items.length === 1 ? { content_name: items[0].name } : {}), value: toMajor(itemsValueMinor(items)) }, eventId: newId() };
+    case "begin_checkout":
+      return { name: "InitiateCheckout", params: { ...base, num_items: items.reduce((n, i) => n + i.quantity, 0), value: toMajor(itemsValueMinor(items)) }, eventId: newId() };
+    case "purchase":
+      return {
+        name: "Purchase",
+        params: { ...base, num_items: items.reduce((n, i) => n + i.quantity, 0), value: toMajor(Math.max(0, itemsValueMinor(items) - event.discountMinor)) },
+        eventId: event.eventId ?? purchaseEventId(event.transactionId),
+      };
+  }
+}
