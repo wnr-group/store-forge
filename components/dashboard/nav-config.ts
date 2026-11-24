@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Megaphone, ShoppingBasket, TicketPercent, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, Plug, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Megaphone, ShoppingBasket, TicketPercent, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, Plug, ScrollText, Settings, ShieldCheck, UserCog, Users, Activity, Gauge, Receipt, SlidersHorizontal, Tags, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -55,14 +55,19 @@ export const OWNER_NAV_ITEMS: NavItem[] = [
   NAV_ITEMS[NAV_ITEMS.length - 1],
 ];
 
-/** Platform Admin area: companies only - no merchant data. */
+/** Platform administration. Which entries a person sees depends on their platform role (see `hiddenAdminHrefs`); the pages and the API check again. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: ROUTES.adminCompanies, label: "Organizations", icon: Building2, group: "Platform" },
-  { href: ROUTES.adminTeam, label: "Platform Team", icon: ShieldCheck, group: "Platform" },
-  { href: ROUTES.adminActivity, label: "Activity & Audit Logs", icon: ScrollText, group: "Platform" },
-  { href: ROUTES.adminUsage, label: "Usage & Analytics", icon: BarChart3, group: "Platform" },
-  { href: ROUTES.adminSettings, label: "Settings", icon: Settings, group: "Platform" },
+  { href: ROUTES.adminCompanies, label: "Tenants", icon: Building2, group: "Platform" },
+  { href: ROUTES.adminPlans, label: "Subscription Plans", icon: Tags, group: "Platform" },
+  { href: ROUTES.adminEntitlements, label: "Feature Entitlements", icon: SlidersHorizontal, group: "Platform" },
+  { href: ROUTES.adminLimits, label: "Usage & Limits", icon: Gauge, group: "Platform" },
+  { href: ROUTES.adminBilling, label: "Billing & Invoices", icon: Receipt, group: "Finance" },
+  { href: ROUTES.adminTeam, label: "Platform Administrators", icon: ShieldCheck, group: "Administration" },
+  { href: ROUTES.adminActivity, label: "Audit Logs", icon: ScrollText, group: "Administration" },
+  { href: ROUTES.adminMonitoring, label: "System Monitoring", icon: Activity, group: "Administration" },
+  { href: ROUTES.adminUsage, label: "Usage & Analytics", icon: BarChart3, group: "Administration" },
+  { href: ROUTES.adminSettings, label: "Settings", icon: Settings, group: "Administration" },
   { href: ROUTES.adminAccount, label: "My Account", icon: KeyRound, group: "Account" },
 ];
 

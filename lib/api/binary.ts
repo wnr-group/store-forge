@@ -6,17 +6,17 @@ import { logEvent } from "@/lib/observability/log";
 import { apiBaseUrl } from "./config";
 
 /**
- * Downloads a file (a shipping label PDF) from the StoreForge API for the signed-in user. Like `apiRequest`, it runs on the
+ * Downloads a file (a shipping label or an invoice PDF) from the StoreForge API for the signed-in user. Platform endpoints take no organization. Like `apiRequest`, it runs on the
  * server only: the access token comes from the HttpOnly cookie and never reaches the browser; the organization is the
  * caller's verified active tenant.
  */
-export async function apiBinary(path: string, organizationId: string): Promise<{ body: ArrayBuffer; contentType: string }> {
+export async function apiBinary(path: string, organizationId?: string): Promise<{ body: ArrayBuffer; contentType: string }> {
   const session = await readStoredSession(await cookies());
   if (!session) throw new AppError("UNAUTHENTICATED", "Your session has expired. Please sign in again.");
   let response: Response;
   try {
     response = await fetch(`${apiBaseUrl()}${path}`, {
-      headers: { Authorization: `Bearer ${session.accessToken}`, "X-Organization-Id": organizationId },
+      headers: { Authorization: `Bearer ${session.accessToken}`, ...(organizationId ? { "X-Organization-Id": organizationId } : {}) },
       cache: "no-store",
       redirect: "manual",
       signal: AbortSignal.timeout(30_000),

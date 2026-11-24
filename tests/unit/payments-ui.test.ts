@@ -200,7 +200,11 @@ describe("static checks", () => {
       actualResult: `${changed.length} changed or new source files; none under Settings, none named route.ts`,
       assert: () => {
         expect(settings).toEqual([]);
-        expect(handlers).toEqual(["app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts"]);
+        expect(handlers).toEqual([
+          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
+          // Platform Administration: the invoice PDF download, same reason as the label.
+          "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
+        ]);
       },
       content: () => `AC-FE-14: files changed against origin/main: ${changed.length}\nSettings files changed: ${settings.length}\nroute handlers added: ${handlers.length}\n`,
     });

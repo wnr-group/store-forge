@@ -19,6 +19,9 @@ const dateOnly = z
   .catch("")
   .default("");
 
+/** What an audit entry can be about, as the API lists them (`GET /platform/audit-logs/filters`). */
+export const AUDIT_ENTITY_TYPES = ["all", "organization", "store", "team_member", "platform_admin", "platform_settings", "plan", "subscription", "entitlement", "invoice", "payment", "billing_settings"] as const;
+
 /** Organizations list. Invalid URL values fall back to the defaults instead of erroring. */
 export const orgListQuerySchema = z.object({
   q: text(80),
@@ -33,6 +36,7 @@ export type OrgListQuery = z.output<typeof orgListQuerySchema>;
 /** Activity & Audit Logs. `org` narrows to one organization (a link from its page); `q` searches the organization name. */
 export const auditListQuerySchema = z.object({
   action: z.enum([...AUDIT_ACTIONS, "all"]).catch("all").default("all"),
+  entity: z.enum(AUDIT_ENTITY_TYPES).catch("all").default("all"),
   admin: z.union([z.uuid(), z.literal("all")]).catch("all").default("all"),
   org: z.union([z.uuid(), z.literal("")]).catch("").default(""),
   q: text(80),

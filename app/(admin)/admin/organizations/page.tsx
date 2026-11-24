@@ -9,6 +9,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROUTES } from "@/config/app";
+import { getPlatformAccess } from "@/lib/auth/platform";
 import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
 import { ADMIN_PAGE_SIZES, orgListQuerySchema } from "@/lib/validations/admin-list";
 import { listCompaniesPage, type CompanySummary } from "@/services/platform.service";
@@ -74,23 +75,24 @@ const SORT_OPTIONS = [
 export default async function CompaniesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const raw = await searchParams;
   const query = orgListQuerySchema.parse(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])));
-  const { items: companies, total, page, pageSize } = await listCompaniesPage(query);
+  const [{ items: companies, total, page, pageSize }, access] = await Promise.all([listCompaniesPage(query), getPlatformAccess()]);
+  const canCreate = access?.permissions.includes("tenants:manage") ?? false;
   const filtered = Boolean(query.q) || query.status !== "all";
-  const create = (
+  const create = canCreate ? (
     <Link href={ROUTES.adminNewCompany} className={buttonVariants()}>
-      <PlusCircle aria-hidden /> Create organization
+      <PlusCircle aria-hidden /> Create tenant
     </Link>
-  );
+  ) : null;
 
   return (
     <>
-      <PageHeader title="Organizations" description="Every organization on the platform." actions={total > 0 || filtered ? create : null} />
+      <PageHeader title="Tenants" description="Every organization on the platform. Search by name, owner e-mail, organization id or store address." actions={total > 0 || filtered ? create : null} />
       {total === 0 && !filtered ? (
-        <EmptyState icon={Building2} title="No organizations yet" description="Create an organization together with its owner account." action={create} />
+        <EmptyState icon={Building2} title="No organizations yet" description="Create an organization together with its owner account." action={create ?? undefined} />
       ) : (
         <>
           <ListFilters
-            searchPlaceholder="Search by name or address"
+            searchPlaceholder="Search by name, owner e-mail, id or store address"
             filters={[{ key: "status", label: "Status", options: [{ value: "all", label: "All statuses" }, { value: "active", label: "Active" }, { value: "suspended", label: "Suspended" }] }]}
             sortOptions={SORT_OPTIONS}
           />

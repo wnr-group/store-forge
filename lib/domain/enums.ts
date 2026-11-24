@@ -16,7 +16,7 @@ export type AccessLevel = (typeof ACCESS_LEVELS)[number];
 export type MemberPermissions = Partial<Record<Module, AccessLevel>>;
 
 /** Platform staff levels. Only a super admin can manage other admins and the platform settings; the last one can never be removed. */
-export const PLATFORM_ADMIN_ROLES = ["super_admin", "admin"] as const;
+export const PLATFORM_ADMIN_ROLES = ["super_admin", "admin", "billing_admin", "support_admin"] as const;
 export type PlatformAdminRole = (typeof PLATFORM_ADMIN_ROLES)[number];
 
 /** A deactivated membership keeps its row but grants no access (enforced by is_tenant_member / has_tenant_role). */

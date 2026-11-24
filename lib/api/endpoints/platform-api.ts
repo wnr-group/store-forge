@@ -6,10 +6,11 @@ import { apiRequest, type PageMeta } from "@/lib/api/client";
  * platform authority is separate from tenant roles and the API answers 403 to anyone who is not a Platform Admin.
  */
 
-export type PlatformLevelApi = "super_admin" | "admin";
+export type PlatformLevelApi = "super_admin" | "admin" | "billing_admin" | "support_admin";
 
-/** `GET /platform/me`: 403 for everyone who is not a Platform Admin. */
-export const getPlatformMeApi = async () => (await apiRequest<{ level: PlatformLevelApi }>("/platform/me")).data;
+/** `GET /platform/me`: 403 for everyone who is not platform staff. `permissions` is what the role may do (the API enforces it either way). */
+export const getPlatformMeApi = async () =>
+  (await apiRequest<{ level: PlatformLevelApi; permissions: import("@/lib/platform/roles").PlatformPermission[] }>("/platform/me")).data;
 
 // Settings ---------------------------------------------------------------------------------------------------------------
 export type PlatformSettingsApi = {
@@ -66,8 +67,11 @@ export type AuditLogApi = {
   previousData: unknown;
   newData: unknown;
   createdAt: string;
+  ip: string | null;
+  userAgent: string | null;
+  requestId: string | null;
 };
-export type AuditApiQuery = { page: number; limit: number; action?: string; admin?: string; org?: string; search?: string; from?: string; to?: string };
+export type AuditApiQuery = { page: number; limit: number; action?: string; entity?: string; admin?: string; org?: string; search?: string; from?: string; to?: string };
 
 export async function listAuditLogsApi(query: AuditApiQuery): Promise<{ items: AuditLogApi[]; meta: PageMeta }> {
   const { data, meta } = await apiRequest<AuditLogApi[]>("/platform/audit-logs", { query });

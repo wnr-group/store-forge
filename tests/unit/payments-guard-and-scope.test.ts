@@ -148,7 +148,8 @@ describe("static scans [layer:STATIC]", () => {
 
   it("AC-SCOPE-01 [layer:STATIC]: no shopper login, registration or authentication enforcement was introduced (frontend)", async () => {
     const files = ours();
-    const authTouched = files.filter((f) => /^(app\/\(auth\)|lib\/auth|lib\/supabase|proxy\.ts)/.test(f) && f !== "lib/auth/permissions.ts");
+    const authTouched = files.filter((f) => /^(app\/\(auth\)|lib\/auth|lib\/supabase|proxy\.ts)/.test(f) && f !== "lib/auth/permissions.ts" && f !== "lib/auth/platform.ts");
+    // lib/auth/platform.ts decides what PLATFORM STAFF may do (role and permissions from the API); it has nothing to do with shoppers.
     // The storefront checkout is guest checkout: it must never read a session, a token cookie or Supabase.
     const checkoutAuth = files.filter((f) => /^(components\/storefront\/checkout|app\/s\/\[slug\]\/(checkout|orders))\//.test(f)).filter((f) => /readStoredSession|supabase|cookies\(|signIn|login/i.test(read(f)));
     const readers = walk("lib").concat(walk("app"), walk("components"), walk("services")).filter((f) => /customerAuthEnabled|customer_auth_enabled/.test(read(f)));
@@ -177,7 +178,11 @@ describe("static scans [layer:STATIC]", () => {
       assert: () => {
         expect(deps).toEqual([]);
         expect(hosts).toEqual(["components/storefront/checkout/razorpay.ts"]);
-        expect(handlers).toEqual(["app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts"]);
+        expect(handlers).toEqual([
+          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
+          // Platform Administration: streams an invoice PDF the browser cannot fetch itself (the API token is HttpOnly). Moves no money.
+          "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
+        ]);
       },
       content: () => `AC-SCOPE-02: razorpay dependencies: ${deps.length}; razorpay hosts in changed source: ${hosts.length}; route handlers added: ${handlers.length}\n`,
     });
