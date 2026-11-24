@@ -7,14 +7,17 @@ import { cn } from "@/lib/utils";
  * One figure with a label, an optional line of explanation and, when given, the change since the previous period. The change is
  * words and an arrow as well as a colour. `change: undefined` shows none; `null` says there is no earlier period to compare to.
  */
-export function StatTile({ label, value, hint, change, className }: { label: string; value: string; hint?: string; change?: number | null; className?: string }) {
+/** Which way is good news: more sales is, more refunds is not, more discounts is neither (they are a choice). Only colours the change; the words never depend on it. */
+export type Good = "up" | "down" | "neither";
+
+export function StatTile({ label, value, hint, change, good = "up", className }: { label: string; value: string; hint?: string; change?: number | null; good?: Good; className?: string }) {
   const c = change === undefined ? null : changeLabel(change);
   return (
     <Card className={cn("gap-1 px-4 py-4", className)}>
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="text-2xl font-semibold tabular-nums tracking-tight">{value}</p>
       {c ? (
-        <p className={cn("flex items-center gap-1 text-xs", c.tone === "up" && "text-success-text", c.tone === "down" && "text-destructive", (c.tone === "flat" || c.tone === "none") && "text-muted-foreground")}>
+        <p className={cn("flex items-center gap-1 text-xs", good !== "neither" && c.tone === (good === "up" ? "up" : "down") && "text-success-text", good !== "neither" && c.tone === (good === "up" ? "down" : "up") && "text-destructive", (good === "neither" || c.tone === "flat" || c.tone === "none") && "text-muted-foreground")}>
           {c.tone === "up" ? <ArrowUpRight className="size-3.5" aria-hidden /> : c.tone === "down" ? <ArrowDownRight className="size-3.5" aria-hidden /> : <Minus className="size-3.5" aria-hidden />}
           <span>{c.text}</span>
           {c.tone === "up" || c.tone === "down" ? <span className="text-muted-foreground">vs the period before</span> : null}
