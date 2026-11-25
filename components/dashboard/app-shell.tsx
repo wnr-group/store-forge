@@ -51,7 +51,7 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
           )}
         >
           <div className={cn("flex h-12 items-center border-b border-sidebar-border px-3", collapsed && "justify-center px-0")}>
-            {collapsed ? <Logo href={homeHref} name={brandName} logoUrl={logoUrl} className="[&>span:last-child]:hidden" /> : <Logo href={homeHref} name={brandName} logoUrl={logoUrl} />}
+            <Logo href={homeHref} name={brandName} logoUrl={logoUrl} compact={collapsed} />
           </div>
           <div data-sidebar-scroll className="flex-1 space-y-4 overflow-y-auto p-2.5">
             {collapsed ? switcher.compact : switcher.full}
