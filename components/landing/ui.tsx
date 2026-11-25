@@ -55,7 +55,7 @@ export function BrandLogo({ className, light = false, name = APP_NAME, logoUrl }
   if (!logoUrl) {
     return (
       <span className={cn("inline-flex items-center", className)}>
-        <Image src={light ? "/kanova-logo-light.png" : "/kanova-logo.png"} alt="" aria-hidden width={880} height={279} className={cn("w-auto shrink-0", light ? "h-16" : "h-[3.25rem]")} />
+        <Image src={light ? "/kanova-logo-light.png" : "/kanova-logo.png"} alt="" aria-hidden width={909} height={279} className={cn("w-auto shrink-0", light ? "h-16" : "h-[3.25rem]")} />
       </span>
     );
   }
