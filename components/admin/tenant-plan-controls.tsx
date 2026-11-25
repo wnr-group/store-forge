@@ -18,7 +18,7 @@ const MB = 1_048_576;
 
 type PlanChoice = { id: string; name: string; monthlyPrice: string; yearlyPrice: string; currency: string; trialDays: number };
 
-/** Move a tenant to another active plan, for an upgrade or a downgrade. What it may use changes straight away. */
+/** Move an organization to another active plan, for an upgrade or a downgrade. What it may use changes straight away. */
 export function ChangePlanButton({ tenantId, currentPlanId, interval, plans }: { tenantId: string; currentPlanId: string; interval: "monthly" | "yearly"; plans: PlanChoice[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -36,7 +36,7 @@ export function ChangePlanButton({ tenantId, currentPlanId, interval, plans }: {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Change plan</DialogTitle>
-              <DialogDescription>Only active plans are offered. The tenant gets the new plan&apos;s features and limits immediately. A paid plan is invoiced from the Billing section.</DialogDescription>
+              <DialogDescription>Only active plans are offered. The organization gets the new plan&apos;s features and limits immediately. A paid plan is invoiced from the Billing section.</DialogDescription>
             </DialogHeader>
             <form
               noValidate
@@ -87,7 +87,7 @@ export function ChangePlanButton({ tenantId, currentPlanId, interval, plans }: {
   );
 }
 
-/** Follow the plan, or force a feature on or off for this tenant only. An exception always wins over the plan. */
+/** Follow the plan, or force a feature on or off for this organization only. An exception always wins over the plan. */
 export function FeatureOverrideSelect({ tenantId, featureKey, label, current, canEdit }: { tenantId: string; featureKey: string; label: string; current: boolean | null; canEdit: boolean }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -115,7 +115,7 @@ export function FeatureOverrideSelect({ tenantId, featureKey, label, current, ca
   );
 }
 
-/** Give this tenant its own warning and hard limit for one resource, or go back to the plan's. */
+/** Give this organization its own warning and hard limit for one resource, or go back to the plan's. */
 export function LimitOverrideButton({ tenantId, limitKey, label, unit, soft, hard, hasOverride }: { tenantId: string; limitKey: string; label: string; unit: "count" | "bytes"; soft: number | null; hard: number | null; hasOverride: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -131,7 +131,7 @@ export function LimitOverrideButton({ tenantId, limitKey, label, unit, soft, har
     send(async () => {
       const res = await setLimitOverrideAction(tenantId, body);
       if (!res.ok) return void fail(res);
-      toast.success(clear_ ? "Back to the plan's limit" : "Limit saved for this tenant");
+      toast.success(clear_ ? "Back to the plan's limit" : "Limit saved for this organization");
       setOpen(false);
       router.refresh();
     });
@@ -139,15 +139,15 @@ export function LimitOverrideButton({ tenantId, limitKey, label, unit, soft, har
 
   return (
     <>
-      <Button variant="ghost" size="icon-sm" aria-label={`Set a limit for ${label} for this tenant`} onClick={() => { setV({ soft: show(soft), hard: show(hard), note: "" }); setOpen(true); }}>
+      <Button variant="ghost" size="icon-sm" aria-label={`Set a limit for ${label} for this organization`} onClick={() => { setV({ soft: show(soft), hard: show(hard), note: "" }); setOpen(true); }}>
         <Pencil aria-hidden />
       </Button>
       {open ? (
         <Dialog open onOpenChange={(o) => !pending && !o && setOpen(false)}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>{label}: limit for this tenant</DialogTitle>
-              <DialogDescription>This tenant&apos;s own limit replaces its plan&apos;s, whatever the plan says. Leave both boxes empty for no limit at all. It applies from the next request.</DialogDescription>
+              <DialogTitle>{label}: limit for this organization</DialogTitle>
+              <DialogDescription>This organization&apos;s own limit replaces its plan&apos;s, whatever the plan says. Leave both boxes empty for no limit at all. It applies from the next request.</DialogDescription>
             </DialogHeader>
             <form noValidate className="space-y-3" onSubmit={(e) => { e.preventDefault(); save(false); }}>
               {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
@@ -181,7 +181,7 @@ export function LimitOverrideButton({ tenantId, limitKey, label, unit, soft, har
   );
 }
 
-/** Issue the invoice for the period the tenant is in now, or the next one. A period is only ever invoiced once. */
+/** Issue the invoice for the period the organization is in now, or the next one. A period is only ever invoiced once. */
 export function IssueInvoiceButtons({ tenantId }: { tenantId: string }) {
   const router = useRouter();
   const [pending, setPending] = useState<"current" | "next" | null>(null);

@@ -26,18 +26,18 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader title="Invoices" description="Every invoice issued to a tenant. Open one to see its payments, download it, or settle it." />
+      <PageHeader title="Invoices" description="Every invoice issued to an organization. Open one to see its payments, download it, or settle it." />
       <BillingTabs />
       {meta.total === 0 && !filtered ? (
-        <EmptyState icon={Receipt} title="No invoices yet" description="Invoices are issued for paid plans: automatically before each renewal, or from a tenant's page." />
+        <EmptyState icon={Receipt} title="No invoices yet" description="Invoices are issued for paid plans: automatically before each renewal, or from an organization's page." />
       ) : (
         <>
           <ListFilters
-            searchPlaceholder="Search by invoice number or tenant"
+            searchPlaceholder="Search by invoice number or organization"
             filters={[{ key: "status", label: "Status", options: [{ value: "all", label: "All statuses" }, { value: "open", label: "Unpaid" }, { value: "overdue", label: "Overdue" }, { value: "paid", label: "Paid" }, { value: "void", label: "Void" }] }]}
             dateFilters={[{ key: "from", label: "Issued from" }, { key: "to", label: "to" }]}
           />
-          {query.org ? <p className="mb-3 text-sm text-muted-foreground">Showing one tenant only. <Link href={ROUTES.adminInvoices} className="underline">Show all</Link></p> : null}
+          {query.org ? <p className="mb-3 text-sm text-muted-foreground">Showing one organization only. <Link href={ROUTES.adminInvoices} className="underline">Show all</Link></p> : null}
           {meta.total === 0 ? (
             <EmptyState icon={SearchX} title="No invoices match" description="Try a different search or clear the filters." />
           ) : (
@@ -47,7 +47,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
                   <TableHeader>
                     <TableRow className="bg-muted/40 hover:bg-muted/40">
                       <TableHead>Invoice</TableHead>
-                      <TableHead>Tenant</TableHead>
+                      <TableHead>Organization</TableHead>
                       <TableHead className="hidden md:table-cell">Plan</TableHead>
                       <TableHead className="hidden sm:table-cell">Issued</TableHead>
                       <TableHead className="hidden lg:table-cell">Due</TableHead>

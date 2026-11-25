@@ -38,11 +38,11 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
       <PageHeader title="Payments" description="Every payment attempt: successful, failed, pending and refunded, with the Razorpay reference. Times are UTC." />
       <BillingTabs />
       {meta.total === 0 && !filtered ? (
-        <EmptyState icon={Banknote} title="No payments yet" description="Payments appear here when a tenant pays an invoice or you record an offline payment." />
+        <EmptyState icon={Banknote} title="No payments yet" description="Payments appear here when an organization pays an invoice or you record an offline payment." />
       ) : (
         <>
           <ListFilters
-            searchPlaceholder="Search by invoice, tenant, Razorpay id or reference"
+            searchPlaceholder="Search by invoice, organization, Razorpay id or reference"
             filters={[
               { key: "status", label: "Status", options: [{ value: "all", label: "All statuses" }, { value: "succeeded", label: "Successful" }, { value: "failed", label: "Failed" }, { value: "pending", label: "Pending" }, { value: "partially_refunded", label: "Partly refunded" }, { value: "refunded", label: "Refunded" }] },
               { key: "refundRequired", label: "Refund", options: [{ value: "all", label: "Any" }, { value: "true", label: "Needs a refund" }] },
@@ -59,7 +59,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                     <TableRow className="bg-muted/40 hover:bg-muted/40">
                       <TableHead>When</TableHead>
                       <TableHead>Invoice</TableHead>
-                      <TableHead className="hidden md:table-cell">Tenant</TableHead>
+                      <TableHead className="hidden md:table-cell">Organization</TableHead>
                       <TableHead className="hidden lg:table-cell">Reference</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                       <TableHead>Status</TableHead>

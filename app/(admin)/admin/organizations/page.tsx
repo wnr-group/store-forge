@@ -80,13 +80,13 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Pr
   const filtered = Boolean(query.q) || query.status !== "all";
   const create = canCreate ? (
     <Link href={ROUTES.adminNewCompany} className={buttonVariants()}>
-      <PlusCircle aria-hidden /> Create tenant
+      <PlusCircle aria-hidden /> Create organization
     </Link>
   ) : null;
 
   return (
     <>
-      <PageHeader title="Tenants" description="Every organization on the platform. Search by name, owner e-mail, organization id or store address." actions={total > 0 || filtered ? create : null} />
+      <PageHeader title="Organizations" description="Every organization on the platform. Search by name, owner e-mail, organization id or store address." actions={total > 0 || filtered ? create : null} />
       {total === 0 && !filtered ? (
         <EmptyState icon={Building2} title="No organizations yet" description="Create an organization together with its owner account." action={create ?? undefined} />
       ) : (

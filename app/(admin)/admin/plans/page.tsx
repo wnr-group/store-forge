@@ -35,9 +35,9 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader title="Subscription plans" description="What each plan costs, includes and limits. Tenants get the features and limits of the plan they are on, straight away." actions={create} />
+      <PageHeader title="Subscription plans" description="What each plan costs, includes and limits. Organizations get the features and limits of the plan they are on, straight away." actions={create} />
       {meta.total === 0 && !filtered ? (
-        <EmptyState icon={Tags} title="No plans yet" description="Create a plan to give tenants features and limits." action={create ?? undefined} />
+        <EmptyState icon={Tags} title="No plans yet" description="Create a plan to give organizations features and limits." action={create ?? undefined} />
       ) : (
         <>
           <ListFilters
@@ -56,7 +56,7 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
                       <TableHead className="text-right">Monthly</TableHead>
                       <TableHead className="hidden text-right sm:table-cell">Yearly</TableHead>
                       <TableHead className="hidden text-right md:table-cell">Trial</TableHead>
-                      <TableHead className="text-right">Tenants</TableHead>
+                      <TableHead className="text-right">Organizations</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -67,7 +67,7 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
                           <Link href={`${ROUTES.adminPlans}/${p.id}`} className="font-medium hover:underline">{p.name}</Link>
                           <span className="block text-xs text-muted-foreground">
                             {p.code}
-                            {p.isDefault ? " · default for new tenants" : ""}
+                            {p.isDefault ? " · default for new organizations" : ""}
                             {p.isUnrestricted ? " · unrestricted" : ""}
                           </span>
                         </TableCell>

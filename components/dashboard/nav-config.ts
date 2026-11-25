@@ -71,7 +71,7 @@ export const OWNER_NAV_ITEMS: NavItem[] = [
 /** Platform administration. Which entries a person sees depends on their platform role (see `hiddenAdminHrefs`); the pages and the API check again. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: ROUTES.adminCompanies, label: "Tenants", icon: Building2, group: "Platform" },
+  { href: ROUTES.adminCompanies, label: "Organizations", icon: Building2, group: "Platform" },
   { href: ROUTES.adminPlans, label: "Subscription Plans", icon: Tags, group: "Platform" },
   { href: ROUTES.adminEntitlements, label: "Feature Entitlements", icon: SlidersHorizontal, group: "Platform" },
   { href: ROUTES.adminLimits, label: "Usage & Limits", icon: Gauge, group: "Platform" },

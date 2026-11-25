@@ -21,7 +21,7 @@ const FILTERS = [
   { value: "attention", label: "Needs attention" },
   { value: "reached", label: "Limit reached" },
   { value: "warning", label: "Close to a limit" },
-  { value: "every", label: "Every tenant" },
+  { value: "every", label: "Every organization" },
 ];
 
 export default async function LimitsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -35,14 +35,14 @@ export default async function LimitsPage({ searchParams }: { searchParams: Promi
     <>
       <PageHeader
         title="Usage & limits"
-        description="How much of its plan each tenant uses. Warnings start at a plan's warning level or at 80% of a hard limit; at the hard limit, adding more is refused. Storage is measured on each tenant's own page."
+        description="How much of its plan each organization uses. Warnings start at a plan's warning level or at 80% of a hard limit; at the hard limit, adding more is refused. Storage is measured on each organization's own page."
       />
-      <ListFilters searchPlaceholder="Search by tenant name" filters={[{ key: "filter", label: "Show", options: FILTERS, defaultValue: "attention" }]} />
+      <ListFilters searchPlaceholder="Search by organization name" filters={[{ key: "filter", label: "Show", options: FILTERS, defaultValue: "attention" }]} />
       {meta.total === 0 ? (
         quiet ? (
-          <EmptyState icon={Gauge} title="Nothing needs attention" description="No tenant is close to, or at, a limit of its plan." />
+          <EmptyState icon={Gauge} title="Nothing needs attention" description="No organization is close to, or at, a limit of its plan." />
         ) : (
-          <EmptyState icon={SearchX} title="No tenants match" description="Try a different search or filter." />
+          <EmptyState icon={SearchX} title="No organizations match" description="Try a different search or filter." />
         )
       ) : (
         <>
@@ -50,7 +50,7 @@ export default async function LimitsPage({ searchParams }: { searchParams: Promi
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/40 hover:bg-muted/40">
-                  <TableHead>Tenant</TableHead>
+                  <TableHead>Organization</TableHead>
                   <TableHead>Plan</TableHead>
                   {Object.values(LABEL).map((l) => (
                     <TableHead key={l}>{l}</TableHead>

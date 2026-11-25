@@ -34,7 +34,7 @@ export default async function AdminOverviewPage({ searchParams }: { searchParams
         actions={
           canCreate ? (
             <Link href={ROUTES.adminNewCompany} className={buttonVariants()}>
-              <PlusCircle aria-hidden /> Create tenant
+              <PlusCircle aria-hidden /> Create organization
             </Link>
           ) : null
         }
@@ -48,11 +48,11 @@ export default async function AdminOverviewPage({ searchParams }: { searchParams
       ) : null}
 
       <div className="space-y-6">
-        <section aria-label="Tenants" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="Tenants" value={d.tenants.total} icon={Building2} />
-          <StatCard label="Active tenants" value={d.tenants.active} icon={CheckCircle2} />
-          <StatCard label="Suspended tenants" value={d.tenants.suspended} icon={PauseCircle} tone={d.tenants.suspended > 0 ? "warning" : undefined} />
-          <StatCard label="Registered users" value={d.tenants.users} hint="People with an account in any tenant" icon={Users} />
+        <section aria-label="Organizations" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard label="Organizations" value={d.tenants.total} icon={Building2} />
+          <StatCard label="Active organizations" value={d.tenants.active} icon={CheckCircle2} />
+          <StatCard label="Suspended organizations" value={d.tenants.suspended} icon={PauseCircle} tone={d.tenants.suspended > 0 ? "warning" : undefined} />
+          <StatCard label="Registered users" value={d.tenants.users} hint="People with an account in any organization" icon={Users} />
         </section>
 
         <section aria-label="Subscriptions" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -75,8 +75,8 @@ export default async function AdminOverviewPage({ searchParams }: { searchParams
           <SectionCard title="New subscriptions" description={`Subscriptions started per ${d.growth.bucket}, ${range}.`}>
             <NewOrgsChart points={toPoints(d.growth.newSubscriptions)} bucket={d.growth.bucket} noun="subscription" />
           </SectionCard>
-          <SectionCard title="New tenants" description={`Tenants created per ${d.growth.bucket}, ${range}.`}>
-            <NewOrgsChart points={toPoints(d.growth.newOrganizations)} bucket={d.growth.bucket} noun="tenant" />
+          <SectionCard title="New organizations" description={`Organizations created per ${d.growth.bucket}, ${range}.`}>
+            <NewOrgsChart points={toPoints(d.growth.newOrganizations)} bucket={d.growth.bucket} noun="organization" />
           </SectionCard>
         </div>
 

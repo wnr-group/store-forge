@@ -6,7 +6,7 @@ import { setPlanStatusAction } from "@/app/(admin)/admin/commercial-actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 
-/** Activate or deactivate a plan. A deactivated plan can no longer be given to tenants; tenants already on it keep it. */
+/** Activate or deactivate a plan. A deactivated plan can no longer be given to organizations; organizations already on it keep it. */
 export function PlanStatusButton({ planId, planName, status, isDefault, subscribers }: { planId: string; planName: string; status: "active" | "inactive"; isDefault: boolean; subscribers: number }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -30,8 +30,8 @@ export function PlanStatusButton({ planId, planName, status, isDefault, subscrib
           title={next === "inactive" ? `Deactivate ${planName}?` : `Activate ${planName}?`}
           description={
             next === "inactive"
-              ? `It can no longer be given to tenants. ${subscribers > 0 ? `The ${subscribers} tenant${subscribers === 1 ? "" : "s"} already on it keep${subscribers === 1 ? "s" : ""} it.` : "No tenant is on it."}`
-              : "It can be given to tenants again."
+              ? `It can no longer be given to organizations. ${subscribers > 0 ? `The ${subscribers} organization${subscribers === 1 ? "" : "s"} already on it keep${subscribers === 1 ? "s" : ""} it.` : "No organization is on it."}`
+              : "It can be given to organizations again."
           }
           confirmLabel={next === "inactive" ? "Deactivate" : "Activate"}
           successMessage={next === "inactive" ? "Plan deactivated" : "Plan activated"}

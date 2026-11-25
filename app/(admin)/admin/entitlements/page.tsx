@@ -39,7 +39,7 @@ export default async function EntitlementsPage() {
 
   return (
     <>
-      <PageHeader title="Feature entitlements" description="What each plan includes. A tenant gets exactly what its plan lists, the moment it is assigned or the plan is edited. Edit a plan to change what it includes." />
+      <PageHeader title="Feature entitlements" description="What each plan includes. An organization gets exactly what its plan lists, the moment it is assigned or the plan is edited. Edit a plan to change what it includes." />
       {plans.length === 0 ? (
         <EmptyState icon={Tags} title="No plans yet" description="Create a plan first; then this table shows what each one includes." />
       ) : (
@@ -106,7 +106,7 @@ export default async function EntitlementsPage() {
           </SectionCard>
 
           <p className="text-sm text-muted-foreground">
-            To give one tenant something its plan does not include, or a different limit, open the tenant and use <span className="font-medium">Plan, features and limits</span>. Those exceptions always win over the plan and are recorded in the audit log.
+            To give one organization something its plan does not include, or a different limit, open the organization and use <span className="font-medium">Plan, features and limits</span>. Those exceptions always win over the plan and are recorded in the audit log.
           </p>
         </div>
       )}

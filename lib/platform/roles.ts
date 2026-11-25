@@ -34,10 +34,10 @@ export const PLATFORM_LEVEL_LABELS: Record<PlatformAdminLevel, string> = {
 };
 
 export const PLATFORM_LEVEL_DESCRIPTIONS: Record<PlatformAdminLevel, string> = {
-  super_admin: "Full access: tenants, plans, billing, administrators, audit log and platform settings.",
-  admin: "Manages tenants, subscription plans, entitlements and usage limits. Can read billing, the audit log and monitoring.",
-  billing_admin: "Manages invoices, payments, refunds and billing settings. Can see tenants, plans and usage.",
-  support_admin: "Read-only support: can look up tenants, their subscription and usage. Cannot change anything.",
+  super_admin: "Full access: organizations, plans, billing, administrators, audit log and platform settings.",
+  admin: "Manages organizations, subscription plans, entitlements and usage limits. Can read billing, the audit log and monitoring.",
+  billing_admin: "Manages invoices, payments, refunds and billing settings. Can see organizations, plans and usage.",
+  support_admin: "Read-only support: can look up organizations, their subscription and usage. Cannot change anything.",
 };
 
 /** The permission a menu entry needs. Entries not listed here are open to every platform role. */

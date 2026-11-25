@@ -61,7 +61,7 @@ export default async function BillingOverviewPage({ searchParams }: { searchPara
                 <TableHeader>
                   <TableRow className="bg-muted/40 hover:bg-muted/40">
                     <TableHead>Invoice</TableHead>
-                    <TableHead>Tenant</TableHead>
+                    <TableHead>Organization</TableHead>
                     <TableHead className="hidden sm:table-cell">Due</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead><span className="sr-only">Status</span></TableHead>

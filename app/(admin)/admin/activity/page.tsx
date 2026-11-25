@@ -15,7 +15,7 @@ import { listAuditAdmins, listAuditLogs, type AuditRow } from "@/services/admin-
 
 export const metadata: Metadata = { title: "Audit logs" };
 
-const ENTITY_LABEL: Record<string, string> = { organization: "Tenants", store: "Stores", team_member: "Team members", platform_admin: "Administrators", platform_settings: "Platform settings", plan: "Plans", subscription: "Subscriptions", entitlement: "Entitlements", invoice: "Invoices", payment: "Payments", billing_settings: "Billing settings" };
+const ENTITY_LABEL: Record<string, string> = { organization: "Organizations", store: "Stores", team_member: "Team members", platform_admin: "Administrators", platform_settings: "Platform settings", plan: "Plans", subscription: "Subscriptions", entitlement: "Entitlements", invoice: "Invoices", payment: "Payments", billing_settings: "Billing settings" };
 
 const when = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 

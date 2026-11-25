@@ -12,10 +12,10 @@ import { getPlatformAccess } from "@/lib/auth/platform";
 import { formatBytes } from "@/lib/utils/bytes";
 import { getSubscription, getTenantBilling, getTenantEntitlements, listPlans } from "@/services/platform-commercial.service";
 
-const SOURCE = { plan: "From the plan", unrestricted: "Unrestricted plan", override: "Exception for this tenant" } as const;
+const SOURCE = { plan: "From the plan", unrestricted: "Unrestricted plan", override: "Exception for this organization" } as const;
 
 /**
- * One tenant's plan, what it may use, how much it uses, and its billing position, with the controls each role is allowed. Everything
+ * One organization's plan, what it may use, how much it uses, and its billing position, with the controls each role is allowed. Everything
  * is read from the API; a part the signed-in role cannot read is left out, and a part that fails says so instead of breaking the page.
  */
 export async function TenantPlanSection({ tenantId }: { tenantId: string }) {
@@ -44,7 +44,7 @@ export async function TenantPlanSection({ tenantId }: { tenantId: string }) {
   return (
     <SectionCard
       title="Plan, features and limits"
-      description="What this tenant may use comes from its plan. An exception here always wins over the plan, applies at once and is recorded in the audit log."
+      description="What this organization may use comes from its plan. An exception here always wins over the plan, applies at once and is recorded in the audit log."
       aside={canManagePlan ? <ChangePlanButton tenantId={tenantId} currentPlanId={sub.plan.id} interval={sub.billingInterval} plans={plans.items.map((p) => ({ id: p.id, name: p.name, monthlyPrice: p.monthlyPrice, yearlyPrice: p.yearlyPrice, currency: p.currency, trialDays: p.trialDays }))} /> : undefined}
     >
       <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -65,7 +65,7 @@ export async function TenantPlanSection({ tenantId }: { tenantId: string }) {
           <dd className="text-sm">{shortDate(ent.subscriptionStatus === "trialing" ? sub.trialEndsAt : sub.currentPeriodEnd)}</dd>
         </div>
       </dl>
-      {!ent.entitled ? <p role="alert" className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-destructive">This subscription is {ent.subscriptionStatus === "canceled" ? "canceled" : "expired"}, so the tenant currently has no features and cannot add anything new.</p> : null}
+      {!ent.entitled ? <p role="alert" className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-destructive">This subscription is {ent.subscriptionStatus === "canceled" ? "canceled" : "expired"}, so the organization currently has no features and cannot add anything new.</p> : null}
 
       <div>
         <h3 className="mb-2 text-sm font-semibold">Usage against limits</h3>

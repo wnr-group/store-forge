@@ -13,7 +13,7 @@ import { cookies } from "next/headers";
 
 /**
  * Server-side gate for the whole Platform Admin area: validated session AND is_platform_admin()
- * in the database. Tenant roles (even Owner) never pass this check. Each admin action and service
+ * in the database. Organization roles (even Owner) never pass this check. Each admin action and service
  * repeats it, so this layout is a UX gate, not the only protection.
  */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -30,7 +30,7 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ id:
     <>
       <PageHeader
         title={plan.name}
-        description={`${plan.code} · ${plan.subscriberCount} tenant${plan.subscriberCount === 1 ? "" : "s"} on this plan`}
+        description={`${plan.code} · ${plan.subscriberCount} organization${plan.subscriberCount === 1 ? "" : "s"} on this plan`}
         actions={
           <>
             <StatusBadge tone={plan.status === "active" ? "active" : "draft"}>{plan.status === "active" ? "Active" : "Inactive"}</StatusBadge>

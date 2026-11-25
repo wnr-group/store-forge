@@ -33,7 +33,7 @@ type Props = { catalog: PlanCatalogApi; plan?: PlanApi; canEdit: boolean };
 /**
  * Create or edit a subscription plan. Which features and limits exist comes from the API's catalog, so a capability added to the
  * product appears here without a change to this screen. The plan code is permanent. Plans on a restricted list of features are
- * what tenants get from the moment they are assigned: nothing here is cached anywhere else.
+ * what organizations get from the moment they are assigned: nothing here is cached anywhere else.
  */
 export function PlanForm({ catalog, plan, canEdit }: Props) {
   const router = useRouter();
@@ -98,7 +98,7 @@ export function PlanForm({ catalog, plan, canEdit }: Props) {
       {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
       {editing && plan && plan.subscriberCount > 0 ? (
         <p className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
-          {plan.subscriberCount} tenant{plan.subscriberCount === 1 ? " is" : "s are"} on this plan. Changes to features and limits apply to them immediately.
+          {plan.subscriberCount} organization{plan.subscriberCount === 1 ? " is" : "s are"} on this plan. Changes to features and limits apply to them immediately.
         </p>
       ) : null}
 
@@ -135,7 +135,7 @@ export function PlanForm({ catalog, plan, canEdit }: Props) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Features" description="What a tenant on this plan can use. Anything left off is not available to it.">
+      <SectionCard title="Features" description="What an organization on this plan can use. Anything left off is not available to it.">
         <label className="flex items-start gap-3 rounded-lg border bg-muted/30 p-3 text-sm">
           <Switch checked={v.isUnrestricted} onCheckedChange={(on) => setV((cur) => ({ ...cur, isUnrestricted: on }))} disabled={off} aria-label="Unrestricted plan" />
           <span>
@@ -197,7 +197,7 @@ export function PlanForm({ catalog, plan, canEdit }: Props) {
             <Switch checked={v.isDefault} onCheckedChange={(on) => setV((cur) => ({ ...cur, isDefault: on }))} disabled={off || (editing && plan?.isDefault) || (editing && plan?.status === "inactive")} aria-label="Default plan" />
             <span>
               <span className="block font-medium">Default plan</span>
-              <span className="text-muted-foreground">{editing && plan?.isDefault ? "New tenants get this plan. To change the default, make another plan the default." : "New tenants start on this plan unless you choose another."}</span>
+              <span className="text-muted-foreground">{editing && plan?.isDefault ? "New organizations get this plan. To change the default, make another plan the default." : "New organizations start on this plan unless you choose another."}</span>
             </span>
           </label>
           <FormField id="pl-sort" label="List order" error={errors.sortOrder} hint="Lower numbers are listed first.">
