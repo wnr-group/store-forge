@@ -48,14 +48,25 @@ export const lpButton = (variant: Variant = "primary", className?: string) =>
   );
 
 /**
- * Kanova Store brand lock-up. By default it is the full logo exactly as designed (public/kanova-logo.png, or the white-text
- * kanova-logo-light.png on dark backgrounds). An uploaded platform logo is shown with the platform name beside it instead.
+ * Kanova Store brand lock-up: the K shopping-bag mark is an image (public/kanova-mark.png) and the name beside it is live text,
+ * laid out like the logo ("Kanova" with the TM, then an orange dash and "Store"). An uploaded platform logo is shown with the
+ * platform name beside it instead.
  */
 export function BrandLogo({ className, light = false, name = APP_NAME, logoUrl }: { className?: string; light?: boolean; name?: string; logoUrl?: string | null }) {
   if (!logoUrl) {
     return (
-      <span className={cn("inline-flex items-center", className)}>
-        <Image src={light ? "/kanova-logo-light.png" : "/kanova-logo.png"} alt="" aria-hidden width={909} height={279} className={cn("w-auto shrink-0", light ? "h-16" : "h-[3.25rem]")} />
+      <span className={cn("inline-flex items-center gap-2.5", className)}>
+        <Image src="/kanova-mark.png" alt="" aria-hidden width={230} height={279} className={cn("w-auto shrink-0", light ? "h-14" : "h-11")} />
+        <span className={cn("lp-display flex flex-col leading-none", light ? "text-white" : "text-lp-heading")}>
+          <span className="relative pr-3.5 text-[28px] font-extrabold tracking-tight">
+            Kanova
+            <sup className="absolute top-0 right-0 text-[10px] leading-none font-bold tracking-normal">TM</sup>
+          </span>
+          <span className="mt-1 flex items-center gap-2">
+            <span aria-hidden className="h-[3px] w-5 rounded-full bg-gradient-to-r from-lp-cta to-lp-accent" />
+            <span className="text-[17px] leading-none font-medium tracking-wide">Store</span>
+          </span>
+        </span>
       </span>
     );
   }
