@@ -42,6 +42,22 @@ export const removePlatformLogoApi = async () => (await apiRequest<PlatformSetti
 export const getPublicBrandingApi = async () =>
   (await apiRequest<{ platformName: string; supportEmail: string | null; logoUrl: string | null }>("/public/branding", { anonymous: true })).data;
 
+/** `GET /public/plans`: the subscription plans an admin has published (active). No session needed; limit `value: null` means unlimited. */
+export type PublicPlanApi = {
+  code: string;
+  name: string;
+  description: string | null;
+  currency: string;
+  monthlyPrice: string;
+  monthlyPriceMinor: number;
+  yearlyPrice: string;
+  yearlyPriceMinor: number;
+  trialDays: number;
+  features: { key: string; label: string }[];
+  limits: { key: string; label: string; unit: "count" | "bytes"; value: number | null }[];
+};
+export const getPublicPlansApi = async () => (await apiRequest<PublicPlanApi[]>("/public/plans", { anonymous: true })).data;
+
 // Admins -----------------------------------------------------------------------------------------------------------------
 export type PlatformAdminApi = {
   userId: string;

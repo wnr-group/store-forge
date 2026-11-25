@@ -160,7 +160,7 @@ export function Features() {
     <Section id="features" className="bg-white">
       <Container>
         <div className="max-w-2xl">
-          <SlideIn as="p" x={-28} className="text-sm font-medium tracking-wide text-lp-primary">WHAT YOU CAN DO WITH STOREFORGE</SlideIn>
+          <SlideIn as="p" x={-28} className="text-sm font-medium tracking-wide text-lp-primary">WHAT YOU CAN DO WITH KANOVA STORE</SlideIn>
           <SlideIn x={-28} delay={0.08}>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance text-lp-heading sm:text-4xl sm:leading-[1.15]">Everything your store needs. All in one place.</h2>
           </SlideIn>

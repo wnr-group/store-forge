@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { ROUTES } from "@/config/app";
 import { run } from "@/lib/actions/run";
@@ -20,6 +20,7 @@ import {
   voidInvoiceSchema,
 } from "@/lib/validations/admin-commercial";
 import { parseInput } from "@/lib/validations/parse";
+import { PUBLIC_PLANS_TAG } from "@/services/public-plans.service";
 import {
   assignPlan,
   createPlan,
@@ -61,12 +62,19 @@ function planBody(v: z.output<typeof planUpdateSchema>): PlanInputApi {
   };
 }
 
+/** The landing page lists the published plans, so a plan that is created, edited or switched on or off must show there at once. */
+function refreshPublicPlans() {
+  updateTag(PUBLIC_PLANS_TAG);
+  revalidatePath(ROUTES.home);
+}
+
 // Plans -------------------------------------------------------------------------------------------------------------------------
 export async function createPlanAction(input: unknown) {
   return guarded("admin.plan.create", async () => {
     const v = parseInput(planFormSchema, input);
     const plan = await createPlan({ code: v.code, ...planBody(v) });
     revalidatePath(ROUTES.adminPlans);
+    refreshPublicPlans();
     return { id: plan.id };
   });
 }
@@ -76,6 +84,7 @@ export async function updatePlanAction(planId: unknown, input: unknown) {
     await updatePlan(parseInput(id, planId), planBody(parseInput(planUpdateSchema, input)));
     revalidatePath(ROUTES.adminPlans, "layout");
     revalidatePath(ROUTES.adminEntitlements);
+    refreshPublicPlans();
   });
 }
 
@@ -83,6 +92,7 @@ export async function setPlanStatusAction(planId: unknown, status: unknown) {
   return guarded("admin.plan.set_status", async () => {
     await setPlanStatus(parseInput(id, planId), parseInput(planStatusSchema, status));
     revalidatePath(ROUTES.adminPlans, "layout");
+    refreshPublicPlans();
   });
 }
 

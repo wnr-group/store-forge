@@ -6,6 +6,7 @@ import { HeroCarousel } from "@/components/landing/hero-carousel";
 import { MotionProvider, ScrollProgress } from "@/components/landing/motion";
 import { Industries } from "@/components/landing/industries";
 import { Integrations } from "@/components/landing/integrations";
+import { Pricing } from "@/components/landing/pricing";
 import { Security } from "@/components/landing/security";
 import { Personalization } from "@/components/landing/personalization";
 import { ProblemSolution } from "@/components/landing/problem-solution";
@@ -35,6 +36,7 @@ export default function LandingPage() {
           <Personalization />
           <Industries />
           <Integrations />
+          <Pricing />
           <Security />
           <Faq />
           <FinalCta />

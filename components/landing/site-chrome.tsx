@@ -1,5 +1,6 @@
 import { APP_NAME } from "@/config/app";
 import { getPublicBranding } from "@/services/platform-settings.service";
+import { getPublicPlans } from "@/services/public-plans.service";
 import Link from "next/link";
 import { HeaderShell } from "./header-shell";
 import { MobileMenu } from "./mobile-menu";
@@ -33,8 +34,12 @@ export function AnnouncementBar() {
   );
 }
 
+/** The Plans link is only offered while at least one plan is published, so it never points at a section that is not there. */
+const withPlansLink = (hasPlans: boolean) => (hasPlans ? [...NAV_LINKS.slice(0, 2), { href: "/#plans", label: "Plans" }, ...NAV_LINKS.slice(2)] : [...NAV_LINKS]);
+
 export async function SiteHeader() {
-  const { logoUrl } = await getPublicBranding();
+  const [{ logoUrl }, plans] = await Promise.all([getPublicBranding(), getPublicPlans()]);
+  const links = withPlansLink(plans.length > 0);
   return (
     <HeaderShell>
       <Container className="flex h-(--nav-h) items-center justify-between gap-6 transition-[height] duration-300 motion-reduce:transition-none">
@@ -42,7 +47,7 @@ export async function SiteHeader() {
           <BrandLogo name={platformName} logoUrl={logoUrl} />
         </Link>
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
-          {NAV_LINKS.map((l) => (
+          {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -55,7 +60,7 @@ export async function SiteHeader() {
         <div className="hidden md:block">
           <AuthActions variant="header" />
         </div>
-        <MobileMenu links={NAV_LINKS} />
+        <MobileMenu links={links} />
       </Container>
     </HeaderShell>
   );
