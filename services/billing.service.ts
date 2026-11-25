@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import {
   getMyBillingApi,
   getMyEntitlementsApi,
@@ -14,10 +15,11 @@ import { requireActiveTenant } from "@/lib/tenant/context";
  * BEFORE any API call, the tenant comes from `requireActiveTenant` (never from input), and the API and the database check again.
  * `getMyEntitlements` is for display only (menu, notices) and open to every member; the server refuses disallowed actions anyway.
  */
-export async function getMyEntitlements(storage = false) {
+/** Cached per request: the layout, the page guards and the menu share one call. */
+export const getMyEntitlements = cache(async (storage = false) => {
   const { tenant } = await requireActiveTenant();
   return getMyEntitlementsApi(tenant.id, storage);
-}
+});
 
 export async function getMyBilling() {
   const { tenant } = await requireActiveTenant("billing:manage");

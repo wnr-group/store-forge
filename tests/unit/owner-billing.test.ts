@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { hiddenFeatureHrefs, hiddenNavHrefs, OWNER_NAV_ITEMS, NAV_ITEMS } from "@/components/dashboard/nav-config";
 import { ROUTES } from "@/config/app";
 import { can, canManageBilling, type Actor } from "@/lib/auth/permissions";
+import { featureAccess } from "@/lib/billing/features";
 import { bytesText } from "@/lib/billing/format";
 import { invoiceIdSchema, myInvoiceListSchema, verifyPaymentSchema } from "@/lib/validations/billing";
 
@@ -21,12 +22,21 @@ describe("owner billing access", () => {
 });
 
 describe("menu follows the plan", () => {
+  const plan = (on: string[], entitled = true) => ({ entitled, features: ["discount_codes", "marketing_campaigns", "abandoned_cart_recovery", "advanced_reports"].map((key) => ({ key, enabled: on.includes(key) })) });
   it("hides only the screens whose feature is switched off", () => {
-    expect(hiddenFeatureHrefs({ discount_codes: false, marketing_campaigns: true, abandoned_cart_recovery: true, advanced_reports: false }).sort()).toEqual([ROUTES.analytics, ROUTES.discounts].sort());
+    expect(hiddenFeatureHrefs(plan(["marketing_campaigns", "abandoned_cart_recovery"])).sort()).toEqual([ROUTES.analytics, ROUTES.discounts].sort());
+    expect(hiddenFeatureHrefs(plan(["discount_codes", "marketing_campaigns", "abandoned_cart_recovery", "advanced_reports"]))).toEqual([]);
   });
-  it("hides nothing when the plan is unknown or a feature is not mentioned", () => {
-    expect(hiddenFeatureHrefs({})).toEqual([]);
-    expect(hiddenFeatureHrefs({ multiple_staff: false })).toEqual([]);
+  it("hides every plan-gated screen when the plan could not be read or is not active", () => {
+    expect(hiddenFeatureHrefs(null)).toHaveLength(4);
+    expect(hiddenFeatureHrefs(plan([], false))).toHaveLength(4);
+  });
+  it("never reads an unknown plan as allowed", () => {
+    expect(featureAccess(null, "discount_codes")).toBe("unknown");
+    expect(featureAccess(plan([]), "discount_codes")).toBe("missing");
+    expect(featureAccess(plan(["discount_codes"], false), "discount_codes")).toBe("enabled");
+    expect(featureAccess(plan([], false), "discount_codes")).toBe("inactive");
+    expect(featureAccess({ entitled: true, features: [] }, "multiple_staff")).toBe("missing");
   });
   it("keeps the permission-based hiding separate", () => {
     expect(hiddenNavHrefs(owner)).toEqual([]);

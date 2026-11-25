@@ -1,6 +1,7 @@
 import { BarChart3, Boxes, Megaphone, ShoppingBasket, TicketPercent, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, Plug, ScrollText, Settings, ShieldCheck, UserCog, Users, Activity, Gauge, Receipt, SlidersHorizontal, Tags, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
+export { hiddenFeatureHrefs } from "@/lib/billing/features";
 
 export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean; group?: string };
 
@@ -24,18 +25,6 @@ const NAV_PERMISSION: Record<string, Permission> = {
 /** hrefs the member may not open, for the sidebar to hide (the pages and the database check again). */
 export const hiddenNavHrefs = (actor: Actor): string[] =>
   NAV_ITEMS.filter((i) => NAV_PERMISSION[i.href] && !can(actor, NAV_PERMISSION[i.href])).map((i) => i.href);
-
-/** Screens that belong to one plan feature. Hidden when the plan lacks it; the API refuses the calls whatever the menu shows. */
-const NAV_FEATURE: Record<string, string> = {
-  [ROUTES.discounts]: "discount_codes",
-  [ROUTES.campaigns]: "marketing_campaigns",
-  [ROUTES.abandonedCarts]: "abandoned_cart_recovery",
-  [ROUTES.analytics]: "advanced_reports",
-};
-
-/** hrefs whose feature is switched off for this organization. `enabled` is the plan's answer per feature key. */
-export const hiddenFeatureHrefs = (enabled: Readonly<Record<string, boolean>>): string[] =>
-  Object.entries(NAV_FEATURE).filter(([, key]) => enabled[key] === false).map(([href]) => href);
 
 /** Only list pages that exist - no placeholder navigation. */
 export const NAV_ITEMS: NavItem[] = [

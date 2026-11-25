@@ -48,9 +48,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const collapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "1";
   // One source for the sidebar and the Ctrl+K palette, so they always list the same sections.
   const navKey = active.role === "owner" ? "owner" : "merchant";
-  // What the plan includes is for display only (menu and notices): if it cannot be read, show everything; the API enforces the plan regardless.
+  // What the plan includes decides the menu and the notices. If it cannot be read nothing plan-gated is shown (fail closed); the API enforces the plan regardless.
   const plan = await getMyEntitlements().catch(() => null);
-  const hiddenNav = [...hiddenNavHrefs(active), ...(plan ? hiddenFeatureHrefs(Object.fromEntries(plan.features.map((f) => [f.key, f.enabled]))) : [])];
+  const hiddenNav = [...hiddenNavHrefs(active), ...hiddenFeatureHrefs(plan)];
 
   return (
     <MerchantScope>

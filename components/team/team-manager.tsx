@@ -219,7 +219,8 @@ function EditMemberDialog({ member, onClose }: { member: MemberRow; onClose: () 
 type Pending = { kind: "edit" | "reset" | "toggle" | "remove"; member: MemberRow } | null;
 
 /** The Owner's team table. Every action is re-authorised on the server (Owner of the active tenant only). */
-export function TeamManager({ members, description }: { members: MemberRow[]; description: string }) {
+/** `canAdd` is false when the plan does not allow more team members: the button stays, disabled, with the reason beside the list. */
+export function TeamManager({ members, description, canAdd = true }: { members: MemberRow[]; description: string; canAdd?: boolean }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const addFocus = useReturnFocus(adding);
@@ -233,7 +234,7 @@ export function TeamManager({ members, description }: { members: MemberRow[]; de
         title="Team members"
         description={description}
         actions={
-          <Button onClick={() => setAdding(true)}>
+          <Button onClick={() => setAdding(true)} disabled={!canAdd}>
             <PlusCircle aria-hidden /> Add member
           </Button>
         }

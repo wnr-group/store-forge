@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { FeatureGate } from "@/components/billing/feature-gate";
 import { CarrierCard } from "@/components/shipping/carrier-card";
 import { ShippingNav } from "@/components/shipping/shipping-nav";
 import { PageHeader } from "@/components/shared/page-header";
@@ -24,9 +25,11 @@ export default async function CarriersPage() {
       <PageHeader title="Shipping" description={`Connect your own carrier accounts for ${active.tenant.name}. Each carrier uses your credentials; nothing is shared with other stores.`} />
       <ShippingNav />
       <div className="grid max-w-5xl gap-5">
-        {carriers.map((c) => (
-          <CarrierCard key={c.code} carrier={c} />
-        ))}
+        <FeatureGate feature="shipping_integrations" inline>
+          {carriers.map((c) => (
+            <CarrierCard key={c.code} carrier={c} />
+          ))}
+        </FeatureGate>
         <SectionCard title="Recent activity" description="Who connected, changed or turned a carrier on or off. Secrets are never recorded.">
           {events.length === 0 ? (
             <p className="text-sm text-muted-foreground">No activity yet.</p>
