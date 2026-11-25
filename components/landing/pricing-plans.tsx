@@ -1,7 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { useId, useRef, useState } from "react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicPlan } from "@/services/public-plans.service";
 import { Reveal } from "./motion";
@@ -43,7 +43,7 @@ function PlanCard({ plan, interval, index }: { plan: PublicPlan; interval: Inter
   const extra = plan.features.length - PREVIEW_FEATURES;
   const saving = interval === "yearly" ? savingsPercent(plan) : 0;
   return (
-    <Reveal as="li" delay={index * 0.08} amount={0.1} className="h-full">
+    <Reveal as="li" delay={index * 0.08} amount={0.1} className="w-[85%] max-w-sm shrink-0 snap-center sm:w-[22rem] sm:snap-start">
       <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-lp-border bg-white p-6 shadow-[0_1px_2px_rgba(8,10,37,0.04)] transition-[translate,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-28px_rgba(8,10,37,0.35)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:p-7">
         <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-lp-cta to-lp-primary" />
 
@@ -112,10 +112,11 @@ function PlanCard({ plan, interval, index }: { plan: PublicPlan; interval: Inter
 /** The plans, as cards. Nothing here can be bought: the only controls change what is shown (billing period, full feature list). */
 export function PricingPlans({ plans }: { plans: PublicPlan[] }) {
   const [billing, setBilling] = useState<Interval>("monthly");
+  const scroller = useRef<HTMLUListElement>(null);
   if (plans.length === 0) return null;
   const yearly = hasYearlyOption(plans);
   const bestSaving = Math.max(0, ...plans.map(savingsPercent));
-  const columns = plans.length === 1 ? "max-w-md" : plans.length === 2 ? "max-w-3xl lg:grid-cols-2" : plans.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2 xl:grid-cols-4";
+  const scrollBy = (dir: 1 | -1) => scroller.current?.scrollBy({ left: dir * 380, behavior: "smooth" });
   return (
     <Section id="plans" className="bg-lp-soft py-24 sm:py-32">
       <Container>
@@ -123,11 +124,32 @@ export function PricingPlans({ plans }: { plans: PublicPlan[] }) {
           Compare what each plan includes and what it allows.
         </SectionHeading>
         {yearly ? <BillingToggle interval={billing} onChange={setBilling} saving={bestSaving} /> : null}
-        <ul className={cn("mx-auto mt-12 grid items-stretch gap-5 sm:grid-cols-2", plans.length === 1 && "sm:grid-cols-1", columns)}>
-          {plans.map((p, i) => (
-            <PlanCard key={p.code} plan={p} interval={yearly ? billing : "monthly"} index={i} />
-          ))}
-        </ul>
+        <div className="relative mt-8">
+          {plans.length > 1 ? (
+            <div className="mb-2 hidden justify-end gap-2 sm:flex">
+              {([-1, 1] as const).map((dir) => (
+                <button
+                  key={dir}
+                  type="button"
+                  aria-label={dir === -1 ? "Previous plans" : "Next plans"}
+                  onClick={() => scrollBy(dir)}
+                  className="grid size-10 place-items-center rounded-full border border-lp-border bg-white text-lp-heading transition-colors outline-none hover:bg-lp-secondary focus-visible:ring-2 focus-visible:ring-lp-primary"
+                >
+                  {dir === -1 ? <ChevronLeft className="size-5" aria-hidden /> : <ChevronRight className="size-5" aria-hidden />}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <ul
+            ref={scroller}
+            aria-label="Plans"
+            className="mx-auto flex w-fit max-w-full snap-x snap-mandatory items-stretch gap-5 overflow-x-auto scroll-smooth px-1 pt-2 pb-8 [scrollbar-width:thin] motion-reduce:scroll-auto"
+          >
+            {plans.map((p, i) => (
+              <PlanCard key={p.code} plan={p} interval={yearly ? billing : "monthly"} index={i} />
+            ))}
+          </ul>
+        </div>
       </Container>
     </Section>
   );
