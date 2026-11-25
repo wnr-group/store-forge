@@ -48,25 +48,31 @@ export const lpButton = (variant: Variant = "primary", className?: string) =>
   );
 
 /**
- * Kanova Store brand lock-up: the K shopping-bag mark is an image (public/kanova-mark.png) and the name beside it is live text,
- * laid out like the logo ("Kanova" with the TM, then an orange dash and "Store"). An uploaded platform logo is shown with the
- * platform name beside it instead.
+ * Kanova Store brand lock-up, drawn to the proportions of the logo artwork: the K shopping-bag mark is an image
+ * (public/kanova-mark.png) and "Kanova", the TM and "Store" are live SVG text, each fitted to the width it has in the artwork.
+ * Coordinates are the artwork's own pixels (origin at the mark's top left, 282 high). An uploaded platform logo is shown with
+ * the platform name beside it instead.
  */
+const BRAND_FONT = "var(--font-manrope), ui-sans-serif, system-ui, sans-serif";
 export function BrandLogo({ className, light = false, name = APP_NAME, logoUrl }: { className?: string; light?: boolean; name?: string; logoUrl?: string | null }) {
   if (!logoUrl) {
     return (
-      <span className={cn("inline-flex items-center gap-2.5", className)}>
-        <Image src="/kanova-mark.png" alt="" aria-hidden width={230} height={279} className={cn("w-auto shrink-0", light ? "h-14" : "h-11")} />
-        <span className={cn("lp-display flex flex-col leading-none", light ? "text-white" : "text-lp-heading")}>
-          <span className="relative pr-3.5 text-[28px] font-extrabold tracking-tight">
-            Kanova
-            <sup className="absolute top-0 right-0 text-[10px] leading-none font-bold tracking-normal">TM</sup>
-          </span>
-          <span className="mt-1 flex items-center gap-2">
-            <span aria-hidden className="h-[3px] w-5 rounded-full bg-gradient-to-r from-lp-cta to-lp-accent" />
-            <span className="text-[17px] leading-none font-medium tracking-wide">Store</span>
-          </span>
-        </span>
+      <span className={cn("inline-flex items-center", className)}>
+        <svg viewBox="0 0 894 282" aria-hidden focusable="false" className={cn("w-auto shrink-0", light ? "h-16 text-white" : "h-[3.25rem] text-lp-heading")}>
+          <defs>
+            <linearGradient id={light ? "kn-dash-light" : "kn-dash"} x1="0" x2="1">
+              <stop offset="0" stopColor="#f86f18" />
+              <stop offset="1" stopColor="#fa9c2c" />
+            </linearGradient>
+          </defs>
+          <image href="/kanova-mark.png" x="0" y="1.5" width="230" height="279" />
+          <g fill="currentColor" style={{ fontFamily: BRAND_FONT }}>
+            <text x="285" y="191" fontSize="158" fontWeight="800" stroke="currentColor" strokeWidth="5" strokeLinejoin="round" textLength="541" lengthAdjust="spacingAndGlyphs">Kanova</text>
+            <text x="834" y="120" fontSize="46" fontWeight="700" textLength="54" lengthAdjust="spacingAndGlyphs">TM</text>
+            <text x="415" y="265" fontSize="63" fontWeight="500" textLength="245" lengthAdjust="spacingAndGlyphs">Store</text>
+          </g>
+          <rect x="285" y="230" width="108" height="11" rx="5.5" fill={`url(#${light ? "kn-dash-light" : "kn-dash"})`} />
+        </svg>
       </span>
     );
   }
