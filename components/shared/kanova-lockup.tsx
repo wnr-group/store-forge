@@ -20,10 +20,10 @@ export function KanovaLockup({ className }: { className?: string }) {
         </linearGradient>
       </defs>
       <image href="/kanova-mark.png" x="0" y="1.5" width="230" height="279" />
-      <g fill="currentColor" style={{ fontFamily: BRAND_FONT }}>
+      <g fill="currentColor" style={{ fontFamily: BRAND_FONT, fontStyle: "normal", letterSpacing: "normal", wordSpacing: "normal", textRendering: "geometricPrecision" }}>
         <text x="285" y="191" fontSize="158" fontWeight="800" stroke="currentColor" strokeWidth="5" strokeLinejoin="round" textLength="541" lengthAdjust="spacingAndGlyphs">Kanova</text>
         <text x="834" y="120" fontSize="46" fontWeight="700" textLength="54" lengthAdjust="spacingAndGlyphs">TM</text>
-        <text x="415" y="265" fontSize="63" fontWeight="500" textLength="245" lengthAdjust="spacingAndGlyphs">Store</text>
+        <text x="415" y="265" fontSize="76" fontWeight="500" textLength="218" lengthAdjust="spacing">Store</text>
       </g>
       <rect x="285" y="230" width="108" height="11" rx="5.5" fill={`url(#${dash})`} />
     </svg>
