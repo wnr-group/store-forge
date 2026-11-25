@@ -109,7 +109,7 @@ export default async function TransactionPage({ params }: { params: Promise<{ id
           )}
         </SectionCard>
 
-        <SectionCard title="Razorpay events" description="What Razorpay told StoreForge about this payment, oldest first.">
+        <SectionCard title="Razorpay events" description="What Razorpay told Kanova Store about this payment, oldest first.">
           {t.events.length === 0 ? (
             <p className="text-sm text-muted-foreground">No events received.</p>
           ) : (

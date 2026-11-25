@@ -27,12 +27,12 @@ export default async function BillingPage() {
 
   return (
     <>
-      <PageHeader title="Plan & billing" description={`Your StoreForge plan, what ${active.tenant.name} has used, and what you owe.`} />
+      <PageHeader title="Plan & billing" description={`Your Kanova Store plan, what ${active.tenant.name} has used, and what you owe.`} />
 
       {!plan.entitled ? (
         <div role="alert" className="mb-5 flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden />
-          <span>Your subscription is {plan.subscriptionStatus === "expired" ? "expired" : "not active"}, so paid features are switched off. Pay any unpaid invoice below, or contact StoreForge.</span>
+          <span>Your subscription is {plan.subscriptionStatus === "expired" ? "expired" : "not active"}, so paid features are switched off. Pay any unpaid invoice below, or contact Kanova Store.</span>
         </div>
       ) : billing.overdue ? (
         <div role="alert" className="mb-5 flex items-start gap-2 rounded-lg border border-warning/50 bg-warning/10 p-3 text-sm">
@@ -51,7 +51,7 @@ export default async function BillingPage() {
               <div className="flex justify-between gap-4 py-1.5"><dt className="text-muted-foreground">Renews</dt><dd>{shortDate(billing.renewsAt)}</dd></div>
               <div className="flex justify-between gap-4 py-1.5"><dt className="text-muted-foreground">Unpaid invoices</dt><dd className="tabular-nums">{billing.openInvoices}</dd></div>
             </dl>
-            <p className="text-xs text-muted-foreground">To change your plan, contact StoreForge. Plans are assigned by StoreForge, not bought here.</p>
+            <p className="text-xs text-muted-foreground">To change your plan, contact Kanova Store. Plans are assigned by Kanova Store, not bought here.</p>
           </SectionCard>
 
           <SectionCard title="Usage" description="How much of each limit you have used.">
@@ -80,7 +80,7 @@ export default async function BillingPage() {
         </SectionCard>
 
         {unpaid.length > 0 ? (
-          <SectionCard title="To pay" description="Payments go through Razorpay. Your card or bank details are entered in Razorpay's window and never reach StoreForge.">
+          <SectionCard title="To pay" description="Payments go through Razorpay. Your card or bank details are entered in Razorpay's window and never reach Kanova Store.">
             <ul className="divide-y">
               {unpaid.map((i) => (
                 <li key={i.id} className="flex flex-wrap items-center justify-between gap-3 py-3">

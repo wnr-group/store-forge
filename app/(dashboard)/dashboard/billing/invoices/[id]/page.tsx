@@ -51,7 +51,7 @@ export default async function MyInvoicePage({ params }: { params: Promise<{ id: 
       />
       <div className="space-y-6">
         {inv.status === "open" ? (
-          <SectionCard title="Pay this invoice" description="You pay the full amount in Razorpay's window. Your card or bank details never reach StoreForge, and the invoice is marked paid only once Razorpay confirms it.">
+          <SectionCard title="Pay this invoice" description="You pay the full amount in Razorpay's window. Your card or bank details never reach Kanova Store, and the invoice is marked paid only once Razorpay confirms it.">
             <PayInvoiceButton invoiceId={inv.id} number={inv.number} totalMinor={inv.totalMinor} currency={inv.currency} />
           </SectionCard>
         ) : null}

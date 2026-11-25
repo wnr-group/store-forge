@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import type { z } from "zod";
 import { requirePlatformAdmin, requireSuperAdmin } from "@/lib/auth/platform";
+import { APP_NAME } from "@/config/app";
 import {
   getPlatformSettingsApi,
   getPublicBrandingApi,
@@ -39,8 +40,8 @@ export async function getPlatformSettings(): Promise<PlatformSettingsView> {
 export type PublicBranding = { platformName: string; supportEmail: string | null; logoUrl: string | null };
 const DEFAULT_BRANDING: PublicBranding = { platformName: "Kanova Store", supportEmail: null, logoUrl: null };
 
-/** The props the app shell takes for branding: the platform name and the uploaded logo (if any). */
-export const brandProps = (b: PublicBranding) => ({ brandName: b.platformName, logoUrl: b.logoUrl });
+/** The props the app shell takes for branding: the app name (Kanova Store) and the uploaded logo (if any). */
+export const brandProps = (b: PublicBranding) => ({ brandName: APP_NAME, logoUrl: b.logoUrl });
 
 export const BRANDING_TAG = "platform-branding";
 

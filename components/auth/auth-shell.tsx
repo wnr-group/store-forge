@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/config/app";
 import { getPublicBranding } from "@/services/platform-settings.service";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,7 +40,7 @@ const HIGHLIGHTS = [
 
 export async function AuthShell({ title, description, children, footer, icon, brandName }: Props) {
   const branding = await getPublicBranding();
-  const platformName = brandName ?? branding.platformName;
+  const platformName = brandName ?? APP_NAME;
   // The platform logo belongs to the platform, not to a store: a store login keeps the built-in mark.
   const logoUrl = brandName ? null : branding.logoUrl;
   return (

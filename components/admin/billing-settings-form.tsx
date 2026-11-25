@@ -73,7 +73,7 @@ export function BillingSettingsForm({ initial, canEdit }: { initial: BillingSett
       {!canEdit ? <p className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">You can view the billing settings. Only a Super Admin or Billing Admin can change them.</p> : null}
       {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
 
-      <SectionCard title="Online payment" description="Organizations pay invoices through StoreForge's own Razorpay account. The keys are set on the server, never here, and are never shown.">
+      <SectionCard title="Online payment" description="Organizations pay invoices through Kanova Store's own Razorpay account. The keys are set on the server, never here, and are never shown.">
         <div className="flex items-center gap-2 text-sm">
           <StatusBadge tone={initial.paymentsConfigured ? "active" : "warning"}>{initial.paymentsConfigured ? "Configured" : "Not configured"}</StatusBadge>
           <span className="text-muted-foreground">

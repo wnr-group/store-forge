@@ -12,7 +12,7 @@ export default async function BillingSettingsPage() {
   const [settings, access] = await Promise.all([getBillingSettings(), getPlatformAccess()]);
   return (
     <>
-      <PageHeader title="Billing settings" description="What invoices say about StoreForge as the seller, the tax added to plan prices, and how renewals behave." />
+      <PageHeader title="Billing settings" description="What invoices say about Kanova Store as the seller, the tax added to plan prices, and how renewals behave." />
       <BillingTabs />
       <BillingSettingsForm key={settings.updatedAt} initial={settings} canEdit={access?.permissions.includes("billing:manage") ?? false} />
     </>

@@ -29,7 +29,7 @@ export function PlanNotice({ plan, isOwner }: { plan: MyEntitlementsApi; isOwner
         <p className="text-muted-foreground">
           {isOwner ? (
             <>
-              See <Link href={ROUTES.billing} className="underline">Plan &amp; billing</Link> or contact StoreForge to change your plan.
+              See <Link href={ROUTES.billing} className="underline">Plan &amp; billing</Link> or contact Kanova Store to change your plan.
             </>
           ) : (
             "Ask the store owner to review the plan."

@@ -27,7 +27,7 @@ export default async function MyInvoicesPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader title="Invoices" description="What StoreForge has billed your organization. Open one to see its payments or download it." actions={<Link href={ROUTES.billing} className="text-sm underline">Back to plan &amp; billing</Link>} />
+      <PageHeader title="Invoices" description="What Kanova Store has billed your organization. Open one to see its payments or download it." actions={<Link href={ROUTES.billing} className="text-sm underline">Back to plan &amp; billing</Link>} />
       {meta.total === 0 && query.status === "all" ? (
         <EmptyState icon={Receipt} title="No invoices yet" description="Invoices are issued for paid plans, before each renewal." />
       ) : (

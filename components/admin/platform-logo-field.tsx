@@ -68,7 +68,7 @@ export function PlatformLogoField({ logoUrl, canEdit }: Props) {
           {logoUrl ? (
             <Image src={logoUrl} alt="Current platform logo" width={160} height={64} unoptimized className="max-h-16 w-auto object-contain" />
           ) : (
-            <Image src="/logo.png" alt="Built-in logo" width={256} height={217} className="max-h-14 w-auto object-contain" />
+            <Image src="/kanova-mark.png" alt="Built-in logo" width={230} height={279} className="max-h-14 w-auto object-contain" />
           )}
         </div>
         <div className="space-y-2">

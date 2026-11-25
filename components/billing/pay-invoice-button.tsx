@@ -10,10 +10,10 @@ import { Button } from "@/components/ui/button";
 import { money } from "@/lib/admin/format";
 
 /**
- * Pays one StoreForge invoice with Razorpay Checkout. The server creates the Razorpay order for the amount stored on the invoice; this
+ * Pays one Kanova Store invoice with Razorpay Checkout. The server creates the Razorpay order for the amount stored on the invoice; this
  * button only opens the widget with what the server returned and hands Razorpay's three success values back, which the API checks with
  * Razorpay before it marks the invoice paid. The widget closing "successfully" proves nothing by itself, and no card detail ever
- * reaches StoreForge.
+ * reaches Kanova Store.
  */
 export function PayInvoiceButton({ invoiceId, number, totalMinor, currency, label }: { invoiceId: string; number: string; totalMinor: number; currency: string; label?: string }) {
   const router = useRouter();
@@ -42,7 +42,7 @@ export function PayInvoiceButton({ invoiceId, number, totalMinor, currency, labe
           order_id: orderId,
           amount: amountMinor,
           currency: cur,
-          name: "StoreForge",
+          name: "Kanova Store",
           description: `Invoice ${invoiceNumber}`,
           handler: async (response: { razorpay_order_id?: string; razorpay_payment_id?: string; razorpay_signature?: string }) => {
             const verified = await verifyInvoicePaymentAction({ razorpayOrderId: response.razorpay_order_id, razorpayPaymentId: response.razorpay_payment_id, razorpaySignature: response.razorpay_signature });
