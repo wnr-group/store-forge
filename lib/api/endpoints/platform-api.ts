@@ -6,10 +6,11 @@ import { apiRequest, type PageMeta } from "@/lib/api/client";
  * platform authority is separate from tenant roles and the API answers 403 to anyone who is not a Platform Admin.
  */
 
-export type PlatformLevelApi = "super_admin" | "admin";
+export type PlatformLevelApi = "super_admin" | "admin" | "billing_admin" | "support_admin";
 
-/** `GET /platform/me`: 403 for everyone who is not a Platform Admin. */
-export const getPlatformMeApi = async () => (await apiRequest<{ level: PlatformLevelApi }>("/platform/me")).data;
+/** `GET /platform/me`: 403 for everyone who is not platform staff. `permissions` is what the role may do (the API enforces it either way). */
+export const getPlatformMeApi = async () =>
+  (await apiRequest<{ level: PlatformLevelApi; permissions: import("@/lib/platform/roles").PlatformPermission[] }>("/platform/me")).data;
 
 // Settings ---------------------------------------------------------------------------------------------------------------
 export type PlatformSettingsApi = {
@@ -18,18 +19,28 @@ export type PlatformSettingsApi = {
   defaultCurrency: string;
   defaultTimezone: string;
   defaultStoreStatus: "active" | "inactive";
+  /** Public address of the uploaded platform logo; null means the built-in logo. */
+  logoUrl: string | null;
   updatedAt: string;
   updatedByEmail: string | null;
 };
-export type PlatformSettingsApiInput = Omit<PlatformSettingsApi, "updatedAt" | "updatedByEmail">;
+export type PlatformSettingsApiInput = Omit<PlatformSettingsApi, "updatedAt" | "updatedByEmail" | "logoUrl">;
 
 export const getPlatformSettingsApi = async () => (await apiRequest<PlatformSettingsApi>("/platform/settings")).data;
 export const updatePlatformSettingsApi = async (input: PlatformSettingsApiInput) =>
   (await apiRequest<PlatformSettingsApi>("/platform/settings", { method: "PATCH", json: input })).data;
 
+/** `POST /platform/settings/logo/upload-url`, `PUT` and `DELETE /platform/settings/logo`: super admins only. The browser uploads the file itself to the signed link. */
+export type LogoUploadTargetApi = { path: string; token: string; signedUrl: string };
+export const requestPlatformLogoUploadApi = async (input: { type: string; size: number }) =>
+  (await apiRequest<LogoUploadTargetApi>("/platform/settings/logo/upload-url", { method: "POST", json: input })).data;
+export const setPlatformLogoApi = async (path: string) =>
+  (await apiRequest<PlatformSettingsApi>("/platform/settings/logo", { method: "PUT", json: { path } })).data;
+export const removePlatformLogoApi = async () => (await apiRequest<PlatformSettingsApi>("/platform/settings/logo", { method: "DELETE" })).data;
+
 /** `GET /public/branding`: no session needed. */
 export const getPublicBrandingApi = async () =>
-  (await apiRequest<{ platformName: string; supportEmail: string | null }>("/public/branding", { anonymous: true })).data;
+  (await apiRequest<{ platformName: string; supportEmail: string | null; logoUrl: string | null }>("/public/branding", { anonymous: true })).data;
 
 // Admins -----------------------------------------------------------------------------------------------------------------
 export type PlatformAdminApi = {
@@ -66,8 +77,11 @@ export type AuditLogApi = {
   previousData: unknown;
   newData: unknown;
   createdAt: string;
+  ip: string | null;
+  userAgent: string | null;
+  requestId: string | null;
 };
-export type AuditApiQuery = { page: number; limit: number; action?: string; admin?: string; org?: string; search?: string; from?: string; to?: string };
+export type AuditApiQuery = { page: number; limit: number; action?: string; entity?: string; admin?: string; org?: string; search?: string; from?: string; to?: string };
 
 export async function listAuditLogsApi(query: AuditApiQuery): Promise<{ items: AuditLogApi[]; meta: PageMeta }> {
   const { data, meta } = await apiRequest<AuditLogApi[]>("/platform/audit-logs", { query });

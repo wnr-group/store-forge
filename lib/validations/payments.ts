@@ -8,13 +8,17 @@ import { z } from "zod";
  */
 export const KEY_ID_PATTERN = /^rzp_(test|live)_[A-Za-z0-9]{8,}$/;
 export const KEY_SECRET_PATTERN = /^[A-Za-z0-9]{16,128}$/;
+export const WEBHOOK_SECRET_PATTERN = /^[!-~]{8,128}$/;
 
 export const KEY_ID_MESSAGE = "Enter a valid Razorpay Key ID, like rzp_test_ or rzp_live_ followed by at least 8 letters or numbers.";
 export const KEY_SECRET_MESSAGE = "Enter a valid Razorpay Key Secret: 16 to 128 letters and numbers, with no spaces or symbols.";
+export const WEBHOOK_SECRET_MESSAGE = "Enter a valid webhook secret: 8 to 128 letters, numbers or symbols, with no spaces.";
 
 export const paymentConfigSchema = z.strictObject({
   keyId: z.string({ error: "Enter your Razorpay Key ID." }).regex(KEY_ID_PATTERN, KEY_ID_MESSAGE),
   keySecret: z.string({ error: "Enter your Razorpay Key Secret." }).regex(KEY_SECRET_PATTERN, KEY_SECRET_MESSAGE),
+  /** Optional: when omitted, a webhook secret that is already saved is kept. */
+  webhookSecret: z.string({ error: "Enter your Razorpay webhook secret." }).regex(WEBHOOK_SECRET_PATTERN, WEBHOOK_SECRET_MESSAGE).optional(),
 });
 
 export type PaymentConfigInput = z.infer<typeof paymentConfigSchema>;

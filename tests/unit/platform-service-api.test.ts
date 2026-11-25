@@ -16,7 +16,7 @@ const getCurrentUser = vi.fn(async () => ({ id: "u1", user_metadata: {} }) as { 
 vi.mock("@/lib/auth/session", () => ({ getCurrentUser: () => getCurrentUser() }));
 
 const p = {
-  me: vi.fn(), getSettings: vi.fn(), updateSettings: vi.fn(), branding: vi.fn(),
+  me: vi.fn(), getSettings: vi.fn(), updateSettings: vi.fn(), branding: vi.fn(), logoUpload: vi.fn(), logoSet: vi.fn(), logoRemove: vi.fn(),
   admins: vi.fn(), addAdmin: vi.fn(), setRole: vi.fn(), removeAdmin: vi.fn(),
   audit: vi.fn(), auditAdmins: vi.fn(),
   usage: vi.fn(), usageList: vi.fn(), summary: vi.fn(), inactive: vi.fn(), series: vi.fn(),
@@ -26,6 +26,9 @@ vi.mock("@/lib/api/endpoints/platform-api", () => ({
   getPlatformSettingsApi: () => p.getSettings(),
   updatePlatformSettingsApi: (...a: unknown[]) => p.updateSettings(...a),
   getPublicBrandingApi: () => p.branding(),
+  requestPlatformLogoUploadApi: (...a: unknown[]) => p.logoUpload(...a),
+  setPlatformLogoApi: (...a: unknown[]) => p.logoSet(...a),
+  removePlatformLogoApi: () => p.logoRemove(),
   listPlatformAdminsApi: () => p.admins(),
   addPlatformAdminApi: (...a: unknown[]) => p.addAdmin(...a),
   setPlatformAdminRoleApi: (...a: unknown[]) => p.setRole(...a),
@@ -106,7 +109,7 @@ describe("settings, branding and admins", () => {
   it("falls back to default branding when the API is unreachable", async () => {
     p.branding.mockRejectedValue(new AppError("UNKNOWN", "down"));
     const { getPublicBranding } = await import("@/services/platform-settings.service");
-    await expect(getPublicBranding()).resolves.toEqual({ platformName: "StoreForge", supportEmail: null });
+    await expect(getPublicBranding()).resolves.toEqual({ platformName: "StoreForge", supportEmail: null, logoUrl: null });
   });
 
   it("only a super admin may update settings or manage admins", async () => {
@@ -118,6 +121,29 @@ describe("settings, branding and admins", () => {
     await expect(team.removePlatformAdmin("x")).rejects.toMatchObject({ code: "FORBIDDEN" });
     expect(p.updateSettings).not.toHaveBeenCalled();
     expect(p.removeAdmin).not.toHaveBeenCalled();
+  });
+
+  it("only a super admin may upload, set or remove the platform logo", async () => {
+    p.me.mockResolvedValue({ level: "admin" });
+    const settings = await import("@/services/platform-settings.service");
+    await expect(settings.requestPlatformLogoUpload({ type: "image/png", size: 1000 })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(settings.setPlatformLogo("logo/a.png")).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(settings.removePlatformLogo()).rejects.toMatchObject({ code: "FORBIDDEN" });
+    expect(p.logoUpload).not.toHaveBeenCalled();
+    expect(p.logoSet).not.toHaveBeenCalled();
+    expect(p.logoRemove).not.toHaveBeenCalled();
+  });
+
+  it("super admin: uploads, sets and removes the platform logo through the API", async () => {
+    p.me.mockResolvedValue({ level: "super_admin" });
+    p.logoUpload.mockResolvedValue({ path: "logo/a.png", token: "t", signedUrl: "https://s/x" });
+    const settings = await import("@/services/platform-settings.service");
+    await expect(settings.requestPlatformLogoUpload({ type: "image/png", size: 1000 })).resolves.toMatchObject({ path: "logo/a.png" });
+    await settings.setPlatformLogo("logo/a.png");
+    await settings.removePlatformLogo();
+    expect(p.logoUpload).toHaveBeenCalledWith({ type: "image/png", size: 1000 });
+    expect(p.logoSet).toHaveBeenCalledWith("logo/a.png");
+    expect(p.logoRemove).toHaveBeenCalledTimes(1);
   });
 
   it("super admin: updates settings and manages admins through the API", async () => {

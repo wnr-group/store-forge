@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Building2, CreditCard, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, ScrollText, Settings, ShieldCheck, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Megaphone, ShoppingBasket, TicketPercent, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, Plug, ScrollText, Settings, ShieldCheck, UserCog, Users, Activity, Gauge, Receipt, SlidersHorizontal, Tags, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 
@@ -12,43 +12,75 @@ const NAV_PERMISSION: Record<string, Permission> = {
   [ROUTES.inventory]: "catalog:view",
   [ROUTES.customers]: "customers:view",
   [ROUTES.analytics]: "orders:view",
+  [ROUTES.orders]: "orders:view",
+  [ROUTES.shipping]: "shipping:view",
+  [ROUTES.taxes]: "tax:view",
+  [ROUTES.integrations]: "integrations:view",
+  [ROUTES.discounts]: "marketing:view",
+  [ROUTES.campaigns]: "marketing:view",
+  [ROUTES.abandonedCarts]: "marketing:view",
 };
 
 /** hrefs the member may not open, for the sidebar to hide (the pages and the database check again). */
 export const hiddenNavHrefs = (actor: Actor): string[] =>
   NAV_ITEMS.filter((i) => NAV_PERMISSION[i.href] && !can(actor, NAV_PERMISSION[i.href])).map((i) => i.href);
 
+/** Screens that belong to one plan feature. Hidden when the plan lacks it; the API refuses the calls whatever the menu shows. */
+const NAV_FEATURE: Record<string, string> = {
+  [ROUTES.discounts]: "discount_codes",
+  [ROUTES.campaigns]: "marketing_campaigns",
+  [ROUTES.abandonedCarts]: "abandoned_cart_recovery",
+  [ROUTES.analytics]: "advanced_reports",
+};
+
+/** hrefs whose feature is switched off for this organization. `enabled` is the plan's answer per feature key. */
+export const hiddenFeatureHrefs = (enabled: Readonly<Record<string, boolean>>): string[] =>
+  Object.entries(NAV_FEATURE).filter(([, key]) => enabled[key] === false).map(([href]) => href);
+
 /** Only list pages that exist - no placeholder navigation. */
 export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.dashboard, label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: ROUTES.orders, label: "Orders", icon: ShoppingCart, group: "Sales" },
+  { href: ROUTES.shipping, label: "Shipping", icon: Truck, group: "Sales" },
+  { href: ROUTES.taxes, label: "Taxes", icon: Landmark, group: "Sales" },
   { href: ROUTES.products, label: "Products", icon: Package, group: "Catalog" },
   { href: ROUTES.categories, label: "Categories", icon: FolderTree, group: "Catalog" },
   { href: ROUTES.collections, label: "Collections", icon: Layers, group: "Catalog" },
   { href: ROUTES.inventory, label: "Inventory", icon: Boxes, group: "Catalog" },
+  { href: ROUTES.discounts, label: "Discounts", icon: TicketPercent, group: "Marketing" },
+  { href: ROUTES.campaigns, label: "Campaigns", icon: Megaphone, group: "Marketing" },
+  { href: ROUTES.abandonedCarts, label: "Abandoned carts", icon: ShoppingBasket, group: "Marketing" },
   { href: ROUTES.customers, label: "Customers", icon: Users, group: "Insights" },
   { href: ROUTES.analytics, label: "Analytics", icon: BarChart3, group: "Insights" },
   { href: ROUTES.templates, label: "Themes", icon: Palette, group: "Online Store", exact: true },
   { href: ROUTES.themeEditor, label: "Customize", icon: PenTool, group: "Online Store" },
   { href: ROUTES.pages, label: "Pages", icon: FileText, group: "Online Store" },
   { href: ROUTES.navigation, label: "Navigation", icon: Menu, group: "Online Store" },
+  { href: ROUTES.integrations, label: "Integrations", icon: Plug, group: "Workspace" },
   { href: ROUTES.settings, label: "Settings", icon: Settings, group: "Workspace" },
 ];
 
 export const OWNER_NAV_ITEMS: NavItem[] = [
   ...NAV_ITEMS.slice(0, -1),
   { href: ROUTES.team, label: "Team members", icon: UserCog, group: "Workspace" },
+  { href: ROUTES.billing, label: "Plan & billing", icon: Receipt, group: "Workspace" },
   { href: ROUTES.payments, label: "Payments", icon: CreditCard, group: "Workspace" },
   NAV_ITEMS[NAV_ITEMS.length - 1],
 ];
 
-/** Platform Admin area: companies only - no merchant data. */
+/** Platform administration. Which entries a person sees depends on their platform role (see `hiddenAdminHrefs`); the pages and the API check again. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: ROUTES.admin, label: "Overview", icon: LayoutDashboard, exact: true },
   { href: ROUTES.adminCompanies, label: "Organizations", icon: Building2, group: "Platform" },
-  { href: ROUTES.adminTeam, label: "Platform Team", icon: ShieldCheck, group: "Platform" },
-  { href: ROUTES.adminActivity, label: "Activity & Audit Logs", icon: ScrollText, group: "Platform" },
-  { href: ROUTES.adminUsage, label: "Usage & Analytics", icon: BarChart3, group: "Platform" },
-  { href: ROUTES.adminSettings, label: "Settings", icon: Settings, group: "Platform" },
+  { href: ROUTES.adminPlans, label: "Subscription Plans", icon: Tags, group: "Platform" },
+  { href: ROUTES.adminEntitlements, label: "Feature Entitlements", icon: SlidersHorizontal, group: "Platform" },
+  { href: ROUTES.adminLimits, label: "Usage & Limits", icon: Gauge, group: "Platform" },
+  { href: ROUTES.adminBilling, label: "Billing & Invoices", icon: Receipt, group: "Finance" },
+  { href: ROUTES.adminTeam, label: "Platform Administrators", icon: ShieldCheck, group: "Administration" },
+  { href: ROUTES.adminActivity, label: "Audit Logs", icon: ScrollText, group: "Administration" },
+  { href: ROUTES.adminMonitoring, label: "System Monitoring", icon: Activity, group: "Administration" },
+  { href: ROUTES.adminUsage, label: "Usage & Analytics", icon: BarChart3, group: "Administration" },
+  { href: ROUTES.adminSettings, label: "Settings", icon: Settings, group: "Administration" },
   { href: ROUTES.adminAccount, label: "My Account", icon: KeyRound, group: "Account" },
 ];
 

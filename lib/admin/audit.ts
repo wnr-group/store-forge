@@ -1,7 +1,7 @@
 /**
  * Every action a Platform Admin can leave in the audit log, with the label shown on the Activity page.
  * The database only checks the shape (`entity.verb`); this list is the single source of truth for what the app records.
- * Organization deletion is intentionally not here: that flow is unchanged.
+ * The list matches the API (`GET /platform/audit-logs/filters`), including plans, subscriptions, entitlements and billing.
  */
 export const AUDIT_ACTIONS = [
   "organization.created",
@@ -18,6 +18,25 @@ export const AUDIT_ACTIONS = [
   "platform_admin.removed",
   "platform_admin.role_changed",
   "platform_settings.updated",
+  "organization.deleted",
+  "plan.created",
+  "plan.updated",
+  "plan.activated",
+  "plan.deactivated",
+  "plan.default_changed",
+  "subscription.created",
+  "subscription.changed",
+  "entitlement.feature_overridden",
+  "entitlement.feature_override_removed",
+  "entitlement.limit_overridden",
+  "entitlement.limit_override_removed",
+  "invoice.issued",
+  "invoice.voided",
+  "payment.manual_recorded",
+  "payment.refunded",
+  "payment.refund_failed",
+  "billing.settings_updated",
+  "billing.run_completed",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -36,6 +55,25 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   "platform_admin.removed": "Platform admin removed",
   "platform_admin.role_changed": "Platform admin level changed",
   "platform_settings.updated": "Platform settings updated",
+  "organization.deleted": "Organization deleted",
+  "plan.created": "Plan created",
+  "plan.updated": "Plan updated",
+  "plan.activated": "Plan activated",
+  "plan.deactivated": "Plan deactivated",
+  "plan.default_changed": "Default plan changed",
+  "subscription.created": "Subscription started",
+  "subscription.changed": "Subscription changed",
+  "entitlement.feature_overridden": "Feature exception set",
+  "entitlement.feature_override_removed": "Feature exception removed",
+  "entitlement.limit_overridden": "Limit exception set",
+  "entitlement.limit_override_removed": "Limit exception removed",
+  "invoice.issued": "Invoice issued",
+  "invoice.voided": "Invoice voided",
+  "payment.manual_recorded": "Offline payment recorded",
+  "payment.refunded": "Refund started",
+  "payment.refund_failed": "Refund failed",
+  "billing.settings_updated": "Billing settings updated",
+  "billing.run_completed": "Billing run completed",
 };
 
 /**

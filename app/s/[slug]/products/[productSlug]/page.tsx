@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublishedView } from "@/components/storefront/published-view";
+import { TrackViewItem } from "@/components/storefront/tracking/track-view-item";
 import type { TemplateDocument } from "@/lib/templates/document";
 import { getPublishedProductPage } from "@/services/storefront.service";
 
@@ -20,5 +21,10 @@ export default async function ProductPage({ params }: Params) {
   if (slug !== slug.toLowerCase()) notFound();
   const page = await getPublishedProductPage(slug, productSlug);
   if (!page) notFound();
-  return <PublishedView store={page.store} frame={page} document={page.layout.template.document as unknown as TemplateDocument} resource={page.resource} />;
+  return (
+    <>
+      <PublishedView store={page.store} frame={page} document={page.layout.template.document as unknown as TemplateDocument} resource={page.resource} />
+      <TrackViewItem slug={String(page.resource.slug)} name={String(page.resource.name)} priceMinor={Number(page.resource.price_minor)} currency={page.store.currency} />
+    </>
+  );
 }

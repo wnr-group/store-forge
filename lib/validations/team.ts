@@ -11,7 +11,7 @@ const level = <const L extends readonly [string, ...string[]]>(levels: L) => z.e
  */
 export const permissionsSchema = z.object({
   products: level(MODULE_LABELS.products.levels as ["none", "read", "write"]),
-  orders: level(MODULE_LABELS.orders.levels as ["none", "read"]),
+  orders: level(MODULE_LABELS.orders.levels as ["none", "read", "write"]),
   customers: level(MODULE_LABELS.customers.levels as ["none", "read", "write"]),
   settings: level(MODULE_LABELS.settings.levels as ["read", "write"]),
 });

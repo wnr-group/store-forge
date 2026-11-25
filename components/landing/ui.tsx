@@ -48,10 +48,14 @@ export const lpButton = (variant: Variant = "primary", className?: string) =>
   );
 
 /** StoreForge brand lock-up. The mark is the gold handshake logo (public/logo.png), shared with the product. */
-export function BrandLogo({ className, light = false, name = APP_NAME }: { className?: string; light?: boolean; name?: string }) {
+export function BrandLogo({ className, light = false, name = APP_NAME, logoUrl }: { className?: string; light?: boolean; name?: string; logoUrl?: string | null }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-8 w-auto shrink-0" />
+      {logoUrl ? (
+        <Image src={logoUrl} alt="" aria-hidden width={160} height={48} unoptimized className="h-8 w-auto max-w-40 shrink-0 object-contain" />
+      ) : (
+        <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-8 w-auto shrink-0" />
+      )}
       <span className={cn("lp-display text-[19px] leading-none font-extrabold tracking-tight", light ? "text-white" : "text-lp-heading")}>{name}</span>
     </span>
   );

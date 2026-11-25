@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AnalyticsTabs } from "@/components/analytics/analytics-tabs";
 import { AnalyticsView, RangeTabs } from "@/components/analytics/analytics-view";
 import { PageHeader } from "@/components/shared/page-header";
 import { ROUTES } from "@/config/app";
@@ -11,12 +12,13 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const raw = (await searchParams).range;
   const n = Number(Array.isArray(raw) ? raw[0] : raw);
   const range = (RANGES as readonly number[]).includes(n) ? (n as RangeDays) : 30;
-  const { store } = await requireWorkspaceCan("orders:view");
+  const { active, store } = await requireWorkspaceCan("orders:view");
   const data = await getAnalytics(range);
 
   return (
     <>
       <PageHeader title="Analytics" description={`Sales and orders in ${store?.currency ?? "your currency"}, by day in ${store?.timezone ?? "UTC"}.`} actions={<RangeTabs range={range} basePath={ROUTES.analytics} />} />
+      <AnalyticsTabs actor={active} />
       <AnalyticsView data={data} currency={store?.currency ?? "INR"} timezone={store?.timezone ?? "UTC"} detailed />
     </>
   );

@@ -3,7 +3,15 @@ import "server-only";
 import { cache } from "react";
 import type { z } from "zod";
 import { requirePlatformAdmin, requireSuperAdmin } from "@/lib/auth/platform";
-import { getPlatformSettingsApi, getPublicBrandingApi, updatePlatformSettingsApi } from "@/lib/api/endpoints/platform-api";
+import {
+  getPlatformSettingsApi,
+  getPublicBrandingApi,
+  removePlatformLogoApi,
+  requestPlatformLogoUploadApi,
+  setPlatformLogoApi,
+  updatePlatformSettingsApi,
+  type LogoUploadTargetApi,
+} from "@/lib/api/endpoints/platform-api";
 import type { platformSettingsSchema } from "@/lib/validations/admin-platform";
 
 /**
@@ -17,6 +25,7 @@ export type PlatformSettingsView = {
   defaultCurrency: string;
   defaultTimezone: string;
   defaultStoreStatus: "active" | "inactive";
+  logoUrl: string | null;
   updatedAt: Date;
   updatedByEmail: string | null;
 };
@@ -27,8 +36,11 @@ export async function getPlatformSettings(): Promise<PlatformSettingsView> {
   return { ...s, updatedAt: new Date(s.updatedAt) };
 }
 
-export type PublicBranding = { platformName: string; supportEmail: string | null };
-const DEFAULT_BRANDING: PublicBranding = { platformName: "StoreForge", supportEmail: null };
+export type PublicBranding = { platformName: string; supportEmail: string | null; logoUrl: string | null };
+const DEFAULT_BRANDING: PublicBranding = { platformName: "StoreForge", supportEmail: null, logoUrl: null };
+
+/** The props the app shell takes for branding: the platform name and the uploaded logo (if any). */
+export const brandProps = (b: PublicBranding) => ({ brandName: b.platformName, logoUrl: b.logoUrl });
 
 export const BRANDING_TAG = "platform-branding";
 
@@ -55,4 +67,22 @@ export const getPublicBranding = cache(async (): Promise<PublicBranding> => {
 export async function updatePlatformSettings(v: z.output<typeof platformSettingsSchema>): Promise<void> {
   await requireSuperAdmin();
   await updatePlatformSettingsApi(v);
+}
+
+/** Super admins only. A one-time link to upload a logo (JPEG, PNG or WebP, up to 2 MB) straight to Storage. */
+export async function requestPlatformLogoUpload(file: { type: string; size: number }): Promise<LogoUploadTargetApi> {
+  await requireSuperAdmin();
+  return requestPlatformLogoUploadApi(file);
+}
+
+/** Super admins only. Use an uploaded file as the logo; the API checks the file, logs the change and deletes the old logo file. */
+export async function setPlatformLogo(path: string): Promise<void> {
+  await requireSuperAdmin();
+  await setPlatformLogoApi(path);
+}
+
+/** Super admins only. Go back to the built-in logo. */
+export async function removePlatformLogo(): Promise<void> {
+  await requireSuperAdmin();
+  await removePlatformLogoApi();
 }

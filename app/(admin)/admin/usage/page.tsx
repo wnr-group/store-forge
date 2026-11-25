@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requirePlatformPagePermission } from "@/lib/auth/platform";
 import Link from "next/link";
 import { Building2, HardDrive, MoonStar, PauseCircle, SearchX } from "lucide-react";
 import { NewOrgsChart } from "@/components/admin/new-orgs-chart-lazy";
@@ -46,6 +47,7 @@ function Stat({ label, value, icon: Icon, hint }: { label: string; value: React.
 }
 
 export default async function UsagePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requirePlatformPagePermission("usage:read");
   const raw = await searchParams;
   const query = usageQuerySchema.parse(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])));
   const range = resolveSeriesRange(query.from, query.to);
