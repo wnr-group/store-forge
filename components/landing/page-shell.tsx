@@ -21,11 +21,11 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Deep green page banner with a gold eyebrow, shared by the sub-pages. */
+/** Purple page banner with an orange eyebrow, shared by the sub-pages. */
 export function PageHero({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
     <section className="relative isolate overflow-hidden bg-lp-primary">
-      <span aria-hidden className="pointer-events-none absolute -top-48 -right-32 -z-10 size-[34rem] rounded-full bg-[radial-gradient(circle,rgba(199,167,122,0.32),transparent_65%)]" />
+      <span aria-hidden className="pointer-events-none absolute -top-48 -right-32 -z-10 size-[34rem] rounded-full bg-[radial-gradient(circle,rgba(250,156,44,0.32),transparent_65%)]" />
       <span aria-hidden className="pointer-events-none absolute -bottom-56 -left-28 -z-10 size-[30rem] rounded-full border border-white/10" />
       <span aria-hidden className="pointer-events-none absolute -bottom-40 -left-10 -z-10 size-[30rem] rounded-full border border-lp-accent/20" />
       <Container className="py-20 sm:py-28">

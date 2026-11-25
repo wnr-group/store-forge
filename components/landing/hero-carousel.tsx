@@ -77,9 +77,9 @@ export function HeroCarousel() {
 
   return (
     <section ref={sectionRef} aria-roledescription="carousel" aria-label="Featured" className="relative">
-      <h1 className="sr-only">StoreForge: build, manage and grow your online store</h1>
+      <h1 className="sr-only">Kanova Store: build, manage and grow your online store</h1>
       <div
-        className="relative h-[calc(100svh-6.3125rem)] max-h-[58rem] min-h-[34rem] w-full overflow-hidden bg-[#12281f]"
+        className="relative h-[calc(100svh-6.3125rem)] max-h-[58rem] min-h-[34rem] w-full overflow-hidden bg-[#080a25]"
         // Hovering never pauses the timer. It only holds while someone is tabbing through the controls (keyboard
         // focus), so a mouse click on a control does not stop the slide show either.
         onFocus={(e) => e.target.matches(":focus-visible") && setKeyboardFocus(true)}
@@ -115,9 +115,9 @@ export function HeroCarousel() {
                 style={{ objectPosition: s.image.position }}
                 className={cn("object-cover motion-safe:transition-transform motion-safe:duration-[9000ms] motion-safe:ease-out", active ? "scale-100" : "motion-safe:scale-110")}
               />
-              {/* Deep green wash so white text always has strong contrast, strongest where the text sits. */}
-              <div className="absolute inset-0 bg-[#12281f]/60 sm:bg-transparent sm:bg-gradient-to-r sm:from-[#12281f]/85 sm:via-[#12281f]/50 sm:via-55% sm:to-transparent" aria-hidden />
-              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#12281f]/80 to-transparent" aria-hidden />
+              {/* Deep navy wash so white text always has strong contrast, strongest where the text sits. */}
+              <div className="absolute inset-0 bg-[#080a25]/60 sm:bg-transparent sm:bg-gradient-to-r sm:from-[#080a25]/85 sm:via-[#080a25]/50 sm:via-55% sm:to-transparent" aria-hidden />
+              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#080a25]/80 to-transparent" aria-hidden />
 
               <motion.div style={{ y: heroScroll.y, opacity: heroScroll.opacity }} className="relative mx-auto flex h-full w-full max-w-6xl items-center px-4 pb-32 sm:px-6 sm:pb-28">
                 <div className="lp-stagger max-w-2xl">
@@ -162,7 +162,7 @@ export function HeroCarousel() {
                     aria-selected={active}
                     aria-label={`Banner ${i + 1}: ${s.eyebrow}`}
                     onClick={() => go(i)}
-                    className="group relative rounded-sm pt-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#12281f]"
+                    className="group relative rounded-sm pt-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#080a25]"
                   >
                     <span className="absolute inset-x-0 top-0 h-[3px] overflow-hidden rounded-full bg-white/30" aria-hidden>
                       {active ? (

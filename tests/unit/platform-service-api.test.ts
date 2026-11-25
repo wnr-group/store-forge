@@ -109,7 +109,7 @@ describe("settings, branding and admins", () => {
   it("falls back to default branding when the API is unreachable", async () => {
     p.branding.mockRejectedValue(new AppError("UNKNOWN", "down"));
     const { getPublicBranding } = await import("@/services/platform-settings.service");
-    await expect(getPublicBranding()).resolves.toEqual({ platformName: "StoreForge", supportEmail: null, logoUrl: null });
+    await expect(getPublicBranding()).resolves.toEqual({ platformName: "Kanova Store", supportEmail: null, logoUrl: null });
   });
 
   it("only a super admin may update settings or manage admins", async () => {

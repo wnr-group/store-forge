@@ -1,4 +1,4 @@
-export const APP_NAME = "StoreForge";
+export const APP_NAME = "Kanova Store";
 
 /** Cookie holding the *preferred* tenant id. It is a hint only - never proof of access. */
 export const ACTIVE_TENANT_COOKIE = "sf_active_tenant";

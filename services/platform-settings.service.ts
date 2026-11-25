@@ -37,7 +37,7 @@ export async function getPlatformSettings(): Promise<PlatformSettingsView> {
 }
 
 export type PublicBranding = { platformName: string; supportEmail: string | null; logoUrl: string | null };
-const DEFAULT_BRANDING: PublicBranding = { platformName: "StoreForge", supportEmail: null, logoUrl: null };
+const DEFAULT_BRANDING: PublicBranding = { platformName: "Kanova Store", supportEmail: null, logoUrl: null };
 
 /** The props the app shell takes for branding: the platform name and the uploaded logo (if any). */
 export const brandProps = (b: PublicBranding) => ({ brandName: b.platformName, logoUrl: b.logoUrl });

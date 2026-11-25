@@ -54,7 +54,7 @@ export async function AuthShell({ title, description, children, footer, icon, br
           {logoUrl ? (
             <Image src={logoUrl} alt="" aria-hidden width={160} height={48} unoptimized className="h-9 w-auto max-w-40 shrink-0 object-contain" />
           ) : (
-            <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-9 w-auto shrink-0" priority />
+            <Image src="/kanova-mark.png" alt="" aria-hidden width={230} height={279} className="h-9 w-auto shrink-0" priority />
           )}
           <span className="lp-display text-xl leading-none font-extrabold tracking-tight">{platformName}</span>
         </Link>
@@ -80,7 +80,7 @@ export async function AuthShell({ title, description, children, footer, icon, br
 
       <main className="lp-paper relative flex flex-col items-center justify-center px-4 py-10 sm:px-8">
         <Link href="/" className="mb-8 inline-flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary lg:hidden">
-          <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-8 w-auto shrink-0" priority />
+          <Image src="/kanova-mark.png" alt="" aria-hidden width={230} height={279} className="h-8 w-auto shrink-0" priority />
           <span className="lp-display text-xl leading-none font-extrabold tracking-tight">{platformName}</span>
         </Link>
 

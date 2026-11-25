@@ -12,8 +12,8 @@ import { ProblemSolution } from "@/components/landing/problem-solution";
 import { AnnouncementBar, SiteFooter, SiteHeader } from "@/components/landing/site-chrome";
 
 export const metadata: Metadata = {
-  title: { absolute: "StoreForge - build, manage and grow your online store" },
-  description: "StoreForge helps you create your online store, manage products, orders and customers, and give shoppers a better way to buy.",
+  title: { absolute: "Kanova Store - build, manage and grow your online store" },
+  description: "Kanova Store helps you create your online store, manage products, orders and customers, and give shoppers a better way to buy.",
 };
 
 /** Public landing page. Every link points at an existing route or an anchor on this page. */
