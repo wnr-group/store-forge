@@ -51,7 +51,7 @@ describe("platform roles", () => {
 
   it("lists the sections of the brief in the menu", () => {
     const labels = ADMIN_NAV_ITEMS.map((i) => i.label);
-    for (const wanted of ["Overview", "Tenants", "Subscription Plans", "Usage & Limits", "Feature Entitlements", "Billing & Invoices", "Platform Administrators", "Audit Logs", "System Monitoring"])
+    for (const wanted of ["Overview", "Organizations", "Subscription Plans", "Usage & Limits", "Feature Entitlements", "Billing & Invoices", "Platform Administrators", "Audit Logs", "System Monitoring"])
       expect(labels).toContain(wanted);
   });
 });

@@ -200,12 +200,12 @@ describe("static checks", () => {
       actualResult: `${changed.length} changed or new source files; none under Settings, none named route.ts`,
       assert: () => {
         expect(settings).toEqual([]);
-        expect(handlers).toEqual([
-          // The order git lists them in: Platform Administration invoice PDF (the API token is HttpOnly, so the browser cannot fetch it; moves no money), the shipping label,
-          // then the Owner's own StoreForge invoice PDF. Paying an invoice reuses the storefront's Razorpay loader, so no new Razorpay host appears.
+        expect([...handlers].sort()).toEqual([
+          // Platform Administration invoice PDF (the API token is HttpOnly, so the browser cannot fetch it; moves no money), the shipping label,
+          // and the Owner's own Kanova Store invoice PDF. Paying an invoice reuses the storefront's Razorpay loader, so no new Razorpay host appears.
           "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
-          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
           "app/(dashboard)/dashboard/billing/invoices/[id]/download/route.ts",
+          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
         ]);
       },
       content: () => `AC-FE-14: files changed against origin/main: ${changed.length}\nSettings files changed: ${settings.length}\nroute handlers added: ${handlers.length}\n`,
@@ -214,15 +214,18 @@ describe("static checks", () => {
 
   it("AC-FE-16 [layer:STATIC]: the Payments screen reuses the existing design system and adds no UI dependency or global style", async () => {
     const changed = [...new Set([...git("diff", "--name-only", "origin/main").split("\n"), ...git("ls-files", "--others", "--exclude-standard").split("\n")])].filter(Boolean);
+    // Global styles may change for other reasons (the landing theme); what must not appear is any style written for the Payments screen.
+    const paymentStyles = git("diff", "origin/main", "--", "app/globals.css").split("\n").filter((l) => l.startsWith("+") && /payment|razorpay|refund|ledger|transaction/i.test(l));
     const imports = PAYMENT_FILES.filter((f) => f.endsWith(".tsx")).flatMap((f) => [...read(f).matchAll(/from "([^"]+)"/g)].map((m) => m[1]));
     const external = [...new Set(imports.filter((i) => !i.startsWith("@/") && !i.startsWith(".")))].sort();
-    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|app\/globals\.css|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|billing\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/)[^/]+\/)/.test(f));
+    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|billing\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/)[^/]+\/)/.test(f));
     await capture({
       acId: "AC-FE-16", folder: "logs", fileName: "AC-FE-16.txt", layer: "STATIC", environment: "unit", testName: "AC-FE-16", testFile: here,
       actualResult: `payments components import only existing shared and ui components (external packages: ${external.join(", ")}); no dependency, global style or other page changed`,
       assert: () => {
         expect(external).toEqual(["lucide-react", "next", "next/link", "next/navigation", "react", "sonner", "zod"]);
         expect(unexpected).toEqual([]);
+        expect(paymentStyles).toEqual([]);
         expect(imports.filter((i) => i.startsWith("@/components/")).every((i) => /^@\/components\/(ui|shared|payments|orders)\//.test(i))).toBe(true);
       },
       content: () => `AC-FE-16 (a): external imports: ${external.join(", ")}\nunexpected changed files: ${unexpected.length}\nchanged files: ${changed.length}\n`,

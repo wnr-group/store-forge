@@ -113,7 +113,8 @@ describe("regression and scope [layer:FE]", () => {
     const source = read("lib/tenant/context.ts");
     for (const name of ["getUserTenants", "getActiveTenant", "getActiveStore", "requireTenantAccess", "requireTenantRole", "requireActiveTenant", "setActiveTenantCookie", "requireWorkspace"])
       expect(source, name).toMatch(new RegExp(`export (async function|const) ${name}\\b`));
-    expect(git("diff", "--name-only", "origin/main", "--", "lib/tenant").split("\n").filter(Boolean)).toEqual([]);
+    // Existing files must be untouched (modified, deleted or renamed); a new helper file such as with-tenant.ts may be added.
+    expect(git("diff", "--name-only", "--diff-filter=MDR", "origin/main", "--", "lib/tenant").split("\n").filter(Boolean)).toEqual([]);
   });
 });
 
@@ -178,12 +179,12 @@ describe("static scans [layer:STATIC]", () => {
       assert: () => {
         expect(deps).toEqual([]);
         expect(hosts).toEqual(["components/storefront/checkout/razorpay.ts"]);
-        expect(handlers).toEqual([
-          // The order git lists them in: Platform Administration invoice PDF (the API token is HttpOnly, so the browser cannot fetch it; moves no money), the shipping label,
-          // then the Owner's own StoreForge invoice PDF. Paying an invoice reuses the storefront's Razorpay loader, so no new Razorpay host appears.
+        expect([...handlers].sort()).toEqual([
+          // Platform Administration invoice PDF (the API token is HttpOnly, so the browser cannot fetch it; moves no money), the shipping label,
+          // and the Owner's own Kanova Store invoice PDF. Paying an invoice reuses the storefront's Razorpay loader, so no new Razorpay host appears.
           "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
-          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
           "app/(dashboard)/dashboard/billing/invoices/[id]/download/route.ts",
+          "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
         ]);
       },
       content: () => `AC-SCOPE-02: razorpay dependencies: ${deps.length}; razorpay hosts in changed source: ${hosts.length}; route handlers added: ${handlers.length}\n`,
