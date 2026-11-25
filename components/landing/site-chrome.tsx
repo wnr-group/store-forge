@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/config/app";
 import { getPublicBranding } from "@/services/platform-settings.service";
 import Link from "next/link";
 import { HeaderShell } from "./header-shell";
@@ -15,8 +16,10 @@ export const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ] as const;
 
-export async function AnnouncementBar() {
-  const { platformName } = await getPublicBranding();
+/** The public site always carries the Kanova Store name; only the uploaded logo comes from the platform settings. */
+const platformName = APP_NAME;
+
+export function AnnouncementBar() {
   return (
     <div className="bg-lp-deep text-white">
       <Container className="flex min-h-9 items-center justify-center py-2 text-center text-[13px]">
@@ -31,7 +34,7 @@ export async function AnnouncementBar() {
 }
 
 export async function SiteHeader() {
-  const { platformName, logoUrl } = await getPublicBranding();
+  const { logoUrl } = await getPublicBranding();
   return (
     <HeaderShell>
       <Container className="flex h-(--nav-h) items-center justify-between gap-6 transition-[height] duration-300 motion-reduce:transition-none">
@@ -91,7 +94,7 @@ const FOOTER_COLUMNS = [
 ] as const;
 
 export async function SiteFooter() {
-  const { platformName, logoUrl } = await getPublicBranding();
+  const { logoUrl } = await getPublicBranding();
   return (
     <footer className="relative bg-lp-deep text-white">
       <span aria-hidden className="lp-gold-rule absolute inset-x-0 top-0 h-px" />
