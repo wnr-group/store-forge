@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Download } from "lucide-react";
 import { z } from "zod";
 import { InvoiceBadge, PaymentBadge } from "@/components/admin/billing-badges";
+import { DownloadInvoiceButton } from "@/components/billing/download-invoice-button";
 import { PayInvoiceButton } from "@/components/billing/pay-invoice-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
-import { buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/config/app";
 import { dateTime, money, shortDate } from "@/lib/admin/format";
 import { canManageBilling } from "@/lib/auth/permissions";
@@ -43,9 +42,7 @@ export default async function MyInvoicePage({ params }: { params: Promise<{ id: 
         actions={
           <>
             <InvoiceBadge status={inv.status} overdue={inv.overdue} />
-            <a href={`${ROUTES.billing}/invoices/${inv.id}/download`} className={buttonVariants({ variant: "outline" })}>
-              <Download aria-hidden /> Download PDF
-            </a>
+            <DownloadInvoiceButton href={`${ROUTES.billing}/invoices/${inv.id}/download`} fileName={`${inv.number}.pdf`} />
           </>
         }
       />

@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Download } from "lucide-react";
 import { z } from "zod";
 import { BillingTabs } from "@/components/admin/billing-tabs";
 import { InvoiceBadge, PaymentBadge } from "@/components/admin/billing-badges";
 import { InvoiceActions, RefundButton } from "@/components/admin/invoice-actions";
+import { DownloadInvoiceButton } from "@/components/billing/download-invoice-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
-import { buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROUTES } from "@/config/app";
 import { dateTime, money, shortDate } from "@/lib/admin/format";
@@ -51,9 +50,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         actions={
           <>
             <InvoiceBadge status={inv.status} overdue={inv.overdue} />
-            <a href={`${ROUTES.adminInvoices}/${inv.id}/download`} className={buttonVariants({ variant: "outline" })}>
-              <Download aria-hidden /> Download PDF
-            </a>
+            <DownloadInvoiceButton href={`${ROUTES.adminInvoices}/${inv.id}/download`} fileName={`${inv.number}.pdf`} />
             {canManage ? <InvoiceActions invoiceId={inv.id} number={inv.number} status={inv.status} totalMinor={inv.totalMinor} currency={inv.currency} /> : null}
           </>
         }
