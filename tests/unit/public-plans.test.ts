@@ -75,7 +75,7 @@ describe("getPublicPlans", () => {
   });
 
   it("returns an empty list, so the section is left out, when the API cannot be reached", async () => {
-    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const error = vi.spyOn(console, "warn").mockImplementation(() => {});
     plansApi.mockRejectedValue(new AppError("UNKNOWN", "down"));
     const { getPublicPlans } = await import("@/services/public-plans.service");
     await expect(getPublicPlans()).resolves.toEqual([]);

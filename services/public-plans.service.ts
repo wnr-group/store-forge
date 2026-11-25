@@ -21,7 +21,7 @@ export const getPublicPlans = cache(async (): Promise<PublicPlan[]> => {
   try {
     return await fetchPublicPlans();
   } catch (error) {
-    console.error("[public-plans] plans unavailable, hiding the plans section", error instanceof Error ? error.message : error);
+    console.warn("[public-plans] plans unavailable, hiding the plans section", error instanceof Error ? error.message : error);
     return [];
   }
 });
