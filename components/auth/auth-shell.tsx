@@ -38,7 +38,10 @@ const HIGHLIGHTS = [
 ];
 
 export async function AuthShell({ title, description, children, footer, icon, brandName }: Props) {
-  const platformName = brandName ?? (await getPublicBranding()).platformName;
+  const branding = await getPublicBranding();
+  const platformName = brandName ?? branding.platformName;
+  // The platform logo belongs to the platform, not to a store: a store login keeps the built-in mark.
+  const logoUrl = brandName ? null : branding.logoUrl;
   return (
     <div style={LANDING_THEME} className="lp-root grid min-h-dvh bg-lp-bg text-lp-heading lg:grid-cols-[1.05fr_1fr]">
       <aside className="relative isolate hidden overflow-hidden bg-lp-deep p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
@@ -48,7 +51,11 @@ export async function AuthShell({ title, description, children, footer, icon, br
         <span aria-hidden className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(160deg,#244c3c_0%,#12281f_70%)]" />
 
         <Link href="/" className="inline-flex items-center gap-2.5 self-start rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-accent">
-          <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-9 w-auto shrink-0" priority />
+          {logoUrl ? (
+            <Image src={logoUrl} alt="" aria-hidden width={160} height={48} unoptimized className="h-9 w-auto max-w-40 shrink-0 object-contain" />
+          ) : (
+            <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-9 w-auto shrink-0" priority />
+          )}
           <span className="lp-display text-xl leading-none font-extrabold tracking-tight">{platformName}</span>
         </Link>
 

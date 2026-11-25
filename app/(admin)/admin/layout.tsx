@@ -1,4 +1,4 @@
-import { getPublicBranding } from "@/services/platform-settings.service";
+import { brandProps, getPublicBranding } from "@/services/platform-settings.service";
 import Link from "next/link";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/dashboard/app-shell";
@@ -41,7 +41,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       homeHref={ROUTES.admin}
       defaultCollapsed={collapsed}
       hiddenNav={hiddenAdminHrefs(access?.permissions ?? [])}
-      brandName={(await getPublicBranding()).platformName}
+      {...brandProps(await getPublicBranding())}
       switcher={{ full: badge(false), compact: badge(true) }}
       footer={{
         full: <UserMenu name={name} email={email} role={roleLabel}>{accountLink}</UserMenu>,

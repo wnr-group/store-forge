@@ -22,7 +22,8 @@ import {
   updateCompanyStore,
 } from "@/services/platform.service";
 import { addPlatformAdmin, removePlatformAdmin, setPlatformAdminRole } from "@/services/platform-team.service";
-import { BRANDING_TAG, updatePlatformSettings } from "@/services/platform-settings.service";
+import { BRANDING_TAG, removePlatformLogo, requestPlatformLogoUpload, setPlatformLogo, updatePlatformSettings } from "@/services/platform-settings.service";
+import { platformLogoPathSchema, platformLogoUploadSchema } from "@/lib/validations/admin-platform";
 
 // Every action below calls a service function whose first statement authorises the Platform Admin from the validated session,
 // before any privileged work. Hiding the UI is never the protection. Each action also:
@@ -140,6 +141,30 @@ export async function removePlatformAdminAction(userId: unknown) {
 export async function updatePlatformSettingsAction(input: unknown) {
   return guarded("settings.update", "admin.settings.update", async () => {
     await updatePlatformSettings(parseInput(platformSettingsSchema, input));
+    updateTag(BRANDING_TAG);
+    revalidatePath("/", "layout");
+    revalidatePath(ROUTES.admin, "layout");
+  });
+}
+
+// Platform logo (super admins only). The browser uploads the file itself to the signed link from the first action, then the second
+// action makes it the logo; the API re-checks the file, the role and the rate limit.
+export async function requestPlatformLogoUploadAction(input: unknown) {
+  return guarded("settings.update", "admin.settings.logo_upload_url", async () => requestPlatformLogoUpload(parseInput(platformLogoUploadSchema, input)));
+}
+
+export async function setPlatformLogoAction(path: unknown) {
+  return guarded("settings.update", "admin.settings.logo_set", async () => {
+    await setPlatformLogo(parseInput(platformLogoPathSchema, path));
+    updateTag(BRANDING_TAG);
+    revalidatePath("/", "layout");
+    revalidatePath(ROUTES.admin, "layout");
+  });
+}
+
+export async function removePlatformLogoAction() {
+  return guarded("settings.update", "admin.settings.logo_remove", async () => {
+    await removePlatformLogo();
     updateTag(BRANDING_TAG);
     revalidatePath("/", "layout");
     revalidatePath(ROUTES.admin, "layout");

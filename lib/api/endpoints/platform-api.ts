@@ -19,18 +19,28 @@ export type PlatformSettingsApi = {
   defaultCurrency: string;
   defaultTimezone: string;
   defaultStoreStatus: "active" | "inactive";
+  /** Public address of the uploaded platform logo; null means the built-in logo. */
+  logoUrl: string | null;
   updatedAt: string;
   updatedByEmail: string | null;
 };
-export type PlatformSettingsApiInput = Omit<PlatformSettingsApi, "updatedAt" | "updatedByEmail">;
+export type PlatformSettingsApiInput = Omit<PlatformSettingsApi, "updatedAt" | "updatedByEmail" | "logoUrl">;
 
 export const getPlatformSettingsApi = async () => (await apiRequest<PlatformSettingsApi>("/platform/settings")).data;
 export const updatePlatformSettingsApi = async (input: PlatformSettingsApiInput) =>
   (await apiRequest<PlatformSettingsApi>("/platform/settings", { method: "PATCH", json: input })).data;
 
+/** `POST /platform/settings/logo/upload-url`, `PUT` and `DELETE /platform/settings/logo`: super admins only. The browser uploads the file itself to the signed link. */
+export type LogoUploadTargetApi = { path: string; token: string; signedUrl: string };
+export const requestPlatformLogoUploadApi = async (input: { type: string; size: number }) =>
+  (await apiRequest<LogoUploadTargetApi>("/platform/settings/logo/upload-url", { method: "POST", json: input })).data;
+export const setPlatformLogoApi = async (path: string) =>
+  (await apiRequest<PlatformSettingsApi>("/platform/settings/logo", { method: "PUT", json: { path } })).data;
+export const removePlatformLogoApi = async () => (await apiRequest<PlatformSettingsApi>("/platform/settings/logo", { method: "DELETE" })).data;
+
 /** `GET /public/branding`: no session needed. */
 export const getPublicBrandingApi = async () =>
-  (await apiRequest<{ platformName: string; supportEmail: string | null }>("/public/branding", { anonymous: true })).data;
+  (await apiRequest<{ platformName: string; supportEmail: string | null; logoUrl: string | null }>("/public/branding", { anonymous: true })).data;
 
 // Admins -----------------------------------------------------------------------------------------------------------------
 export type PlatformAdminApi = {

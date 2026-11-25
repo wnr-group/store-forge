@@ -1,4 +1,4 @@
-import { getPublicBranding } from "@/services/platform-settings.service";
+import { brandProps, getPublicBranding } from "@/services/platform-settings.service";
 import Link from "next/link";
 import { ExternalLink, Settings } from "lucide-react";
 import { Suspense } from "react";
@@ -60,7 +60,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         hiddenNav={hiddenNav}
         homeHref={ROUTES.dashboard}
         defaultCollapsed={collapsed}
-        brandName={(await getPublicBranding()).platformName}
+        {...brandProps(await getPublicBranding())}
         switcher={{ full: <TenantSwitcher {...switcherProps} />, compact: <TenantSwitcher {...switcherProps} compact /> }}
         footer={{
           full: <UserMenu name={name} email={email} role={role}>{accountLink}</UserMenu>,
