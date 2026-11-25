@@ -47,15 +47,21 @@ export const lpButton = (variant: Variant = "primary", className?: string) =>
     className,
   );
 
-/** Kanova Store brand lock-up. The mark is the K shopping-bag logo (public/kanova-mark.png). */
+/**
+ * Kanova Store brand lock-up. By default it is the full logo exactly as designed (public/kanova-logo.png, or the white-text
+ * kanova-logo-light.png on dark backgrounds). An uploaded platform logo is shown with the platform name beside it instead.
+ */
 export function BrandLogo({ className, light = false, name = APP_NAME, logoUrl }: { className?: string; light?: boolean; name?: string; logoUrl?: string | null }) {
+  if (!logoUrl) {
+    return (
+      <span className={cn("inline-flex items-center", className)}>
+        <Image src={light ? "/kanova-logo-light.png" : "/kanova-logo.png"} alt="" aria-hidden width={843} height={279} className={cn("w-auto shrink-0", light ? "h-16" : "h-12")} />
+      </span>
+    );
+  }
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      {logoUrl ? (
-        <Image src={logoUrl} alt="" aria-hidden width={160} height={48} unoptimized className="h-8 w-auto max-w-40 shrink-0 object-contain" />
-      ) : (
-        <Image src="/kanova-mark.png" alt="" aria-hidden width={230} height={279} className="h-9 w-auto shrink-0" />
-      )}
+      <Image src={logoUrl} alt="" aria-hidden width={160} height={48} unoptimized className="h-8 w-auto max-w-40 shrink-0 object-contain" />
       <span className={cn("lp-display text-[19px] leading-none font-extrabold tracking-tight", light ? "text-white" : "text-lp-heading")}>{name}</span>
     </span>
   );
