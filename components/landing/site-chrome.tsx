@@ -1,4 +1,6 @@
+import { APP_NAME } from "@/config/app";
 import { getPublicBranding } from "@/services/platform-settings.service";
+import { getPublicPlans } from "@/services/public-plans.service";
 import Link from "next/link";
 import { HeaderShell } from "./header-shell";
 import { MobileMenu } from "./mobile-menu";
@@ -6,17 +8,19 @@ import { Reveal } from "./motion";
 import { AuthActions } from "./auth-actions";
 import { BrandLogo, Container } from "./ui";
 
-/** In-page anchors only: every destination below exists. */
+/**
+ * The public navigation: Home, Features, Pricing, About and Contact. Login and Get Started are the buttons beside it (see AuthActions). Every
+ * destination exists, and there is deliberately no link to any admin area here: the Platform Admin dashboard is not part of the public site.
+ */
 export const NAV_LINKS = [
-  { href: "/#platform", label: "Platform" },
+  { href: "/", label: "Home" },
   { href: "/#features", label: "Features" },
-  { href: "/#solutions", label: "Solutions" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
 ] as const;
 
-export async function AnnouncementBar() {
-  const { platformName } = await getPublicBranding();
+/** The public site always carries the Kanova Store name; only the uploaded logo comes from the platform settings. */
+const platformName = APP_NAME;
+
+export function AnnouncementBar() {
   return (
     <div className="bg-lp-deep text-white">
       <Container className="flex min-h-9 items-center justify-center py-2 text-center text-[13px]">
@@ -30,16 +34,25 @@ export async function AnnouncementBar() {
   );
 }
 
+/** The Pricing link is only offered while at least one plan is published, so it never points at a section that is not there. */
+const withPricingLink = (hasPlans: boolean) => [
+  ...NAV_LINKS,
+  ...(hasPlans ? [{ href: "/#plans", label: "Pricing" }] : []),
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
 export async function SiteHeader() {
-  const { platformName } = await getPublicBranding();
+  const [{ logoUrl }, plans] = await Promise.all([getPublicBranding(), getPublicPlans()]);
+  const links = withPricingLink(plans.length > 0);
   return (
     <HeaderShell>
       <Container className="flex h-(--nav-h) items-center justify-between gap-6 transition-[height] duration-300 motion-reduce:transition-none">
         <Link href="/" aria-label={`${platformName}, home`} className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary">
-          <BrandLogo name={platformName} />
+          <BrandLogo name={platformName} logoUrl={logoUrl} />
         </Link>
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
-          {NAV_LINKS.map((l) => (
+          {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -52,7 +65,7 @@ export async function SiteHeader() {
         <div className="hidden md:block">
           <AuthActions variant="header" />
         </div>
-        <MobileMenu links={NAV_LINKS} />
+        <MobileMenu links={links} />
       </Container>
     </HeaderShell>
   );
@@ -91,14 +104,14 @@ const FOOTER_COLUMNS = [
 ] as const;
 
 export async function SiteFooter() {
-  const { platformName } = await getPublicBranding();
+  const { logoUrl } = await getPublicBranding();
   return (
     <footer className="relative bg-lp-deep text-white">
       <span aria-hidden className="lp-gold-rule absolute inset-x-0 top-0 h-px" />
       <Container className="py-14">
         <Reveal y={20} className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))]">
           <div className="max-w-sm">
-            <BrandLogo light name={platformName} />
+            <BrandLogo light name={platformName} logoUrl={logoUrl} />
             <p className="mt-4 text-sm leading-6 text-white/65">
               {platformName} is a commerce platform for online sellers. Each company gets its own catalog, inventory, customers, team and a public storefront on its own subdomain.
             </p>

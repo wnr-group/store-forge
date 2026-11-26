@@ -36,3 +36,12 @@ export const platformSettingsSchema = z.object({
   defaultStoreStatus: z.enum(["active", "inactive"], { error: "Choose how new stores start." }),
 });
 export type PlatformSettingsInput = z.input<typeof platformSettingsSchema>;
+
+/** The platform logo: a small JPEG, PNG or WebP image. The API checks the real file in Storage again. */
+export const PLATFORM_LOGO_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const PLATFORM_LOGO_MAX_BYTES = 2 * 1024 * 1024;
+export const platformLogoUploadSchema = z.object({
+  type: z.enum(PLATFORM_LOGO_TYPES, { error: "The logo must be a JPEG, PNG or WebP image." }),
+  size: z.number().int().positive().max(PLATFORM_LOGO_MAX_BYTES, "The logo must be 2 MB or smaller."),
+});
+export const platformLogoPathSchema = z.string().regex(/^logo\/[A-Za-z0-9._-]{1,120}$/, "Invalid logo path.");

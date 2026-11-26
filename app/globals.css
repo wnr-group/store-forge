@@ -94,9 +94,9 @@
   background: var(--color-lp-accent);
   color: var(--color-lp-deep);
 }
-/* Soft paper grain over the cream background, and a gold hairline used to underline eyebrows. */
+/* Soft tint over the white background, and an orange hairline used to underline eyebrows. */
 .lp-paper {
-  background-image: radial-gradient(60rem 28rem at 85% -10%, rgb(220 232 223 / 0.65), transparent 70%), radial-gradient(40rem 24rem at -5% 40%, rgb(199 167 122 / 0.12), transparent 70%);
+  background-image: radial-gradient(60rem 28rem at 85% -10%, rgb(88 28 198 / 0.07), transparent 70%), radial-gradient(40rem 24rem at -5% 40%, rgb(250 156 44 / 0.12), transparent 70%);
 }
 .lp-gold-rule {
   background: linear-gradient(90deg, var(--color-lp-accent), transparent);
@@ -529,4 +529,32 @@
   --border: #2a2f2c;
   --input: #343a36;
   --ring: #2fb58f;
+}/*
+ * Public landing page palette (Kanova Store brand). Fixed light colours on purpose: the marketing page does not follow the
+ * dashboard's light/dark preference. Used as bg-lp-bg, text-lp-heading, border-lp-border ...
+ *
+ *   orange  #F86F18  primary calls to action          (lp-cta, lp-cta-hover = golden orange #FA9C2C)
+ *   purple  #581CC6  links, accents, selected states  (lp-primary, lp-primary-hover = deep purple #350D8B)
+ *   navy    #080A25  headings, important text, dark sections (lp-heading, lp-deep)
+ *   white / #FFF8F2  page background / alternate sections (lp-bg / lp-soft)
+ *
+ * Orange is too light for white text (about 2.9:1), so orange buttons carry navy text (about 6.6:1).
+ */
+@theme {
+  --color-lp-bg: #ffffff;
+  --color-lp-soft: #fff8f2;
+  --color-lp-secondary: #efe7fb;
+  --color-lp-card: #ffffff;
+  --color-lp-cta: #f86f18;
+  --color-lp-cta-hover: #fa9c2c;
+  --color-lp-primary: #581cc6;
+  --color-lp-primary-hover: #350d8b;
+  --color-lp-deep: #080a25;
+  --color-lp-heading: #080a25;
+  --color-lp-text: #4b4e68;
+  --color-lp-accent: #fa9c2c;
+  --color-lp-accent-light: #fdc27a;
+  --color-lp-border: #f0e4d8;
 }
+
+

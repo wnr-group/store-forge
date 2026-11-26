@@ -8,14 +8,14 @@ import { Container, Section } from "@/components/landing/ui";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch with the StoreForge team, or sign in to your workspace.",
+  description: "Get in touch with the Kanova Store team, or sign in to your workspace.",
 };
 
 const CHANNELS: { icon: LucideIcon; title: string; text: string; label: string; href: string; external?: boolean }[] = [
   {
     icon: Building2,
     title: "Talk to WNR Group",
-    text: "StoreForge is powered by WNR Group. Reach out through their website for questions about the platform, partnerships or getting started.",
+    text: "Kanova Store is powered by WNR Group. Reach out through their website for questions about the platform, partnerships or getting started.",
     label: "Visit wnradvisory.com",
     href: "https://www.wnradvisory.com/",
     external: true,
@@ -30,7 +30,7 @@ const CHANNELS: { icon: LucideIcon; title: string; text: string; label: string; 
   {
     icon: MessagesSquare,
     title: "Browse common questions",
-    text: "Many questions about how StoreForge works are answered in the FAQ on our home page.",
+    text: "Many questions about how Kanova Store works are answered in the FAQ on our home page.",
     label: "Read the FAQ",
     href: "/#faq",
   },
@@ -43,7 +43,7 @@ export default function ContactPage() {
   return (
     <PageShell>
       <PageHero eyebrow="Contact" title="Let's talk about your store.">
-        Questions about StoreForge, or ready to get started? Choose the way that suits you best.
+        Questions about Kanova Store, or ready to get started? Choose the way that suits you best.
       </PageHero>
 
       <Section className="lp-paper bg-lp-bg">
@@ -52,7 +52,7 @@ export default function ContactPage() {
             {CHANNELS.map((c, i) => (
               <li key={c.title}>
                 <Fade delay={i * 0.1} className="h-full">
-                  <article className="group flex h-full flex-col rounded-2xl border border-lp-border bg-white p-7 transition-[translate,border-color,box-shadow] duration-500 hover:-translate-y-1 hover:border-lp-primary/30 hover:shadow-[0_24px_48px_-24px_rgba(18,40,31,0.3)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+                  <article className="group flex h-full flex-col rounded-2xl border border-lp-border bg-white p-7 transition-[translate,border-color,box-shadow] duration-500 hover:-translate-y-1 hover:border-lp-primary/30 hover:shadow-[0_24px_48px_-24px_rgba(8,10,37,0.3)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
                     <span className="grid size-11 place-items-center rounded-xl bg-lp-secondary text-lp-primary">
                       <c.icon className="size-5" aria-hidden />
                     </span>

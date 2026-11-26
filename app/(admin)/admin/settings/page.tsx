@@ -18,6 +18,7 @@ export default async function PlatformSettingsPage() {
         // remount with fresh values after a save
         key={`${settings.updatedAt.getTime()}`}
         canEdit={level === "super_admin"}
+        logoUrl={settings.logoUrl}
         updatedLine={`Last changed ${when.format(settings.updatedAt)}${settings.updatedByEmail ? ` by ${settings.updatedByEmail}` : ""}.`}
         initial={{
           platformName: settings.platformName,

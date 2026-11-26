@@ -25,7 +25,7 @@ const PRODUCTS = [
   { name: "Linen shirt", price: "$48.00", was: null, tile: "bg-lp-accent/25" },
   { name: "Canvas tote", price: "$18.00", was: "$24.00", tile: "bg-lp-secondary" },
   { name: "Ceramic mug", price: "$16.50", was: null, tile: "bg-rose-100" },
-  { name: "Wool throw", price: "$62.00", was: null, tile: "bg-emerald-100" },
+  { name: "Wool throw", price: "$62.00", was: null, tile: "bg-lp-accent/40" },
   { name: "Desk lamp", price: "$39.00", was: null, tile: "bg-violet-100" },
   { name: "Notebook set", price: "$14.00", was: null, tile: "bg-orange-100" },
 ] as const;
@@ -33,7 +33,7 @@ const PRODUCTS = [
 /** Decorative storefront that mirrors the real one: logo and name, a description, and a grid of priced products. */
 function StorefrontMockup() {
   return (
-    <div aria-hidden className="overflow-hidden rounded-xl border border-lp-border bg-white shadow-[0_30px_60px_-30px_rgba(18,40,31,0.35)]">
+    <div aria-hidden className="overflow-hidden rounded-xl border border-lp-border bg-white shadow-[0_30px_60px_-30px_rgba(8,10,37,0.35)]">
       <div className="flex items-center gap-3 border-b border-lp-border bg-lp-bg px-4 py-2.5">
         <div className="flex gap-1.5">
           {[0, 1, 2].map((i) => (
@@ -91,7 +91,7 @@ export function Personalization() {
               <span aria-hidden className="mt-6 block h-0.5 w-14 bg-lp-primary" />
             </Fade>
             <Fade as="p" delay={0.3} className="mt-6 max-w-md text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
-              Every business has its own identity. StoreForge helps you create a store experience that reflects your brand, with your own name, logo and products on a storefront of your own.
+              Every business has its own identity. Kanova Store helps you create a store experience that reflects your brand, with your own name, logo and products on a storefront of your own.
             </Fade>
             <ul className="mt-8 space-y-5">
               {HIGHLIGHTS.map((h, i) => (

@@ -105,7 +105,7 @@ describe("customers in API mode", () => {
     const svc = await import("@/services/customer.service");
     cus.get.mockResolvedValueOnce({
       ...wireCustomer,
-      orders: [{ id: "o1", orderNumber: 7, status: "paid", currency: "INR", subtotalMinor: 100, totalMinor: 100, placedAt: "2026-02-01T00:00:00.000Z" }],
+      orders: [{ id: "o1", orderNumber: 7, status: "confirmed", currency: "INR", subtotalMinor: 100, totalMinor: 100, placedAt: "2026-02-01T00:00:00.000Z" }],
     });
     const found = await svc.getCustomer("cu1");
     expect(found?.customer.id).toBe("cu1");

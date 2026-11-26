@@ -118,9 +118,9 @@ function CartDrawer() {
                   {formatBagPrice(cart.subtotalMinor, cart.currency)}
                 </span>
               </div>
-              <p className="mt-2 text-[11px] leading-snug text-[color:var(--sf-color-muted)]">Online checkout is not available yet for this store.</p>
+              <p className="mt-2 text-[11px] leading-snug text-[color:var(--sf-color-muted)]">Delivery and GST are calculated at checkout.</p>
               <div className="mt-5 grid gap-3">
-                <CheckoutButton />
+                <CheckoutButton onNavigate={closeDrawer} />
                 <Link href="/cart" onClick={closeDrawer} className="flex h-[44px] items-center justify-center border border-border text-[11px] font-medium uppercase tracking-[0.15em] text-foreground transition-colors hover:border-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                   View bag
                 </Link>
@@ -133,12 +133,21 @@ function CartDrawer() {
   );
 }
 
-/** Checkout is not built: the button keeps its place in the layout but is disabled and says why, instead of pretending to work. */
-export function CheckoutButton({ className }: { className?: string }) {
+/** Goes to the checkout page. In the theme editor and preview the bag is in memory only, so there the button is inert. */
+export function CheckoutButton({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {
+  const cart = useCart();
+  const base = "flex h-12 w-full items-center justify-center bg-primary text-[11px] font-[450] uppercase tracking-[0.15em] text-primary-foreground";
+  if (cart.preview || cart.lines.length === 0) {
+    return (
+      <button type="button" disabled aria-disabled="true" title={cart.preview ? "Checkout is not available while previewing" : "Your bag is empty"} className={cn(base, "cursor-not-allowed opacity-60", className)}>
+        Proceed to checkout
+      </button>
+    );
+  }
   return (
-    <button type="button" disabled aria-disabled="true" title="Online checkout is not available yet" className={cn("flex h-12 w-full cursor-not-allowed items-center justify-center bg-primary text-[11px] font-[450] uppercase tracking-[0.15em] text-primary-foreground", className)}>
+    <Link href="/checkout" onClick={onNavigate} className={cn(base, "transition-colors hover:bg-[var(--primary-hover,var(--primary))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary", className)}>
       Proceed to checkout
-    </button>
+    </Link>
   );
 }
 

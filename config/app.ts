@@ -1,4 +1,4 @@
-export const APP_NAME = "StoreForge";
+export const APP_NAME = "Kanova Store";
 
 /** Cookie holding the *preferred* tenant id. It is a hint only - never proof of access. */
 export const ACTIVE_TENANT_COOKIE = "sf_active_tenant";
@@ -9,6 +9,8 @@ export const SIDEBAR_COOKIE = "sf_sidebar";
 export const ROUTES = {
   home: "/",
   login: "/login",
+  signup: "/signup",
+  onboarding: "/onboarding",
   noWorkspace: "/no-workspace",
   admin: "/admin",
   adminCompanies: "/admin/organizations",
@@ -18,6 +20,14 @@ export const ROUTES = {
   adminTeam: "/admin/team",
   adminUsage: "/admin/usage",
   adminSettings: "/admin/settings",
+  adminPlans: "/admin/plans",
+  adminEntitlements: "/admin/entitlements",
+  adminLimits: "/admin/limits",
+  adminBilling: "/admin/billing",
+  adminInvoices: "/admin/billing/invoices",
+  adminPayments: "/admin/billing/payments",
+  adminBillingSettings: "/admin/billing/settings",
+  adminMonitoring: "/admin/monitoring",
   dashboard: "/dashboard",
   products: "/dashboard/products",
   categories: "/dashboard/categories",
@@ -26,7 +36,24 @@ export const ROUTES = {
   customers: "/dashboard/customers",
   analytics: "/dashboard/analytics",
   team: "/dashboard/team",
+  orders: "/dashboard/orders",
   payments: "/dashboard/payments",
+  billing: "/dashboard/billing",
+  transactions: "/dashboard/payments/transactions",
+  refunds: "/dashboard/payments/refunds",
+  shipping: "/dashboard/shipping",
+  carriers: "/dashboard/shipping/carriers",
+  zones: "/dashboard/shipping/zones",
+  shippingMethods: "/dashboard/shipping/methods",
+  shipments: "/dashboard/shipping/shipments",
+  taxes: "/dashboard/taxes",
+  integrations: "/dashboard/integrations",
+  discounts: "/dashboard/marketing/discounts",
+  campaigns: "/dashboard/marketing/campaigns",
+  abandonedCarts: "/dashboard/marketing/abandoned-carts",
+  analyticsSales: "/dashboard/analytics/sales",
+  analyticsProducts: "/dashboard/analytics/products",
+  analyticsCustomers: "/dashboard/analytics/customers",
   settings: "/dashboard/settings",
   templates: "/dashboard/templates",
   themeEditor: "/dashboard/templates/editor",
@@ -35,10 +62,10 @@ export const ROUTES = {
 } as const;
 
 /** Routes that require a signed-in user (enforced again server-side in the data layer). */
-export const PROTECTED_PREFIXES = [ROUTES.dashboard, ROUTES.admin, ROUTES.noWorkspace] as const;
+export const PROTECTED_PREFIXES = [ROUTES.dashboard, ROUTES.admin, ROUTES.noWorkspace, ROUTES.onboarding] as const;
 
-/** Pages a signed-in user has no reason to see. There is no public registration: sign-in is the only guest page. */
-export const GUEST_ONLY_ROUTES = [ROUTES.login] as const;
+/** Pages a signed-in user has no reason to see: sign in and create an account. (A signed-in visitor to /signup is sent on to /onboarding, see lib/supabase/middleware.ts.) */
+export const GUEST_ONLY_ROUTES = [ROUTES.login, ROUTES.signup] as const;
 
 /** Slugs that must never be claimed (they would collide with app routes / subdomains). Mirrors the DB function. */
 export const RESERVED_SLUGS = [

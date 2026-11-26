@@ -20,6 +20,9 @@ export type AuditRow = {
   previousData: unknown;
   newData: unknown;
   createdAt: Date;
+  ip: string | null;
+  userAgent: string | null;
+  requestId: string | null;
 };
 
 export type AuditPage = { rows: AuditRow[]; total: number; page: number; pageSize: number };
@@ -27,7 +30,7 @@ export type AuditPage = { rows: AuditRow[]; total: number; page: number; pageSiz
 /** A page past the end answers with the last real page (the API clamps it). */
 export async function listAuditLogs(q: AuditListQuery): Promise<AuditPage> {
   await requirePlatformAdmin();
-  const { items, meta } = await listAuditLogsApi({ page: q.page, limit: q.pageSize, action: q.action, admin: q.admin, org: q.org, search: q.q, from: q.from, to: q.to });
+  const { items, meta } = await listAuditLogsApi({ page: q.page, limit: q.pageSize, action: q.action, entity: q.entity, admin: q.admin, org: q.org, search: q.q, from: q.from, to: q.to });
   return { page: meta.page, pageSize: q.pageSize, total: meta.total, rows: items.map((r) => ({ ...r, createdAt: new Date(r.createdAt) })) };
 }
 

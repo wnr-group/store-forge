@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { KanovaLockup } from "@/components/shared/kanova-lockup";
 import { APP_NAME } from "@/config/app";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./motion";
@@ -34,10 +35,10 @@ export function SectionHeading({ eyebrow, title, children, align = "left", class
 
 type Variant = "primary" | "secondary" | "light" | "gold";
 const BUTTON: Record<Variant, string> = {
-  primary: "bg-lp-primary text-white hover:bg-lp-primary-hover",
+  primary: "bg-lp-cta text-lp-deep hover:bg-lp-cta-hover",
   secondary: "border border-lp-border bg-white text-lp-heading hover:bg-lp-soft",
   light: "bg-white text-lp-heading hover:bg-lp-soft",
-  gold: "bg-lp-accent text-lp-deep hover:bg-lp-accent-light",
+  gold: "bg-lp-cta text-lp-deep hover:bg-lp-accent",
 };
 /** Class names for landing buttons rendered as plain anchors. */
 export const lpButton = (variant: Variant = "primary", className?: string) =>
@@ -47,11 +48,20 @@ export const lpButton = (variant: Variant = "primary", className?: string) =>
     className,
   );
 
-/** StoreForge brand lock-up. The mark is the gold handshake logo (public/logo.png), shared with the product. */
-export function BrandLogo({ className, light = false, name = APP_NAME }: { className?: string; light?: boolean; name?: string }) {
+/**
+ * Kanova Store brand lock-up (see KanovaLockup). An uploaded platform logo is shown with the platform name beside it instead.
+ */
+export function BrandLogo({ className, light = false, name = APP_NAME, logoUrl }: { className?: string; light?: boolean; name?: string; logoUrl?: string | null }) {
+  if (!logoUrl) {
+    return (
+      <span className={cn("inline-flex items-center", className)}>
+        <KanovaLockup className={light ? "h-16 text-white" : "h-[3.25rem] text-lp-heading"} />
+      </span>
+    );
+  }
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-8 w-auto shrink-0" />
+      <Image src={logoUrl} alt="" aria-hidden width={160} height={48} unoptimized className="h-8 w-auto max-w-40 shrink-0 object-contain" />
       <span className={cn("lp-display text-[19px] leading-none font-extrabold tracking-tight", light ? "text-white" : "text-lp-heading")}>{name}</span>
     </span>
   );

@@ -9,10 +9,13 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROUTES } from "@/config/app";
 import { AUDIT_ACTION_LABELS, AUDIT_ACTIONS, LEGACY_AUDIT_ACTION_LABELS, type AuditAction } from "@/lib/admin/audit";
-import { ADMIN_PAGE_SIZES, auditListQuerySchema } from "@/lib/validations/admin-list";
+import { requirePlatformPagePermission } from "@/lib/auth/platform";
+import { ADMIN_PAGE_SIZES, AUDIT_ENTITY_TYPES, auditListQuerySchema } from "@/lib/validations/admin-list";
 import { listAuditAdmins, listAuditLogs, type AuditRow } from "@/services/admin-audit.service";
 
-export const metadata: Metadata = { title: "Activity & Audit Logs" };
+export const metadata: Metadata = { title: "Audit logs" };
+
+const ENTITY_LABEL: Record<string, string> = { organization: "Organizations", store: "Stores", team_member: "Team members", platform_admin: "Administrators", platform_settings: "Platform settings", plan: "Plans", subscription: "Subscriptions", entitlement: "Entitlements", invoice: "Invoices", payment: "Payments", billing_settings: "Billing settings" };
 
 const when = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
@@ -26,10 +29,17 @@ const tone = (action: string) =>
 
 /** Before and after facts of a change, when the entry recorded any. Credentials are never stored, so nothing sensitive can show here. */
 function Details({ row }: { row: AuditRow }) {
-  if (!row.previousData && !row.newData) return null;
+  if (!row.previousData && !row.newData && !row.ip && !row.requestId) return null;
   return (
     <details className="mt-1 text-xs text-muted-foreground">
       <summary className="cursor-pointer select-none">Details</summary>
+      {row.ip || row.requestId ? (
+        <p className="mt-1">
+          {row.ip ? `From ${row.ip}` : null}
+          {row.ip && row.requestId ? " · " : null}
+          {row.requestId ? <>Request <span className="font-mono">{row.requestId}</span></> : null}
+        </p>
+      ) : null}
       <div className="mt-1 grid gap-2 sm:grid-cols-2">
         {row.previousData ? (
           <div>
@@ -49,18 +59,20 @@ function Details({ row }: { row: AuditRow }) {
 }
 
 export default async function ActivityPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requirePlatformPagePermission("audit:read");
   const raw = await searchParams;
   const query = auditListQuerySchema.parse(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])));
   const [{ rows, total, page, pageSize }, admins] = await Promise.all([listAuditLogs(query), listAuditAdmins()]);
-  const filtered = query.action !== "all" || query.admin !== "all" || Boolean(query.org || query.q || query.from || query.to);
+  const filtered = query.action !== "all" || query.entity !== "all" || query.admin !== "all" || Boolean(query.org || query.q || query.from || query.to);
 
   return (
     <>
-      <PageHeader title="Activity & Audit Logs" description="What Platform Admins did, newest first. Entries cannot be edited or removed." />
+      <PageHeader title="Audit logs" description="What platform staff did, newest first, with the time, who did it and where from. Times are UTC. Entries cannot be edited or removed, and passwords and keys are never recorded." />
       <ListFilters
         searchPlaceholder="Search by organization name"
         filters={[
           { key: "action", label: "Action", options: [{ value: "all", label: "All actions" }, ...AUDIT_ACTIONS.map((a) => ({ value: a, label: AUDIT_ACTION_LABELS[a] }))] },
+          { key: "entity", label: "Kind", options: AUDIT_ENTITY_TYPES.map((e) => ({ value: e, label: e === "all" ? "Everything" : (ENTITY_LABEL[e] ?? e) })) },
           { key: "admin", label: "Administrator", options: [{ value: "all", label: "All administrators" }, ...admins.map((a) => ({ value: a.id, label: a.email }))] },
         ]}
         dateFilters={[
@@ -118,7 +130,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
             pageSize={pageSize}
             total={total}
             basePath={ROUTES.adminActivity}
-            params={{ action: query.action, admin: query.admin, org: query.org, q: query.q, from: query.from, to: query.to, pageSize: String(pageSize) }}
+            params={{ action: query.action, entity: query.entity, admin: query.admin, org: query.org, q: query.q, from: query.from, to: query.to, pageSize: String(pageSize) }}
             pageSizeOptions={ADMIN_PAGE_SIZES}
           />
         </>

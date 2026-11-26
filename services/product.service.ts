@@ -235,6 +235,9 @@ export async function buildQuickEditPayload(patch: QuickEditPatch): Promise<Reco
     trackInventory: d.trackInventory,
     quantity: String(d.quantity),
     lowStockThreshold: String(d.lowStockThreshold),
+    weightGrams: String(d.weightGrams ?? 0),
+    taxRateBps: d.taxRateBps === null || d.taxRateBps === undefined ? "" : String(d.taxRateBps),
+    hsnCode: d.hsnCode ?? "",
     status: d.status,
     options: d.options.map((o) => ({ name: o.name, values: o.values })),
     variants: d.variants.map((v) => ({

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { INTEGRATION_ICONS, type IntegrationIcon } from "./integration-icons";
@@ -44,14 +45,9 @@ export function IntegrationsDiagram({ nodes }: { nodes: readonly DiagramNode[] }
         })}
       </svg>
 
-      <motion.div variants={{ hidden: { opacity: 0, scale: 0.7 }, show: { opacity: 1, scale: 1, transition: { duration: 0.8, ease: EASE } } }} className="absolute top-1/2 left-1/2 grid w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center gap-1.5 rounded-3xl border border-lp-border bg-white py-4 shadow-[0_24px_48px_-24px_rgba(18,40,31,0.35)] sm:gap-2 sm:py-6">
-        <svg viewBox="0 0 32 32" aria-hidden className="size-9 sm:size-12">
-          <rect width="32" height="32" rx="8" className="fill-lp-primary" />
-          <rect x="8" y="9" width="16" height="3.5" rx="1.75" className="fill-white" />
-          <rect x="8" y="14.25" width="12" height="3.5" rx="1.75" className="fill-white" />
-          <rect x="8" y="19.5" width="8" height="3.5" rx="1.75" className="fill-white" />
-        </svg>
-        <span className="text-[11px] font-semibold tracking-tight text-lp-heading sm:text-sm">StoreForge</span>
+      <motion.div variants={{ hidden: { opacity: 0, scale: 0.7 }, show: { opacity: 1, scale: 1, transition: { duration: 0.8, ease: EASE } } }} className="absolute top-1/2 left-1/2 grid w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center gap-1.5 rounded-3xl border border-lp-border bg-white py-4 shadow-[0_24px_48px_-24px_rgba(8,10,37,0.35)] sm:gap-2 sm:py-6">
+        <Image src="/kanova-mark.png" alt="" aria-hidden width={230} height={279} className="h-9 w-auto sm:h-12" />
+        <span className="text-[11px] font-semibold tracking-tight text-lp-heading sm:text-sm">Kanova Store</span>
       </motion.div>
 
       <ul>

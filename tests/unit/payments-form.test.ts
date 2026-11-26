@@ -4,14 +4,14 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
-vi.mock("@/app/(dashboard)/dashboard/payments/actions", () => ({ savePaymentConfigAction: vi.fn(), removePaymentConfigAction: vi.fn() }));
+vi.mock("@/app/(dashboard)/dashboard/payments/actions", () => ({ savePaymentConfigAction: vi.fn(), removePaymentConfigAction: vi.fn(), verifyPaymentConfigAction: vi.fn(), setPaymentEnabledAction: vi.fn() }));
 
 describe("the Payments form [layer:FE]", () => {
   const render = async (config: Parameters<typeof import("@/components/payments/payment-config-form").PaymentConfigForm>[0]["config"]) => {
     const { PaymentConfigForm } = await import("@/components/payments/payment-config-form");
     return renderToStaticMarkup(createElement(PaymentConfigForm, { config }));
   };
-  const configured = { configured: true as const, keyIdMasked: "rzp_test_••••5678", mode: "test" as const, updatedAtLabel: "19 Nov 2026, 6:15 pm UTC", updatedByName: "Alice Owner" };
+  const configured = { configured: true as const, keyIdMasked: "rzp_test_••••5678", mode: "test" as const, webhookSecretConfigured: false, enabled: false, verificationStatus: "unverified" as const, verificationError: null, verifiedAtLabel: null, webhookPath: null, updatedAtLabel: "19 Nov 2026, 6:15 pm UTC", updatedByName: "Alice Owner" };
 
   it("AC-FE-13: shows the masked Key ID and a Test or Live badge from the API's mode", async () => {
     const test = await render(configured);
@@ -35,7 +35,8 @@ describe("the Payments form [layer:FE]", () => {
   it("configured: shows the saved state, the exact copy, who and when, Replace and Remove", async () => {
     const html = await render(configured);
     expect(html).toContain("Configured (saved)");
-    expect(html).toContain("saved, not verified");
+    expect(html).toContain("Not verified yet");
+    expect(html).toContain("Off at checkout");
     expect(html).toContain("Secret saved, enter a new value to replace it");
     expect(html).toContain("Last updated 19 Nov 2026, 6:15 pm UTC by Alice Owner");
     expect(html).toContain("Replace credentials");
@@ -53,13 +54,22 @@ describe("the Payments form [layer:FE]", () => {
     }
   });
 
-  it("AC-UI-26 [layer:FE]: no Test Connection, Verify or Connect control and no Verified or Connected text in any state", async () => {
-    for (const config of [{ configured: false as const }, configured]) {
-      const html = await render(config);
-      const visible = html.replace(/<[^>]+>/g, " ");
-      expect(visible).not.toMatch(/\bVerified\b|\bConnected\b|Test Connection|\bVerify\b|\bConnect\b/);
-      expect(html).not.toMatch(/<button[^>]*>[^<]*(Verify|Connect|Test connection)/i);
-    }
+  it("AC-UI-26 [layer:FE]: an unverified connection can be checked but not yet turned on; a verified one can", async () => {
+    const unverified = await render(configured);
+    expect(unverified).toContain("Check connection");
+    expect(unverified).toMatch(/<button[^>]*\sdisabled=""[^>]*>\s*Turn on at checkout/);
+    const verified = await render({ ...configured, verificationStatus: "verified", verifiedAtLabel: "23 Nov 2026, 2:00 pm UTC" });
+    expect(verified).toContain("Connection verified");
+    expect(verified).not.toMatch(/<button[^>]*\sdisabled=""[^>]*>\s*Turn on at checkout/);
+    const on = await render({ ...configured, verificationStatus: "verified", enabled: true });
+    expect(on).toContain("On at checkout");
+    expect(on).toContain("Turn off at checkout");
+    const failed = await render({ ...configured, verificationStatus: "failed", verificationError: "Razorpay rejected the keys." });
+    expect(failed).toContain("Razorpay rejected the keys.");
+    expect(failed).toMatch(/<button[^>]*\sdisabled=""[^>]*>\s*Turn on at checkout/);
+    // Nothing is shown as verified before Razorpay was asked, and an empty store shows no connection controls.
+    const none = (await render({ configured: false })).replace(/<[^>]+>/g, " ");
+    expect(none).not.toMatch(/Check connection|Connection verified/);
   });
 
   it("AC-FE-16 [layer:FE]: the screen is built from the existing design system (shared settings section, form fields, ui buttons and badges)", async () => {

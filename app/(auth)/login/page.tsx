@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Info } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
@@ -27,7 +28,20 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       brandName={store?.name}
       title={store ? `Sign in to ${store.name}` : "Sign in"}
       description="Sign in with the email and password you were given."
-      footer={brand.supportEmail ? `Need help? Contact ${brand.supportEmail}.` : undefined}
+      footer={
+        <>
+          {/* A store's own sign-in is for that store's team; creating a new store account belongs to the main site. */}
+          {store ? null : (
+            <span className="block">
+              New here?{" "}
+              <Link href="/signup" className="font-semibold text-lp-primary underline-offset-4 hover:underline">
+                Get started
+              </Link>
+            </span>
+          )}
+          {brand.supportEmail ? <span className="mt-1 block">Need help? Contact {brand.supportEmail}.</span> : null}
+        </>
+      }
     >
       {error === "callback" ? (
         <Alert variant="destructive">

@@ -78,3 +78,18 @@ export function cartDocument(): TemplateDocument {
 export function wishlistDocument(): TemplateDocument {
   return doc([["wishlist", node("wishlist", {})]]);
 }
+
+/** Checkout: one checkout section. The bag lives in the browser; every price shown comes from the API. */
+export function checkoutDocument(): TemplateDocument {
+  return doc([["checkout", node("checkout", {})]]);
+}
+
+/** One order, opened with the token this browser saved when the order was placed. */
+export function orderDocument(): TemplateDocument {
+  return doc([["order", node("order", {})]]);
+}
+
+/** The orders this browser placed in this store. */
+export function ordersDocument(): TemplateDocument {
+  return doc([["orders", node("orders", {})]]);
+}

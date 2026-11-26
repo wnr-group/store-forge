@@ -70,6 +70,12 @@ export type Product = {
   trackInventory: boolean;
   quantity: number;
   lowStockThreshold: number;
+  /** Packed shipping weight per unit in grams (0 = not set). */
+  weightGrams: number;
+  /** GST rate in basis points, or null for the store default. */
+  taxRateBps: number | null;
+  /** HSN (goods) or SAC (services) code. */
+  hsnCode: string | null;
   status: ProductStatus;
   createdAt: Date;
   updatedAt: Date;

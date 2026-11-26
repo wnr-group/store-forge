@@ -29,12 +29,12 @@ describe("audit list query (from the URL)", () => {
   const id = "3f2b1c9e-8a4d-4c1e-9f6a-2b7d5e8c1a40";
 
   it("has sensible defaults", () => {
-    expect(auditListQuerySchema.parse({})).toEqual({ action: "all", admin: "all", org: "", q: "", from: "", to: "", page: 1, pageSize: 20 });
+    expect(auditListQuerySchema.parse({})).toEqual({ action: "all", entity: "all", admin: "all", org: "", q: "", from: "", to: "", page: 1, pageSize: 20 });
   });
 
   it("accepts only known actions, uuids and real dates", () => {
     for (const a of AUDIT_ACTIONS) expect(auditListQuerySchema.parse({ action: a }).action).toBe(a);
-    expect(auditListQuerySchema.parse({ action: "organization.deleted" }).action).toBe("all");
+    expect(auditListQuerySchema.parse({ action: "organization.vaporised" }).action).toBe("all");
     expect(auditListQuerySchema.parse({ admin: id, org: id }).admin).toBe(id);
     expect(auditListQuerySchema.parse({ admin: "not-a-uuid", org: "'; drop table x;--" })).toMatchObject({ admin: "all", org: "" });
     expect(auditListQuerySchema.parse({ from: "2026-11-01", to: "2026-11-09" })).toMatchObject({ from: "2026-11-01", to: "2026-11-09" });

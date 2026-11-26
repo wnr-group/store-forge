@@ -160,12 +160,12 @@ export function Features() {
     <Section id="features" className="bg-white">
       <Container>
         <div className="max-w-2xl">
-          <SlideIn as="p" x={-28} className="text-sm font-medium tracking-wide text-lp-primary">WHAT YOU CAN DO WITH STOREFORGE</SlideIn>
+          <SlideIn as="p" x={-28} className="text-sm font-medium tracking-wide text-lp-primary">WHAT YOU CAN DO WITH KANOVA STORE</SlideIn>
           <SlideIn x={-28} delay={0.08}>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance text-lp-heading sm:text-4xl sm:leading-[1.15]">Everything your store needs. All in one place.</h2>
           </SlideIn>
           <SlideIn as="p" x={-28} delay={0.16} className="mt-4 text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
-            From managing products and orders to tracking inventory and understanding performance, StoreForge gives you the tools to run your e-commerce business with confidence.
+            From managing products and orders to tracking inventory and understanding performance, Kanova Store gives you the tools to run your e-commerce business with confidence.
           </SlideIn>
         </div>
         <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -173,12 +173,12 @@ export function Features() {
             <ScaleIn as="li" key={f.title} scale={0.9} delay={((i % 3) + Math.floor(i / 3)) * 0.1} amount={0.12} className="group h-full">
               <article className="relative isolate flex h-full transform-gpu flex-col rounded-2xl border border-lp-border bg-lp-bg p-3 transition-[translate,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-1 group-hover:border-lp-primary/25 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
                 {/* The shadow fades in on its own layer: animating box-shadow directly repaints every frame and looks choppy */}
-                <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 shadow-[0_20px_44px_-18px_rgba(18,40,31,0.28)] transition-opacity duration-500 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
+                <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 shadow-[0_20px_44px_-18px_rgba(8,10,37,0.28)] transition-opacity duration-500 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
                 <div aria-hidden className="h-48 overflow-hidden rounded-xl bg-lp-soft p-3.5">
                   {f.visual}
                 </div>
                 <div className="flex flex-1 flex-col px-3 pt-5 pb-3">
-                  <span className="grid size-10 place-items-center rounded-lg border border-lp-border bg-white text-lp-primary shadow-[0_1px_2px_rgba(18,40,31,0.05)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-3 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none">
+                  <span className="grid size-10 place-items-center rounded-lg border border-lp-border bg-white text-lp-primary shadow-[0_1px_2px_rgba(8,10,37,0.05)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-3 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none">
                     <f.icon className="size-5" strokeWidth={1.75} aria-hidden />
                   </span>
                   <h3 className="mt-4 text-lg font-semibold tracking-tight text-lp-heading">{f.title}</h3>

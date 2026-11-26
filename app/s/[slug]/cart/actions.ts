@@ -1,7 +1,11 @@
 "use server";
 
 import { z } from "zod";
+import { run } from "@/lib/actions/run";
+import { checkpointCartApi, openCartRecoveryApi } from "@/lib/api/endpoints/checkout-api";
 import { getPublicProductApi } from "@/lib/api/endpoints/public-api";
+import { cartKeySchema, lineSchema, storeSlugSchema } from "@/lib/validations/checkout";
+import { parseInput } from "@/lib/validations/parse";
 import { AppError } from "@/lib/errors";
 import { MAX_LINES, type AddInput, type LineCheck } from "@/lib/cart/cart";
 
@@ -128,4 +132,33 @@ export async function quickAddAction(input: unknown): Promise<QuickAddResult> {
   } catch (error) {
     return error instanceof AppError && error.code === "NOT_FOUND" ? { status: "gone" } : { status: "error" };
   }
+}
+
+/**
+ * Saves the bag of a shopper who typed an email at checkout, so it can be recovered if they leave. The API prices the items itself and
+ * stores only a hash of the cart id; failures are returned, never thrown, and the checkout ignores them.
+ */
+export async function checkpointCartAction(input: unknown) {
+  return run(async () => {
+    const v = parseInput(
+      z.object({
+        storeSlug: storeSlugSchema,
+        cartKey: cartKeySchema,
+        lines: z.array(lineSchema.pick({ productSlug: true, variantId: true, quantity: true })).min(1).max(50),
+        customer: z.object({ email: z.string().trim().max(254).email(), fullName: z.string().trim().max(120).optional(), phone: z.string().trim().max(20).optional() }),
+        marketingConsent: z.boolean().optional(),
+      }),
+      input,
+    );
+    const { storeSlug, ...body } = v;
+    return checkpointCartApi(storeSlug, body);
+  });
+}
+
+/** Opens a recovery link: the saved items, priced now. A wrong, spent or expired link is one and the same "not found". */
+export async function recoverCartAction(input: unknown) {
+  return run(async () => {
+    const v = parseInput(z.object({ storeSlug: storeSlugSchema, token: z.string().regex(/^[A-Za-z0-9_-]{43}$/) }), input);
+    return openCartRecoveryApi(v.storeSlug, v.token);
+  });
 }

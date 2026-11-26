@@ -47,7 +47,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isSignedIn && GUEST_ONLY_ROUTES.some((r) => matches(pathname, r))) {
-    return redirectTo(ROUTES.dashboard);
+    // Someone who is already signed in and presses "Get started" carries on with the plan they picked.
+    return redirectTo(matches(pathname, ROUTES.signup) ? `${ROUTES.onboarding}${search}` : ROUTES.dashboard);
   }
 
   return response;

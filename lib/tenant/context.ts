@@ -74,8 +74,9 @@ export async function requireTenantRole(tenantId: string, permission: Permission
 export const requireWorkspace = cache(async () => {
   const user = await requireUser();
   const active = await getActiveTenant();
-  // No (active) workspace: Platform Admins belong in the admin area; everyone else cannot self-onboard.
-  if (!active) redirect((await isPlatformAdmin()) ? ROUTES.admin : ROUTES.noWorkspace);
+  // No (active) workspace: Platform Admins belong in the admin area. On a store's own address nobody can onboard (the notice explains it);
+  // on the main site a signed-in customer without a store continues the self-service onboarding (choose a plan, pay, create the store).
+  if (!active) redirect((await isPlatformAdmin()) ? ROUTES.admin : (await getRequestStoreSlug()) ? ROUTES.noWorkspace : ROUTES.onboarding);
   const { store, memberships: tenants } = await loadWorkspaceData();
   return { user, active, store, tenants };
 });

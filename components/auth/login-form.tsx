@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginAction } from "@/app/(auth)/actions";
 import { FormError } from "@/components/shared/form-error";
@@ -25,7 +26,10 @@ export function LoginForm({ next }: { next?: string }) {
     startTransition(async () => {
       // On success the action redirects; it only returns on failure.
       const result = await loginAction(values, next);
-      if (result && !result.ok) setFormError(result.error);
+      if (result && !result.ok) {
+        setFormError(result.error);
+        toast.error(result.error);
+      }
     });
   });
 
