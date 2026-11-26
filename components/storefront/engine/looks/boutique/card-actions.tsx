@@ -4,6 +4,7 @@ import { Heart } from "lucide-react";
 import { useQuickAdd } from "@/components/storefront/cart/use-quick-add";
 import { useOptionalWishlist } from "@/components/storefront/wishlist/wishlist-provider";
 import { cn } from "@/lib/utils";
+import { useWording, useWordingMarker } from "../../use-wording";
 import type { CardProduct } from "../../ui";
 
 /**
@@ -14,6 +15,9 @@ import type { CardProduct } from "../../ui";
 export function CardActions({ product, href, aspect = "aspect-[3/4]", inset = "inset-x-3 bottom-3", round = "" }: { product: CardProduct; href: string | null; aspect?: string; inset?: string; round?: string }) {
   const { cart, busy, addToBag } = useQuickAdd(product, href);
   const wishlist = useOptionalWishlist();
+  const { addToBagLabel } = useWording();
+  // Editor and preview only: a click on the button jumps to Theme > Shopping wording > Add to bag label.
+  const themeTarget = useWordingMarker("addToBagLabel");
   const soldOut = product.available === false;
   const saved = wishlist?.ready ? wishlist.has(product.slug) : false;
 
@@ -51,9 +55,10 @@ export function CardActions({ product, href, aspect = "aspect-[3/4]", inset = "i
           type="button"
           onClick={addToBag}
           disabled={busy}
+          {...themeTarget}
           className={cn("pointer-events-auto absolute flex h-10 translate-y-2 items-center justify-center bg-primary text-[11px] font-[450] uppercase tracking-[0.15em] text-primary-foreground opacity-0 transition-all duration-300 ease-[cubic-bezier(.22,.61,.36,1)] hover:bg-[var(--primary-hover,var(--primary))] focus-visible:translate-y-0 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100 disabled:cursor-wait disabled:opacity-80 motion-reduce:transition-none [@media(hover:none)]:translate-y-0 [@media(hover:none)]:opacity-100", inset, round)}
         >
-          {busy ? "Adding" : "Add to bag"}
+          {busy ? "Adding" : addToBagLabel}
         </button>
       ) : null}
     </div>

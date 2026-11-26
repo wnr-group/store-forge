@@ -43,6 +43,12 @@ export function availableCardParts(look: string | undefined): CardPartKey[] {
 }
 
 /**
+ * Whether the cards of a look carry an "Add to bag" button whose words are the store's Add to bag label. Market's cards have only
+ * the heart, and its product page keeps its own "Add to cart", so nothing about the label is offered there.
+ */
+export const cardHasAddToBagLabel = (look: string | undefined): boolean => look === "boutique" || look === "sport";
+
+/**
  * Whether a card shows its description when the merchant has not chosen. This is what the cards did before the choice existed:
  * Boutique, Sport and the Haven theme show it, the others do not. The cards pass the same answer to `readCardParts`.
  */

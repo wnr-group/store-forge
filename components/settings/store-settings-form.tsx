@@ -14,8 +14,23 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
+import { cn } from "@/lib/utils";
 import { storeSettingsSchema } from "@/lib/validations/catalog";
 import type { Store } from "@/lib/domain/entities";
+
+/** Same limits as the API and storeSettingsSchema. */
+const META_TITLE_MAX = 70;
+const META_DESCRIPTION_MAX = 160;
+
+/** `42/70`, turning red once the text is too long (it is then refused on save). */
+function Counter({ value, max }: { value: string; max: number }) {
+  const n = value.trim().length;
+  return (
+    <span aria-live="polite" className={cn("text-xs tabular-nums", n > max ? "text-error" : "text-muted-foreground")}>
+      {n}/{max}
+    </span>
+  );
+}
 
 type Props = { store: Store; publicId: string; canEdit: boolean; currencyLocked: boolean };
 
@@ -42,6 +57,8 @@ export function StoreSettingsForm({ store, publicId, canEdit, currencyLocked }: 
     name: store.name,
     slug: store.slug,
     description: store.description ?? "",
+    metaTitle: store.metaTitle ?? "",
+    metaDescription: store.metaDescription ?? "",
     contactEmail: store.contactEmail ?? "",
     contactPhone: store.contactPhone ?? "",
     currency: store.currency,
@@ -104,6 +121,15 @@ export function StoreSettingsForm({ store, publicId, canEdit, currencyLocked }: 
           <p className="mb-2 text-sm font-medium">Logo</p>
           <ImageUploader value={logo} onChange={setLogo} scope="store" max={1} single disabled={off} label="Store logo" />
         </div>
+      </SettingsSection>
+
+      <SettingsSection title="SEO" description="How your store's home page appears in search results and when its link is shared. Leave a field empty to use your store name or description.">
+        <FormField id="st-meta-title" label="Meta title" optional error={errors.metaTitle} labelAside={<Counter value={v.metaTitle} max={META_TITLE_MAX} />} hint={`Up to ${META_TITLE_MAX} characters. Defaults to your store name.`}>
+          <Input id="st-meta-title" value={v.metaTitle} onChange={set("metaTitle")} onBlur={blur("metaTitle")} disabled={off} aria-invalid={Boolean(errors.metaTitle)} aria-describedby="st-meta-title-msg" />
+        </FormField>
+        <FormField id="st-meta-desc" label="Meta description" optional error={errors.metaDescription} labelAside={<Counter value={v.metaDescription} max={META_DESCRIPTION_MAX} />} hint={`Up to ${META_DESCRIPTION_MAX} characters. Defaults to your store description.`}>
+          <Textarea id="st-meta-desc" rows={3} value={v.metaDescription} onChange={set("metaDescription")} onBlur={blur("metaDescription")} disabled={off} aria-invalid={Boolean(errors.metaDescription)} aria-describedby="st-meta-desc-msg" />
+        </FormField>
       </SettingsSection>
 
       <SettingsSection title="Contact" description="How customers can reach your store.">

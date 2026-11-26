@@ -16,8 +16,8 @@ export const updateCompanySchema = z.object({
 });
 export type UpdateCompanyInput = z.input<typeof updateCompanySchema>;
 
-/** Store: the merchant settings rules minus the address (slug) and logo, which an admin does not edit. */
-export const updateStoreSchema = storeSettingsSchema.omit({ slug: true, logoPath: true });
+/** Store: the merchant settings rules minus the address (slug), logo and SEO text, which an admin does not edit (the API rejects them). */
+export const updateStoreSchema = storeSettingsSchema.omit({ slug: true, logoPath: true, metaTitle: true, metaDescription: true });
 export type UpdateStoreInput = z.input<typeof updateStoreSchema>;
 
 

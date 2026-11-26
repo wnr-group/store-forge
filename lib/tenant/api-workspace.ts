@@ -24,6 +24,8 @@ const toStore = (s: StoreApi, tenantId: string): Store => ({
   slug: s.slug,
   description: s.description,
   logoUrl: s.logoPath,
+  metaTitle: s.metaTitle ?? null,
+  metaDescription: s.metaDescription ?? null,
   contactEmail: s.contactEmail,
   contactPhone: s.contactPhone,
   currency: s.currency,

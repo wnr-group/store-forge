@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { TemplateRenderer } from "@/components/storefront/engine/renderer";
 import type { RenderMode } from "@/components/storefront/engine/types";
+import { themeTargetAt, type ThemeTarget } from "@/lib/editor/theme-target";
 import type { TemplateDocument } from "@/lib/templates/document";
 import type { PreviewStoreData } from "@/lib/themes/types";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,8 @@ export type ThemeFrameProps = {
   cropHeight?: number;
   /** Section or block clicks, in editor mode. `text` and `image` say what was under the pointer, to find the setting behind it. */
   onSelect?: (target: ClickTarget) => void;
+  /** Inspector on: a click on something that stands for a theme-wide setting (the bag drawer, a card's Add to bag button). */
+  onThemeTarget?: (target: ThemeTarget) => void;
   /** Double click on a link, in editor mode: the link's address. */
   onNavigate?: (href: string) => void;
   /** Inspector on: double-clicking text edits it in place; this receives the old and new words once the merchant is done. */
@@ -133,7 +136,7 @@ function DeviceScreen({ width, height, scale, left, children }: { width: number;
  * space available. Nothing here is a mock-up, so what the merchant sees is what the storefront renders. Links and forms
  * inside never navigate; in editor mode a click selects the section or block under the pointer instead.
  */
-export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onNavigate, onEditText, onEditBlocked, inspector = true, selectedSectionId, selectedBlockId, labelFor, zoom, resource, cardTools, className }: ThemeFrameProps) {
+export function ThemeFrame({ document, theme, groups, data, device = "desktop", mode = "preview", cropHeight, onSelect, onThemeTarget, onNavigate, onEditText, onEditBlocked, inspector = true, selectedSectionId, selectedBlockId, labelFor, zoom, resource, cardTools, className }: ThemeFrameProps) {
   const outer = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ sectionId: string; blockId?: string } | null>(null);
   // The text being edited in place, so a change of mode or a closed preview ends the edit cleanly.
@@ -205,6 +208,9 @@ export function ThemeFrame({ document, theme, groups, data, device = "desktop", 
       if (href && onNavigate) onNavigate(href);
       return;
     }
+    // The bag drawer and a card's Add to bag button stand for a theme-wide setting, not for a section: open that setting instead.
+    const themeTarget = themeTargetAt(target);
+    if (themeTarget && onThemeTarget) return onThemeTarget(themeTarget);
     const section = target.closest<HTMLElement>("[data-sf-section]");
     if (!section) return;
     const block = target.closest<HTMLElement>("[data-sf-block]");

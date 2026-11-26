@@ -7,6 +7,7 @@ import { Check, X } from "lucide-react";
 import { formatBagPrice } from "@/lib/cart/format";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
+import { useWording, useWordingMarker } from "../engine/use-wording";
 import { useCart } from "./cart-provider";
 import { QtyStepper } from "./qty-stepper";
 
@@ -25,6 +26,9 @@ export function CartChrome() {
 
 function CartDrawer() {
   const cart = useCart();
+  const { emptyCartTitle } = useWording();
+  // Editor and preview only: a click on the open drawer jumps to Theme > Shopping wording > Empty cart title.
+  const themeTarget = useWordingMarker("emptyCartTitle");
   const panel = useRef<HTMLDivElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const { drawerOpen, closeDrawer } = cart;
@@ -65,7 +69,7 @@ function CartDrawer() {
   return (
     <div className="fixed inset-0 z-[60]">
       <button type="button" aria-label="Close bag" tabIndex={-1} onClick={closeDrawer} className="absolute inset-0 cursor-default bg-primary/25 animate-in fade-in duration-300" />
-      <div ref={panel} role="dialog" aria-modal="true" aria-label={`Your bag, ${cart.count} ${cart.count === 1 ? "item" : "items"}`} className="absolute inset-y-0 right-0 flex w-full max-w-[26rem] flex-col bg-white text-foreground shadow-[0_0_60px_rgba(31,28,25,0.08)] animate-in slide-in-from-right duration-300 motion-reduce:animate-none">
+      <div ref={panel} {...themeTarget} role="dialog" aria-modal="true" aria-label={`Your bag, ${cart.count} ${cart.count === 1 ? "item" : "items"}`} className="absolute inset-y-0 right-0 flex w-full max-w-[26rem] flex-col bg-white text-foreground shadow-[0_0_60px_rgba(31,28,25,0.08)] animate-in slide-in-from-right duration-300 motion-reduce:animate-none">
         <div className="flex h-[63px] shrink-0 items-center justify-between border-b border-border px-6">
           <h2 className={cn(LABEL, "text-foreground")}>Your bag ({cart.count})</h2>
           <button ref={closeButton} type="button" onClick={closeDrawer} aria-label="Close bag" className="-mr-2 flex size-9 items-center justify-center text-[color:var(--sf-color-muted)] transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
@@ -76,7 +80,7 @@ function CartDrawer() {
         {empty ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6 text-center">
             <p className="text-[1.75rem] leading-tight" style={DISPLAY}>
-              Your bag is empty
+              {emptyCartTitle}
             </p>
             <Link href="/products" onClick={closeDrawer} className="inline-flex h-11 items-center rounded-full border border-border px-6 text-[14px] font-medium transition-colors hover:bg-primary hover:text-primary-foreground">
               Continue shopping

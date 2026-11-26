@@ -191,6 +191,9 @@ export const storeSettingsSchema = z.object({
   name: trimmed("Store name", 80, 2),
   slug: storeSlugSchema,
   description: optionalText("Store description", 500),
+  /** SEO text of the storefront home page; limits match the API. Empty becomes null. */
+  metaTitle: optionalText("Meta title", 70),
+  metaDescription: optionalText("Meta description", 160),
   contactEmail: optionalEmail("Store email"),
   contactPhone: optionalPhone,
   currency: z

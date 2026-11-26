@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { resolveVariant } from "@/lib/templates/variant-selection";
 import { cn } from "@/lib/utils";
 import type { ProductDetailData } from "../engine/types";
+import { useWording } from "../engine/use-wording";
 import { useOptionalCart } from "./cart-provider";
 import { useOptionalWishlist } from "../wishlist/wishlist-provider";
 import { QtyStepper } from "./qty-stepper";
@@ -17,6 +18,7 @@ import { QtyStepper } from "./qty-stepper";
 export function AddToBag({ product, selectedOptions }: { product: ProductDetailData; selectedOptions: Record<string, string> }) {
   const cart = useOptionalCart();
   const wishlist = useOptionalWishlist();
+  const { addToBagLabel } = useWording();
   const [quantity, setQuantity] = useState(1);
   if (!cart || !product.slug) return null;
   const saved = wishlist?.ready ? wishlist.has(product.slug) : false;
@@ -41,7 +43,7 @@ export function AddToBag({ product, selectedOptions }: { product: ProductDetailD
   const variant = needsVariant ? resolveVariant(variants, selectedOptions) : undefined;
   const soldOut = product.available === false;
   const blocked = soldOut || (needsVariant && !variant) || cart.storeSlug === "";
-  const label = soldOut ? "Sold out" : needsVariant && !variant ? "Select options" : "Add to bag";
+  const label = soldOut ? "Sold out" : needsVariant && !variant ? "Select options" : addToBagLabel;
 
   const add = () => {
     if (blocked) return;

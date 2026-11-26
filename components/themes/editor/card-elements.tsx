@@ -4,15 +4,25 @@ import { Check, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CARD_PARTS, COLLECTION_CARD_PARTS, availableCardParts, countOnByDefault, readCardParts, readCollectionCardParts, type CardKind } from "@/lib/templates/card-parts";
+import { CARD_PARTS, COLLECTION_CARD_PARTS, availableCardParts, cardHasAddToBagLabel, countOnByDefault, readCardParts, readCollectionCardParts, type CardKind } from "@/lib/templates/card-parts";
+import { WORDING_GROUP } from "@/lib/storefront/wording";
+import { themeSettingDescriptors } from "@/lib/templates/registry/theme-settings";
 import { cn } from "@/lib/utils";
+import { SettingField } from "./setting-field";
 
 /** What the editor needs to know about the theme to offer the right card elements. */
 export type CardContext = {
   look: string | undefined;
   /** Whether the cards of this theme show the short description when the merchant has not chosen. */
   descriptionDefault: boolean;
+  /**
+   * The store-wide Add to bag label (theme setting `productCards.addToBagLabel`), so a card's elements can edit it. It is the
+   * theme's own setting, not a copy: `onChange` writes to the theme. Absent where there is no theme document to write to.
+   */
+  addToBagLabel?: { value: unknown; error?: string; onChange: (value: string) => void };
 };
+
+const ADD_TO_BAG_DESCRIPTOR = themeSettingDescriptors.find((d) => d.group === WORDING_GROUP && d.id === "addToBagLabel");
 
 type Part = { key: string; setting: string; label: string; help: string };
 
@@ -91,6 +101,12 @@ export function CardElements({ kind = "product", settings, context, disabled, on
       ) : (
         <p className="border-t px-3 py-2 text-xs text-muted-foreground">The card is empty. Use + to add an element.</p>
       )}
+      {kind === "product" && on.quickAdd && available.includes("quickAdd") && cardHasAddToBagLabel(context.look) && context.addToBagLabel && ADD_TO_BAG_DESCRIPTOR ? (
+        <div className="space-y-1.5 border-t p-3" data-testid="card-add-to-bag-label">
+          <SettingField descriptor={ADD_TO_BAG_DESCRIPTOR} value={context.addToBagLabel.value} disabled={disabled} error={context.addToBagLabel.error} onChange={(value) => context.addToBagLabel?.onChange(String(value ?? ""))} />
+          <p className="text-[11px] leading-snug text-muted-foreground">This is a store-wide setting (Theme &gt; Shopping wording). It applies to all product cards and the product detail page.</p>
+        </div>
+      ) : null}
     </div>
   );
 }

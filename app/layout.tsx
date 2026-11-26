@@ -4,6 +4,7 @@ import Script from "next/script";
 import { ThemedToaster } from "@/components/shared/themed-toaster";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/script";
 import { APP_NAME } from "@/config/app";
+import { PLATFORM_ICONS } from "@/lib/storefront/seo";
 import "./globals.css";
 
 // Self-hosted variable fonts (latin subset, app/fonts): no Google Fonts request at dev, build or run time, so the
@@ -29,6 +30,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: `${platformName} - launch your online store`, template: `%s | ${platformName}` },
     description: `${platformName} lets merchants create and run their own online store on a secure, multi-tenant platform.`,
     applicationName: platformName,
+    // The platform's own icons (files in /public). A storefront layout replaces these with the store's favicon when it has one.
+    icons: PLATFORM_ICONS,
   };
 }
 

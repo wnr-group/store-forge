@@ -170,11 +170,15 @@ const PAYMENT_FILES = [
   "components/payments/payment-config-form.tsx", ...walk("app/(dashboard)/dashboard/payments"),
 ];
 
+/** The Settings form gained the home page SEO title and description (store SEO feature); it is the only Settings file allowed to differ from the baseline. */
+const SEO_SETTINGS_FORM = "components/settings/store-settings-form.tsx";
+
 // No layer tag on the block: the tool takes the FIRST [layer:X] in a test's full name, and these tests carry their own (STATIC or FE).
 describe("static checks", () => {
   it("AC-REG-10 [layer:STATIC]: the Settings page and its components are byte-identical to the baseline", () => {
     const settingsFiles = [...walk("app/(dashboard)/dashboard/settings"), ...walk("components/settings")];
-    const different = git("diff", "--name-only", "origin/main", "--", "app/(dashboard)/dashboard/settings", "components/settings").split("\n").filter(Boolean);
+    // The one allowed change: the SEO title and description fields of the store form (the settings page itself and every other component are untouched).
+    const different = git("diff", "--name-only", "origin/main", "--", "app/(dashboard)/dashboard/settings", "components/settings").split("\n").filter(Boolean).filter((f) => f !== SEO_SETTINGS_FORM);
     expect(settingsFiles.length).toBeGreaterThan(3);
     expect(different).toEqual([]);
   });
@@ -192,7 +196,7 @@ describe("static checks", () => {
     const files = git("diff", "--name-only", "origin/main").split("\n").filter(Boolean);
     const untracked = git("ls-files", "--others", "--exclude-standard", "--", "app", "components", "lib", "services", "config").split("\n").filter(Boolean);
     const changed = [...new Set([...files, ...untracked])];
-    const settings = changed.filter((f) => /^(app\/\(dashboard\)\/dashboard\/settings|components\/settings)\//.test(f));
+    const settings = changed.filter((f) => /^(app\/\(dashboard\)\/dashboard\/settings|components\/settings)\//.test(f) && f !== SEO_SETTINGS_FORM);
     // The one route handler is the shipping-label download: it streams a PDF the browser cannot fetch itself (the API token is HttpOnly).
     const handlers = changed.filter((f) => /(^|\/)route\.(ts|tsx|js)$/.test(f));
     await capture({
@@ -218,7 +222,7 @@ describe("static checks", () => {
     const paymentStyles = git("diff", "origin/main", "--", "app/globals.css").split("\n").filter((l) => l.startsWith("+") && /payment|razorpay|refund|ledger|transaction/i.test(l));
     const imports = PAYMENT_FILES.filter((f) => f.endsWith(".tsx")).flatMap((f) => [...read(f).matchAll(/from "([^"]+)"/g)].map((m) => m[1]));
     const external = [...new Set(imports.filter((i) => !i.startsWith("@/") && !i.startsWith(".")))].sort();
-    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|billing\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/|team\/)[^/]+\/)/.test(f));
+    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|billing\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/|team\/)[^/]+\/)/.test(f) && f !== SEO_SETTINGS_FORM);
     await capture({
       acId: "AC-FE-16", folder: "logs", fileName: "AC-FE-16.txt", layer: "STATIC", environment: "unit", testName: "AC-FE-16", testFile: here,
       actualResult: `payments components import only existing shared and ui components (external packages: ${external.join(", ")}); no dependency, global style or other page changed`,

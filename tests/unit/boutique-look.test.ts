@@ -117,3 +117,49 @@ describe("boutique helpers", () => {
     expect(list.map((p) => p.slug)).toEqual(["b", "a", "c"]);
   });
 });
+
+describe("the Add to bag label on product cards is the store's shopping wording", () => {
+  const grid: TemplateDocument = {
+    schemaVersion: 1,
+    layout: "classic",
+    order: ["grid"],
+    sections: { grid: { type: "product-grid", settings: { columns: 4 }, blocks: {}, block_order: [] } },
+  } as unknown as TemplateDocument;
+  const store = { name: "Silk Route", slug: "a", currency: "INR", products: [{ name: "Linen Saree", slug: "linen", price_minor: 540000, available: true }, { name: "Shell Jacket", slug: "shell", price_minor: 18900, available: false }] };
+  // A theme with a colour is a "themed" storefront, the only kind that has a bag.
+  const themeOf = (look: string, label?: unknown) => ({ settings: { brand: { look }, colors: { primary: "#10362f" }, ...(label === undefined ? {} : { productCards: { addToBagLabel: label } }) } });
+  const render = (theme: unknown) => renderToStaticMarkup(createElement(TemplateRenderer, { document: grid, mode: "public", context: { store, collections: [], theme, basePath: "" } as never }));
+
+  it("Boutique cards say Add to bag until the merchant sets a label", () => {
+    expect(render(themeOf("boutique"))).toContain(">Add to bag<");
+    expect(render(themeOf("boutique", "  "))).toContain(">Add to bag<");
+  });
+
+  it("Boutique cards show the custom label, only on products that can be bought", () => {
+    const html = render(themeOf("boutique", "Buy now"));
+    expect(html.match(/>Buy now</g)).toHaveLength(1); // the sold-out jacket has no button
+    expect(html).not.toContain(">Add to bag<");
+    expect(html).toContain("Sold out");
+  });
+
+  it("Sport cards show the custom label too", () => {
+    expect(render(themeOf("sport"))).toContain(">Add to bag<");
+    const html = render(themeOf("sport", "Grab it"));
+    expect(html).toContain(">Grab it<");
+    expect(html).not.toContain(">Add to bag<");
+  });
+
+  it("Market cards keep Add to cart whatever the label is", () => {
+    const html = render(themeOf("market", "Buy now"));
+    expect(html).toContain("Add to cart");
+    expect(html).not.toContain(">Buy now<");
+  });
+
+  it("the label of one store does not change another's", () => {
+    const a = render(themeOf("boutique", "Buy now"));
+    const b = render(themeOf("boutique"));
+    expect(a).toContain(">Buy now<");
+    expect(b).toContain(">Add to bag<");
+    expect(b).not.toContain(">Buy now<");
+  });
+});

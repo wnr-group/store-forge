@@ -16,6 +16,8 @@ export type StoreSettingsValues = {
   currency: string;
   timezone: string;
   logoPath: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
 };
 
 /** Owner/admin only (checked here AND by the API). */

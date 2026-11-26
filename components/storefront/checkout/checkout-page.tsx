@@ -13,6 +13,7 @@ import { clearCartKey, getCartKey, takePrefill } from "@/lib/checkout/cart-key";
 import { newIdempotencyKey, rememberOrder } from "@/lib/checkout/my-orders";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { addressSchema, customerSchema, PHONE_PATTERN, PINCODE_PATTERN } from "@/lib/validations/checkout";
+import { wordingOf } from "@/lib/storefront/wording";
 import { cn } from "@/lib/utils";
 import { useOptionalCart } from "../cart/cart-provider";
 import { useTracker } from "../tracking/tracking-provider";
@@ -77,6 +78,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
   const cart = useOptionalCart();
   const router = useRouter();
   const isPreview = context.mode === "preview" || context.mode === "editor";
+  const wording = wordingOf(context.theme);
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
 
   const [form, setForm] = useState<FormState>(EMPTY);
@@ -370,7 +372,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
       ) : !hasLines ? (
         <div className="flex flex-col items-start gap-6 py-16 md:py-24">
           <p className="text-[1.75rem] leading-tight md:text-[2.25rem]" style={{ fontFamily: "var(--sf-font-heading)" }}>
-            Your bag is empty
+            {wording.emptyCartTitle}
           </p>
           <Link href="/products" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[14px] font-medium text-primary-foreground">
             Continue shopping

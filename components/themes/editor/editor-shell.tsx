@@ -22,6 +22,9 @@ import { CARD_PARTS, COLLECTION_CARD_PARTS, availableCardParts, cardKindOf, coun
 import { isHomeTheme } from "@/lib/templates/engine/theme-style";
 import { applyInlineEdit, locateInlineEdit } from "@/lib/editor/inline";
 import { findSettingForClick } from "@/lib/editor/locate";
+import { themeFieldId, type ThemeTarget } from "@/lib/editor/theme-target";
+import { WORDING_GROUP } from "@/lib/storefront/wording";
+import type { CardContext } from "./card-elements";
 import { originalOf, readTextOverrides } from "@/lib/editor/text";
 import { PAGE_KEYS, PAGE_LABELS, routeForHref, withPageContent } from "@/lib/storefront/pages";
 import { foldVirtualPages, isVirtualId, openVirtualPage, rebuildVirtualPages, resetVirtualPage, virtualId, virtualKey } from "@/lib/themes/editor/virtual";
@@ -434,6 +437,17 @@ export function EditorShell({ init }: { init: EditorInit }) {
     return { look, descriptionDefault: descriptionOnByDefault(look, isHomeTheme(themeDoc)) };
   }, [state.docs]);
 
+  /** The same, plus the store-wide Add to bag label the card's Elements edit (Theme > Shopping wording): the theme's own setting, which the product page uses too. */
+  const cardElementsContext = useMemo<CardContext>(() => {
+    const themeId = Object.values(state.docs).find((d) => d.kind === "theme_settings")?.templateId;
+    const themeDoc = themeId ? state.docs[themeId].document : null;
+    const stored = (themeDoc as { settings?: Record<string, Record<string, unknown> | undefined> } | null)?.settings?.[WORDING_GROUP]?.addToBagLabel;
+    return {
+      ...cardContext,
+      addToBagLabel: themeId ? { value: stored, onChange: (value: string) => edit((s) => setThemeSetting(s, themeId, WORDING_GROUP, "addToBagLabel", value), `theme:${themeId}:${WORDING_GROUP}.addToBagLabel`) } : undefined,
+    };
+  }, [state.docs, cardContext, edit]);
+
   const onPreviewSelect = useCallback(
     (target: ClickTarget) => {
       const s = stateRef.current;
@@ -461,6 +475,15 @@ export function EditorShell({ init }: { init: EditorInit }) {
     },
     [edit],
   );
+
+  /** The bag drawer or a card's Add to bag button clicked: open that theme-wide setting (Theme tab) and put the cursor in its field. */
+  const onThemeTarget = useCallback((target: ThemeTarget) => {
+    setPickedCard(null);
+    setLeftTab("theme");
+    setMobileTab("settings");
+    setFocusSetting({ key: themeFieldId(target), nonce: Date.now() });
+    setClickedText(null);
+  }, []);
 
   /** Text edited directly on the page: saved where the text lives (see lib/editor/inline.ts). */
   const onEditText = useCallback(
@@ -1118,7 +1141,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
               {leftTab === "sections" ? (
-                <SectionsPanel state={state} groupIds={groupIds} pageKind={page.kind} actions={actions} disabled={!canEdit} cardContext={cardContext} />
+                <SectionsPanel state={state} groupIds={groupIds} pageKind={page.kind} actions={actions} disabled={!canEdit} cardContext={cardElementsContext} />
               ) : leftTab === "product" ? (
                 previewMode === "demo" ? (
                   <div className="space-y-3 p-4">
@@ -1191,7 +1214,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
               {loadingPage ? (
                 <div className="flex h-96 items-center justify-center"><Loader2 className="size-5 animate-spin text-muted-foreground" aria-label="Loading page" /></div>
               ) : (
-                <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onNavigate={navigateHref} onEditText={onEditText} onEditBlocked={onEditBlocked} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} labelFor={labelFor} zoom={zoom || null} cardTools={cardTools} {...frameProps} />
+                <ThemeFrame document={frameDocument} device={device} mode="editor" onSelect={onPreviewSelect} onThemeTarget={onThemeTarget} onNavigate={navigateHref} onEditText={onEditText} onEditBlocked={onEditBlocked} inspector={inspector} selectedSectionId={selectedSectionId} selectedBlockId={selectedBlockId} labelFor={labelFor} zoom={zoom || null} cardTools={cardTools} {...frameProps} />
               )}
             </div>
           </div>
@@ -1230,7 +1253,7 @@ export function EditorShell({ init }: { init: EditorInit }) {
             onSetting={(docId, sectionId, blockId, key, value) => edit((s) => setSetting(s, docId, sectionId, blockId, key, value), `set:${docId}:${sectionId}:${blockId ?? ""}:${key}`)}
             onThemeSetting={(docId, group, key, value) => edit((s) => setThemeSetting(s, docId, group, key, value), `theme:${docId}:${group}.${key}`)}
             adapter={adapter}
-            cardContext={cardContext}
+            cardContext={cardElementsContext}
             styleDevice={STYLE_DEVICE[device]}
             onStyle={onStyle}
             onResetStyle={onResetStyle}

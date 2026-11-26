@@ -36,8 +36,12 @@ export interface ThemeBrand {
   look?: string;
 }
 
+/** The shopping wording (see lib/storefront/wording.ts). Read it through `wordingOf`, never directly. */
+export type ThemeProductCards = Record<string, unknown>;
+
 export interface ThemeSettings {
   brand?: ThemeBrand;
+  productCards?: ThemeProductCards;
   colors?: ThemeColors;
   typography?: ThemeTypography;
   layout?: ThemeLayout;

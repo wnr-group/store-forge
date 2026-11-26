@@ -7,6 +7,7 @@ import { formatBagPrice } from "@/lib/cart/format";
 import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
 import type { SectionProps } from "../engine/looks";
+import { wordingOf } from "@/lib/storefront/wording";
 import { useOptionalCart } from "./cart-provider";
 import { CartRecovery } from "./cart-recovery";
 import { CheckoutButton } from "./cart-drawer";
@@ -25,6 +26,7 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
   const cart = useOptionalCart();
   const [notice, setNotice] = useState<string | null>(null);
   const isPreview = context.mode === "preview" || context.mode === "editor";
+  const wording = wordingOf(context.theme);
   const sfProps = isPreview && sectionId ? { "data-sf-section": sectionId } : {};
 
   const ready = cart?.ready ?? false;
@@ -86,9 +88,9 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
       ) : lines.length === 0 ? (
         <div className="flex flex-col items-start gap-6 py-16 md:py-24">
           <p className="text-[1.75rem] leading-tight md:text-[2.25rem]" style={DISPLAY}>
-            Your bag is empty
+            {wording.emptyCartTitle}
           </p>
-          <p className={cn("max-w-md text-[15px] leading-7", MUTED)}>Pieces you add appear here, saved in this browser for this store.</p>
+          <p className={cn("max-w-md text-[15px] leading-7", MUTED)}>{wording.emptyCartMessage}</p>
           <Link href="/products" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-[var(--primary-hover,var(--primary))]">
             Continue shopping
           </Link>

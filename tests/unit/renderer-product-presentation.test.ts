@@ -126,16 +126,22 @@ describe("media position", () => {
   });
 });
 
+// The product page shows every picture whole (`object-contain`, see sections/main-product.tsx). A focal point only decides which part of a
+// CROPPED picture stays in view, and on a picture that is not cropped `object-position` would only push it off-centre in its box, so
+// this layout does not apply it. The focal point is still stored and still read (a product with one renders normally).
 describe("focal point", () => {
-  it("applies object-position to the primary picture only", () => {
+  it("is not applied to the pictures, which are shown whole", () => {
     const html = render(page(), product("Tee", { presentation: { schemaVersion: 1, focalPoint: { x: 25, y: 75 } } }));
-    expect(html).toContain("object-position:25% 75%");
-    // main picture + the primary thumbnail: the other thumbnails and pictures are untouched
-    expect(html.match(/object-position/g)).toHaveLength(2);
+    expect(html).not.toContain("object-position");
+    // The gallery's pictures (the main picture and its thumbnails) are shown whole. Other elements on the page are not looked at here;
+    // main-product-layout.test.ts checks the section on its own.
+    expect(html.match(/<img[^>]*class="[^"]*object-contain[^"]*"/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
   });
-  it("stacked applies it to the first picture only", () => {
+  it("stacked does not apply it either, and still shows the pictures", () => {
     const html = render(page(), product("Tee", { presentation: { schemaVersion: 1, gallery: { layout: "stacked" }, focalPoint: { x: 0, y: 100 } } }));
-    expect(html.match(/object-position:0% 100%/g)).toHaveLength(1);
+    expect(html).not.toContain("object-position");
+    expect(html).toContain('data-gallery="stacked"');
+    expect(html).toContain("object-contain");
   });
 });
 

@@ -15,6 +15,19 @@ describe("storefrontSchema", () => {
   it("accepts the old response shape (no template key)", () => {
     expect(storefrontSchema.parse(base).template).toBeUndefined();
   });
+  it("parses the SEO title and description of the home page", () => {
+    const r = storefrontSchema.parse({ ...base, meta_title: "Acme | Candles", meta_description: "Hand-poured candles." });
+    expect(r.meta_title).toBe("Acme | Candles");
+    expect(r.meta_description).toBe("Hand-poured candles.");
+  });
+  it("accepts null SEO values, and an API that does not send them yet", () => {
+    expect(storefrontSchema.parse({ ...base, meta_title: null, meta_description: null })).toMatchObject({ meta_title: null, meta_description: null });
+    expect(storefrontSchema.parse(base).meta_title).toBeUndefined();
+    expect(storefrontSchema.parse(base).meta_description).toBeUndefined();
+  });
+  it("rejects SEO values that are not text", () => {
+    expect(storefrontSchema.safeParse({ ...base, meta_title: 5 }).success).toBe(false);
+  });
   it("accepts a template object and template: null (store has no settings)", () => {
     expect(storefrontSchema.parse({ ...base, template }).template?.key).toBe("spotlight");
     expect(storefrontSchema.parse({ ...base, template: null }).template).toBeNull();

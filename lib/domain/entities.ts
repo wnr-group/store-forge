@@ -19,6 +19,9 @@ export type Store = {
   description: string | null;
   /** Object path of the logo in the `products` bucket (`{tenant_id}/store/...`), not a URL. */
   logoUrl: string | null;
+  /** SEO title and description of the storefront home page. */
+  metaTitle: string | null;
+  metaDescription: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
   currency: string;
