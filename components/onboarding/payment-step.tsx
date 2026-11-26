@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { CreditCard, Loader2, Lock } from "lucide-react";
 import { startCheckoutAction, verifyCheckoutAction } from "@/app/(auth)/onboarding/actions";
 import { priceView, type Interval } from "@/components/landing/pricing-utils";
@@ -42,9 +43,15 @@ export function PaymentStep({
     setError(null);
     try {
       const started = await startCheckoutAction({ planCode: plan.code, billingInterval: interval });
-      if (!started.ok) return void setError(started.error);
+      if (!started.ok) {
+        toast.error(started.error);
+        return void setError(started.error);
+      }
       const checkout = started.data;
-      if (!checkout) return void setError("Could not start the payment. Please try again.");
+      if (!checkout) {
+        toast.error("Could not start the payment. Please try again.");
+        return void setError("Could not start the payment. Please try again.");
+      }
       // Nothing to pay (a free plan) or already paid: the store step is next.
       if (!checkout.payment) return void router.refresh();
 
@@ -73,6 +80,7 @@ export function PaymentStep({
             });
             if (!verified.ok) {
               setError(verified.error);
+              toast.error(verified.error);
               return done("failed");
             }
             done("paid");
@@ -80,14 +88,23 @@ export function PaymentStep({
           modal: { ondismiss: () => done("dismissed") },
         });
         widget.on("payment.failed", (r) => {
-          setError(r.error?.description ?? "The payment failed. You have not been charged; please try again.");
+          const message = r.error?.description ?? "The payment failed. You have not been charged; please try again.";
+          setError(message);
+          toast.error(message);
         });
         widget.open();
       });
       // Whatever happened, ask the server again what state the purchase is in: only it knows whether the payment counts.
-      if (outcome === "paid") router.refresh();
+      if (outcome === "paid") {
+        toast.success("Payment successful. Now name your store.");
+        router.refresh();
+      } else if (outcome === "dismissed") {
+        toast.info("Payment cancelled. You have not been charged.");
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      const message = e instanceof Error ? e.message : "Something went wrong. Please try again.";
+      setError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }

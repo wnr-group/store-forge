@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerAction } from "@/app/(auth)/actions";
 import { FormError } from "@/components/shared/form-error";
@@ -38,6 +39,7 @@ export function SignupForm({ plan }: { plan: PlanChoice | null }) {
       const result = await registerAction(values, plan ?? undefined);
       if (result && !result.ok) {
         setFormError(result.error);
+        toast.error(result.error);
         for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
           if (field in values) setError(field as keyof RegisterInput, { message });
         }
