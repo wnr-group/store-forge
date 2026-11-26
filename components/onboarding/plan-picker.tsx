@@ -1,51 +1,83 @@
-import Link from "next/link";
+"use client";
+
+import { useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { BillingToggle, PlanCard } from "@/components/landing/pricing-plans";
+import { effectiveInterval, hasYearlyOption, savingsPercent, type Interval } from "@/components/landing/pricing-utils";
 import { ROUTES } from "@/config/app";
-import { priceView } from "@/components/landing/pricing-utils";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { PublicPlan } from "@/services/public-plans.service";
 
-/** The published plans as a short list. Choosing one only changes the address: nothing is bought until the payment step. */
-export function PlanPicker({ plans }: { plans: PublicPlan[] }) {
-  if (plans.length === 0) {
-    return <p className="text-sm text-lp-text">No plans are available right now. Please try again shortly.</p>;
-  }
+/**
+ * The published plans in a pop-up, as the same cards the landing page shows: scroll sideways, switch monthly/yearly, pick one. Choosing
+ * only changes the address (nothing is bought until the payment step). There is no way to close it: a plan is the next required step,
+ * and `footer` (sign out) is the way out.
+ */
+export function PlanPicker({ plans, footer }: { plans: PublicPlan[]; footer?: React.ReactNode }) {
+  const [billing, setBilling] = useState<Interval>("monthly");
+  const scroller = useRef<HTMLUListElement>(null);
+  const yearly = hasYearlyOption(plans);
+  const bestSaving = Math.max(0, ...plans.map(savingsPercent));
+  const scrollBy = (dir: 1 | -1) => scroller.current?.scrollBy({ left: dir * 380, behavior: "smooth" });
+
   return (
-    <ul className="space-y-3">
-      {plans.map((plan) => {
-        const monthly = priceView(plan, "monthly");
-        const yearly = plan.monthlyPriceMinor > 0 && plan.yearlyPriceMinor > 0 ? priceView(plan, "yearly") : null;
-        return (
-          <li key={plan.code} className="rounded-2xl border border-lp-border bg-white p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h2 className="text-base font-semibold text-lp-heading">{plan.name}</h2>
-                {plan.description ? <p className="mt-0.5 text-sm text-lp-text">{plan.description}</p> : null}
-              </div>
-              <p className="shrink-0 text-right">
-                <span className="text-lg font-extrabold text-lp-heading">{monthly.amount}</span>
-                {monthly.per ? <span className="ml-1 text-xs text-lp-text">{monthly.per}</span> : null}
-              </p>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Link
-                href={`${ROUTES.onboarding}?plan=${encodeURIComponent(plan.code)}&interval=monthly`}
-                className={cn(buttonVariants({ size: "sm" }), "rounded-full")}
-              >
-                {monthly.free ? "Start free" : "Choose monthly"}
-              </Link>
-              {yearly ? (
-                <Link
-                  href={`${ROUTES.onboarding}?plan=${encodeURIComponent(plan.code)}&interval=yearly`}
-                  className={cn(buttonVariants({ size: "sm", variant: "outline" }), "rounded-full")}
-                >
-                  Choose yearly ({yearly.amount})
-                </Link>
+    <DialogPrimitive.Root open modal disablePointerDismissal onOpenChange={() => {}}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Backdrop className="fixed inset-0 isolate z-50 bg-lp-deep/60 backdrop-blur-sm data-open:animate-in data-open:fade-in-0" />
+        <DialogPrimitive.Popup className="lp-root fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-5xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl bg-lp-soft text-lp-heading shadow-2xl outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95">
+          <div className="shrink-0 px-5 pt-6 text-center sm:px-8 sm:pt-8">
+            <DialogPrimitive.Title className="text-2xl font-extrabold tracking-tight sm:text-3xl">Choose your plan</DialogPrimitive.Title>
+            <DialogPrimitive.Description className="mt-2 text-sm text-lp-text sm:text-base">
+              Compare what each plan includes. You can change it later.
+            </DialogPrimitive.Description>
+            {yearly ? <BillingToggle interval={billing} onChange={setBilling} saving={bestSaving} /> : null}
+          </div>
+
+          {plans.length === 0 ? (
+            <p className="px-6 py-16 text-center text-sm text-lp-text">No plans are available right now. Please try again shortly.</p>
+          ) : (
+            <div className="relative min-h-0 flex-1 overflow-y-auto px-3 pt-4 sm:px-6">
+              {plans.length > 1 ? (
+                <div className="mb-1 hidden justify-end gap-2 sm:flex">
+                  {([-1, 1] as const).map((dir) => (
+                    <button
+                      key={dir}
+                      type="button"
+                      aria-label={dir === -1 ? "Previous plans" : "Next plans"}
+                      onClick={() => scrollBy(dir)}
+                      className="grid size-9 place-items-center rounded-full border border-lp-border bg-white text-lp-heading transition-colors outline-none hover:bg-lp-secondary focus-visible:ring-2 focus-visible:ring-lp-primary"
+                    >
+                      {dir === -1 ? <ChevronLeft className="size-5" aria-hidden /> : <ChevronRight className="size-5" aria-hidden />}
+                    </button>
+                  ))}
+                </div>
               ) : null}
+              <ul
+                ref={scroller}
+                aria-label="Plans"
+                className="mx-auto flex w-fit max-w-full snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth px-1 pt-2 pb-6 [scrollbar-width:thin] motion-reduce:scroll-auto"
+              >
+                {plans.map((p, i) => {
+                  const interval = effectiveInterval(p, yearly ? billing : "monthly");
+                  return (
+                    <PlanCard
+                      key={p.code}
+                      plan={p}
+                      interval={yearly ? billing : "monthly"}
+                      index={i}
+                      reveal={false}
+                      href={`${ROUTES.onboarding}?plan=${encodeURIComponent(p.code)}&interval=${interval}`}
+                      cta={p.monthlyPriceMinor === 0 && p.yearlyPriceMinor === 0 ? "Start free" : "Choose this plan"}
+                    />
+                  );
+                })}
+              </ul>
             </div>
-          </li>
-        );
-      })}
-    </ul>
+          )}
+
+          {footer ? <div className="shrink-0 border-t border-lp-border bg-white/60 px-5 py-2.5 text-center">{footer}</div> : null}
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

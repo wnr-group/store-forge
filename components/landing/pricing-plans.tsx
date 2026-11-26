@@ -12,7 +12,7 @@ import { Container, lpButton, Section, SectionHeading } from "./ui";
 /** Features shown before "Show all": enough to compare plans at a glance, the rest one click away. */
 const PREVIEW_FEATURES = 5;
 
-function BillingToggle({ interval, onChange, saving }: { interval: Interval; onChange: (i: Interval) => void; saving: number }) {
+export function BillingToggle({ interval, onChange, saving }: { interval: Interval; onChange: (i: Interval) => void; saving: number }) {
   const option = (value: Interval, label: string) => (
     <button
       type="button"
@@ -37,14 +37,37 @@ function BillingToggle({ interval, onChange, saving }: { interval: Interval; onC
   );
 }
 
-function PlanCard({ plan, interval, index }: { plan: PublicPlan; interval: Interval; index: number }) {
+/** `href` and `cta` let another screen (the onboarding plan dialog) reuse the card; `reveal` is off where the card is not scrolled into view with the page. */
+export function PlanCard({
+  plan,
+  interval,
+  index,
+  href = `/signup?plan=${encodeURIComponent(plan.code)}&interval=${effectiveInterval(plan, interval)}`,
+  cta,
+  reveal = true,
+}: {
+  plan: PublicPlan;
+  interval: Interval;
+  index: number;
+  href?: string;
+  cta?: string;
+  reveal?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const listId = useId();
   const price = priceView(plan, interval);
   const extra = plan.features.length - PREVIEW_FEATURES;
   const saving = interval === "yearly" ? savingsPercent(plan) : 0;
-  return (
-    <Reveal as="li" delay={index * 0.08} amount={0.1} className="w-[85%] max-w-sm shrink-0 snap-center sm:w-[22rem] sm:snap-start">
+  const itemClass = "w-[85%] max-w-sm shrink-0 snap-center sm:w-[22rem] sm:snap-start";
+  const wrap = (card: React.ReactNode) =>
+    reveal ? (
+      <Reveal as="li" delay={index * 0.08} amount={0.1} className={itemClass}>
+        {card}
+      </Reveal>
+    ) : (
+      <li className={itemClass}>{card}</li>
+    );
+  return wrap(
       <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-lp-border bg-white p-6 shadow-[0_1px_2px_rgba(8,10,37,0.04)] transition-[translate,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-28px_rgba(8,10,37,0.35)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:p-7">
         <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-lp-cta to-lp-primary" />
 
@@ -68,11 +91,11 @@ function PlanCard({ plan, interval, index }: { plan: PublicPlan; interval: Inter
         </div>
 
         <Link
-          href={`/signup?plan=${encodeURIComponent(plan.code)}&interval=${effectiveInterval(plan, interval)}`}
+          href={href}
           className={lpButton("primary", "mt-5 w-full")}
           aria-label={`${price.free ? "Start free with" : "Get started with"} the ${plan.name} plan`}
         >
-          {price.free ? "Start free" : "Get started"}
+          {cta ?? (price.free ? "Start free" : "Get started")}
         </Link>
 
         {plan.features.length > 0 ? (
@@ -113,8 +136,7 @@ function PlanCard({ plan, interval, index }: { plan: PublicPlan; interval: Inter
             ))}
           </dl>
         ) : null}
-      </article>
-    </Reveal>
+      </article>,
   );
 }
 

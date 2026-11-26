@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { SignOutButton } from "@/components/auth/sign-out-button";
@@ -22,12 +23,12 @@ export const metadata: Metadata = { title: "Set up your store" };
  * decided by the API's own record of this person's purchase, never by the address or anything the browser says, so refreshing, coming
  * back later or paying in another tab always lands on the right step.
  */
-export default async function OnboardingPage({ searchParams }: { searchParams: Promise<{ plan?: string; interval?: string }> }) {
+export default async function OnboardingPage({ searchParams }: { searchParams: Promise<{ plan?: string; interval?: string; step?: string }> }) {
   const user = await requireUser();
   // Platform staff can never own a store, and the admin area is their home.
   if (await isPlatformAdmin()) redirect(ROUTES.admin);
 
-  const { plan, interval } = await searchParams;
+  const { plan, interval, step } = await searchParams;
   const [status, plans, active] = await Promise.all([getSignupStatus(), getPublicPlans(), getActiveTenant()]);
   const requested = planChoiceFrom(plan, interval);
   const picked = requested ? plans.find((p) => p.code === requested.planCode) : undefined;
@@ -51,7 +52,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   // A plan chosen in the address wins over an unpaid one left from earlier (choosing again replaces it); otherwise resume the open one.
   const chosenPlan = picked && requested ? { code: picked.code, name: picked.name, interval: effectiveInterval(picked, requested.billingInterval), plan: picked } : null;
   const resume =
-    !chosenPlan && status.state === "payment_required" && status.planCode && status.billingInterval
+    !chosenPlan && step !== "plans" && status.state === "payment_required" && status.planCode && status.billingInterval
       ? plans.find((p) => p.code === status.planCode)
       : undefined;
   const target =
@@ -66,7 +67,12 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
         title="Complete your payment"
         description="You pay StoreForge for your plan. Your store is created right after the payment is confirmed."
         footer={
-          <SignOutButton className={buttonVariants({ variant: "ghost", size: "sm" })}>Not you? Sign out</SignOutButton>
+          <>
+            <Link href={`${ROUTES.onboarding}?step=plans`} className="block font-semibold text-lp-primary underline-offset-4 hover:underline">
+              Change plan
+            </Link>
+            <SignOutButton className={buttonVariants({ variant: "ghost", size: "sm" })}>Not you? Sign out</SignOutButton>
+          </>
         }
       >
         <PaymentStep
@@ -85,9 +91,8 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       headline="Choose the plan that fits your store."
       title="Choose your plan"
       description={plan && !picked ? "That plan is not available any more. Choose one of the plans below." : "Pick a plan to get started. You can change it later."}
-      footer={<SignOutButton className={buttonVariants({ variant: "ghost", size: "sm" })}>Not you? Sign out</SignOutButton>}
     >
-      <PlanPicker plans={plans} />
+      <PlanPicker plans={plans} footer={<SignOutButton className={buttonVariants({ variant: "ghost", size: "sm" })}>Not you? Sign out</SignOutButton>} />
     </AuthShell>
   );
 }
