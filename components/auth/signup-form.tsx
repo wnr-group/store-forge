@@ -48,6 +48,7 @@ export function SignupForm({ plan }: { plan: PlanChoice | null }) {
   return (
     <form method="post" onSubmit={onSubmit} noValidate className="space-y-1">
       <FormError message={formError} />
+      <div className="grid gap-x-4 sm:grid-cols-2">
       <FormField required id="fullName" label="Full name" error={errors.fullName?.message}>
         <Input
           className="h-9 rounded-lg px-3 text-sm"
@@ -71,6 +72,8 @@ export function SignupForm({ plan }: { plan: PlanChoice | null }) {
           {...register("email")}
         />
       </FormField>
+      </div>
+      <div className="grid gap-x-4 sm:grid-cols-2">
       <FormField required id="password" label="Password" error={errors.password?.message} hint="At least 8 characters, with a letter and a number.">
         <PasswordInput
           id="password"
@@ -91,6 +94,7 @@ export function SignupForm({ plan }: { plan: PlanChoice | null }) {
           {...register("confirmPassword")}
         />
       </FormField>
+      </div>
       <div className="space-y-1.5 pt-1" data-invalid={errors.acceptTerms ? "true" : undefined}>
         <div className="flex items-start gap-2.5">
           <Controller

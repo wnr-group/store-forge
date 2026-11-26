@@ -24,6 +24,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
 
   return (
     <AuthShell
+      wide
       eyebrow="GET STARTED"
       headline="Launch your online store in minutes."
       title="Create your account"
