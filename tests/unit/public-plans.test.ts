@@ -5,7 +5,7 @@ import { AppError } from "@/lib/errors";
 import type { PublicPlanApi } from "@/lib/api/endpoints/platform-api";
 import { hasYearlyOption, limitValue, priceView, savingsPercent } from "@/components/landing/pricing-utils";
 
-/** The landing page lists the plans a Platform Admin has published, as cards with no way to buy. */
+/** The landing page lists the plans a Platform Admin has published, as cards. A card only starts the sign-up: nothing is bought on the page. */
 
 vi.mock("next/cache", () => ({ unstable_cache: <T>(fn: T) => fn, revalidatePath: vi.fn(), revalidateTag: vi.fn(), updateTag: vi.fn() }));
 const plansApi = vi.fn();
@@ -47,10 +47,30 @@ describe("plans on the landing page", () => {
       expect(html, text).toContain(text);
   });
 
-  it("has nothing to buy: no links, forms or inputs, and no buy-style wording", async () => {
+  it("sells nothing on the page: no forms or inputs, and a card's only link starts the sign-up with that plan", async () => {
     const html = await render([plan(), plan({ code: "pro", name: "Pro" })]);
-    expect(html).not.toMatch(/<(a|form|input)[\s>]/);
-    expect(html).not.toMatch(/\b(buy|purchase|subscribe|checkout|get started|choose plan|select plan|sign up)\b/i);
+    expect(html).not.toMatch(/<(form|input)[\s>]/);
+    expect(html).not.toMatch(/\b(buy|purchase|subscribe|checkout)\b/i);
+    const links = [...html.matchAll(/<a\b[^>]*href="([^"]*)"/g)].map((m) => m[1]);
+    expect(links).toEqual(["/signup?plan=starter&amp;interval=monthly", "/signup?plan=pro&amp;interval=monthly"]);
+    expect(html).toContain("Get started");
+  });
+
+  it("asks for the yearly price in the sign-up link only once yearly is chosen, and only for a plan that has one", async () => {
+    const { PricingPlans } = await import("@/components/landing/pricing");
+    const monthlyOnly = plan({ code: "solo", name: "Solo", yearlyPrice: "0.00", yearlyPriceMinor: 0 });
+    const html = renderToStaticMarkup(createElement(PricingPlans, { plans: [plan(), monthlyOnly] }));
+    // Rendered with the monthly period; the yearly toggle is exercised in the browser, the rule behind it is checked here.
+    expect(html).toContain("/signup?plan=solo&amp;interval=monthly");
+    const { effectiveInterval } = await import("@/components/landing/pricing-utils");
+    expect(effectiveInterval(monthlyOnly, "yearly")).toBe("monthly");
+    expect(effectiveInterval(plan(), "yearly")).toBe("yearly");
+  });
+
+  it("shows a free plan with a plain 'Start free' button", async () => {
+    const html = await render([plan({ code: "free", name: "Free", monthlyPrice: "0.00", monthlyPriceMinor: 0, yearlyPrice: "0.00", yearlyPriceMinor: 0 })]);
+    expect(html).toContain("Start free");
+    expect(html).toContain("/signup?plan=free&amp;interval=monthly");
   });
 
   it("only has controls that change what is shown: the billing period and the full feature list", async () => {

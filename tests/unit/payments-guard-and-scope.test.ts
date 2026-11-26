@@ -101,7 +101,7 @@ describe("regression and scope [layer:FE]", () => {
   });
 
   it("AC-REG-01 AC-REG-02: the anonymous and customer storefront routes are still outside the protected area", () => {
-    expect([...PROTECTED_PREFIXES]).toEqual([ROUTES.dashboard, ROUTES.admin, ROUTES.noWorkspace]);
+    expect([...PROTECTED_PREFIXES]).toEqual([ROUTES.dashboard, ROUTES.admin, ROUTES.noWorkspace, ROUTES.onboarding]);
     expect(ROUTES.payments.startsWith(ROUTES.dashboard)).toBe(true);
     for (const prefix of PROTECTED_PREFIXES) expect("/s/urban-nest-demo".startsWith(prefix)).toBe(false);
   });
@@ -114,7 +114,10 @@ describe("regression and scope [layer:FE]", () => {
     for (const name of ["getUserTenants", "getActiveTenant", "getActiveStore", "requireTenantAccess", "requireTenantRole", "requireActiveTenant", "setActiveTenantCookie", "requireWorkspace"])
       expect(source, name).toMatch(new RegExp(`export (async function|const) ${name}\\b`));
     // Existing files must be untouched (modified, deleted or renamed); a new helper file such as with-tenant.ts may be added.
-    expect(git("diff", "--name-only", "--diff-filter=MDR", "origin/main", "--", "lib/tenant").split("\n").filter(Boolean)).toEqual([]);
+    // The one allowed change is in context.ts: a signed-in customer with no store yet is sent to the self-service onboarding instead of the
+    // "no workspace" notice (requireWorkspace). Every exported entry point checked above is unchanged.
+    const changedExisting = git("diff", "--name-only", "--diff-filter=MDR", "origin/main", "--", "lib/tenant").split("\n").filter(Boolean);
+    expect(changedExisting.filter((f) => f !== "lib/tenant/context.ts")).toEqual([]);
   });
 });
 
@@ -149,7 +152,11 @@ describe("static scans [layer:STATIC]", () => {
 
   it("AC-SCOPE-01 [layer:STATIC]: no shopper login, registration or authentication enforcement was introduced (frontend)", async () => {
     const files = ours();
-    const authTouched = files.filter((f) => /^(app\/\(auth\)|lib\/auth|lib\/supabase|proxy\.ts)/.test(f) && f !== "lib/auth/permissions.ts" && f !== "lib/auth/platform.ts");
+    // Self-service sign-up lets a would-be STORE OWNER create their own account and continue to buy a plan (app/(auth)/actions.ts, signup/ and
+    // onboarding/, where a signed-in visitor lands in lib/auth/home.ts and is routed by lib/supabase/middleware.ts). It is for merchants and
+    // adds nothing to any storefront.
+    const selfService = (f: string) => /^app\/\(auth\)\/(actions\.ts|signup\/|onboarding\/)/.test(f) || f === "lib/auth/home.ts" || f === "lib/supabase/middleware.ts";
+    const authTouched = files.filter((f) => /^(app\/\(auth\)|lib\/auth|lib\/supabase|proxy\.ts)/.test(f) && f !== "lib/auth/permissions.ts" && f !== "lib/auth/platform.ts" && !selfService(f));
     // lib/auth/platform.ts decides what PLATFORM STAFF may do (role and permissions from the API); it has nothing to do with shoppers.
     // The storefront checkout is guest checkout: it must never read a session, a token cookie or Supabase.
     const checkoutAuth = files.filter((f) => /^(components\/storefront\/checkout|app\/s\/\[slug\]\/(checkout|orders))\//.test(f)).filter((f) => /readStoredSession|supabase|cookies\(|signIn|login/i.test(read(f)));

@@ -57,13 +57,13 @@ describe("platform roles", () => {
 });
 
 describe("where platform staff land after sign-in", () => {
-  it("sends every platform role with no workspace to the admin area, and nobody else", async () => {
+  it("sends every platform role with no workspace to the admin area, and a customer with no store yet to the onboarding", async () => {
     const { defaultHomePath, identityFromLogin } = await import("@/lib/auth/home");
     for (const level of PLATFORM_LEVELS) {
       const id = identityFromLogin({ platformAdminLevel: level, memberships: [] });
       expect(defaultHomePath(id), level).toBe("/admin");
     }
-    expect(defaultHomePath(identityFromLogin({ platformAdminLevel: null, memberships: [] }))).toBe("/dashboard");
+    expect(defaultHomePath(identityFromLogin({ platformAdminLevel: null, memberships: [] }))).toBe("/onboarding");
     expect(defaultHomePath(identityFromLogin({ platformAdminLevel: "billing_admin", memberships: [{}] }))).toBe("/dashboard");
   });
 });

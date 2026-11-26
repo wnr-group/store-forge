@@ -1,6 +1,6 @@
 # Authentication
 
-Sign-in, sign-out, session refresh, password change and session checks all go through the StoreForge API (`store-forge-api`), which talks to Supabase Auth itself. There is no direct-to-Supabase sign-in in this app.
+Sign-in, sign-out, session refresh, password change, self-service account creation and session checks all go through the StoreForge API (`store-forge-api`), which talks to Supabase Auth itself. There is no direct-to-Supabase sign-in in this app.
 
 For the API side (design, security measures, verification), see `COOKIE_SESSION_AUTH.md` in the `store-forge-api` repository.
 
@@ -40,6 +40,25 @@ Next.js --(server-to-server)--> POST /auth/login | /auth/logout | /auth/refresh,
 
 - **Signed-in marker.** Static store pages cannot read the HttpOnly cookies. They read the token-free `sf_signed_in` marker through `useSignedIn`.
 - **Landing page.** With no `next` path, login asks the API for the profile and sends Platform Admins to `/admin` and everyone else to `/dashboard`. An explicit `next` path skips that lookup.
+
+## Self-service sign-up
+
+A visitor can create their own account and their own store, with no Platform Admin involved. (A Platform Admin can still create an organization and its Owner by hand: both ways end in the same database routine, `provision_tenant_internal`.)
+
+```
+/#plans  -- "Get started" on a plan card -->  /signup?plan=<code>&interval=monthly|yearly
+  POST /auth/register   creates a confirmed account (no e-mail verification) and signs the visitor in; no organization, no role
+  /onboarding           asks the API where this person is (GET /signup/status) and shows ONE step:
+      choose a plan  ->  pay (POST /signup/checkout, Razorpay Checkout, POST /signup/verify-payment)  ->  name the store (POST /signup/store)
+  /dashboard            the new store, with the person as Owner and the paid plan active
+```
+
+- **Nothing the browser says is trusted.** The price is worked out by the API from the plan and the tax settings; the form sends only a plan code and a billing period. A payment counts only after the API has checked Razorpay's signature and asked Razorpay itself, or Razorpay's signed webhook said so. The store is created only for a paid purchase.
+- **Retry and idempotency.** A failed or abandoned payment is paid again on the same Razorpay order (the button asks the API for it again), so no second account is needed. Verifying the same payment twice, delivering the same webhook twice, or pressing "Create my store" twice changes nothing and creates one store.
+- **Where it lives.** Pages: `app/(auth)/signup`, `app/(auth)/onboarding`. Actions: `app/(auth)/actions.ts` (`registerAction`), `app/(auth)/onboarding/actions.ts`. Service: `services/onboarding.service.ts`; API client: `lib/api/endpoints/signup-api.ts`. The plan travels in the address (`lib/onboarding/path.ts`).
+- **Routing.** `/onboarding` needs a session; `/signup` is for visitors (a signed-in visitor is sent on to `/onboarding`). A signed-in person with no workspace who is not platform staff lands on `/onboarding` (`defaultHomePath`, `requireWorkspace`); Platform Admins go to `/admin`, and a Platform Admin can never buy a store (a person is staff or a member, never both).
+- **The public header** has Home, Features, Pricing, Login and Get Started, and no link into the admin area.
+- **No e-mail verification, OTP or password recovery** in this version: anyone can register with any address, and a forgotten password is reset by an administrator.
 
 ## Tests
 

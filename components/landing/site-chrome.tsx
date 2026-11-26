@@ -8,13 +8,13 @@ import { Reveal } from "./motion";
 import { AuthActions } from "./auth-actions";
 import { BrandLogo, Container } from "./ui";
 
-/** In-page anchors only: every destination below exists. */
+/**
+ * The public navigation: Home, Features, Pricing, About and Contact. Login and Get Started are the buttons beside it (see AuthActions). Every
+ * destination exists, and there is deliberately no link to any admin area here: the Platform Admin dashboard is not part of the public site.
+ */
 export const NAV_LINKS = [
-  { href: "/#platform", label: "Platform" },
+  { href: "/", label: "Home" },
   { href: "/#features", label: "Features" },
-  { href: "/#solutions", label: "Solutions" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
 ] as const;
 
 /** The public site always carries the Kanova Store name; only the uploaded logo comes from the platform settings. */
@@ -34,12 +34,17 @@ export function AnnouncementBar() {
   );
 }
 
-/** The Plans link is only offered while at least one plan is published, so it never points at a section that is not there. */
-const withPlansLink = (hasPlans: boolean) => (hasPlans ? [...NAV_LINKS.slice(0, 2), { href: "/#plans", label: "Plans" }, ...NAV_LINKS.slice(2)] : [...NAV_LINKS]);
+/** The Pricing link is only offered while at least one plan is published, so it never points at a section that is not there. */
+const withPricingLink = (hasPlans: boolean) => [
+  ...NAV_LINKS,
+  ...(hasPlans ? [{ href: "/#plans", label: "Pricing" }] : []),
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
 
 export async function SiteHeader() {
   const [{ logoUrl }, plans] = await Promise.all([getPublicBranding(), getPublicPlans()]);
-  const links = withPlansLink(plans.length > 0);
+  const links = withPricingLink(plans.length > 0);
   return (
     <HeaderShell>
       <Container className="flex h-(--nav-h) items-center justify-between gap-6 transition-[height] duration-300 motion-reduce:transition-none">

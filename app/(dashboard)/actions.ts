@@ -10,7 +10,7 @@ import { parseInput } from "@/lib/validations/parse";
 import type { ActionResult } from "@/types/action";
 
 // NOTE: redirect() works by throwing, so it is always called OUTSIDE try/catch.
-// Workspaces are created only by a Platform Admin (see app/(admin)); there is no self-service onboarding action.
+// Workspaces are created by a Platform Admin (see app/(admin)) or by a customer who has paid for a plan (see app/(auth)/onboarding).
 
 export async function switchTenantAction(tenantId: unknown): Promise<ActionResult> {
   try {

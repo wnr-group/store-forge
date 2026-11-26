@@ -23,6 +23,20 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Enter your password").max(72),
 });
 
+/**
+ * Self-service account creation. The same password rule as everywhere else; the confirmation and the Terms are checked again by the
+ * API, so this only gives the person quick feedback.
+ */
+export const registerSchema = z
+  .object({
+    fullName: z.string().trim().min(2, "Enter your full name").max(80, "Use at most 80 characters"),
+    email,
+    password: passwordField,
+    confirmPassword: z.string().max(72),
+    acceptTerms: z.boolean().refine((accepted) => accepted, "Accept the Terms and Conditions to continue"),
+  })
+  .refine((v) => v.password === v.confirmPassword, { path: ["confirmPassword"], message: "Passwords do not match" });
+
 /** Self-service change (first login or any time). The current password is re-verified server-side. */
 export const changePasswordSchema = z
   .object({ currentPassword: z.string().min(1, "Enter your current password").max(72), password: passwordField, confirmPassword: z.string() })
@@ -39,5 +53,6 @@ export const changePasswordSchema = z
 export const resetPasswordSchema = z.object({ password: passwordField });
 
 export type LoginInput = z.input<typeof loginSchema>;
+export type RegisterInput = z.input<typeof registerSchema>;
 export type ChangePasswordInput = z.input<typeof changePasswordSchema>;
 export type ResetPasswordInput = z.input<typeof resetPasswordSchema>;

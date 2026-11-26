@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { Check, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicPlan } from "@/services/public-plans.service";
 import { Reveal } from "./motion";
-import { hasYearlyOption, limitValue, priceView, savingsPercent, type Interval } from "./pricing-utils";
-import { Container, Section, SectionHeading } from "./ui";
+import { effectiveInterval, hasYearlyOption, limitValue, priceView, savingsPercent, type Interval } from "./pricing-utils";
+import { Container, lpButton, Section, SectionHeading } from "./ui";
 
 /** Features shown before "Show all": enough to compare plans at a glance, the rest one click away. */
 const PREVIEW_FEATURES = 5;
@@ -66,6 +67,14 @@ function PlanCard({ plan, interval, index }: { plan: PublicPlan; interval: Inter
           ) : null}
         </div>
 
+        <Link
+          href={`/signup?plan=${encodeURIComponent(plan.code)}&interval=${effectiveInterval(plan, interval)}`}
+          className={lpButton("primary", "mt-5 w-full")}
+          aria-label={`${price.free ? "Start free with" : "Get started with"} the ${plan.name} plan`}
+        >
+          {price.free ? "Start free" : "Get started"}
+        </Link>
+
         {plan.features.length > 0 ? (
           <div className="mt-5 border-t border-lp-border pt-5">
             <h4 className="text-sm font-semibold text-lp-heading">What&apos;s included</h4>
@@ -109,7 +118,7 @@ function PlanCard({ plan, interval, index }: { plan: PublicPlan; interval: Inter
   );
 }
 
-/** The plans, as cards. Nothing here can be bought: the only controls change what is shown (billing period, full feature list). */
+/** The plans, as cards. A card's button starts the sign-up with that plan; nothing is bought here (payment comes after the account exists). */
 export function PricingPlans({ plans }: { plans: PublicPlan[] }) {
   const [billing, setBilling] = useState<Interval>("monthly");
   const scroller = useRef<HTMLUListElement>(null);

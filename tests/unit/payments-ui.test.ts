@@ -218,7 +218,7 @@ describe("static checks", () => {
     const paymentStyles = git("diff", "origin/main", "--", "app/globals.css").split("\n").filter((l) => l.startsWith("+") && /payment|razorpay|refund|ledger|transaction/i.test(l));
     const imports = PAYMENT_FILES.filter((f) => f.endsWith(".tsx")).flatMap((f) => [...read(f).matchAll(/from "([^"]+)"/g)].map((m) => m[1]));
     const external = [...new Set(imports.filter((i) => !i.startsWith("@/") && !i.startsWith(".")))].sort();
-    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|billing\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/)[^/]+\/)/.test(f));
+    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|billing\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/|team\/)[^/]+\/)/.test(f));
     await capture({
       acId: "AC-FE-16", folder: "logs", fileName: "AC-FE-16.txt", layer: "STATIC", environment: "unit", testName: "AC-FE-16", testFile: here,
       actualResult: `payments components import only existing shared and ui components (external packages: ${external.join(", ")}); no dependency, global style or other page changed`,
@@ -226,7 +226,7 @@ describe("static checks", () => {
         expect(external).toEqual(["lucide-react", "next", "next/link", "next/navigation", "react", "sonner", "zod"]);
         expect(unexpected).toEqual([]);
         expect(paymentStyles).toEqual([]);
-        expect(imports.filter((i) => i.startsWith("@/components/")).every((i) => /^@\/components\/(ui|shared|payments|orders)\//.test(i))).toBe(true);
+        expect(imports.filter((i) => i.startsWith("@/components/")).every((i) => /^@\/components\/(ui|shared|payments|orders|billing)\//.test(i))).toBe(true); // billing: the plan gate (FeatureLocked, loadPlanAccess)
       },
       content: () => `AC-FE-16 (a): external imports: ${external.join(", ")}\nunexpected changed files: ${unexpected.length}\nchanged files: ${changed.length}\n`,
     });

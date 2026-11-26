@@ -35,6 +35,9 @@ export const hasYearlyOption = (plans: PublicPlan[]) => plans.some((p) => p.mont
 /** A figure in minor units rounded to a whole major unit (41583 paise becomes 41600, shown as ₹416), so a monthly equivalent has no odd decimals. */
 const wholeUnits = (minor: number, currency: string) => Math.round(minor / 10 ** currencyDigits(currency)) * 10 ** currencyDigits(currency);
 
+/** The billing period that is really on offer: a plan with no yearly price is bought monthly, exactly as its card shows it. */
+export const effectiveInterval = (plan: Pick<PublicPlan, "yearlyPriceMinor">, interval: Interval): Interval => (interval === "yearly" && plan.yearlyPriceMinor > 0 ? "yearly" : "monthly");
+
 export type PriceView = { free: boolean; amount: string; per: string; note: string | null };
 
 /** What a plan card shows as its price for the chosen billing interval. A plan without a yearly price keeps its monthly price. */
