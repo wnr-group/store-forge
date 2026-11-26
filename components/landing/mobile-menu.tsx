@@ -29,7 +29,7 @@ export function MobileMenu({ links }: { links: readonly { href: string; label: s
         {open ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
       </button>
       {open ? (
-        <nav id="landing-mobile-nav" aria-label="Mobile" className="absolute inset-x-0 top-full border-b border-lp-border bg-lp-bg/95 px-4 pt-2 pb-5 shadow-[0_20px_40px_-20px_rgba(18,40,31,0.25)] backdrop-blur-xl">
+        <nav id="landing-mobile-nav" aria-label="Mobile" className="absolute inset-x-0 top-full border-b border-lp-border bg-lp-bg/95 px-4 pt-2 pb-5 shadow-[0_20px_40px_-20px_rgba(8,10,37,0.25)] backdrop-blur-xl">
           <ul className="divide-y divide-lp-border/70">
             {links.map((l) => (
               <li key={l.href}>

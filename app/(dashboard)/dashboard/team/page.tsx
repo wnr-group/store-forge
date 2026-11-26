@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { FeatureLocked } from "@/components/billing/feature-locked";
+import { loadPlanAccess } from "@/components/billing/feature-gate";
 import { TeamManager } from "@/components/team/team-manager";
 import { ROUTES } from "@/config/app";
 import { canManageMembers } from "@/lib/auth/permissions";
@@ -12,12 +14,15 @@ export default async function TeamPage() {
   const { user, active } = await requireWorkspace();
   // Owner-only. The service and the database repeat this check; this is just the friendly redirect.
   if (!canManageMembers(active)) redirect(ROUTES.dashboard);
-  const team = await listTeam();
+  const [team, plan] = await Promise.all([listTeam(), loadPlanAccess()]);
+  const staff = plan.access("multiple_staff");
 
   return (
     <>
+      {staff === "enabled" ? null : <FeatureLocked className="mb-5 py-6" label={plan.labelOf("multiple_staff")} access={staff} isOwner={plan.isOwner} />}
       <TeamManager
         description={`People who can sign in to ${active.tenant.name}. Only you, the owner, can add or change them.`}
+        canAdd={staff === "enabled"}
         members={team.map((m) => ({ ...m, isSelf: m.userId === user.id }))}
       />
     </>

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "StoreForge is a commerce platform that brings an online seller's products, orders, customers and storefront into one place.",
+  description: "Kanova Store is a commerce platform that brings an online seller's products, orders, customers and storefront into one place.",
 };
 
 const DIRECTION: { icon: LucideIcon; label: string; title: string; text: string; dark?: boolean }[] = [
@@ -38,8 +38,8 @@ const PRINCIPLES: { icon: LucideIcon; title: string; text: string }[] = [
 export default function AboutPage() {
   return (
     <PageShell>
-      <PageHero eyebrow="About StoreForge" title="Built for people who run online stores.">
-        StoreForge is a multi-tenant commerce platform. It helps sellers create their store, manage the everyday work behind it, and give shoppers a better way to buy.
+      <PageHero eyebrow="About Kanova Store" title="Built for people who run online stores.">
+        Kanova Store is a multi-tenant commerce platform. It helps sellers create their store, manage the everyday work behind it, and give shoppers a better way to buy.
       </PageHero>
 
       <Section className="bg-white">
@@ -55,7 +55,7 @@ export default function AboutPage() {
                       d.dark ? "bg-lp-primary text-white" : "border border-lp-border bg-lp-bg text-lp-heading",
                     )}
                   >
-                    {d.dark ? <span aria-hidden className="pointer-events-none absolute -top-28 -right-20 -z-10 size-[20rem] rounded-full bg-[radial-gradient(circle,rgba(199,167,122,0.32),transparent_65%)]" /> : null}
+                    {d.dark ? <span aria-hidden className="pointer-events-none absolute -top-28 -right-20 -z-10 size-[20rem] rounded-full bg-[radial-gradient(circle,rgba(250,156,44,0.32),transparent_65%)]" /> : null}
                     <span className={cn("grid size-12 place-items-center rounded-xl", d.dark ? "bg-white/10 text-lp-accent-light" : "bg-lp-secondary text-lp-primary")}>
                       <d.icon className="size-6" aria-hidden />
                     </span>
@@ -80,7 +80,7 @@ export default function AboutPage() {
             {PRINCIPLES.map((p, i) => (
               <li key={p.title}>
                 <Fade delay={i * 0.08} className="h-full">
-                  <article className="group h-full rounded-2xl border border-lp-border bg-white p-7 transition-[translate,border-color,box-shadow] duration-500 hover:-translate-y-1 hover:border-lp-primary/30 hover:shadow-[0_24px_48px_-24px_rgba(18,40,31,0.3)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+                  <article className="group h-full rounded-2xl border border-lp-border bg-white p-7 transition-[translate,border-color,box-shadow] duration-500 hover:-translate-y-1 hover:border-lp-primary/30 hover:shadow-[0_24px_48px_-24px_rgba(8,10,37,0.3)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
                     <span className="grid size-11 place-items-center rounded-xl bg-lp-secondary text-lp-primary">
                       <p.icon className="size-5" aria-hidden />
                     </span>
@@ -98,7 +98,7 @@ export default function AboutPage() {
       <Section className="bg-white">
         <Container>
           <Reveal className="relative isolate flex flex-col items-start justify-between gap-6 overflow-hidden rounded-[2rem] bg-lp-primary px-8 py-12 sm:flex-row sm:items-center sm:px-12">
-            <span aria-hidden className="pointer-events-none absolute -top-32 -right-24 -z-10 size-[22rem] rounded-full bg-[radial-gradient(circle,rgba(199,167,122,0.3),transparent_65%)]" />
+            <span aria-hidden className="pointer-events-none absolute -top-32 -right-24 -z-10 size-[22rem] rounded-full bg-[radial-gradient(circle,rgba(250,156,44,0.3),transparent_65%)]" />
             <div className="max-w-lg">
               <h2 className="text-3xl font-extrabold tracking-tight text-balance text-white">Want to talk about your store?</h2>
               <p className="mt-3 text-base leading-7 text-white/75">We would be glad to hear what you are building.</p>

@@ -8,6 +8,7 @@ import { publicImageUrl } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
 import type { SectionProps } from "../engine/looks";
 import { useOptionalCart } from "./cart-provider";
+import { CartRecovery } from "./cart-recovery";
 import { CheckoutButton } from "./cart-drawer";
 import { QtyStepper } from "./qty-stepper";
 
@@ -45,6 +46,7 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
 
   if (!cart) return null;
   const { lines } = cart;
+  const recovery = isPreview ? null : <CartRecovery />;
   const currency = cart.currency;
 
   return (
@@ -68,6 +70,8 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
         Your bag
       </h1>
 
+      {recovery}
+
       {notice ? (
         <p role="status" className="mt-6 border border-border bg-white px-4 py-3 text-[13px] text-foreground">
           {notice}
@@ -87,6 +91,9 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
           <p className={cn("max-w-md text-[15px] leading-7", MUTED)}>Pieces you add appear here, saved in this browser for this store.</p>
           <Link href="/products" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-[var(--primary-hover,var(--primary))]">
             Continue shopping
+          </Link>
+          <Link href="/orders" className="text-[12px] font-medium uppercase tracking-[0.16em] underline underline-offset-4 decoration-border hover:decoration-foreground">
+            Track an order
           </Link>
         </div>
       ) : (
@@ -124,6 +131,9 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
             <Link href="/products" className="mt-6 inline-block text-[12px] font-medium uppercase tracking-[0.16em] text-foreground underline underline-offset-4 decoration-border transition-colors hover:decoration-foreground">
               Continue shopping
             </Link>
+            <Link href="/orders" className="mt-6 ml-6 inline-block text-[12px] font-medium uppercase tracking-[0.16em] text-[color:var(--sf-color-muted)] underline underline-offset-4 decoration-border transition-colors hover:text-foreground hover:decoration-foreground">
+              Your orders
+            </Link>
           </div>
 
           <aside aria-label="Order summary" className="border border-border bg-white px-6 pb-8 pt-6 sm:px-8 sm:pb-8 sm:pt-[30px]">
@@ -139,6 +149,10 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
                 <dt className={MUTED}>Shipping</dt>
                 <dd>Calculated at checkout</dd>
               </div>
+              <div className="flex justify-between gap-4">
+                <dt className={MUTED}>GST</dt>
+                <dd>Calculated at checkout</dd>
+              </div>
             </dl>
             <div className="mt-6 border-t border-border pt-6">
               <div className="flex items-center justify-between gap-4">
@@ -147,7 +161,7 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
                   {formatBagPrice(cart.subtotalMinor, currency)}
                 </span>
               </div>
-              <p className={cn("mt-[11px] text-[11px]", MUTED)}>Online checkout is not available yet for this store.</p>
+              <p className={cn("mt-[11px] text-[11px]", MUTED)}>Delivery, GST and any payment charges are added at checkout.</p>
             </div>
             <CheckoutButton className="mt-[23px]" />
           </aside>

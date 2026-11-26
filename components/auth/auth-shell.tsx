@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/config/app";
 import { getPublicBranding } from "@/services/platform-settings.service";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +12,9 @@ type Props = {
   icon?: React.ReactNode;
   /** Name shown beside the logo: the store on a tenant login, otherwise the platform name. */
   brandName?: string;
+  /** Small label and headline on the side panel; they default to the sign-in wording. */
+  eyebrow?: string;
+  headline?: string;
 };
 
 // Auth screens use the landing page's fixed light palette (deep green + gold on cream), whatever the app theme is.
@@ -37,8 +41,11 @@ const HIGHLIGHTS = [
   { icon: ShieldCheck, text: "Secure, role-based access for your team" },
 ];
 
-export async function AuthShell({ title, description, children, footer, icon, brandName }: Props) {
-  const platformName = brandName ?? (await getPublicBranding()).platformName;
+export async function AuthShell({ title, description, children, footer, icon, brandName, eyebrow = "WELCOME BACK", headline = "Your store deserves a smarter way to grow." }: Props) {
+  const branding = await getPublicBranding();
+  const platformName = brandName ?? APP_NAME;
+  // The platform logo belongs to the platform, not to a store: a store login keeps the built-in mark.
+  const logoUrl = brandName ? null : branding.logoUrl;
   return (
     <div style={LANDING_THEME} className="lp-root grid min-h-dvh bg-lp-bg text-lp-heading lg:grid-cols-[1.05fr_1fr]">
       <aside className="relative isolate hidden overflow-hidden bg-lp-deep p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
@@ -48,13 +55,17 @@ export async function AuthShell({ title, description, children, footer, icon, br
         <span aria-hidden className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(160deg,#244c3c_0%,#12281f_70%)]" />
 
         <Link href="/" className="inline-flex items-center gap-2.5 self-start rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-accent">
-          <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-9 w-auto shrink-0" priority />
+          {logoUrl ? (
+            <Image src={logoUrl} alt="" aria-hidden width={160} height={48} unoptimized className="h-9 w-auto max-w-40 shrink-0 object-contain" />
+          ) : (
+            <Image src="/kanova-mark.png" alt="" aria-hidden width={230} height={279} className="h-9 w-auto shrink-0" priority />
+          )}
           <span className="lp-display text-xl leading-none font-extrabold tracking-tight">{platformName}</span>
         </Link>
 
         <div className="max-w-md">
-          <p className="text-sm font-semibold tracking-[0.14em] text-lp-accent-light">WELCOME BACK</p>
-          <h2 className="mt-4 text-4xl leading-[1.1] font-extrabold tracking-tight text-balance xl:text-5xl">Your store deserves a smarter way to grow.</h2>
+          <p className="text-sm font-semibold tracking-[0.14em] text-lp-accent-light">{eyebrow}</p>
+          <h2 className="mt-4 text-4xl leading-[1.1] font-extrabold tracking-tight text-balance xl:text-5xl">{headline}</h2>
           <span aria-hidden className="lp-gold-rule mt-6 block h-px w-24" />
           <ul className="mt-8 space-y-4">
             {HIGHLIGHTS.map(({ icon: Icon, text }) => (
@@ -73,7 +84,7 @@ export async function AuthShell({ title, description, children, footer, icon, br
 
       <main className="lp-paper relative flex flex-col items-center justify-center px-4 py-10 sm:px-8">
         <Link href="/" className="mb-8 inline-flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-lp-primary lg:hidden">
-          <Image src="/logo.png" alt="" aria-hidden width={256} height={217} className="h-8 w-auto shrink-0" priority />
+          <Image src="/kanova-mark.png" alt="" aria-hidden width={230} height={279} className="h-8 w-auto shrink-0" priority />
           <span className="lp-display text-xl leading-none font-extrabold tracking-tight">{platformName}</span>
         </Link>
 

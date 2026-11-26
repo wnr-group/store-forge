@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { updatePlatformSettingsAction } from "@/app/(admin)/admin/actions";
+import { PlatformLogoField } from "@/components/admin/platform-logo-field";
 import { FormField } from "@/components/shared/form-field";
 import { SectionCard } from "@/components/shared/section-card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ export type SettingsView = {
   defaultStoreStatus: "active" | "inactive";
 };
 
-type Props = { initial: SettingsView; canEdit: boolean; updatedLine: string | null };
+type Props = { initial: SettingsView; canEdit: boolean; updatedLine: string | null; logoUrl: string | null };
 
 // Intl.supportedValuesOf() differs between Node and the browser; the full lists are added only after hydration.
 const names = (kind: "currency" | "timeZone") => {
@@ -41,7 +42,7 @@ const subscribeNever = () => () => {};
  * Platform settings. Everyone with admin access can read them; only a super admin can change them (the server and database
  * both refuse anyone else).
  */
-export function PlatformSettingsForm({ initial, canEdit, updatedLine }: Props) {
+export function PlatformSettingsForm({ initial, canEdit, updatedLine, logoUrl }: Props) {
   const router = useRouter();
   const start = {
     platformName: initial.platformName,
@@ -84,6 +85,8 @@ export function PlatformSettingsForm({ initial, canEdit, updatedLine }: Props) {
     <form noValidate className="mx-auto max-w-3xl space-y-6" onSubmit={(e) => { e.preventDefault(); submit(); }}>
       {!canEdit ? <p className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">You can view the platform settings. Only a super admin can change them.</p> : null}
       {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
+
+      <PlatformLogoField logoUrl={logoUrl} canEdit={canEdit} />
 
       <SectionCard title="Branding" description="Shown on the sign-in page and on the page people see when their account is not linked to an organization.">
         <div className="grid gap-4 sm:grid-cols-2">

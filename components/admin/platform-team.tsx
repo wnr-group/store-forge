@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, MoreHorizontal, PlusCircle, ScrollText, ShieldCheck, ShieldMinus, Trash2 } from "lucide-react";
+import { Loader2, MoreHorizontal, PlusCircle, ScrollText, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { addPlatformAdminAction, removePlatformAdminAction, setPlatformAdminRoleAction } from "@/app/(admin)/admin/actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ROUTES } from "@/config/app";
+import { PLATFORM_LEVELS, PLATFORM_LEVEL_DESCRIPTIONS, PLATFORM_LEVEL_LABELS, type PlatformAdminLevel } from "@/lib/platform/roles";
 import { useFormErrors } from "@/lib/forms/use-form-errors";
 import { addPlatformAdminSchema } from "@/lib/validations/admin-platform";
 
@@ -24,22 +25,19 @@ export type AdminView = {
   userId: string;
   email: string;
   fullName: string | null;
-  role: "super_admin" | "admin";
+  role: PlatformAdminLevel;
   createdAt: string;
   createdByEmail: string | null;
 };
 
-const LEVELS = { super_admin: "Super admin", admin: "Admin" } as const;
-const LEVEL_HINT = {
-  super_admin: "Can do everything, including adding and removing admins and editing the platform settings.",
-  admin: "Can manage organizations, stores and teams. Cannot manage other admins or the platform settings.",
-} as const;
+const LEVELS = PLATFORM_LEVEL_LABELS;
+const LEVEL_HINT = PLATFORM_LEVEL_DESCRIPTIONS;
 
 const when = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 function AddAdminDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const router = useRouter();
-  const [v, setV] = useState({ fullName: "", email: "", password: "", role: "admin" as "admin" | "super_admin" });
+  const [v, setV] = useState({ fullName: "", email: "", password: "", role: "support_admin" as PlatformAdminLevel });
   const { errors, formError, pending, validate, validateField, clear, fail, submit: send } = useFormErrors();
   const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setV((cur) => ({ ...cur, [k]: e.target.value }));
@@ -68,8 +66,8 @@ function AddAdminDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
     <Dialog open={open} onOpenChange={(o) => !pending && onOpenChange(o)}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add platform admin</DialogTitle>
-          <DialogDescription>Creates a sign-in for platform staff. No email is sent: share the email and initial password securely and ask them to change it after signing in.</DialogDescription>
+          <DialogTitle>Add platform staff</DialogTitle>
+          <DialogDescription>Creates a sign-in for a member of the platform team, with the role you choose. No email is sent: share the email and initial password securely and ask them to change it after signing in.</DialogDescription>
         </DialogHeader>
         <form noValidate className="space-y-3" onSubmit={(e) => { e.preventDefault(); submit(); }}>
           {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
@@ -84,8 +82,9 @@ function AddAdminDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
           </FormField>
           <FormField id="pa-role" label="Access level" required error={errors.role} hint={LEVEL_HINT[v.role]}>
             <NativeSelect {...common("role", "pa-role")}>
-              <option value="admin">{LEVELS.admin}</option>
-              <option value="super_admin">{LEVELS.super_admin}</option>
+              {PLATFORM_LEVELS.map((level) => (
+                <option key={level} value={level}>{LEVELS[level]}</option>
+              ))}
             </NativeSelect>
           </FormField>
           <DialogFooter>
@@ -100,10 +99,54 @@ function AddAdminDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
   );
 }
 
+function ChangeRoleDialog({ admin, lastSuper, onClose }: { admin: AdminView; lastSuper: boolean; onClose: () => void }) {
+  const router = useRouter();
+  const [role, setRole] = useState<PlatformAdminLevel>(admin.role);
+  const { formError, pending, fail, submit: send } = useFormErrors();
+  const save = () =>
+    send(async () => {
+      const res = await setPlatformAdminRoleAction({ userId: admin.userId, role });
+      if (!res.ok) {
+        fail(res);
+        return;
+      }
+      toast.success("Role updated");
+      onClose();
+      router.refresh();
+    });
+  return (
+    <Dialog open onOpenChange={(o) => !pending && !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Change role</DialogTitle>
+          <DialogDescription>{admin.email} is a {LEVELS[admin.role]}. Pick the role they should have from now on.</DialogDescription>
+        </DialogHeader>
+        <form noValidate className="space-y-3" onSubmit={(e) => { e.preventDefault(); save(); }}>
+          {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
+          <FormField id="cr-role" label="Role" hint={LEVEL_HINT[role]}>
+            <NativeSelect id="cr-role" value={role} onChange={(e) => setRole(e.target.value as PlatformAdminLevel)} disabled={pending}>
+              {PLATFORM_LEVELS.map((level) => (
+                <option key={level} value={level} disabled={lastSuper && level !== "super_admin"}>{LEVELS[level]}</option>
+              ))}
+            </NativeSelect>
+          </FormField>
+          {lastSuper ? <p className="text-xs text-muted-foreground">This is the only super admin, so the role cannot be lowered until another super admin exists.</p> : null}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={pending}>Cancel</Button>
+            <Button type="submit" disabled={pending || role === admin.role}>
+              {pending ? <Loader2 className="animate-spin" aria-hidden /> : null} {pending ? "Saving…" : "Save role"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 type Pending = { kind: "level" | "remove"; admin: AdminView } | null;
 
 /**
- * Platform Admin accounts. Everyone with admin access can see the list; only a super admin gets the controls, and the server
+ * Platform staff accounts. Anyone who can read the team can see the list; only a super admin gets the controls, and the server
  * (and the database) refuse anyone else. The last super admin cannot be demoted or removed.
  */
 export function PlatformTeam({ admins, currentUserId, canManage }: { admins: AdminView[]; currentUserId: string; canManage: boolean }) {
@@ -148,7 +191,7 @@ export function PlatformTeam({ admins, currentUserId, canManage }: { admins: Adm
                   </TableCell>
                   <TableCell>{a.email}</TableCell>
                   <TableCell>
-                    <StatusBadge tone={a.role === "super_admin" ? "info" : "neutral"}>{LEVELS[a.role]}</StatusBadge>
+                    <StatusBadge tone={a.role === "super_admin" ? "info" : a.role === "support_admin" ? "draft" : "neutral"}>{LEVELS[a.role]}</StatusBadge>
                   </TableCell>
                   <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
                     {when.format(new Date(a.createdAt))}
@@ -166,7 +209,7 @@ export function PlatformTeam({ admins, currentUserId, canManage }: { admins: Adm
                         {canManage ? (
                           <>
                             <DropdownMenuItem disabled={lastSuper} onClick={() => setTarget({ kind: "level", admin: a })}>
-                              {a.role === "super_admin" ? <ShieldMinus aria-hidden /> : <ShieldCheck aria-hidden />} {a.role === "super_admin" ? "Make admin" : "Make super admin"}
+                              <ShieldCheck aria-hidden /> Change role
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem variant="destructive" disabled={lastSuper} onClick={() => setTarget({ kind: "remove", admin: a })}>
@@ -186,25 +229,7 @@ export function PlatformTeam({ admins, currentUserId, canManage }: { admins: Adm
       {canManage && supers <= 1 ? <p className="text-xs text-muted-foreground">There is one super admin. They cannot be demoted or removed until another super admin exists.</p> : null}
 
       {adding ? <AddAdminDialog open onOpenChange={setAdding} /> : null}
-      {target?.kind === "level" ? (
-        <ConfirmDialog
-          open
-          onOpenChange={(o) => !o && close()}
-          title={target.admin.role === "super_admin" ? "Make this person an admin?" : "Make this person a super admin?"}
-          description={
-            target.admin.role === "super_admin"
-              ? `${target.admin.email} will lose the ability to manage admins and the platform settings.`
-              : `${target.admin.email} will be able to add and remove admins and edit the platform settings.`
-          }
-          confirmLabel={target.admin.role === "super_admin" ? "Make admin" : "Make super admin"}
-          successMessage="Access level updated"
-          onConfirm={async () => {
-            const res = await setPlatformAdminRoleAction({ userId: target.admin.userId, role: target.admin.role === "super_admin" ? "admin" : "super_admin" });
-            if (res.ok) router.refresh();
-            return res;
-          }}
-        />
-      ) : null}
+      {target?.kind === "level" ? <ChangeRoleDialog admin={target.admin} lastSuper={target.admin.role === "super_admin" && supers <= 1} onClose={close} /> : null}
       {target?.kind === "remove" ? (
         <ConfirmDialog
           open

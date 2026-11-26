@@ -4,7 +4,7 @@ import { Building2 } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { buttonVariants } from "@/components/ui/button";
-import { ROUTES } from "@/config/app";
+import { APP_NAME, ROUTES } from "@/config/app";
 import { requireUser } from "@/lib/auth/session";
 import { isPlatformAdmin } from "@/lib/auth/platform";
 import { getActiveTenant } from "@/lib/tenant/context";
@@ -24,7 +24,7 @@ export default async function NoWorkspacePage() {
   const brand = await getPublicBranding();
   const description = storeSlug
     ? `You are signed in as ${user.email ?? "this account"}, which is not a member of ${storeSlug}. Sign out, then sign in with an account that belongs to this store.`
-    : `Your account is not linked to an active company. It may have been deactivated or the company suspended. Please contact your ${brand.platformName} administrator or company owner${brand.supportEmail ? ` (${brand.supportEmail})` : ""}.`;
+    : `Your account is not linked to an active company. It may have been deactivated or the company suspended. Please contact your ${APP_NAME} administrator or company owner${brand.supportEmail ? ` (${brand.supportEmail})` : ""}.`;
 
   return (
     <AuthShell

@@ -24,11 +24,13 @@ type Props = {
   homeHref: string;
   /** Platform name shown next to the logo. */
   brandName?: string;
+  /** Uploaded platform logo; the built-in mark when absent. */
+  logoUrl?: string | null;
   children: React.ReactNode;
 };
 
 /** Responsive shell: collapsible sidebar on desktop, drawer below `lg`. Slots are server-rendered. */
-export function AppShell({ switcher, header, footer, defaultCollapsed = false, navKey, hiddenNav, homeHref, brandName, children }: Props) {
+export function AppShell({ switcher, header, footer, defaultCollapsed = false, navKey, hiddenNav, homeHref, brandName, logoUrl, children }: Props) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [drawer, setDrawer] = useState(false);
 
@@ -49,7 +51,7 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
           )}
         >
           <div className={cn("flex h-12 items-center border-b border-sidebar-border px-3", collapsed && "justify-center px-0")}>
-            {collapsed ? <Logo href={homeHref} name={brandName} className="[&>span:last-child]:hidden" /> : <Logo href={homeHref} name={brandName} />}
+            <Logo href={homeHref} name={brandName} logoUrl={logoUrl} compact={collapsed} />
           </div>
           <div data-sidebar-scroll className="flex-1 space-y-4 overflow-y-auto p-2.5">
             {collapsed ? switcher.compact : switcher.full}
@@ -73,7 +75,7 @@ export function AppShell({ switcher, header, footer, defaultCollapsed = false, n
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <SheetDescription className="sr-only">Main dashboard navigation</SheetDescription>
             <div className="flex h-12 items-center border-b border-sidebar-border px-3">
-              <Logo href={homeHref} name={brandName} />
+              <Logo href={homeHref} name={brandName} logoUrl={logoUrl} />
             </div>
             <div data-sidebar-scroll className="flex-1 space-y-4 overflow-y-auto p-2.5">
               {switcher.full}

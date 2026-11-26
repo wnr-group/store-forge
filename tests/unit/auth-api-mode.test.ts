@@ -203,6 +203,70 @@ describe("login", () => {
   });
 });
 
+describe("register (self-service account)", () => {
+  const cookies = [`${NAME}=v; Max-Age=34560000; Path=/; HttpOnly; SameSite=Lax`, "sf_signed_in=1; Max-Age=34560000; Path=/; SameSite=Lax"];
+  const valid = { fullName: "Asha Rao", email: " Asha@Example.com ", password: "Asha-pass-1", confirmPassword: "Asha-pass-1", acceptTerms: true };
+
+  it("creates the account through the API, relays the session cookies and continues to the onboarding", async () => {
+    handler = (_req, res) => reply(res, 200, { success: true, data: { id: "u1", email: "asha@example.com" } }, cookies);
+    const { registerAction } = await import("@/app/(auth)/actions");
+    expect(await redirected(registerAction(valid))).toBe("/onboarding");
+
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toMatchObject({ method: "POST", path: "/api/v1/auth/register" });
+    expect(JSON.parse(seen[0].body)).toEqual({ ...valid, email: "asha@example.com", includeProfile: false });
+    expect(seen[0].headers["x-internal-auth"]).toBe(SECRET);
+    expect(seen[0].headers["x-forwarded-for"]).toBe("203.0.113.9");
+    expect(jar.get(NAME)!.options).toMatchObject({ httpOnly: true, sameSite: "lax", path: "/" });
+  });
+
+  it("keeps the plan the visitor picked, and drops anything that is not shaped like a plan", async () => {
+    handler = (_req, res) => reply(res, 200, { success: true, data: { id: "u1" } }, cookies);
+    const { registerAction } = await import("@/app/(auth)/actions");
+    expect(await redirected(registerAction(valid, { planCode: "growth", billingInterval: "yearly" }))).toBe("/onboarding?plan=growth&interval=yearly");
+    expect(await redirected(registerAction(valid, { planCode: "growth", billingInterval: "weekly" }))).toBe("/onboarding?plan=growth&interval=monthly");
+    expect(await redirected(registerAction(valid, { planCode: "https://evil.com", billingInterval: "monthly" }))).toBe("/onboarding");
+    expect(await redirected(registerAction(valid, { planCode: "../admin", billingInterval: "monthly" }))).toBe("/onboarding");
+  });
+
+  it("reports an e-mail that is already registered on the e-mail field and signs nobody in", async () => {
+    handler = (_req, res) => reply(res, 409, { success: false, message: "An account with this email already exists.", error: { code: "EMAIL_TAKEN" } });
+    const { registerAction } = await import("@/app/(auth)/actions");
+    expect(await registerAction(valid)).toMatchObject({ ok: false, code: "CONFLICT", fieldErrors: { email: "Already in use" } });
+    expect(jar.size).toBe(0);
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it("checks the form before calling the API: confirmation, terms, password rules, e-mail and name", async () => {
+    const { registerAction } = await import("@/app/(auth)/actions");
+    const bad = [
+      { ...valid, confirmPassword: "Different-1" },
+      { ...valid, acceptTerms: false },
+      { ...valid, password: "short1", confirmPassword: "short1" },
+      { ...valid, password: "nodigitshere", confirmPassword: "nodigitshere" },
+      { ...valid, email: "not-an-email" },
+      { ...valid, fullName: " " },
+    ];
+    for (const input of bad) expect(await registerAction(input)).toMatchObject({ ok: false, code: "VALIDATION" });
+    expect(seen).toHaveLength(0);
+  });
+
+  it("tells the visitor to sign in when the account was created but the automatic sign-in failed", async () => {
+    handler = (_req, res) => reply(res, 500, { success: false, message: "Your account was created, but we could not sign you in. Please sign in with your email and password.", error: { code: "REGISTERED_SIGN_IN_FAILED" } });
+    const { registerAction } = await import("@/app/(auth)/actions");
+    expect(await registerAction(valid)).toMatchObject({ ok: false, error: expect.stringContaining("Please sign in") });
+    expect(jar.size).toBe(0);
+  });
+
+  it("sends a signed-in person who has no store yet (and is not platform staff) to the onboarding", async () => {
+    handler = (_req, res) => reply(res, 200, { success: true, data: { id: "u1", email: "a@b.co", platformAdminLevel: null, memberships: [] } }, cookies);
+    const { loginAction } = await import("@/app/(auth)/actions");
+    expect(await redirected(loginAction({ email: "a@b.co", password: "x" }))).toBe("/onboarding");
+    // ...but an explicit destination (for example the onboarding link carried through the login page) still wins.
+    expect(await redirected(loginAction({ email: "a@b.co", password: "x" }, "/onboarding?plan=growth&interval=monthly"))).toBe("/onboarding?plan=growth&interval=monthly");
+  });
+});
+
 describe("logout", () => {
   it("revokes through the API with the visitor's cookies and clears every session cookie", async () => {
     jar.set(NAME, { value: "SESSION" });

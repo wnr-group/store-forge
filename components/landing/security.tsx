@@ -29,7 +29,7 @@ const Dot = ({ className }: { className?: string }) => <span aria-hidden classNa
 
 function Panel({ title, icon: Icon, children, className }: { title: string; icon: LucideIcon; children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-xl border border-lp-border bg-white p-4 shadow-[0_1px_2px_rgba(18,40,31,0.04)] sm:p-5", className)}>
+    <div className={cn("rounded-xl border border-lp-border bg-white p-4 shadow-[0_1px_2px_rgba(8,10,37,0.04)] sm:p-5", className)}>
       <div className="flex items-center gap-2.5">
         <span className="grid size-8 place-items-center rounded-lg bg-lp-soft text-lp-primary">
           <Icon className="size-4" strokeWidth={1.75} />
@@ -140,7 +140,7 @@ export function Security() {
             <h2 className="mt-3 text-4xl leading-[1.1] font-semibold tracking-tight text-balance text-lp-heading sm:text-[2.6rem]">Your business deserves a secure foundation.</h2>
             <span aria-hidden className="mt-6 block h-0.5 w-14 bg-lp-primary" />
             <p className="mt-6 max-w-md text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
-              Your store operations and business information matter. StoreForge is designed with security-conscious architecture and controlled access to help you manage your business with confidence.
+              Your store operations and business information matter. Kanova Store is designed with security-conscious architecture and controlled access to help you manage your business with confidence.
             </p>
             <ul className="mt-8 space-y-4">
               {HIGHLIGHTS.map((h) => (
@@ -156,7 +156,7 @@ export function Security() {
               href="#features"
               className="group mt-8 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-lp-primary outline-none transition-colors duration-300 hover:text-lp-primary-hover focus-visible:ring-2 focus-visible:ring-lp-primary focus-visible:ring-offset-2"
             >
-              Explore how StoreForge works
+              Explore how Kanova Store works
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" aria-hidden />
             </a>
           </Fade>

@@ -59,6 +59,9 @@ export type ProductDetailApi = {
   trackInventory: boolean;
   quantity: number;
   lowStockThreshold: number;
+  weightGrams: number;
+  taxRateBps: number | null;
+  hsnCode: string | null;
   status: string;
   createdAt: string;
   updatedAt: string;

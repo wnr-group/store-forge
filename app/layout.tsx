@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import Script from "next/script";
 import { ThemedToaster } from "@/components/shared/themed-toaster";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/script";
-import { getPublicBranding } from "@/services/platform-settings.service";
+import { APP_NAME } from "@/config/app";
 import "./globals.css";
 
 // Self-hosted variable fonts (latin subset, app/fonts): no Google Fonts request at dev, build or run time, so the
@@ -24,7 +24,7 @@ const plusJakartaSans = localFont({ src: "./fonts/plus-jakarta-sans-latin.woff2"
 const archivo = localFont({ src: "./fonts/archivo-latin.woff2", variable: "--font-archivo", weight: "100 900", display: "swap" });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { platformName } = await getPublicBranding();
+  const platformName = APP_NAME;
   return {
     title: { default: `${platformName} - launch your online store`, template: `%s | ${platformName}` },
     description: `${platformName} lets merchants create and run their own online store on a secure, multi-tenant platform.`,

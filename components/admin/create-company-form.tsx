@@ -74,7 +74,7 @@ export function CreateCompanyForm() {
     >
       {formError ? <p role="alert" className="text-sm text-error">{formError}</p> : null}
 
-      <SectionCard title="Organization" description="The business that will use StoreForge.">
+      <SectionCard title="Organization" description="The business that will use Kanova Store.">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField id="cc-company" label="Organization name" required error={errors.companyName}>
             <Input {...props("companyName", "cc-company")} aria-required autoComplete="off" autoFocus />

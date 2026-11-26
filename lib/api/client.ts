@@ -32,6 +32,8 @@ export type ApiCall = {
   json?: unknown;
   /** Sent as `X-Organization-Id`. Omit for user-level and platform endpoints. */
   organizationId?: string;
+  /** Extra request headers (for example the shopper's `x-order-token` or an `idempotency-key`). Never an Authorization header. */
+  headers?: Record<string, string>;
   /** For public endpoints (branding, storefront): no session is read and no token is sent. */
   anonymous?: boolean;
   /**
@@ -74,7 +76,7 @@ function fieldErrors(details: unknown): Record<string, string> | undefined {
 }
 
 /** Error codes whose `details` are passed through as typed, structured data (everything else keeps only flat field errors). */
-const STRUCTURED_DETAIL_CODES = new Set(["PRODUCT_IMPORT_INVALID"]);
+const STRUCTURED_DETAIL_CODES = new Set(["PRODUCT_IMPORT_INVALID", "CHECKOUT_ISSUES", "DISCOUNT_INVALID"]);
 
 /** Turns a failed response into the `AppError` the pages and server actions already know how to show. */
 export function toAppError(status: number, body: ApiEnvelope<unknown> | null): AppError {
@@ -96,6 +98,7 @@ export async function apiRequest<T = unknown>(path: string, call: ApiCall = {}):
     if (!session) throw new AppError("UNAUTHENTICATED", "Your session has expired. Please sign in again.");
     headers.Authorization = `Bearer ${session.accessToken}`;
   }
+  for (const [name, value] of Object.entries(call.headers ?? {})) if (name.toLowerCase() !== "authorization") headers[name] = value;
   if (call.organizationId) headers["X-Organization-Id"] = call.organizationId;
   if (call.json !== undefined) headers["Content-Type"] = "application/json";
 

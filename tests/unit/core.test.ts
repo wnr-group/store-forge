@@ -61,8 +61,8 @@ describe("access", () => {
 
   it("presets never give more than the form allows, and old data maps onto them", () => {
     for (const key of ROLE_PRESET_KEYS) expect(createMemberSchema.safeParse({ fullName: "Aa", email: "a@b.co", password: "initial-pass-1", permissions: ROLE_PRESETS[key].permissions }).success, key).toBe(true);
-    // migrated rows may carry orders:write; it counts as read, so a migrated manager still reads as Manager
-    expect(presetOf({ products: "write", orders: "write", customers: "write", settings: "write" })).toBe("manager");
+    // orders:write is a real level now, so it no longer matches a preset
+    expect(presetOf({ products: "write", orders: "write", customers: "write", settings: "write" })).toBe("custom");
     expect(presetOf({})).toBe("custom");
   });
 
@@ -182,7 +182,6 @@ describe("team member validation", () => {
 
   it.each([
     ["an unknown level", { ...permissions, products: "admin" }],
-    ["write on orders (read-only for now)", { ...permissions, orders: "write" }],
     ["none on store settings (always readable)", { ...permissions, settings: "none" }],
     ["a missing module", { products: "read", orders: "read", customers: "read" }],
     ["no permissions at all", undefined],

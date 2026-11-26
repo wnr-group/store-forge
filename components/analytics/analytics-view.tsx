@@ -12,7 +12,18 @@ import { cn } from "@/lib/utils";
 import { RANGES, type Analytics } from "@/services/analytics.service";
 import { SalesChart } from "./sales-chart-lazy";
 
-const TONES: Record<string, Tone> = { paid: "active", fulfilled: "active", pending: "warning", cancelled: "draft", refunded: "danger" };
+const TONES: Record<string, Tone> = {
+  confirmed: "active",
+  processing: "active",
+  ready_to_ship: "active",
+  shipped: "active",
+  out_for_delivery: "active",
+  delivered: "active",
+  pending_payment: "warning",
+  cancelled: "draft",
+  failed: "danger",
+  returned: "danger",
+};
 
 function Stat({ label, value, hint, delta }: { label: string; value: string; hint?: string; delta?: number | null }) {
   return (
@@ -126,7 +137,7 @@ export function AnalyticsView({ data, currency, timezone, detailed = false }: Pr
                   </span>
                   <span className="flex shrink-0 flex-col items-end gap-1">
                     <span className="tabular-nums">{formatMoney(o.totalMinor, currency)}</span>
-                    <StatusBadge tone={TONES[o.status] ?? "neutral"}><span className="capitalize">{o.status}</span></StatusBadge>
+                    <StatusBadge tone={TONES[o.status] ?? "neutral"}><span className="capitalize">{o.status.replaceAll("_", " ")}</span></StatusBadge>
                   </span>
                 </li>
               ))}

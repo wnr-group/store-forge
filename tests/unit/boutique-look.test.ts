@@ -49,7 +49,8 @@ describe("look registry", () => {
   it("standard-look themes keep the engine's own sections", () => {
     expect(lookSection({ settings: { buttons: { radius: 12 } } }, "hero")).toBeUndefined();
     expect(lookSection(boutiqueTheme, "hero")).toBe(BoutiqueHero);
-    expect(lookSection(boutiqueTheme, "rich-text")).toBeUndefined();
+    // A section the Boutique look does not override stays with the engine (rich-text has its own Boutique version now).
+    expect(lookSection(boutiqueTheme, "logo-list")).toBeUndefined();
   });
 
   it("another look is picked up from registry data alone, without touching the dispatcher", () => {

@@ -40,7 +40,7 @@ function DashboardMock() {
   ];
   const bars = [34, 48, 42, 60, 54, 76, 68];
   return (
-    <div aria-hidden className="overflow-hidden rounded-xl border border-lp-border bg-lp-bg shadow-[0_12px_32px_-16px_rgba(18,40,31,0.25)]">
+    <div aria-hidden className="overflow-hidden rounded-xl border border-lp-border bg-lp-bg shadow-[0_12px_32px_-16px_rgba(8,10,37,0.25)]">
       <div className="flex items-center gap-1.5 border-b border-lp-border bg-white px-3 py-2">
         {[0, 1, 2].map((i) => (
           <span key={i} className="size-2 rounded-full bg-lp-border" />
@@ -115,7 +115,7 @@ export function ProblemSolution() {
             <MaskRise>Running an online store shouldn&apos;t feel like running five different businesses.</MaskRise>
           </h2>
           <Fade as="p" delay={0.3} className="mt-4 text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
-            Managing products, tracking orders, monitoring inventory and understanding sales across disconnected tools creates unnecessary complexity. StoreForge brings everything together so you can focus on growing your business.
+            Managing products, tracking orders, monitoring inventory and understanding sales across disconnected tools creates unnecessary complexity. Kanova Store brings everything together so you can focus on growing your business.
           </Fade>
         </div>
 
@@ -162,11 +162,11 @@ export function ProblemSolution() {
 
           {/* Solution */}
           <SlideIn x={72} delay={0.1} className="h-full">
-            <div className="flex h-full flex-col rounded-2xl border border-lp-border bg-white p-5 shadow-[0_1px_2px_rgba(18,40,31,0.04)] sm:p-7">
-              <p className="text-sm font-semibold text-lp-primary">The StoreForge solution</p>
+            <div className="flex h-full flex-col rounded-2xl border border-lp-border bg-white p-5 shadow-[0_1px_2px_rgba(8,10,37,0.04)] sm:p-7">
+              <p className="text-sm font-semibold text-lp-primary">The Kanova Store solution</p>
               <h3 className="mt-2 text-2xl font-semibold tracking-tight text-lp-heading sm:text-3xl">One platform. Complete control.</h3>
               <p className="mt-3 text-[15px] leading-7 text-lp-text">
-                StoreForge brings your essential e-commerce operations into one organized workspace. Manage products, orders, inventory, customers and performance without unnecessary complexity.
+                Kanova Store brings your essential e-commerce operations into one organized workspace. Manage products, orders, inventory, customers and performance without unnecessary complexity.
               </p>
               <div className="mt-6">
                 <DashboardMock />
@@ -174,7 +174,7 @@ export function ProblemSolution() {
               <ul className="mt-6 grid gap-x-6 gap-y-5 sm:grid-cols-2">
                 {BENEFITS.map((b) => (
                   <li key={b.title} className="flex gap-3">
-                    <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-600/15">
+                    <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-lp-secondary text-lp-primary ring-1 ring-lp-primary/15">
                       <Check className="size-3.5" strokeWidth={2.25} aria-hidden />
                     </span>
                     <div>

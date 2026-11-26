@@ -3,16 +3,17 @@
 import { redirect } from "next/navigation";
 import { ROUTES } from "@/config/app";
 import { defaultHomePath } from "@/lib/auth/home";
+import { onboardingPath, planChoiceFrom } from "@/lib/onboarding/path";
 import { toFailure } from "@/lib/errors";
 import { logEvent } from "@/lib/observability/log";
 import { safeNextPath } from "@/lib/utils/redirect";
-import { changePasswordSchema, loginSchema } from "@/lib/validations/auth";
+import { changePasswordSchema, loginSchema, registerSchema } from "@/lib/validations/auth";
 import { parseInput } from "@/lib/validations/parse";
 import * as authService from "@/services/auth.service";
 import type { ActionResult } from "@/types/action";
 
 // NOTE: redirect() works by throwing, so it is always called OUTSIDE try/catch.
-// There is intentionally no register / verify-email / forgot-password action: accounts are provisioned.
+// There is intentionally no verify-email / forgot-password action: accounts need no e-mail verification in this version.
 
 export async function loginAction(input: unknown, next?: string): Promise<ActionResult> {
   let destination: string;
@@ -32,6 +33,26 @@ export async function loginAction(input: unknown, next?: string): Promise<Action
     return failure;
   }
   logEvent("info", "login", { outcome: "ok" });
+  redirect(destination);
+}
+
+/**
+ * Creates the visitor's own account, signs them in (no e-mail verification) and continues to the onboarding with the plan they picked.
+ * Creates no organization and gives no role: those follow a verified payment and the store step.
+ */
+export async function registerAction(input: unknown, plan?: { planCode?: string; billingInterval?: string }): Promise<ActionResult> {
+  let destination: string;
+  try {
+    const values = parseInput(registerSchema, input);
+    await authService.register(values);
+    destination = onboardingPath(planChoiceFrom(plan?.planCode, plan?.billingInterval));
+  } catch (e) {
+    const failure = toFailure(e);
+    // The outcome only: never the e-mail address, the name or the password.
+    logEvent("warn", "register", { outcome: "failed", code: failure.code });
+    return failure;
+  }
+  logEvent("info", "register", { outcome: "ok" });
   redirect(destination);
 }
 

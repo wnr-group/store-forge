@@ -27,7 +27,7 @@ export function Industries() {
           </div>
           <Fade delay={0.4}>
             <p className="max-w-md text-base leading-7 text-pretty text-lp-text sm:text-lg sm:leading-8">
-              From electronics and fashion to healthcare and home essentials, StoreForge helps businesses organize their products, orders, inventory and everyday store operations in one place.
+              From electronics and fashion to healthcare and home essentials, Kanova Store helps businesses organize their products, orders, inventory and everyday store operations in one place.
             </p>
           </Fade>
         </div>
