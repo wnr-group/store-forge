@@ -11,6 +11,17 @@ import { lookHasCart } from "../looks";
 import { AddToBag } from "@/components/storefront/cart/add-to-bag";
 import { effectiveGalleryLayout, effectiveMediaPosition, isHiddenFor, presentationOf } from "@/lib/templates/product-presentation";
 
+/**
+ * Picture boxes of the product page. Every picture is shown WHOLE (`object-contain`, the muted background fills any spare space), so
+ * nothing is cropped; this also means a product's focal point, which only matters when a picture is cropped, is not applied here.
+ * - Phones: the box is the full column width at 4:5, as before.
+ * - Tablets (single column): the gallery is centred and at most 34rem wide, and a box is never taller than 75% of the screen.
+ * - Desktop (two columns): the main picture box is as tall as the screen allows after the header, the sticky offset and the thumbnail
+ *   row (17rem), between 22rem and 50rem, and the gallery stays in view while the details scroll.
+ */
+const STACKED_BOX = "relative aspect-[4/5] w-full overflow-hidden bg-muted md:max-h-[75dvh]";
+const MAIN_BOX = "relative aspect-[4/5] w-full overflow-hidden bg-muted md:max-h-[75dvh] lg:aspect-auto lg:h-[calc(100dvh-17rem)] lg:max-h-[50rem] lg:min-h-[22rem]";
+
 interface MainProductSectionProps {
   node: ComponentNode;
   context: RenderContext;
@@ -20,7 +31,8 @@ interface MainProductSectionProps {
 /**
  * The product's picture gallery beside its details. The gallery stacks above the details on phones.
  *
- * A product may carry its own presentation (gallery layout, media position, focal point, hidden blocks). It is applied
+ * A product may carry its own presentation (gallery layout, media position, hidden blocks; its focal point is not used here, see
+ * the picture boxes above). It is applied
  * here at render time only: the page document is never changed, so other products are unaffected. Precedence: the
  * product's setting, then this section's setting, then the descriptor default.
  */
@@ -29,8 +41,6 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
   const presentation = presentationOf(product);
   const mediaPosition = effectiveMediaPosition(node.settings?.mediaPosition, presentation);
   const stacked = effectiveGalleryLayout(node.settings?.galleryLayout, presentation) === "stacked";
-  const focal = presentation?.focalPoint;
-  const focalStyle = focal ? { objectPosition: `${focal.x}% ${focal.y}%` } : undefined;
   const [picked, setPicked] = useState<string | null>(null);
   // With a cart, the option the shopper picks is shared by the picker, the price and "Add to bag"; it starts on the first value of each option.
   const withCart = lookHasCart(context.theme);
@@ -43,8 +53,6 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
   const gallery = [...new Set([product?.image_path, ...(product?.images ?? [])].filter((p): p is string => Boolean(p)))];
   const shownPath = matchedVariant?.image_path ?? picked ?? gallery[0] ?? null;
   const imageUrl = shownPath ? publicImageUrl(shownPath) : null;
-  // The focal point belongs to the product's primary picture (the first one), wherever that picture is shown.
-  const primaryPath = gallery[0] ?? null;
   // Stacked: every picture one under the other, a variant's own picture first.
   const variantPath = matchedVariant?.image_path;
   const stackedPaths = variantPath && gallery.includes(variantPath) ? [variantPath, ...gallery.filter((p) => p !== variantPath)] : gallery;
@@ -59,7 +67,7 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
   return (
     <section className={cn(CONTAINER, "py-8 sm:py-12 lg:py-16")} {...sfProps}>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
-        <div className={cn("space-y-3", mediaRight && "lg:order-2")}>
+        <div className={cn("space-y-3 md:mx-auto md:w-full md:max-w-[34rem] lg:mx-0 lg:max-w-none", !stacked && "lg:sticky lg:top-24 lg:self-start", mediaRight && "lg:order-2")}>
           {stacked ? (
             stackedPaths.length > 0 ? (
               <ul className="space-y-3" aria-label="Product pictures" data-gallery="stacked">
@@ -67,8 +75,8 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
                   const url = publicImageUrl(path);
                   if (!url) return null;
                   return (
-                    <li key={path} className={cn("relative aspect-[4/5] w-full overflow-hidden bg-muted", RADIUS)}>
-                      <Image src={url} alt={i === 0 ? (product?.name ?? "Product image") : ""} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" style={path === primaryPath ? focalStyle : undefined} priority={i === 0} />
+                    <li key={path} className={cn(STACKED_BOX, RADIUS)}>
+                      <Image src={url} alt={i === 0 ? (product?.name ?? "Product image") : ""} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-contain" priority={i === 0} />
                     </li>
                   );
                 })}
@@ -81,9 +89,9 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
             )
           ) : (
             <>
-              <div className={cn("relative aspect-[4/5] w-full overflow-hidden bg-muted", RADIUS)}>
+              <div className={cn(MAIN_BOX, RADIUS)}>
                 {imageUrl ? (
-                  <Image src={imageUrl} alt={product?.name ?? "Product image"} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" style={shownPath === primaryPath ? focalStyle : undefined} priority />
+                  <Image src={imageUrl} alt={product?.name ?? "Product image"} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-contain" priority />
                 ) : (
                   <>
                     <ImagePlaceholder className="absolute inset-0" />
@@ -99,7 +107,7 @@ export function MainProductSection({ node, context, sectionId }: MainProductSect
                     return (
                       <li key={path}>
                         <button type="button" onClick={() => setPicked(path)} aria-label={`Show picture ${i + 1}`} aria-pressed={shownPath === path} className={cn("relative block aspect-square w-full overflow-hidden border bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring", RADIUS, shownPath === path ? "border-foreground" : "border-transparent opacity-80 hover:opacity-100")}>
-                          <Image src={url} alt="" fill sizes="100px" className="object-cover" style={path === primaryPath ? focalStyle : undefined} />
+                          <Image src={url} alt="" fill sizes="100px" className="object-contain" />
                         </button>
                       </li>
                     );

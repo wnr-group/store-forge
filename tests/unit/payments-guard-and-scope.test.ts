@@ -117,7 +117,8 @@ describe("regression and scope [layer:FE]", () => {
     // The one allowed change is in context.ts: a signed-in customer with no store yet is sent to the self-service onboarding instead of the
     // "no workspace" notice (requireWorkspace). Every exported entry point checked above is unchanged.
     const changedExisting = git("diff", "--name-only", "--diff-filter=MDR", "origin/main", "--", "lib/tenant").split("\n").filter(Boolean);
-    expect(changedExisting.filter((f) => f !== "lib/tenant/context.ts")).toEqual([]);
+    // The other allowed change is api-workspace.ts: its store mapper also reads the SEO title and description the API now returns.
+    expect(changedExisting.filter((f) => f !== "lib/tenant/context.ts" && f !== "lib/tenant/api-workspace.ts")).toEqual([]);
   });
 });
 

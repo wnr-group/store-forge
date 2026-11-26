@@ -7,6 +7,7 @@ import { validateDocument } from "../../lib/templates/engine/validate";
 import type { SettingDescriptor } from "../../lib/templates/engine/descriptors";
 import { getRegistry } from "../../lib/templates/registry/index";
 import { THEME_GROUPS, themeSettingDescriptors } from "../../lib/templates/registry/theme-settings";
+import { DEFAULT_WORDING, WORDING_GROUP, WORDING_KEYS, WORDING_MAX } from "../../lib/storefront/wording";
 
 /**
  * AC-ENG-001 (theme part): the theme setting descriptors (registry/theme-settings.ts) are the ONLY definition of the
@@ -57,8 +58,8 @@ describe("[AC-ENG-001] theme descriptors are the single source of the theme sett
     expect([...THEME_GROUPS]).toEqual(["brand", "colors", "typography", "layout", "buttons", "productCards", "productPage", "social"]);
     expect(Object.isFrozen(THEME_GROUPS)).toBe(true);
     for (const d of themeSettingDescriptors) expect({ id: d.id, known: (THEME_GROUPS as readonly string[]).includes(d.group ?? "") }).toEqual({ id: d.id, known: true });
-    // productCards and productPage are populated by a later phase.
-    expect(byGroup("productCards")).toEqual([]);
+    // productPage is populated by a later phase. productCards holds the shopping wording (lib/storefront/wording.ts).
+    expect(byGroup("productCards").map((d) => d.id)).toEqual([...WORDING_KEYS]);
     expect(byGroup("productPage")).toEqual([]);
   });
 
@@ -69,6 +70,7 @@ describe("[AC-ENG-001] theme descriptors are the single source of the theme sett
     expect(idsOf("typography")).toEqual(["headingFont", "bodyFont", "baseSize", "headingWeight", "bodyWeight", "lineHeight"]);
     expect(idsOf("layout")).toEqual(["pageWidth", "gridGap"]);
     expect(idsOf("buttons")).toEqual(["radius"]);
+    expect(idsOf("productCards")).toEqual(["addToBagLabel", "emptyCartTitle", "emptyCartMessage", "emptyWishlistTitle", "emptyWishlistMessage"]);
     expect(idsOf("social")).toEqual(Object.keys(ALLOWED_SOCIAL_NETWORKS));
     expect(new Set(themeSettingDescriptors.map((d) => d.id)).size).toBe(themeSettingDescriptors.length);
   });
@@ -95,6 +97,49 @@ describe("[AC-ENG-001] theme descriptors are the single source of the theme sett
     expect(ok({ typography: { headingWeight: descriptor("headingWeight")?.default, bodyWeight: descriptor("bodyWeight")?.default } })).toBe(true);
   });
 
+  describe("shopping wording (the productCards group, shown as Shopping wording in the editor)", () => {
+    const wording = (key: string, value: unknown) => ok({ productCards: { [key]: value } });
+
+    it("has the exact current storefront words as its defaults", () => {
+      expect(WORDING_GROUP).toBe("productCards");
+      expect(DEFAULT_WORDING).toEqual({
+        addToBagLabel: "Add to bag",
+        emptyCartTitle: "Your bag is empty",
+        emptyCartMessage: "Pieces you add appear here, saved in this browser for this store.",
+        emptyWishlistTitle: "Nothing saved yet",
+        emptyWishlistMessage: "Tap the heart on any piece to keep it here, saved in this browser for this store.",
+      });
+      for (const key of WORDING_KEYS) expect({ key, default: descriptor(key)?.default }).toEqual({ key, default: DEFAULT_WORDING[key] });
+    });
+
+    it("has a label, help text, a text type and the length limit from the shared file for each setting", () => {
+      for (const key of WORDING_KEYS) {
+        const d = descriptor(key);
+        expect({ key, group: d?.group, max: d?.max, label: Boolean(d?.label), help: Boolean(d?.help) }).toEqual({ key, group: "productCards", max: WORDING_MAX[key], label: true, help: true });
+        expect({ key, type: d?.type }).toEqual({ key, type: key.endsWith("Message") ? "textarea" : "text" });
+      }
+      expect(WORDING_MAX).toEqual({ addToBagLabel: 30, emptyCartTitle: 60, emptyCartMessage: 160, emptyWishlistTitle: 60, emptyWishlistMessage: 160 });
+    });
+
+    it("accepts a value of exactly the limit and rejects one character more", () => {
+      for (const key of WORDING_KEYS) {
+        expect({ key, atLimit: wording(key, "x".repeat(WORDING_MAX[key])) }).toEqual({ key, atLimit: true });
+        expect({ key, overLimit: wording(key, "x".repeat(WORDING_MAX[key] + 1)) }).toEqual({ key, overLimit: false });
+      }
+    });
+
+    it("rejects values that are not text and keys that are not wording", () => {
+      for (const bad of [5, true, null, {}, ["Add"]]) expect(wording("addToBagLabel", bad)).toBe(false);
+      expect(ok({ productCards: { somethingElse: "x" } })).toBe(false);
+    });
+
+    it("leaves the other groups and stores that never set it unaffected", () => {
+      expect(ok({})).toBe(true);
+      expect(ok({ productCards: {} })).toBe(true);
+      expect(ok({ buttons: { radius: 6 }, productCards: { addToBagLabel: "Buy now" } })).toBe(true);
+    });
+  });
+
   it("[AC-ENG-001] the font descriptors agree with the closed font list", () => {
     for (const id of ["headingFont", "bodyFont"]) {
       expect(descriptor(id)?.options?.map((o) => o.value).sort()).toEqual([...FONT_KEYS].sort());
@@ -116,7 +161,8 @@ describe("[AC-ENG-001] theme descriptors are the single source of the theme sett
 describe("[AC-ENG-001] unknown groups and keys are rejected (no catch-all)", () => {
   it("[AC-ENG-001] an unknown group, an unknown key inside a group, and the old flat ids are rejected", () => {
     expect(ok({ branding: { logo: "x" } })).toBe(false);
-    expect(ok({ productCards: {} })).toBe(false); // a group without descriptors yet is not accepted either
+    expect(ok({ productPage: {} })).toBe(false); // a group without descriptors yet is not accepted either (productCards now has the shopping wording)
+    expect(ok({ productCards: { sparkle: "x" } })).toBe(false); // an unknown key inside the wording group is rejected like any other
     expect(ok({ colors: { primary: "#112233", favicon: "red" } })).toBe(false);
     expect(ok({ typography: { fontFamily: "evil; }" } })).toBe(false);
     expect(ok({ layout: { css: "x" } })).toBe(false);

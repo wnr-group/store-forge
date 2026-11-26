@@ -8,6 +8,9 @@ export type StoreApi = {
   slug: string;
   description: string | null;
   logoPath: string | null;
+  /** SEO title and description of the storefront home page (max 70 / 160 characters). Null: the store name / description are used. */
+  metaTitle: string | null;
+  metaDescription: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
   currency: string;
@@ -28,6 +31,8 @@ export type StoreApiInput = {
   currency: string;
   timezone: string;
   logoPath: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
 };
 
 export const getStoreApi = async (organizationId: string) => (await apiRequest<StoreApi>("/store", { organizationId })).data;

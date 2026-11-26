@@ -26,6 +26,7 @@ const GROUP_LABELS: Record<string, string> = {
   typography: "Typography",
   layout: "Layout",
   buttons: "Buttons and corners",
+  productCards: "Shopping wording",
   social: "Social media links",
 };
 
@@ -62,7 +63,7 @@ type Props = {
 export function SettingsPanel({ state, disabled, problems, onSetting, onThemeSetting, themeDocId, mode, adapter, styleDevice, onStyle, onResetStyle, onSelectParent, focusSetting, onFocusConsumed, clickedText, onText, onTextStyle, onDuplicate, onRemove, cardContext }: Props) {
   if (mode === "theme") {
     return themeDocId && state.docs[themeDocId] ? (
-      <ThemeSettings doc={state.docs[themeDocId].document} disabled={disabled} problems={problems[themeDocId] ?? {}} onChange={(group, key, value) => onThemeSetting(themeDocId, group, key, value)} />
+      <ThemeSettings doc={state.docs[themeDocId].document} disabled={disabled} problems={problems[themeDocId] ?? {}} onChange={(group, key, value) => onThemeSetting(themeDocId, group, key, value)} focusSetting={focusSetting} onFocusConsumed={onFocusConsumed} />
     ) : (
       <Empty title="No theme settings" text="This store has no theme settings document yet. Apply a theme to create one." />
     );
@@ -252,15 +253,32 @@ function Empty({ title, text }: { title: string; text: string }) {
   );
 }
 
-function ThemeSettings({ doc, disabled, problems, onChange }: { doc: Record<string, unknown>; disabled: boolean; problems: Record<string, string>; onChange: (group: string, key: string, value: unknown) => void }) {
+/** What each group says about itself, under its heading (only where a setting is used in more than one place). */
+const GROUP_NOTES: Record<string, string> = {
+  productCards: "Store-wide words. The Empty cart title applies to both the cart page and the cart drawer, and the Add to bag label to all product cards and the product detail page.",
+};
+
+function ThemeSettings({ doc, disabled, problems, onChange, focusSetting, onFocusConsumed }: { doc: Record<string, unknown>; disabled: boolean; problems: Record<string, string>; onChange: (group: string, key: string, value: unknown) => void; focusSetting: Props["focusSetting"]; onFocusConsumed: () => void }) {
   const settings = (doc.settings ?? {}) as Record<string, Record<string, unknown>>;
+  const root = useRef<HTMLDivElement>(null);
+  // Clicking the bag drawer or a card's Add to bag button in the preview lands here: scroll to that field and put the cursor in it.
+  useEffect(() => {
+    if (!focusSetting) return;
+    const frame = requestAnimationFrame(() => {
+      const target = root.current?.querySelector<HTMLElement>(`[data-setting-id="${CSS.escape(focusSetting.key)}"]`);
+      target?.scrollIntoView({ block: "center", behavior: "smooth" });
+      target?.querySelector<HTMLElement>("input, textarea, select, button")?.focus({ preventScroll: true });
+      onFocusConsumed();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [focusSetting, onFocusConsumed]);
   const groups = useMemo(() => {
     const out = new Map<string, SettingDescriptor[]>();
     for (const d of themeSettingDescriptors) out.set(d.group ?? "other", [...(out.get(d.group ?? "other") ?? []), d]);
     return [...out.entries()];
   }, []);
   return (
-    <div className="space-y-5 p-4">
+    <div ref={root} className="space-y-5 p-4">
       <header>
         <h2 className="text-base font-semibold tracking-tight">Theme settings</h2>
         <p className="text-xs text-muted-foreground">These apply to every page of your store and update the preview immediately. Elements inherit them until you change them under Style.</p>
@@ -268,8 +286,11 @@ function ThemeSettings({ doc, disabled, problems, onChange }: { doc: Record<stri
       {groups.map(([group, descriptors]) => (
         <fieldset key={group} className="space-y-4 rounded-xl border bg-background/60 p-3.5">
           <legend className="-ml-1 px-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{GROUP_LABELS[group] ?? group}</legend>
+          {GROUP_NOTES[group] ? <p className="text-xs text-muted-foreground">{GROUP_NOTES[group]}</p> : null}
           {descriptors.map((d) => (
-            <SettingField key={`${group}.${d.id}`} descriptor={d} value={settings[group]?.[d.id]} disabled={disabled} error={problems[`settings.${group}.${d.id}`]} onChange={(value) => onChange(group, d.id, value)} />
+            <div key={`${group}.${d.id}`} data-setting-id={`${group}.${d.id}`} className="rounded-md">
+              <SettingField descriptor={d} value={settings[group]?.[d.id]} disabled={disabled} error={problems[`settings.${group}.${d.id}`]} onChange={(value) => onChange(group, d.id, value)} />
+            </div>
           ))}
         </fieldset>
       ))}

@@ -19,6 +19,7 @@ import {
 import { AppError } from "@/lib/errors";
 import type { CollectionProductSummary } from "@/components/storefront/engine/types";
 import { featuredCollectionSlugs } from "@/lib/storefront/featured";
+import { faviconUrlFromTheme } from "@/lib/storefront/seo";
 import type { TemplateDocument } from "@/lib/templates/document";
 import { parsePresentation } from "@/lib/templates/product-presentation";
 
@@ -36,6 +37,9 @@ export const storefrontSchema = z.object({
   slug: z.string(),
   description: z.string().nullable(),
   logo_path: z.string().nullable(),
+  /** Home page SEO text. Optional so an API that predates it still parses. */
+  meta_title: z.string().nullish(),
+  meta_description: z.string().nullish(),
   currency: z.string(),
   products: z.array(
     z.object({
@@ -66,6 +70,8 @@ export const getPublicStorefront = cache(async (slug: string): Promise<PublicSto
       slug: s.slug,
       description: s.description,
       logo_path: s.logoPath,
+      meta_title: s.metaTitle ?? null,
+      meta_description: s.metaDescription ?? null,
       currency: s.currency,
       products: s.products.map((p) => ({
         name: p.name,
@@ -80,6 +86,19 @@ export const getPublicStorefront = cache(async (slug: string): Promise<PublicSto
   } catch (error) {
     if (error instanceof AppError && error.code === "NOT_FOUND") return null;
     throw error;
+  }
+});
+
+/**
+ * The tab icon URL of a store: the favicon of its PUBLISHED theme (Studio > Brand), or null. Read from the layout endpoint on its own,
+ * not through getPublishedDesign, because that returns null for a store without a published page even when a theme is published.
+ * Memoized per request, and a failure just means "no favicon" (the platform icon stays); it must never break a page.
+ */
+export const getStorefrontFavicon = cache(async (slug: string): Promise<string | null> => {
+  try {
+    return faviconUrlFromTheme((await getPublicLayoutApi(slug, "index")).theme);
+  } catch {
+    return null;
   }
 });
 

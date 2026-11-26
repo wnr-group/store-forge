@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublishedView } from "@/components/storefront/published-view";
 import { TemplateView } from "@/components/storefront/templates";
+import { homeMetadata } from "@/lib/storefront/seo";
 import type { TemplateDocument } from "@/lib/templates/document";
 import { resolveTemplateKey, resolveTemplateSettings, savedFromPublic } from "@/lib/templates/resolve";
 import { getPublicStorefront, getPublishedDesign } from "@/services/storefront.service";
@@ -14,7 +15,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   if (!slug || slug !== slug.toLowerCase()) return { title: "Store not found" };
   const store = await getPublicStorefront(slug);
-  return store ? { title: store.name, description: store.description ?? undefined } : { title: "Store not found" };
+  // Home page only: the store's own SEO title and description, falling back to its name and description (see lib/storefront/seo.ts).
+  return store ? homeMetadata(store) : { title: "Store not found" };
 }
 
 export default async function StorefrontPage({ params }: Params) {

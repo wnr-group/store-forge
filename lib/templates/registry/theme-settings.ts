@@ -2,12 +2,14 @@ import type { SettingDescriptor } from "../engine/descriptors";
 import { FONT_KEYS, FONT_REGISTRY, type FontKey } from "../engine/fonts";
 import { DEFAULT_LOOK, LOOK_IDS, LOOK_LABELS } from "../looks";
 import { ALLOWED_SOCIAL_NETWORKS } from "../engine/schema";
+import { DEFAULT_WORDING, WORDING_GROUP, WORDING_KEYS, WORDING_LABELS, WORDING_MAX } from "../../storefront/wording";
 
 /**
  * The closed list of theme setting groups (D24: Brand, Colours, Typography, Layout, Buttons, Product cards,
  * Product page, Social). A descriptor's `group` is one of these ids and is also the key of its object in the stored
- * document: `settings[group][id]`. `productCards` and `productPage` have no descriptors yet: the product card
- * and product page settings are added by a later phase (Phase 4 and Phase 6 of the template engine plan).
+ * document: `settings[group][id]`. `productPage` has no descriptors yet (a later phase). `productCards` holds the shopping wording
+ * (see lib/storefront/wording.ts; the editor shows it as "Shopping wording"): it is the one group the API allows that was free, so
+ * the wording needed no API change. The product card settings of Phase 4 are still to come.
  */
 export const THEME_GROUPS = Object.freeze([
   "brand",
@@ -102,5 +104,14 @@ export const themeSettingDescriptors: SettingDescriptor[] = [
   { id: "pageWidth", type: "range", label: "Page Width", default: 1280, min: 800, max: 1920, unit: "px", group: "layout" },
   { id: "gridGap", type: "range", label: "Grid Gap", default: 24, min: 0, max: 100, unit: "px", group: "layout" },
   { id: "radius", type: "range", label: "Button Corner Radius", default: 6, min: 0, max: 50, unit: "px", group: "buttons" },
+  ...WORDING_KEYS.map((key): SettingDescriptor => ({
+    id: key,
+    type: key.endsWith("Message") ? "textarea" : "text",
+    label: WORDING_LABELS[key].label,
+    help: WORDING_LABELS[key].help,
+    default: DEFAULT_WORDING[key],
+    group: WORDING_GROUP,
+    max: WORDING_MAX[key],
+  })),
   ...socialDescriptors,
 ];

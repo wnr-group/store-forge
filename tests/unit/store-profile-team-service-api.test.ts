@@ -45,13 +45,22 @@ beforeEach(() => {
 });
 
 describe("store settings in API mode", () => {
-  const values = { name: "Shop", slug: "shop", description: null, contactEmail: null, contactPhone: null, currency: "INR", timezone: "Asia/Kolkata", logoPath: null };
+  const values = { name: "Shop", slug: "shop", description: null, contactEmail: null, contactPhone: null, currency: "INR", timezone: "Asia/Kolkata", logoPath: null, metaTitle: null, metaDescription: null };
 
   it("sends the whole form after the store:manage check", async () => {
     const { updateStoreSettings } = await import("@/services/store-settings.service");
     await updateStoreSettings(values);
     expect(requireActiveTenant).toHaveBeenCalledWith("store:manage");
     expect(store.update).toHaveBeenCalledWith(tenant.id, values);
+  });
+
+  it("sends the SEO title and description, and null when they are cleared", async () => {
+    const { updateStoreSettings } = await import("@/services/store-settings.service");
+    const seo = { ...values, metaTitle: "Acme | Handmade candles", metaDescription: "Small-batch soy candles, poured by hand." };
+    await updateStoreSettings(seo);
+    expect(store.update).toHaveBeenLastCalledWith(tenant.id, expect.objectContaining({ metaTitle: "Acme | Handmade candles", metaDescription: "Small-batch soy candles, poured by hand." }));
+    await updateStoreSettings(values);
+    expect(store.update).toHaveBeenLastCalledWith(tenant.id, expect.objectContaining({ metaTitle: null, metaDescription: null }));
   });
 
   it("does not call the API without permission and surfaces API field errors", async () => {

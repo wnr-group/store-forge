@@ -262,6 +262,29 @@ describe("storeSettingsSchema", () => {
     expect(storeSettingsSchema.parse(st({ contactEmail: "", description: " " }))).toMatchObject({ currency: "INR", contactEmail: null, description: null, contactPhone: null, logoPath: null });
   });
 
+  describe("SEO title and description of the home page", () => {
+    it("accepts a 70-character title and a 160-character description", () => {
+      const r = storeSettingsSchema.parse(st({ metaTitle: "t".repeat(70), metaDescription: "d".repeat(160) }));
+      expect(r.metaTitle).toHaveLength(70);
+      expect(r.metaDescription).toHaveLength(160);
+    });
+
+    it("rejects a 71-character title and a 161-character description", () => {
+      expect(errorsOf(storeSettingsSchema, st({ metaTitle: "t".repeat(71) })).metaTitle).toBe("Meta title must be at most 70 characters.");
+      expect(errorsOf(storeSettingsSchema, st({ metaDescription: "d".repeat(161) })).metaDescription).toBe("Meta description must be at most 160 characters.");
+    });
+
+    it("trims before counting, so padding spaces do not count against the limit", () => {
+      expect(storeSettingsSchema.parse(st({ metaTitle: `  ${"t".repeat(70)}  ` })).metaTitle).toHaveLength(70);
+    });
+
+    it("turns empty, blank and missing values into null (clearing a field sends null)", () => {
+      expect(storeSettingsSchema.parse(st({ metaTitle: "", metaDescription: "   " }))).toMatchObject({ metaTitle: null, metaDescription: null });
+      expect(storeSettingsSchema.parse(st())).toMatchObject({ metaTitle: null, metaDescription: null });
+      expect(storeSettingsSchema.parse(st({ metaTitle: null, metaDescription: null }))).toMatchObject({ metaTitle: null, metaDescription: null });
+    });
+  });
+
   it("requires name, slug, currency and timezone", () => {
     const e = errorsOf(storeSettingsSchema, st({ name: " ", slug: "", currency: "", timezone: "" }));
     expect(e.name).toBe("Store name is required.");

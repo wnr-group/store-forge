@@ -9,6 +9,9 @@ export type StorefrontApi = {
   publicId: string;
   description: string | null;
   logoPath: string | null;
+  /** Home page SEO title and description; null when not set. Absent from an API that predates them. */
+  metaTitle?: string | null;
+  metaDescription?: string | null;
   currency: string;
   products: {
     name: string;
