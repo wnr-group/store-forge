@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
+import { AccountLink } from "@/components/storefront/account-link";
 import { useOptionalCart } from "@/components/storefront/cart/cart-provider";
 import { useOptionalWishlist } from "@/components/storefront/wishlist/wishlist-provider";
 import { publicImageUrl } from "@/lib/storage/paths";
@@ -127,6 +128,7 @@ export function SportHeader({ node, context, sectionId }: SectionProps) {
           <Link href="/search" aria-label="Search the store" className={cn(iconBtn, "xl:hidden")}>
             <Search className="size-5" strokeWidth={1.75} aria-hidden />
           </Link>
+          <AccountLink className={cn(iconBtn, "hidden sm:inline-flex")} iconClassName="size-5" strokeWidth={1.75} />
           {wishlist ? (
             <Link href="/wishlist" prefetch={false} aria-label={wishlist.ready && wishlist.count > 0 ? `Wishlist, ${wishlist.count} ${wishlist.count === 1 ? "item" : "items"}` : "Wishlist"} className={cn(iconBtn, "hidden sm:inline-flex")}>
               <Heart className="size-5" strokeWidth={1.75} aria-hidden />

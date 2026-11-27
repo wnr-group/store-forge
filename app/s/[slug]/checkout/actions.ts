@@ -15,6 +15,7 @@ import {
   verifyRazorpayApi,
 } from "@/lib/api/endpoints/checkout-api";
 import { AppError } from "@/lib/errors";
+import { clearCustomerSession, readCustomerToken } from "@/lib/customer/session";
 import { addressSchema, discountCodeSchema, lineSchema, methodSchema, placeOrderSchema, storeSlugSchema } from "@/lib/validations/checkout";
 import { parseInput } from "@/lib/validations/parse";
 
@@ -64,7 +65,16 @@ export async function placeOrderAction(input: unknown) {
         throw new AppError("VALIDATION", "Enter the billing address.", { billingAddress: "Enter the billing address." });
       }
       const { storeSlug, idempotencyKey, ...body } = v;
-      return placeOrderApi(storeSlug, { ...body, billingAddress: v.billingSameAsShipping ? undefined : v.billingAddress }, idempotencyKey);
+      // Browsing and the bag need no account; placing an order does. The token comes from the HttpOnly cookie, never from the browser's input.
+      const token = await readCustomerToken(storeSlug);
+      if (!token) throw new AppError("UNAUTHENTICATED", "Sign in or create an account to place your order.", undefined, "CUSTOMER_LOGIN_REQUIRED");
+      try {
+        return await placeOrderApi(storeSlug, { ...body, billingAddress: v.billingSameAsShipping ? undefined : v.billingAddress }, idempotencyKey, token);
+      } catch (error) {
+        // The session ended (expired, signed out elsewhere): drop the dead cookie so the next page asks for a sign-in.
+        if (error instanceof AppError && error.code === "UNAUTHENTICATED") await clearCustomerSession(storeSlug);
+        throw error;
+      }
     },
     { operation: "checkout.place" },
   );

@@ -4,9 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { checkoutAccountAction } from "@/app/s/[slug]/account/actions";
 import { checkpointCartAction } from "@/app/s/[slug]/cart/actions";
 import { paymentOptionsAction, placeOrderAction, quoteAction, shippingOptionsAction, validateDiscountAction } from "@/app/s/[slug]/checkout/actions";
 import type { PaymentMethodKind, PaymentOptionsApi, QuoteApi, ShippingQuoteApi } from "@/lib/api/endpoints/checkout-api";
+import type { CustomerAddressApi } from "@/lib/api/endpoints/customer-account-api";
 import { formatBagPrice } from "@/lib/cart/format";
 import { INDIAN_STATE_NAMES } from "@/lib/checkout/states";
 import { clearCartKey, getCartKey, takePrefill } from "@/lib/checkout/cart-key";
@@ -18,7 +20,7 @@ import { useOptionalCart } from "../cart/cart-provider";
 import { useTracker } from "../tracking/tracking-provider";
 import type { SectionProps } from "../engine/looks";
 import { DiscountBox } from "./discount-box";
-import { Field, formatDays, INPUT, MUTED, Notice, PageTitle, PRIMARY_BUTTON, Row, SHELL, TaxBreakdown } from "./checkout-ui";
+import { Field, formatDays, INPUT, MUTED, Notice, PageTitle, PRIMARY_BUTTON, Row, SHELL, TaxBreakdown, pageStyle } from "./checkout-ui";
 import { payWithRazorpay } from "./razorpay";
 
 type FormState = {
@@ -97,6 +99,8 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
   const [discountError, setDiscountError] = useState<string | null>(null);
   const [discountChecking, setDiscountChecking] = useState(false);
   const [remindMe, setRemindMe] = useState(false);
+  // The signed-in shopper (checkout needs an account): their saved addresses, offered as one-click choices.
+  const [savedAddresses, setSavedAddresses] = useState<CustomerAddressApi[]>([]);
 
   const storeSlug = cart?.storeSlug ?? "";
   const currency = cart?.currency ?? "INR";
@@ -129,6 +133,31 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved) setForm((f) => ({ ...f, email: f.email || saved.email || "", fullName: f.fullName || saved.fullName || "" }));
   }, [isPreview, storeSlug]);
+
+  // The signed-in shopper's details and saved addresses. Their name, email and phone start filled in, and so does their default
+  // address; none of it is trusted by the server, which prices and validates the order again. A shopper who is no longer signed in
+  // (an expired session) is sent to sign in; the bag stays in this browser.
+  useEffect(() => {
+    if (isPreview || !storeSlug) return;
+    let live = true;
+    void checkoutAccountAction({ storeSlug }).then((r) => {
+      if (!live || !r.ok || !r.data) return;
+      if (!r.data.signedIn) return router.replace("/account/login?next=/checkout");
+      const { profile, addresses } = r.data;
+      setSavedAddresses(addresses);
+      const home = addresses.find((a) => a.isDefault) ?? null;
+      setForm((f) => ({
+        ...f,
+        fullName: f.fullName || profile.fullName,
+        email: f.email || profile.email,
+        phone: f.phone || profile.phone || home?.phone || "",
+        ...(f.line1 || !home ? {} : { line1: home.line1, line2: home.line2 ?? "", city: home.city, state: home.state, postalCode: home.postalCode }),
+      }));
+    });
+    return () => {
+      live = false;
+    };
+  }, [isPreview, storeSlug, router]);
 
   // Once there is an email, keep a copy of the bag with the store, so it can be recovered if the shopper leaves. This never blocks or
   // slows the checkout: it runs a moment after typing stops, and a failure is ignored.
@@ -317,6 +346,11 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
     const result = await placeOrderAction({ ...body, idempotencyKey: attempt.current.key });
     if (!result.ok) {
       setSubmitting(false);
+      if (result.code === "UNAUTHENTICATED") {
+        // Placing an order needs an account and the session is gone. The bag is kept in this browser, so just sign in again.
+        router.push("/account/login?next=/checkout");
+        return;
+      }
       if (isDiscountRefusal(result.details)) {
         // The order was NOT placed: the code no longer works. Show why, take it off, and let the shopper decide.
         setDiscount(null);
@@ -353,7 +387,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
   const deliverableBlock = shipping?.configured && !shipping.deliverable;
 
   return (
-    <section className={cn(SHELL, "pb-16 pt-8 md:pb-24 md:pt-[50px]")} {...sfProps}>
+    <section className={cn(SHELL, "pb-16 pt-8 md:pb-24 md:pt-[50px]")} style={pageStyle(context.theme)} {...sfProps}>
       <PageTitle crumbs={[{ label: "Home", href: "/" }, { label: "Your bag", href: "/cart" }, { label: "Checkout" }]} title="Checkout" />
 
       {notice ? (
@@ -372,7 +406,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
           <p className="text-[1.75rem] leading-tight md:text-[2.25rem]" style={{ fontFamily: "var(--sf-font-heading)" }}>
             Your bag is empty
           </p>
-          <Link href="/products" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[14px] font-medium text-primary-foreground">
+          <Link href="/products" className="inline-flex h-12 items-center rounded-[var(--pg-btn-radius,9999px)] bg-primary px-7 text-[16px] font-medium text-primary-foreground">
             Continue shopping
           </Link>
         </div>
@@ -380,7 +414,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
         <form onSubmit={submit} noValidate className="grid items-start gap-10 pt-10 md:pt-12 lg:grid-cols-[minmax(0,1fr)_25.25rem] lg:gap-16">
           <div className="grid gap-12">
             <fieldset className="grid gap-5">
-              <legend className="mb-1 text-[11px] uppercase tracking-[0.2em] text-[color:var(--sf-color-muted)]">Contact</legend>
+              <legend className="mb-1 text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)] text-[color:var(--sf-color-muted)]">Contact</legend>
               <Field label="Full name" htmlFor="co-name" error={err("fullName")}>
                 <input id="co-name" className={INPUT} autoComplete="name" value={form.fullName} onChange={(e) => set({ fullName: e.target.value })} aria-invalid={!!err("fullName")} />
               </Field>
@@ -392,15 +426,35 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
                   <input id="co-phone" type="tel" inputMode="tel" className={INPUT} autoComplete="tel" placeholder="10-digit mobile" value={form.phone} onChange={(e) => set({ phone: e.target.value })} aria-invalid={!!err("phone")} />
                 </Field>
               </div>
-              <p className={cn("text-[12px]", MUTED)}>If you leave before paying, we keep your bag and email so you can pick up where you stopped. Nothing is sent to you unless you tick the box below.</p>
-              <label className="flex items-start gap-3 text-[13px]">
+              <p className={cn("text-[14px]", MUTED)}>If you leave before paying, we keep your bag and email so you can pick up where you stopped. Nothing is sent to you unless you tick the box below.</p>
+              <label className="flex items-start gap-3 text-[15px]">
                 <input type="checkbox" checked={remindMe} onChange={(e) => setRemindMe(e.target.checked)} className="mt-0.5 size-4 accent-[var(--primary)]" />
                 <span>Email me a reminder about my bag and occasional offers from this store.</span>
               </label>
             </fieldset>
 
             <fieldset className="grid gap-5">
-              <legend className="mb-1 text-[11px] uppercase tracking-[0.2em] text-[color:var(--sf-color-muted)]">Delivery address</legend>
+              <legend className="mb-1 text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)] text-[color:var(--sf-color-muted)]">Delivery address</legend>
+              {savedAddresses.length ? (
+                <Field label="Use a saved address" htmlFor="co-saved">
+                  <select
+                    id="co-saved"
+                    className={INPUT}
+                    defaultValue=""
+                    onChange={(e) => {
+                      const a = savedAddresses.find((x) => x.id === e.target.value);
+                      if (a) set({ line1: a.line1, line2: a.line2 ?? "", city: a.city, state: a.state, postalCode: a.postalCode });
+                    }}
+                  >
+                    <option value="">Enter a different address</option>
+                    {savedAddresses.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {[a.label || a.fullName, a.line1, a.city].join(", ")}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              ) : null}
               <Field label="Address" htmlFor="co-line1" error={err("line1")}>
                 <input id="co-line1" className={INPUT} autoComplete="address-line1" value={form.line1} onChange={(e) => set({ line1: e.target.value })} aria-invalid={!!err("line1")} />
               </Field>
@@ -425,8 +479,8 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
                   <input id="co-pin" inputMode="numeric" maxLength={6} className={INPUT} autoComplete="postal-code" value={form.postalCode} onChange={(e) => set({ postalCode: e.target.value.replace(/\D/g, "") })} aria-invalid={!!err("postalCode")} />
                 </Field>
               </div>
-              <p className={cn("text-[12px]", MUTED)}>Country: India. We deliver within India only.</p>
-              <label className="flex items-center gap-3 text-[14px]">
+              <p className={cn("text-[14px]", MUTED)}>Country: India. We deliver within India only.</p>
+              <label className="flex items-center gap-3 text-[16px]">
                 <input type="checkbox" className="size-4 accent-[var(--primary)]" checked={form.billingSame} onChange={(e) => set({ billingSame: e.target.checked })} />
                 Billing address is the same as the delivery address
               </label>
@@ -434,7 +488,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
 
             {!form.billingSame ? (
               <fieldset className="grid gap-5">
-                <legend className="mb-1 text-[11px] uppercase tracking-[0.2em] text-[color:var(--sf-color-muted)]">Billing address</legend>
+                <legend className="mb-1 text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)] text-[color:var(--sf-color-muted)]">Billing address</legend>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Field label="Full name" htmlFor="bo-name" error={err("bFullName")}>
                     <input id="bo-name" className={INPUT} value={form.bFullName} onChange={(e) => set({ bFullName: e.target.value })} />
@@ -471,105 +525,105 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
             ) : null}
 
             <fieldset className="grid gap-4" aria-describedby={err("shipping") ? "co-shipping-error" : undefined}>
-              <legend className="mb-1 text-[11px] uppercase tracking-[0.2em] text-[color:var(--sf-color-muted)]">Delivery method</legend>
+              <legend className="mb-1 text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)] text-[color:var(--sf-color-muted)]">Delivery method</legend>
               {!addressReady ? (
-                <p className={cn("text-[14px]", MUTED)}>Enter your state and PIN code to see delivery options.</p>
+                <p className={cn("text-[16px]", MUTED)}>Enter your state and PIN code to see delivery options.</p>
               ) : shippingBusy && !shipping ? (
-                <p role="status" className={cn("text-[14px]", MUTED)}>
+                <p role="status" className={cn("text-[16px]", MUTED)}>
                   Finding delivery options…
                 </p>
               ) : deliverableBlock ? (
                 <Notice tone="error">{shipping?.reason ?? "We do not deliver to this address."}</Notice>
               ) : shipping && !shipping.configured ? (
-                <p className={cn("text-[14px]", MUTED)}>Delivery is arranged by the store after you order.</p>
+                <p className={cn("text-[16px]", MUTED)}>Delivery is arranged by the store after you order.</p>
               ) : shipping ? (
                 <ul className="grid gap-3">
                   {shipping.options.map((o) => (
                     <li key={o.methodId}>
-                      <label className={cn("flex cursor-pointer items-start gap-4 border bg-white px-4 py-4 transition-colors", methodId === o.methodId ? "border-foreground" : "border-border hover:border-foreground/60")}>
+                      <label className={cn("flex cursor-pointer items-start gap-4 border bg-white rounded-[var(--pg-panel-radius,0px)] px-4 py-4 transition-colors", methodId === o.methodId ? "border-foreground" : "border-border hover:border-foreground/60")}>
                         <input type="radio" name="shipping" className="mt-1 size-4 accent-[var(--primary)]" checked={methodId === o.methodId} onChange={() => setPicked(o.methodId)} />
                         <span className="min-w-0 flex-1">
-                          <span className="block text-[14px] font-medium">{o.name}</span>
-                          <span className={cn("block text-[12px]", MUTED)}>
+                          <span className="block text-[16px] font-medium">{o.name}</span>
+                          <span className={cn("block text-[14px]", MUTED)}>
                             {[formatDays(o.estimatedDays) ? `Delivers in ${formatDays(o.estimatedDays)}` : null, o.carrier ? `via ${o.carrier.name}${o.carrier.estimate ? " (estimate)" : ""}` : null].filter(Boolean).join(" · ") || o.kind}
                           </span>
                         </span>
-                        <span className="text-[14px] tabular-nums">{o.free || o.chargeMinor === 0 ? "Free" : money(o.chargeMinor)}</span>
+                        <span className="text-[16px] tabular-nums">{o.free || o.chargeMinor === 0 ? "Free" : money(o.chargeMinor)}</span>
                       </label>
                     </li>
                   ))}
                   {shipping.unavailable.map((u) => (
-                    <li key={u.methodId} className={cn("border border-dashed border-border px-4 py-3 text-[12px]", MUTED)}>
+                    <li key={u.methodId} className={cn("border border-dashed border-border px-4 py-3 text-[14px]", MUTED)}>
                       {u.name}: {u.reason}
                     </li>
                   ))}
                 </ul>
               ) : null}
               {err("shipping") ? (
-                <p id="co-shipping-error" role="alert" className="text-[12px] text-destructive">
+                <p id="co-shipping-error" role="alert" className="text-[14px] text-destructive">
                   {err("shipping")}
                 </p>
               ) : null}
             </fieldset>
 
             <fieldset className="grid gap-4">
-              <legend className="mb-1 text-[11px] uppercase tracking-[0.2em] text-[color:var(--sf-color-muted)]">Payment</legend>
+              <legend className="mb-1 text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)] text-[color:var(--sf-color-muted)]">Payment</legend>
               {options && !options.razorpayAvailable && !codAllowedHere ? (
                 <Notice tone="error">This store is not accepting orders right now: no payment method is set up.</Notice>
               ) : (
                 <ul className="grid gap-3">
                   {options?.razorpayAvailable ? (
                     <li>
-                      <label className={cn("flex cursor-pointer items-start gap-4 border bg-white px-4 py-4", method === "razorpay" ? "border-foreground" : "border-border hover:border-foreground/60")}>
+                      <label className={cn("flex cursor-pointer items-start gap-4 border bg-white rounded-[var(--pg-panel-radius,0px)] px-4 py-4", method === "razorpay" ? "border-foreground" : "border-border hover:border-foreground/60")}>
                         <input type="radio" name="payment" className="mt-1 size-4 accent-[var(--primary)]" checked={method === "razorpay"} onChange={() => setPref("razorpay")} />
                         <span className="flex-1">
-                          <span className="block text-[14px] font-medium">Pay online</span>
-                          <span className={cn("block text-[12px]", MUTED)}>UPI, cards, net banking and wallets, securely through Razorpay.</span>
+                          <span className="block text-[16px] font-medium">Pay online</span>
+                          <span className={cn("block text-[14px]", MUTED)}>UPI, cards, net banking and wallets, securely through Razorpay.</span>
                         </span>
                       </label>
                     </li>
                   ) : null}
                   {options?.codAvailable ? (
                     <li>
-                      <label className={cn("flex items-start gap-4 border bg-white px-4 py-4", codAllowedHere ? "cursor-pointer" : "cursor-not-allowed opacity-60", method === "cod" ? "border-foreground" : "border-border hover:border-foreground/60")}>
+                      <label className={cn("flex items-start gap-4 border bg-white rounded-[var(--pg-panel-radius,0px)] px-4 py-4", codAllowedHere ? "cursor-pointer" : "cursor-not-allowed opacity-60", method === "cod" ? "border-foreground" : "border-border hover:border-foreground/60")}>
                         <input type="radio" name="payment" className="mt-1 size-4 accent-[var(--primary)]" disabled={!codAllowedHere} checked={method === "cod"} onChange={() => setPref("cod")} />
                         <span className="flex-1">
-                          <span className="block text-[14px] font-medium">Cash on delivery</span>
-                          <span className={cn("block text-[12px]", MUTED)}>
+                          <span className="block text-[16px] font-medium">Cash on delivery</span>
+                          <span className={cn("block text-[14px]", MUTED)}>
                             {codAllowedHere ? `Pay when your order arrives${options.codFeeMinor ? ` (extra ${money(options.codFeeMinor)})` : ""}.` : codBlockedByMethod ? "Not available with this delivery option." : "Not available for this delivery area."}
                           </span>
                         </span>
                       </label>
                     </li>
                   ) : options?.codUnavailableReason ? (
-                    <li className={cn("border border-dashed border-border px-4 py-3 text-[12px]", MUTED)}>Cash on delivery: {options.codUnavailableReason}</li>
+                    <li className={cn("border border-dashed border-border px-4 py-3 text-[14px]", MUTED)}>Cash on delivery: {options.codUnavailableReason}</li>
                   ) : null}
                 </ul>
               )}
               {err("method") ? (
-                <p role="alert" className="text-[12px] text-destructive">
+                <p role="alert" className="text-[14px] text-destructive">
                   {err("method")}
                 </p>
               ) : null}
             </fieldset>
           </div>
 
-          <aside aria-label="Order summary" className="border border-border bg-white px-6 pb-8 pt-6 sm:px-8 sm:pt-[30px] lg:sticky lg:top-24">
-            <h2 className="text-[11px] font-normal uppercase tracking-[0.2em] text-[color:var(--sf-color-muted)]" style={{ fontFamily: "var(--sf-font-heading)" }}>
+          <aside aria-label="Order summary" className="border border-border bg-white rounded-[var(--pg-panel-radius,0px)] shadow-[var(--pg-panel-shadow,none)] px-6 pb-9 pt-7 sm:px-9 sm:pt-[30px] lg:sticky lg:top-24">
+            <h2 className="text-[13px] font-normal [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)] text-[color:var(--sf-color-muted)]" style={{ fontFamily: "var(--sf-font-heading)" }}>
               Order summary
             </h2>
             <ul className="mt-5 grid gap-4">
               {lines.map((line) => {
                 const img = publicImageUrl(line.imagePath);
                 return (
-                  <li key={line.key} className="flex gap-3 text-[13px]">
+                  <li key={line.key} className="flex gap-3 text-[15px]">
                     <span className="relative block aspect-[3/4] w-14 shrink-0 overflow-hidden bg-secondary">
                       {img ? <Image src={img} alt="" fill sizes="56px" className="object-cover" /> : null}
-                      <span className="absolute right-0 top-0 bg-foreground px-1.5 text-[10px] text-background">{line.quantity}</span>
+                      <span className="absolute right-0 top-0 bg-foreground px-1.5 text-[12px] text-background">{line.quantity}</span>
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">{line.name}</span>
-                      {line.variantTitle ? <span className={cn("block text-[12px]", MUTED)}>{line.variantTitle}</span> : null}
+                      {line.variantTitle ? <span className={cn("block text-[14px]", MUTED)}>{line.variantTitle}</span> : null}
                     </span>
                     <span className="tabular-nums">{money(line.unitPriceMinor * line.quantity)}</span>
                   </li>
@@ -579,7 +633,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
             <div className="mt-6 border-t border-border pt-6">
               <DiscountBox applied={discount} error={discountError} checking={discountChecking} onApply={(code) => void applyDiscount(code)} onRemove={() => { setDiscount(null); setDiscountError(null); }} money={money} />
             </div>
-            <dl className="mt-6 grid gap-[13px] border-t border-border pt-6 text-[14px]">
+            <dl className="mt-6 grid gap-[13px] border-t border-border pt-6 text-[16px]">
               <Row label="Subtotal" value={money(quote?.subtotalMinor ?? subtotal)} />
               {discount ? <Row label={`Discount (${discount.code})`} value={`- ${money(quote?.discountMinor ?? discount.discountMinor)}`} /> : null}
               <Row label="Shipping" value={quote ? (quote.shippingMinor === 0 && chosen ? "Free" : money(quote.shippingMinor)) : chosen ? (chosen.chargeMinor === 0 ? "Free" : money(chosen.chargeMinor)) : "Enter address"} />
@@ -594,7 +648,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
             <dl className="mt-6">
               <Row strong label="Total" value={quote ? money(quote.totalMinor) : money(Math.max(0, subtotal - (discount?.discountMinor ?? 0)))} />
             </dl>
-            {!quote ? <p className={cn("mt-3 text-[11px]", MUTED)}>The final total, with delivery and GST, appears once your address and payment method are chosen.</p> : null}
+            {!quote ? <p className={cn("mt-3 text-[13px]", MUTED)}>The final total, with delivery and GST, appears once your address and payment method are chosen.</p> : null}
 
             {quoteError && !issues.length ? (
               <div className="mt-5">
@@ -602,7 +656,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
               </div>
             ) : null}
             {issues.length ? (
-              <ul className="mt-5 grid gap-2 border border-destructive/40 bg-destructive/5 px-4 py-3 text-[12px] text-destructive" role="alert">
+              <ul className="mt-5 grid gap-2 border border-destructive/40 bg-destructive/5 px-4 py-3 text-[14px] text-destructive" role="alert">
                 {issues.map((i) => (
                   <li key={`${i.productSlug}:${i.variantId}:${i.code}`}>{(ISSUE_TEXT[i.code] ?? (() => "An item needs attention."))(nameOf(i.productSlug), i)}</li>
                 ))}
@@ -625,7 +679,7 @@ export function CheckoutPageSection({ context, sectionId }: SectionProps) {
             <button type="submit" disabled={submitting || deliverableBlock || (!!options && !options.razorpayAvailable && !codAllowedHere)} className={cn(PRIMARY_BUTTON, "mt-6")}>
               {submitting ? "Placing your order…" : method === "cod" ? "Place order" : "Pay now"}
             </button>
-            <p className={cn("mt-3 text-center text-[11px]", MUTED)}>Prices are confirmed by the store when you place the order.</p>
+            <p className={cn("mt-3 text-center text-[13px]", MUTED)}>Prices are confirmed by the store when you place the order.</p>
           </aside>
         </form>
       )}

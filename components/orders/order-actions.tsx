@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Ban, PackageCheck, Truck } from "lucide-react";
-import { bookShipmentAction, cancelOrderAction, changeOrderStatusAction, collectCodAction } from "@/app/(dashboard)/dashboard/orders/actions";
+import { bookShipmentAction, cancelOrderAction, changeOrderStatusAction, collectCodAction, recordShipmentAction } from "@/app/(dashboard)/dashboard/orders/actions";
 import { ActionButton, ActionDialog } from "@/components/shared/action-dialog";
 import { FormField } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
@@ -32,11 +32,12 @@ const CARRIERS = [
 export function OrderActions({ orderId, status, paymentMethod, paymentStatus, fulfillmentStatus, nextStatuses, canBookShipment }: Props) {
   const moves = nextStatuses.filter((s) => s !== "cancelled");
   const canCancel = nextStatuses.includes("cancelled");
-  const [dialog, setDialog] = useState<"status" | "cancel" | "ship" | null>(null);
+  const [dialog, setDialog] = useState<"status" | "cancel" | "ship" | "manual" | null>(null);
   const [next, setNext] = useState(moves[0] ?? "");
   const [note, setNote] = useState("");
   const [reason, setReason] = useState("");
   const [ship, setShip] = useState({ providerCode: "", weight: "", length: "", breadth: "", height: "" });
+  const [manual, setManual] = useState({ courierName: "", trackingNumber: "", trackingUrl: "", estimatedDelivery: "" });
 
   const canCollect = paymentMethod === "cod" && paymentStatus === "pending_collection" && !["cancelled", "failed", "pending_payment"].includes(status);
   const shippable = canBookShipment && ["confirmed", "processing", "ready_to_ship"].includes(status) && fulfillmentStatus !== "fulfilled";
@@ -51,6 +52,11 @@ export function OrderActions({ orderId, status, paymentMethod, paymentStatus, fu
       {shippable ? (
         <Button type="button" onClick={() => setDialog("ship")}>
           <Truck aria-hidden /> Book shipment
+        </Button>
+      ) : null}
+      {shippable ? (
+        <Button type="button" variant="outline" onClick={() => setDialog("manual")}>
+          <Truck aria-hidden /> Add courier &amp; tracking number
         </Button>
       ) : null}
       {moves.length ? (
@@ -68,6 +74,29 @@ export function OrderActions({ orderId, status, paymentMethod, paymentStatus, fu
           <Ban aria-hidden /> Cancel order
         </Button>
       ) : null}
+
+      <ActionDialog
+        open={dialog === "manual"}
+        onOpenChange={close}
+        title="Add courier and tracking number"
+        description="For parcels you send with your own courier. The customer sees the provider, tracking number and link in their account straight away."
+        submitLabel="Save shipment"
+        success="Shipment recorded"
+        onSubmit={() => recordShipmentAction(orderId, { courierName: manual.courierName, trackingNumber: manual.trackingNumber, trackingUrl: manual.trackingUrl || undefined, estimatedDelivery: manual.estimatedDelivery || undefined })}
+      >
+        <FormField id="ms-courier" label="Shipping provider" required>
+          <Input id="ms-courier" maxLength={60} placeholder="India Post, DTDC…" value={manual.courierName} onChange={(e) => setManual({ ...manual, courierName: e.target.value })} />
+        </FormField>
+        <FormField id="ms-awb" label="Tracking number" required>
+          <Input id="ms-awb" maxLength={60} value={manual.trackingNumber} onChange={(e) => setManual({ ...manual, trackingNumber: e.target.value })} />
+        </FormField>
+        <FormField id="ms-url" label="Tracking link" optional hint="Starts with https://">
+          <Input id="ms-url" inputMode="url" maxLength={500} value={manual.trackingUrl} onChange={(e) => setManual({ ...manual, trackingUrl: e.target.value })} />
+        </FormField>
+        <FormField id="ms-eta" label="Expected delivery date" optional>
+          <Input id="ms-eta" type="date" value={manual.estimatedDelivery} onChange={(e) => setManual({ ...manual, estimatedDelivery: e.target.value })} />
+        </FormField>
+      </ActionDialog>
 
       <ActionDialog open={dialog === "status"} onOpenChange={close} title="Update order status" description="Only the next steps this order can take are listed." submitLabel="Update status" success="Order updated" onSubmit={() => changeOrderStatusAction(orderId, { status: next, note })}>
         <FormField id="os-status" label="New status" required>

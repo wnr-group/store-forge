@@ -11,6 +11,7 @@ import { useOptionalCart } from "./cart-provider";
 import { CartRecovery } from "./cart-recovery";
 import { CheckoutButton } from "./cart-drawer";
 import { QtyStepper } from "./qty-stepper";
+import { pageStyle, TITLE, TITLE_STYLE } from "../checkout/checkout-ui";
 
 const DISPLAY = { fontFamily: "var(--sf-font-heading)", fontWeight: "var(--sf-font-heading-weight, 500)" } as const;
 const MUTED = "text-[color:var(--sf-color-muted)]";
@@ -50,8 +51,8 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
   const currency = cart.currency;
 
   return (
-    <section className={cn(SHELL, "pb-16 pt-8 md:pb-24 md:pt-[50px]")} {...sfProps}>
-      <nav aria-label="Breadcrumb" className={cn("text-[11px] uppercase tracking-[0.16em]", MUTED)}>
+    <section className={cn(SHELL, "pb-16 pt-8 md:pb-24 md:pt-[50px]")} style={pageStyle(context.theme)} {...sfProps}>
+      <nav aria-label="Breadcrumb" className={cn("text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.16em)]", MUTED)}>
         <ol className="flex items-center gap-2">
           <li>
             <Link href="/" className="transition-colors hover:text-foreground">
@@ -66,14 +67,14 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
           </li>
         </ol>
       </nav>
-      <h1 className="mt-6 border-b border-border pb-8 text-[2.5rem] leading-[1.05] tracking-[-0.01em] text-foreground md:mt-[30px] md:pb-10 md:text-[3.5rem]" style={DISPLAY}>
+      <h1 className={TITLE} style={TITLE_STYLE}>
         Your bag
       </h1>
 
       {recovery}
 
       {notice ? (
-        <p role="status" className="mt-6 border border-border bg-white px-4 py-3 text-[13px] text-foreground">
+        <p role="status" className="mt-6 border border-border bg-white rounded-[var(--pg-panel-radius,0px)] shadow-[var(--pg-panel-shadow,none)] px-4 py-3 text-[15px] text-foreground">
           {notice}
         </p>
       ) : null}
@@ -88,11 +89,11 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
           <p className="text-[1.75rem] leading-tight md:text-[2.25rem]" style={DISPLAY}>
             Your bag is empty
           </p>
-          <p className={cn("max-w-md text-[15px] leading-7", MUTED)}>Pieces you add appear here, saved in this browser for this store.</p>
-          <Link href="/products" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-[var(--primary-hover,var(--primary))]">
+          <p className={cn("max-w-md text-[17px] leading-7", MUTED)}>Pieces you add appear here, saved in this browser for this store.</p>
+          <Link href="/products" className="inline-flex h-12 items-center rounded-[var(--pg-btn-radius,9999px)] bg-primary px-7 text-[16px] font-medium text-primary-foreground transition-colors hover:bg-[var(--primary-hover,var(--primary))]">
             Continue shopping
           </Link>
-          <Link href="/orders" className="text-[12px] font-medium uppercase tracking-[0.16em] underline underline-offset-4 decoration-border hover:decoration-foreground">
+          <Link href="/orders" className="text-[14px] font-medium [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.16em)] underline underline-offset-4 decoration-border hover:decoration-foreground">
             Track an order
           </Link>
         </div>
@@ -113,13 +114,13 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
                         <Link href={href} className="text-[1.125rem] leading-[1.3] hover:underline md:text-[1.22rem]" style={DISPLAY}>
                           {line.name}
                         </Link>
-                        <p className="shrink-0 text-[15px] tabular-nums">{formatBagPrice(line.unitPriceMinor * line.quantity, currency)}</p>
+                        <p className="shrink-0 text-[17px] tabular-nums">{formatBagPrice(line.unitPriceMinor * line.quantity, currency)}</p>
                       </div>
-                      {line.variantTitle ? <p className={cn("mt-2 text-[13px]", MUTED)}>{line.variantTitle}</p> : null}
-                      {line.quantity > 1 ? <p className={cn("mt-1 text-[12px]", MUTED)}>{formatBagPrice(line.unitPriceMinor, currency)} each</p> : null}
+                      {line.variantTitle ? <p className={cn("mt-2 text-[15px]", MUTED)}>{line.variantTitle}</p> : null}
+                      {line.quantity > 1 ? <p className={cn("mt-1 text-[14px]", MUTED)}>{formatBagPrice(line.unitPriceMinor, currency)} each</p> : null}
                       <div className="mt-auto flex items-center gap-6 pt-5">
                         <QtyStepper value={line.quantity} onChange={(n) => cart.setQuantity(line.key, n)} label={line.name} />
-                        <button type="button" onClick={() => cart.remove(line.key)} aria-label={`Remove ${line.name}`} className={cn("text-[11px] uppercase tracking-[0.14em] transition-colors hover:text-foreground hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary", MUTED)}>
+                        <button type="button" onClick={() => cart.remove(line.key)} aria-label={`Remove ${line.name}`} className={cn("text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.14em)] transition-colors hover:text-foreground hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary", MUTED)}>
                           Remove
                         </button>
                       </div>
@@ -128,19 +129,19 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
                 );
               })}
             </ul>
-            <Link href="/products" className="mt-6 inline-block text-[12px] font-medium uppercase tracking-[0.16em] text-foreground underline underline-offset-4 decoration-border transition-colors hover:decoration-foreground">
+            <Link href="/products" className="mt-6 inline-block text-[14px] font-medium [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.16em)] text-foreground underline underline-offset-4 decoration-border transition-colors hover:decoration-foreground">
               Continue shopping
             </Link>
-            <Link href="/orders" className="mt-6 ml-6 inline-block text-[12px] font-medium uppercase tracking-[0.16em] text-[color:var(--sf-color-muted)] underline underline-offset-4 decoration-border transition-colors hover:text-foreground hover:decoration-foreground">
+            <Link href="/orders" className="mt-6 ml-6 inline-block text-[14px] font-medium [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.16em)] text-[color:var(--sf-color-muted)] underline underline-offset-4 decoration-border transition-colors hover:text-foreground hover:decoration-foreground">
               Your orders
             </Link>
           </div>
 
-          <aside aria-label="Order summary" className="border border-border bg-white px-6 pb-8 pt-6 sm:px-8 sm:pb-8 sm:pt-[30px]">
-            <h2 className="text-[11px] font-normal uppercase tracking-[0.2em] text-[color:var(--sf-color-muted)]" style={{ fontFamily: "var(--sf-font-heading)" }}>
+          <aside aria-label="Order summary" className="border border-border bg-white rounded-[var(--pg-panel-radius,0px)] shadow-[var(--pg-panel-shadow,none)] px-6 pb-9 pt-7 sm:px-9 sm:pb-8 sm:pt-[30px]">
+            <h2 className="text-[13px] font-normal [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)] text-[color:var(--sf-color-muted)]" style={{ fontFamily: "var(--sf-font-heading)" }}>
               Order summary
             </h2>
-            <dl className="mt-[21px] grid gap-[13px] text-[14px]">
+            <dl className="mt-[21px] grid gap-[13px] text-[16px]">
               <div className="flex justify-between gap-4">
                 <dt className={MUTED}>Subtotal</dt>
                 <dd className="tabular-nums">{formatBagPrice(cart.subtotalMinor, currency)}</dd>
@@ -156,12 +157,12 @@ export function CartPageSection({ context, sectionId }: SectionProps) {
             </dl>
             <div className="mt-6 border-t border-border pt-6">
               <div className="flex items-center justify-between gap-4">
-                <span className={cn("text-[11px] font-medium uppercase tracking-[0.18em]", MUTED)}>Estimated total</span>
+                <span className={cn("text-[13px] font-medium [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.18em)]", MUTED)}>Estimated total</span>
                 <span className="text-[1.14rem] leading-none tabular-nums">
                   {formatBagPrice(cart.subtotalMinor, currency)}
                 </span>
               </div>
-              <p className={cn("mt-[11px] text-[11px]", MUTED)}>Delivery, GST and any payment charges are added at checkout.</p>
+              <p className={cn("mt-[11px] text-[13px]", MUTED)}>Delivery, GST and any payment charges are added at checkout.</p>
             </div>
             <CheckoutButton className="mt-[23px]" />
           </aside>

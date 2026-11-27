@@ -29,6 +29,7 @@ import { CartPageSection } from "@/components/storefront/cart/cart-page";
 import { WishlistPageSection } from "@/components/storefront/wishlist/wishlist-page";
 import { CheckoutPageSection } from "@/components/storefront/checkout/checkout-page";
 import { OrderPageSection, OrdersListSection } from "@/components/storefront/checkout/order-page";
+import { AccountSection } from "@/components/storefront/account/account-section";
 
 export const SECTION_COMPONENTS: Record<
   string,
@@ -60,6 +61,8 @@ export const SECTION_COMPONENTS: Record<
   checkout: CheckoutPageSection,
   order: OrderPageSection,
   orders: OrdersListSection,
+  /** The shopper's account area (sign in, orders, tracking, addresses). Only the generated account document uses it; it is not an editor section. */
+  account: AccountSection,
 };
 
 export function renderSectionComponent(

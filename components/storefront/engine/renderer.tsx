@@ -1,6 +1,5 @@
 "use client";
 
-import { StoreAccessLink } from "@/components/storefront/store-access-link";
 import React from "react";
 import Image from "next/image";
 import { Store } from "lucide-react";
@@ -191,7 +190,6 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
                 )}
                 <span className="truncate text-sm font-semibold tracking-tight">{store.name}</span>
               </div>
-              <StoreAccessLink className="shrink-0 text-right text-sm text-muted-foreground hover:text-foreground hover:underline sm:w-24" />
             </div>
           </header>
         ) : (
@@ -206,7 +204,6 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
                 </span>
               )}
               <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{classicHeading}</h1>
-              <StoreAccessLink className="shrink-0 text-sm text-muted-foreground hover:text-foreground hover:underline" />
             </div>
           </header>
         )}
@@ -239,7 +236,7 @@ export function TemplateRenderer({ document, context, mode = "public" }: Templat
             {store.name} · Powered by StoreForge
           </footer>
         )}
-        {cartChrome ? <CartChrome /> : null}
+        {cartChrome ? <CartChrome theme={enrichedContext.theme} /> : null}
       </div>
     </StorefrontContext.Provider>
   );

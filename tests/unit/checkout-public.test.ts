@@ -3,12 +3,24 @@ import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * The storefront checkout server actions against a local HTTP server standing in for the StoreForge API. They are anonymous:
- * no session is read, the order token and the idempotency key travel as headers, and bad input never reaches the API.
+ * The storefront checkout server actions against a local HTTP server standing in for the StoreForge API. Browsing, pricing and the
+ * order-token reads are anonymous (no owner/staff session is ever read); placing an order sends the shopper's own account session
+ * from its HttpOnly cookie. The order token and the idempotency key travel as headers, and bad input never reaches the API.
  */
 
+const SHOPPER = "S".repeat(43);
 const cookiesRead = vi.fn();
-vi.mock("next/headers", () => ({ cookies: async () => (cookiesRead(), { getAll: () => [] }) }));
+const shopperCookie = vi.fn<() => string | undefined>(() => SHOPPER);
+vi.mock("next/headers", () => ({
+  cookies: async () => (
+    cookiesRead(),
+    {
+      getAll: () => [],
+      get: (name: string) => (name === "sf_cust_acme_store" && shopperCookie() ? { name, value: shopperCookie()! } : undefined),
+      delete: vi.fn(),
+    }
+  ),
+}));
 
 type Seen = { method?: string; url?: string; headers: IncomingMessage["headers"]; body: string };
 let seen: Seen[] = [];
@@ -33,6 +45,7 @@ afterAll(() => new Promise<void>((r) => server.close(() => r())));
 beforeEach(() => {
   seen = [];
   cookiesRead.mockClear();
+  shopperCookie.mockImplementation(() => SHOPPER);
   reply = { status: 200, body: { success: true, data: {} } };
 });
 
@@ -50,7 +63,7 @@ const order = (over: Record<string, unknown> = {}) => ({
 });
 
 describe("placeOrderAction", () => {
-  it("sends the cart with the idempotency key, anonymously, and never the browser's idea of a total", async () => {
+  it("sends the cart with the idempotency key and the shopper's session, never an owner token and never the browser's idea of a total", async () => {
     reply = { status: 201, body: { success: true, data: { orderNumber: 1001, accessToken: "tok".repeat(12) } } };
     const { placeOrderAction } = await import("@/app/s/[slug]/checkout/actions");
     const result = await placeOrderAction(order({ shippingMethodId: VARIANT }));
@@ -60,7 +73,7 @@ describe("placeOrderAction", () => {
     expect(seen[0]!.url).toBe("/api/v1/public/stores/acme-store/orders");
     expect(seen[0]!.headers["idempotency-key"]).toBe("key-12345678");
     expect(seen[0]!.headers.authorization).toBeUndefined();
-    expect(cookiesRead).not.toHaveBeenCalled();
+    expect(seen[0]!.headers["x-customer-session"]).toBe(SHOPPER);
     const body = JSON.parse(seen[0]!.body) as Record<string, unknown>;
     expect(body).not.toHaveProperty("totalMinor");
     expect(body).not.toHaveProperty("idempotencyKey");
@@ -104,6 +117,24 @@ describe("placeOrderAction", () => {
     const result = await placeOrderAction(order());
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.details).toEqual({ issues: [{ code: "OUT_OF_STOCK", productSlug: "mug", variantId: null, available: 1 }] });
+  });
+});
+
+describe("placing an order needs a signed-in shopper", () => {
+  it("asks to sign in, without calling the API, when there is no shopper session", async () => {
+    shopperCookie.mockImplementation(() => undefined);
+    const { placeOrderAction } = await import("@/app/s/[slug]/checkout/actions");
+    const result = await placeOrderAction(order());
+    expect(result).toMatchObject({ ok: false, code: "UNAUTHENTICATED" });
+    expect(seen).toHaveLength(0);
+  });
+
+  it("asks to sign in again when the API no longer accepts the session", async () => {
+    reply = { status: 401, body: { success: false, message: "Sign in to continue.", error: { code: "CUSTOMER_LOGIN_REQUIRED" } } };
+    const { placeOrderAction } = await import("@/app/s/[slug]/checkout/actions");
+    const result = await placeOrderAction(order());
+    expect(result).toMatchObject({ ok: false, code: "UNAUTHENTICATED" });
+    expect(seen).toHaveLength(1);
   });
 });
 

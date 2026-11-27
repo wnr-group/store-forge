@@ -150,8 +150,9 @@ export type PlaceOrderInput = {
   cartKey?: string;
 };
 
-export const placeOrderApi = async (slug: string, input: PlaceOrderInput, idempotencyKey: string) =>
-  (await apiRequest<PlacedOrderApi>(`${base(slug)}/orders`, { method: "POST", json: input, anonymous: true, headers: { "idempotency-key": idempotencyKey }, timeoutMs: 30_000 })).data;
+/** Placing an order needs a signed-in shopper: `customerToken` is their account session for THIS store (the API checks it again). */
+export const placeOrderApi = async (slug: string, input: PlaceOrderInput, idempotencyKey: string, customerToken: string) =>
+  (await apiRequest<PlacedOrderApi>(`${base(slug)}/orders`, { method: "POST", json: input, anonymous: true, headers: { "idempotency-key": idempotencyKey, "x-customer-session": customerToken }, timeoutMs: 30_000 })).data;
 
 export const getPublicOrderApi = async (slug: string, orderNumber: number, token: string) =>
   (await apiRequest<PublicOrderApi>(`${base(slug)}/orders/${orderNumber}`, { anonymous: true, headers: tokenHeader(token) })).data;

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ArrowLeft } from "lucide-react";
 import { FULFILLMENT_LABELS, labelFor, METHOD_LABELS, OrderStatusBadge, PaymentStatusBadge, ORDER_STATUS_LABELS, ShipmentStatusBadge } from "@/components/orders/order-labels";
+import { ManualShipmentActions } from "@/components/orders/manual-shipment-actions";
 import { OrderActions } from "@/components/orders/order-actions";
 import { TaxBreakdownTable } from "@/components/orders/tax-breakdown-table";
 import { PageHeader } from "@/components/shared/page-header";
@@ -120,7 +121,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                       </Link>
                       <span className="block text-xs text-muted-foreground">Booked {formatDateTime(new Date(s.createdAt), timezone)}</span>
                     </div>
-                    <ShipmentStatusBadge status={s.status} />
+                    <div className="flex items-center gap-2">
+                      {canManage && s.providerCode === "manual" ? <ManualShipmentActions orderId={order.id} shipmentId={s.id} status={s.status} /> : null}
+                      <ShipmentStatusBadge status={s.status} />
+                    </div>
                   </li>
                 ))}
               </ul>

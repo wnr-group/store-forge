@@ -1,6 +1,6 @@
 import "server-only";
 import { cancelOrderApi, collectCodApi, getOrderApi, listOrdersApi, updateOrderStatusApi, type OrderDetailApi, type OrderListApiQuery, type OrderSummaryApi } from "@/lib/api/endpoints/orders-api";
-import { createShipmentApi, listOrderShipmentsApi, type ShipmentApi } from "@/lib/api/endpoints/shipping-api";
+import { createShipmentApi, listOrderShipmentsApi, recordManualShipmentApi, updateManualShipmentApi, type ShipmentApi } from "@/lib/api/endpoints/shipping-api";
 import { AppError } from "@/lib/errors";
 import { withTenant } from "@/lib/tenant/with-tenant";
 
@@ -35,4 +35,6 @@ export async function getOrder(id: string): Promise<{ order: OrderDetailApi; shi
 export const changeOrderStatus = (id: string, input: { status: string; note?: string }) => withTenant("orders:manage", (org) => updateOrderStatusApi(org, id, input));
 export const cancelOrder = (id: string, reason: string) => withTenant("orders:manage", (org) => cancelOrderApi(org, id, { reason }));
 export const collectCod = (id: string) => withTenant("orders:manage", (org) => collectCodApi(org, id));
+export const recordManualShipment = (orderId: string, input: Parameters<typeof recordManualShipmentApi>[2]) => withTenant("orders:manage", (org) => recordManualShipmentApi(org, orderId, input));
+export const updateManualShipment = (shipmentId: string, input: Parameters<typeof updateManualShipmentApi>[2]) => withTenant("orders:manage", (org) => updateManualShipmentApi(org, shipmentId, input));
 export const bookShipment = (orderId: string, input: Parameters<typeof createShipmentApi>[2]) => withTenant("orders:manage", (org) => createShipmentApi(org, orderId, input));

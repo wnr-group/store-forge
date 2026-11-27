@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
+import { AccountLink } from "@/components/storefront/account-link";
 import { useOptionalWishlist } from "@/components/storefront/wishlist/wishlist-provider";
-import { useSignedIn } from "@/lib/auth/use-signed-in";
 import { useOptionalCart } from "@/components/storefront/cart/cart-provider";
-import { StoreAccessLink } from "@/components/storefront/store-access-link";
 import { cn } from "@/lib/utils";
 import { renderBlockComponent } from "../../blocks";
 import { resolveImage } from "../../ui";
@@ -34,7 +33,6 @@ export function BoutiqueHeader({ node, context, sectionId }: SectionProps) {
   const [open, setOpen] = useState(false);
   const cart = useOptionalCart();
   const wishlist = useOptionalWishlist();
-  const signedIn = useSignedIn() === true;
 
   useEffect(() => {
     if (!open) return;
@@ -75,9 +73,7 @@ export function BoutiqueHeader({ node, context, sectionId }: SectionProps) {
           <Link href={searchHref} aria-label="Search the store" className={iconBtn}>
             <Search className="size-[19px]" strokeWidth={1.4} aria-hidden />
           </Link>
-          <Link href={signedIn ? "/dashboard" : "/login"} prefetch={false} aria-label={signedIn ? "Dashboard" : "Store login"} className={cn(iconBtn, "hidden md:inline-flex")}>
-            <User className="size-[19px]" strokeWidth={1.4} aria-hidden />
-          </Link>
+          <AccountLink className={iconBtn} />
           {wishlist ? (
             <Link href="/wishlist" prefetch={false} aria-label={wishlist.ready && wishlist.count > 0 ? `Wishlist, ${wishlist.count} ${wishlist.count === 1 ? "item" : "items"}` : "Wishlist"} className={cn(iconBtn, "relative")}>
               <Heart className="size-[19px]" strokeWidth={1.4} aria-hidden />
@@ -110,7 +106,6 @@ export function BoutiqueHeader({ node, context, sectionId }: SectionProps) {
         <nav id="storefront-menu" aria-label="Main" className="border-t border-border bg-background lg:hidden" onClick={() => setOpen(false)}>
           <div className={cn(SHELL, "flex flex-col py-2 [&_a]:block [&_a]:border-b [&_a]:border-border [&_a]:py-4 [&_a]:text-[13px] [&_a]:font-medium [&_a]:uppercase [&_a]:tracking-[0.16em] [&_a]:text-foreground [&_a]:no-underline")}>
             {menu}
-            <StoreAccessLink className="py-4 text-[13px] font-medium uppercase tracking-[0.16em] text-foreground/70" />
           </div>
         </nav>
       ) : null}

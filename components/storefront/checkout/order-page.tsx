@@ -10,7 +10,7 @@ import { purchaseEventId } from "@/lib/tracking/events";
 import { markPurchaseTracked, wasPurchaseTracked } from "@/lib/tracking/purchase-guard";
 import { cn } from "@/lib/utils";
 import type { SectionProps } from "../engine/looks";
-import { formatDays, labelOf, MUTED, Notice, PageTitle, PAYMENT_LABELS, PRIMARY_BUTTON, Row, SECONDARY_BUTTON, SHELL, STATUS_LABELS, TaxBreakdown } from "./checkout-ui";
+import { formatDays, labelOf, MUTED, Notice, PageTitle, PAYMENT_LABELS, PRIMARY_BUTTON, Row, SECONDARY_BUTTON, SHELL, STATUS_LABELS, TaxBreakdown, pageStyle } from "./checkout-ui";
 import { useTracker } from "../tracking/tracking-provider";
 import { payWithRazorpay } from "./razorpay";
 
@@ -115,7 +115,7 @@ export function OrderPageSection({ context, sectionId }: SectionProps) {
   };
 
   return (
-    <section className={cn(SHELL, "pb-16 pt-8 md:pb-24 md:pt-[50px]")} {...sfProps}>
+    <section className={cn(SHELL, "pb-16 pt-8 md:pb-24 md:pt-[50px]")} style={pageStyle(context.theme)} {...sfProps}>
       <PageTitle crumbs={[{ label: "Home", href: "/" }, { label: "Your orders", href: "/orders" }, { label: `Order #${orderNumber}` }]} title={`Order #${Number.isInteger(orderNumber) ? orderNumber : ""}`} />
       <div className="grid gap-8 pt-10 md:pt-12">
         {(message ?? flash) ? <Notice tone={(message ?? flash)!.tone}>{(message ?? flash)!.text}</Notice> : null}
@@ -123,9 +123,9 @@ export function OrderPageSection({ context, sectionId }: SectionProps) {
           <div className="h-64 animate-pulse bg-secondary/60" aria-busy="true" aria-label="Loading your order" />
         ) : load.state === "missing" ? (
           <div className="grid gap-4">
-            <p className="text-[15px]">We could not find this order in this browser.</p>
-            <p className={cn("max-w-md text-[14px] leading-7", MUTED)}>Orders can only be opened on the device they were placed from. If you need help with an order, contact the store with your order number.</p>
-            <Link href="/orders" className="text-[12px] font-medium uppercase tracking-[0.16em] underline underline-offset-4">
+            <p className="text-[17px]">We could not find this order in this browser.</p>
+            <p className={cn("max-w-md text-[16px] leading-7", MUTED)}>Orders can only be opened on the device they were placed from. If you need help with an order, contact the store with your order number.</p>
+            <Link href="/orders" className="text-[14px] font-medium [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.16em)] underline underline-offset-4">
               Your orders
             </Link>
           </div>
@@ -148,15 +148,24 @@ function OrderBody({ order, busy, onPay, onCancel, placed }: { order: PublicOrde
     <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_25.25rem] lg:gap-16">
       <div className="grid gap-10">
         {placed && order.status !== "cancelled" ? <Notice tone="success">{order.paymentMethod === "cod" ? "Thank you! Your order is placed. Pay in cash when it arrives." : order.status === "pending_payment" ? "Your order is placed. Complete the payment to confirm it." : "Thank you! Your payment was received and your order is confirmed."}</Notice> : null}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px]">
-          <span className="border border-foreground px-3 py-1 text-[11px] uppercase tracking-[0.14em]">{labelOf(STATUS_LABELS, order.status)}</span>
+        {placed ? (
+          <p className={cn("text-[15px]", MUTED)}>
+            Follow every step of its delivery in{" "}
+            <Link href={`/account/orders/${order.orderNumber}`} className="text-foreground underline underline-offset-4">
+              your account
+            </Link>
+            .
+          </p>
+        ) : null}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px]">
+          <span className="border border-foreground px-3 py-1 text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.14em)]">{labelOf(STATUS_LABELS, order.status)}</span>
           <span className={MUTED}>{labelOf(PAYMENT_LABELS, order.paymentStatus)}</span>
           <span className={MUTED}>Placed {dateTime(order.placedAt)}</span>
         </div>
 
         {canPay ? (
-          <div className="grid gap-3 border border-border bg-white p-5 sm:max-w-md">
-            <p className="text-[14px]">This order is waiting for payment{order.reservationExpiresAt ? `. Your items are held until ${dateTime(order.reservationExpiresAt)}.` : "."}</p>
+          <div className="grid gap-3 border border-border bg-white rounded-[var(--pg-panel-radius,0px)] shadow-[var(--pg-panel-shadow,none)] p-5 sm:max-w-md">
+            <p className="text-[16px]">This order is waiting for payment{order.reservationExpiresAt ? `. Your items are held until ${dateTime(order.reservationExpiresAt)}.` : "."}</p>
             <button type="button" className={PRIMARY_BUTTON} onClick={onPay} disabled={busy !== null}>
               {busy === "pay" ? "Opening payment…" : `Pay ${money(order.totalMinor)}`}
             </button>
@@ -164,10 +173,10 @@ function OrderBody({ order, busy, onPay, onCancel, placed }: { order: PublicOrde
         ) : null}
 
         <div>
-          <h2 className={cn("text-[11px] uppercase tracking-[0.2em]", MUTED)}>Items</h2>
+          <h2 className={cn("text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)]", MUTED)}>Items</h2>
           <ul className="mt-4 border-b border-border">
             {order.items.map((i, idx) => (
-              <li key={`${i.name}-${idx}`} className="flex justify-between gap-4 border-t border-border py-4 text-[14px]">
+              <li key={`${i.name}-${idx}`} className="flex justify-between gap-4 border-t border-border py-4 text-[16px]">
                 <span>
                   {i.name} <span className={MUTED}>× {i.quantity}</span>
                 </span>
@@ -179,26 +188,26 @@ function OrderBody({ order, busy, onPay, onCancel, placed }: { order: PublicOrde
 
         {order.shipments.length ? (
           <div className="grid gap-6">
-            <h2 className={cn("text-[11px] uppercase tracking-[0.2em]", MUTED)}>Shipments</h2>
+            <h2 className={cn("text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)]", MUTED)}>Shipments</h2>
             {order.shipments.map((s, idx) => (
-              <div key={`${s.awb ?? "shipment"}-${idx}`} className="border border-border bg-white p-5 text-[14px]">
+              <div key={`${s.awb ?? "shipment"}-${idx}`} className="border border-border bg-white rounded-[var(--pg-panel-radius,0px)] shadow-[var(--pg-panel-shadow,none)] p-5 text-[16px]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-medium">{labelOf(STATUS_LABELS, s.status)}</span>
                   <span className={MUTED}>{[s.courierName, s.awb ? `AWB ${s.awb}` : null].filter(Boolean).join(" · ")}</span>
                 </div>
-                {s.estimatedDelivery ? <p className={cn("mt-1 text-[12px]", MUTED)}>Estimated delivery {dateTime(s.estimatedDelivery)}</p> : null}
-                <p className={cn("mt-1 text-[12px]", MUTED)}>{s.items.map((i) => `${i.name} × ${i.quantity}`).join(", ")}</p>
+                {s.estimatedDelivery ? <p className={cn("mt-1 text-[14px]", MUTED)}>Estimated delivery {dateTime(s.estimatedDelivery)}</p> : null}
+                <p className={cn("mt-1 text-[14px]", MUTED)}>{s.items.map((i) => `${i.name} × ${i.quantity}`).join(", ")}</p>
                 {s.trackingUrl ? (
-                  <a href={s.trackingUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-[12px] font-medium uppercase tracking-[0.14em] underline underline-offset-4">
+                  <a href={s.trackingUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-[14px] font-medium [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.14em)] underline underline-offset-4">
                     Track with the courier
                   </a>
                 ) : null}
                 {s.events.length ? (
                   <ol className="mt-4 grid gap-3 border-l border-border pl-4">
                     {s.events.map((e, i) => (
-                      <li key={i} className="text-[13px]">
+                      <li key={i} className="text-[15px]">
                         <p>{e.description || labelOf(STATUS_LABELS, e.status)}</p>
-                        <p className={cn("text-[11px]", MUTED)}>{[e.location, e.occurredAt ? dateTime(e.occurredAt) : null].filter(Boolean).join(" · ")}</p>
+                        <p className={cn("text-[13px]", MUTED)}>{[e.location, e.occurredAt ? dateTime(e.occurredAt) : null].filter(Boolean).join(" · ")}</p>
                       </li>
                     ))}
                   </ol>
@@ -208,8 +217,8 @@ function OrderBody({ order, busy, onPay, onCancel, placed }: { order: PublicOrde
           </div>
         ) : null}
 
-        <div className="grid gap-1 text-[14px]">
-          <h2 className={cn("text-[11px] uppercase tracking-[0.2em]", MUTED)}>Delivery address</h2>
+        <div className="grid gap-1 text-[16px]">
+          <h2 className={cn("text-[13px] [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)]", MUTED)}>Delivery address</h2>
           <p className="mt-3">{a.fullName}</p>
           <p>{[a.line1, a.line2].filter(Boolean).join(", ")}</p>
           <p>
@@ -220,9 +229,9 @@ function OrderBody({ order, busy, onPay, onCancel, placed }: { order: PublicOrde
         </div>
       </div>
 
-      <aside aria-label="Order summary" className="border border-border bg-white px-6 pb-8 pt-6 sm:px-8 sm:pt-[30px]">
-        <h2 className="text-[11px] font-normal uppercase tracking-[0.2em] text-[color:var(--sf-color-muted)]">Summary</h2>
-        <dl className="mt-5 grid gap-[13px] text-[14px]">
+      <aside aria-label="Order summary" className="border border-border bg-white rounded-[var(--pg-panel-radius,0px)] shadow-[var(--pg-panel-shadow,none)] px-6 pb-9 pt-7 sm:px-9 sm:pt-[30px]">
+        <h2 className="text-[13px] font-normal [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.2em)] text-[color:var(--sf-color-muted)]">Summary</h2>
+        <dl className="mt-5 grid gap-[13px] text-[16px]">
           <Row label="Subtotal" value={money(order.subtotalMinor)} />
           {order.discountMinor > 0 ? <Row label="Discount" value={`- ${money(order.discountMinor)}`} /> : null}
           <Row label="Shipping" value={order.shippingMinor === 0 ? "Free" : money(order.shippingMinor)} />
@@ -235,13 +244,13 @@ function OrderBody({ order, busy, onPay, onCancel, placed }: { order: PublicOrde
         <dl className="mt-6">
           <Row strong label="Total" value={money(order.totalMinor)} />
         </dl>
-        <p className={cn("mt-3 text-[12px]", MUTED)}>{order.paymentMethod === "cod" ? "Cash on delivery" : "Paid online with Razorpay"}</p>
+        <p className={cn("mt-3 text-[14px]", MUTED)}>{order.paymentMethod === "cod" ? "Cash on delivery" : "Paid online with Razorpay"}</p>
         {canCancel ? (
           <button type="button" className={cn(SECONDARY_BUTTON, "mt-6")} onClick={onCancel} disabled={busy !== null}>
             {busy === "cancel" ? "Cancelling…" : "Cancel order"}
           </button>
         ) : order.status === "confirmed" && order.paymentMethod === "razorpay" ? (
-          <p className={cn("mt-6 text-[12px]", MUTED)}>A paid order is cancelled by the store, which will refund it. Contact the store with your order number.</p>
+          <p className={cn("mt-6 text-[14px]", MUTED)}>A paid order is cancelled by the store, which will refund it. Contact the store with your order number.</p>
         ) : null}
       </aside>
     </div>
@@ -266,16 +275,16 @@ export function OrdersListSection({ context, sectionId }: SectionProps) {
   }, [storeSlug, isPreview]);
 
   return (
-    <section className={cn(SHELL, "pb-16 pt-8 md:pb-24 md:pt-[50px]")} {...sfProps}>
+    <section className={cn(SHELL, "pb-16 pt-8 md:pb-24 md:pt-[50px]")} style={pageStyle(context.theme)} {...sfProps}>
       <PageTitle crumbs={[{ label: "Home", href: "/" }, { label: "Your orders" }]} title="Your orders" />
       <div className="pt-10 md:pt-12">
         {rows === null ? (
           <div className="h-40 animate-pulse bg-secondary/60" aria-busy="true" aria-label="Loading your orders" />
         ) : rows.length === 0 ? (
           <div className="grid gap-4">
-            <p className="text-[15px]">No orders from this browser yet.</p>
-            <p className={cn("max-w-md text-[14px] leading-7", MUTED)}>Orders you place here are listed on this device so you can track them.</p>
-            <Link href="/products" className="text-[12px] font-medium uppercase tracking-[0.16em] underline underline-offset-4">
+            <p className="text-[17px]">No orders from this browser yet.</p>
+            <p className={cn("max-w-md text-[16px] leading-7", MUTED)}>Orders you place here are listed on this device so you can track them.</p>
+            <Link href="/products" className="text-[14px] font-medium [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.16em)] underline underline-offset-4">
               Continue shopping
             </Link>
           </div>
@@ -283,7 +292,7 @@ export function OrdersListSection({ context, sectionId }: SectionProps) {
           <ul className="border-b border-border">
             {rows.map(({ ref, order }) => (
               <li key={ref.orderNumber} className="border-t border-border">
-                <Link href={`/orders/${ref.orderNumber}`} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-5 text-[14px] hover:bg-secondary/40">
+                <Link href={`/orders/${ref.orderNumber}`} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-5 text-[16px] hover:bg-secondary/40">
                   <span className="font-medium">Order #{ref.orderNumber}</span>
                   <span className={MUTED}>{order ? dateTime(order.placedAt) : dateTime(ref.placedAt)}</span>
                   <span>{order ? labelOf(STATUS_LABELS, order.status) : "Unavailable"}</span>

@@ -126,7 +126,7 @@ export type CarrierComparisonApi = {
   choice?: { candidate: unknown; strategy: string; fellBack: boolean; reason: string };
 };
 
-const j = (organizationId: string, method: "POST" | "PUT" | "DELETE", json?: unknown) => ({ method, json, organizationId });
+const j = (organizationId: string, method: "POST" | "PUT" | "PATCH" | "DELETE", json?: unknown) => ({ method, json, organizationId });
 
 // --- carriers ---
 export const listCarriersApi = async (org: string) => (await apiRequest<CarrierApi[]>("/shipping/carriers", { organizationId: org })).data;
@@ -172,6 +172,11 @@ export async function listShipmentsApi(org: string, query: { page: number; limit
 export const listOrderShipmentsApi = async (org: string, orderId: string) => (await apiRequest<ShipmentApi[]>(`/orders/${orderId}/shipments`, { organizationId: org })).data;
 export const createShipmentApi = async (org: string, orderId: string, input: { providerCode?: string; serviceCode?: string; weightGrams?: number; lengthCm?: number; breadthCm?: number; heightCm?: number }) =>
   (await apiRequest<ShipmentDetailApi>(`/orders/${orderId}/shipments`, { ...j(org, "POST", input), timeoutMs: 45_000 })).data;
+/** A parcel the store sent with its own courier (no carrier integration): provider name and tracking number typed by the owner. */
+export type ManualShipmentInput = { courierName: string; trackingNumber: string; trackingUrl?: string; estimatedDelivery?: string };
+export type ManualShipmentUpdate = Partial<ManualShipmentInput> & { status?: "picked_up" | "in_transit" | "out_for_delivery" | "delivered" | "returned" };
+export const recordManualShipmentApi = async (org: string, orderId: string, input: ManualShipmentInput) => (await apiRequest<ShipmentDetailApi>(`/orders/${orderId}/shipments/manual`, j(org, "POST", input))).data;
+export const updateManualShipmentApi = async (org: string, id: string, input: ManualShipmentUpdate) => (await apiRequest<ShipmentDetailApi>(`/shipments/${id}/manual`, j(org, "PATCH", input))).data;
 export const getShipmentApi = async (org: string, id: string) => (await apiRequest<ShipmentDetailApi>(`/shipments/${id}`, { organizationId: org })).data;
 export const retryShipmentApi = async (org: string, id: string) => (await apiRequest<ShipmentDetailApi>(`/shipments/${id}/retry`, { ...j(org, "POST"), timeoutMs: 45_000 })).data;
 export const cancelShipmentApi = async (org: string, id: string) => (await apiRequest<ShipmentDetailApi>(`/shipments/${id}/cancel`, { ...j(org, "POST"), timeoutMs: 45_000 })).data;

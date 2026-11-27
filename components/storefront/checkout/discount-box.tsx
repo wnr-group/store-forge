@@ -28,12 +28,12 @@ export function DiscountBox({
 
   if (applied) {
     return (
-      <div className="flex items-center justify-between gap-3 border border-border px-4 py-3 text-[13px]">
+      <div className="flex items-center justify-between gap-3 border border-border px-4 py-3 text-[15px]">
         <span>
           <span className="font-medium tracking-wide">{applied.code}</span>
-          <span className={cn("block text-[12px]", MUTED)}>Takes {money(applied.discountMinor)} off</span>
+          <span className={cn("block text-[14px]", MUTED)}>Takes {money(applied.discountMinor)} off</span>
         </span>
-        <button type="button" onClick={onRemove} className="text-[12px] underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+        <button type="button" onClick={onRemove} className="text-[14px] underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
           Remove
         </button>
       </div>
@@ -46,7 +46,7 @@ export function DiscountBox({
   };
   return (
     <div className="grid gap-1.5">
-      <label htmlFor="co-discount" className={cn("text-[11px] font-medium uppercase tracking-[0.14em]", MUTED)}>
+      <label htmlFor="co-discount" className={cn("text-[13px] font-medium [text-transform:var(--pg-label-case,uppercase)] tracking-[var(--pg-label-track,0.14em)]", MUTED)}>
         Discount code
       </label>
       <div className="flex gap-2">
@@ -75,7 +75,7 @@ export function DiscountBox({
         </button>
       </div>
       {error ? (
-        <p id="co-discount-error" role="alert" className="text-[12px] text-destructive">
+        <p id="co-discount-error" role="alert" className="text-[14px] text-destructive">
           {error}
         </p>
       ) : null}

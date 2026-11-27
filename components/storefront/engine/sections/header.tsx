@@ -1,6 +1,5 @@
 "use client";
 
-import { StoreAccessLink } from "@/components/storefront/store-access-link";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -78,7 +77,6 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
             <Link href={searchHref} aria-label="Search the store" className={iconBtn}>
               <Search className="size-[18px]" strokeWidth={1.25} aria-hidden />
             </Link>
-            <StoreAccessLink className={cn("hidden text-foreground/70 transition-colors duration-300 hover:text-foreground md:inline", label, focus)} />
             {/* Placeholder: checkout is not built yet, so the bag does nothing. */}
             <button type="button" aria-label="Shopping bag" className={cn(iconBtn, "md:-mr-2")}>
               <ShoppingBag className="size-[18px]" strokeWidth={1.25} aria-hidden />
@@ -95,7 +93,6 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
           <nav id="storefront-menu" aria-label="Main" className="border-t border-foreground/10 bg-background md:hidden" onClick={() => setOpen(false)}>
             <div className={cn(CONTAINER, "flex flex-col py-3 [&_a]:block [&_a]:border-b [&_a]:border-foreground/10 [&_a]:py-4 [&_a]:text-xs [&_a]:font-medium [&_a]:uppercase [&_a]:tracking-[0.24em] [&_a]:text-foreground [&_a]:no-underline")}>
               {menu}
-              <StoreAccessLink className="py-4 text-xs font-medium uppercase tracking-[0.24em] text-foreground/70" />
             </div>
           </nav>
         ) : null}
@@ -133,7 +130,6 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
             <Link href={searchHref} aria-label="Search the store" className={cn(roundBtn, "md:hidden")}>
               <Search className="size-5" aria-hidden />
             </Link>
-            <StoreAccessLink className={cn("hidden items-center rounded-full px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-primary/10 hover:text-primary lg:inline-flex", focus)} />
             {/* Placeholder: checkout is not built yet, so the bag does nothing. */}
             <button type="button" aria-label="Shopping bag" className={cn("inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-[var(--primary-hover,var(--primary))] md:px-5", focus)}>
               <ShoppingBag className="size-5" aria-hidden />
@@ -166,7 +162,6 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
           <nav id="storefront-menu" aria-label="Main" className="border-t border-border bg-background md:hidden" onClick={() => setOpen(false)}>
             <div className={cn(CONTAINER, "flex flex-col gap-1 py-3 [&_a]:block [&_a]:rounded-xl [&_a]:px-4 [&_a]:py-3 [&_a]:text-base [&_a]:font-semibold [&_a]:text-foreground [&_a]:no-underline [&_a:hover]:bg-primary/10")}>
               {menu}
-              <StoreAccessLink className="rounded-xl px-4 py-3 text-base font-semibold text-muted-foreground" />
             </div>
           </nav>
         ) : null}
@@ -210,7 +205,6 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
             <Link href={searchHref} aria-label="Search the store" className={iconBtn}>
               <Search className="size-5" strokeWidth={1.5} aria-hidden />
             </Link>
-            <StoreAccessLink className={cn("hidden rounded-full px-3 py-2 text-sm font-medium text-foreground/70 transition-colors duration-300 hover:text-foreground lg:inline-flex", focus)} />
             {/* Placeholder: checkout is not built yet, so the bag does nothing. */}
             <button type="button" aria-label="Shopping bag" className={cn(iconBtn, "-mr-3 lg:mr-0 lg:border lg:border-border lg:hover:border-accent/60")}>
               <ShoppingBag className="size-5" strokeWidth={1.5} aria-hidden />
@@ -222,7 +216,6 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
           <nav id="storefront-menu" aria-label="Main" className="border-t border-border bg-background lg:hidden" onClick={() => setOpen(false)}>
             <div className={cn(CONTAINER, "flex flex-col py-2 [&_a]:block [&_a]:border-b [&_a]:border-border [&_a]:py-4 [&_a]:text-lg [&_a]:font-medium [&_a]:text-foreground [&_a]:no-underline")}>
               {menu}
-              <StoreAccessLink className="py-4 text-lg font-medium text-foreground/70" />
             </div>
           </nav>
         ) : null}
@@ -256,7 +249,6 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
           <Link href={searchHref} aria-label="Search the store" className="inline-flex size-10 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-muted hover:text-foreground">
             <Search className="size-5" aria-hidden />
           </Link>
-          <StoreAccessLink className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground md:inline" />
           {blockOrder.length > 0 ? (
             <button type="button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="storefront-menu" onClick={() => setOpen((v) => !v)} className="inline-flex size-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted md:hidden">
               {open ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
@@ -269,7 +261,6 @@ export function HeaderSection({ node, context, sectionId }: HeaderSectionProps) 
         <nav id="storefront-menu" aria-label="Main" className="border-t border-border bg-background md:hidden" onClick={() => setOpen(false)}>
           <div className={cn(CONTAINER, "flex flex-col py-2 [&_a]:block [&_a]:border-b [&_a]:border-border/60 [&_a]:py-3.5 [&_a]:text-base [&_a]:text-foreground")}>
             {menu}
-            <StoreAccessLink className="py-3.5 text-base text-muted-foreground" />
           </div>
         </nav>
       ) : null}

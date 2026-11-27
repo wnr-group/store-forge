@@ -89,6 +89,11 @@ export function orderDocument(): TemplateDocument {
   return doc([["order", node("order", {})]]);
 }
 
+/** The shopper's account area (sign in, sign up, overview, orders, one order, addresses): one account section told which view to show. */
+export function accountDocument(): TemplateDocument {
+  return doc([["account", node("account", {})]]);
+}
+
 /** The orders this browser placed in this store. */
 export function ordersDocument(): TemplateDocument {
   return doc([["orders", node("orders", {})]]);
