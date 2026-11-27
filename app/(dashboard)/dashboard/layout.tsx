@@ -1,6 +1,7 @@
 import { brandProps, getPublicBranding } from "@/services/platform-settings.service";
 import Link from "next/link";
 import { ExternalLink, Settings } from "lucide-react";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { AppShell } from "@/components/dashboard/app-shell";
@@ -22,7 +23,8 @@ import { getMyEntitlements } from "@/services/billing.service";
 import { AppError } from "@/lib/errors";
 import { storefrontHost, storefrontUrl } from "@/lib/tenant/host";
 import { requireWorkspace } from "@/lib/tenant/context";
-import { getRequestStoreSlug } from "@/lib/tenant/request";
+import { hasStoreHost } from "@/lib/tenant/open-store";
+import { getRequestStoreSlug, isMainHostRequest } from "@/lib/tenant/request";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Server-side gate for every dashboard page: validated user, DB-verified
@@ -31,6 +33,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!canViewDashboard(active)) throw new AppError("FORBIDDEN", "You do not have access to this workspace.");
 
   const onStoreHost = Boolean(await getRequestStoreSlug());
+  // The main domain is the StoreForge platform, not a store owner's dashboard: an owner with a store is sent to it on their own store host.
+  // Only on the main site itself (Host = the root domain). A store host, or the server's own address while a server action renders this page
+  // internally (login does), must never be redirected: that broke the action's response stream.
+  if (!onStoreHost && (await isMainHostRequest()) && store && hasStoreHost({ slug: store.slug, publicId: active.tenant.publicId })) redirect(ROUTES.openStore);
   const name = (user.user_metadata?.full_name as string | undefined) ?? "";
   const email = user.email ?? "";
   const switcherProps = {

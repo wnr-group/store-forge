@@ -106,3 +106,28 @@ export async function signOut() {
 export async function changePassword(currentPassword: string, newPassword: string) {
   return changePasswordViaApi(currentPassword, newPassword);
 }
+
+/**
+ * A one-time code that lets the signed-in person open ONE of their store hosts already signed in. Session cookies are host-only, so a
+ * store host starts with none. The API only issues it for a store the person is an active member of, and only for that host.
+ */
+export async function issueStoreHandoff(audience: string): Promise<string> {
+  const session = await readStoredSession(await cookies());
+  if (!session) throw new AppError("UNAUTHENTICATED", "Your session has expired. Please sign in again.");
+  const result = await authApi<{ code?: string }>("/auth/handoff", {
+    method: "POST",
+    bearer: session.accessToken,
+    json: { audience },
+    clientIp: await requestAddress(),
+  });
+  const code = result.body?.data?.code;
+  if (!result.ok || !code) mapApiFailure(result.status, result.body?.message, result.body?.error);
+  return code as string;
+}
+
+/** Trades a handoff code for this store host's own session. Returns the API's `Set-Cookie` lines for the caller to put on its response. */
+export async function exchangeStoreHandoff(code: string, audience: string): Promise<string[]> {
+  const result = await authApi("/auth/handoff/exchange", { method: "POST", json: { code, audience }, clientIp: await requestAddress() });
+  if (!result.ok) mapApiFailure(result.status, result.body?.message, result.body?.error);
+  return result.setCookies;
+}

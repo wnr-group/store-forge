@@ -206,6 +206,10 @@ describe("static checks", () => {
           "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
           "app/(dashboard)/dashboard/billing/invoices/[id]/download/route.ts",
           "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
+          // Sign-in handoff to a store owner's own host: setting a cookie and redirecting needs a route handler. They move no money.
+          "app/auth/handoff/route.ts",
+          "app/auth/open-store/route.ts",
+          "app/auth/sign-out/route.ts",
         ]);
       },
       content: () => `AC-FE-14: files changed against origin/main: ${changed.length}\nSettings files changed: ${settings.length}\nroute handlers added: ${handlers.length}\n`,

@@ -7,6 +7,7 @@ import { run } from "@/lib/actions/run";
 import { toFailure } from "@/lib/errors";
 import { logEvent } from "@/lib/observability/log";
 import { requireTenantAccess, setActiveTenantCookie } from "@/lib/tenant/context";
+import { storeDashboardUrl } from "@/lib/tenant/open-store";
 import { verifyPaymentSchema } from "@/lib/validations/billing";
 import { checkoutSchema, storeNameSchema } from "@/lib/validations/onboarding";
 import { parseInput } from "@/lib/validations/parse";
@@ -26,14 +27,20 @@ export async function verifyCheckoutAction(input: unknown) {
   return run(() => verifyCheckout(parseInput(verifyPaymentSchema, input)), { operation: "onboarding.checkout.verify" });
 }
 
-/** Creates the store, then opens its dashboard. Only works once the API has confirmed the payment. */
+/**
+ * Creates the store, then opens its dashboard on the store's OWN host (<store>-<id>.<root>/dashboard), signed in, never on the main domain.
+ * Only works once the API has confirmed the payment.
+ */
 export async function createStoreAction(input: unknown): Promise<ActionResult> {
+  let destination: string = ROUTES.dashboard;
   try {
     const { storeName } = parseInput(storeNameSchema, input);
     const store = await createStore({ storeName });
     // The new organization is the person's own (they are its Owner): confirm that with the API before remembering it as the active one.
     await requireTenantAccess(store.tenantId);
     await setActiveTenantCookie(store.tenantId);
+    // Without a configured root domain there are no store hosts: the dashboard stays on this host.
+    destination = (await storeDashboardUrl({ slug: store.storeSlug, publicId: store.publicId })) ?? ROUTES.dashboard;
     logEvent("info", "action", { operation: "onboarding.store.create", outcome: "ok" });
   } catch (e) {
     const failure = toFailure(e);
@@ -41,5 +48,5 @@ export async function createStoreAction(input: unknown): Promise<ActionResult> {
     return failure;
   }
   revalidatePath(ROUTES.dashboard, "layout");
-  redirect(ROUTES.dashboard);
+  redirect(destination);
 }

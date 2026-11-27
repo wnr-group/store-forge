@@ -8,8 +8,8 @@ import { lpButton } from "./ui";
 
 /**
  * The account buttons of the public header. A visitor who is not signed in sees "Login" and "Get Started" (the start of the self-service
- * sign-up); a signed-in one sees a single "Dashboard" button that opens their own workspace (the app itself decides where that is, and
- * nothing here points at the Platform Admin area). Until the session cookie has been checked the buttons keep their space but stay
+ * sign-up); a signed-in one sees a single "Dashboard" button that opens their own store's dashboard on its own address (the app resolves the store from their
+ * memberships, and nothing here points at the Platform Admin area). Until the session cookie has been checked the buttons keep their space but stay
  * invisible, so a signed-in visitor never sees Login flash and nothing shifts.
  */
 export function AuthActions({ variant, onNavigate }: { variant: "header" | "menu"; onNavigate?: () => void }) {
@@ -20,9 +20,10 @@ export function AuthActions({ variant, onNavigate }: { variant: "header" | "menu
 
   const buttons =
     signedIn === true ? (
-      <Link href={ROUTES.dashboard} onClick={onNavigate} className={cn(lpButton("primary", size), unchecked && "invisible")} {...hidden}>
+      // A plain link, not next/link: it opens a route that sends the owner on to their own store's address (a different host).
+      <a href={ROUTES.openStore} onClick={onNavigate} className={cn(lpButton("primary", size), unchecked && "invisible")} {...hidden}>
         Dashboard
-      </Link>
+      </a>
     ) : (
       <>
         <Link href={ROUTES.login} onClick={onNavigate} className={cn(lpButton("secondary", size), unchecked && "invisible")} {...hidden}>

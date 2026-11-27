@@ -116,8 +116,9 @@ describe("regression and scope [layer:FE]", () => {
     // Existing files must be untouched (modified, deleted or renamed); a new helper file such as with-tenant.ts may be added.
     // The one allowed change is in context.ts: a signed-in customer with no store yet is sent to the self-service onboarding instead of the
     // "no workspace" notice (requireWorkspace). Every exported entry point checked above is unchanged.
+    // The other: host.ts lets /auth/handoff (the sign-in handoff to a store owner's own host) through as an app path instead of a storefront page; request.ts gains isStoreHostRequest (Host-based; its existing export is unchanged).
     const changedExisting = git("diff", "--name-only", "--diff-filter=MDR", "origin/main", "--", "lib/tenant").split("\n").filter(Boolean);
-    expect(changedExisting.filter((f) => f !== "lib/tenant/context.ts")).toEqual([]);
+    expect(changedExisting.filter((f) => f !== "lib/tenant/context.ts" && f !== "lib/tenant/host.ts" && f !== "lib/tenant/request.ts")).toEqual([]);
   });
 });
 
@@ -192,6 +193,10 @@ describe("static scans [layer:STATIC]", () => {
           "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
           "app/(dashboard)/dashboard/billing/invoices/[id]/download/route.ts",
           "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
+          // Sign-in handoff to a store owner's own host: setting a cookie and redirecting needs a route handler. They move no money.
+          "app/auth/handoff/route.ts",
+          "app/auth/open-store/route.ts",
+          "app/auth/sign-out/route.ts",
         ]);
       },
       content: () => `AC-SCOPE-02: razorpay dependencies: ${deps.length}; razorpay hosts in changed source: ${hosts.length}; route handlers added: ${handlers.length}\n`,

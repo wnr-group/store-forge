@@ -36,6 +36,26 @@ Next.js --(server-to-server)--> POST /auth/login | /auth/logout | /auth/refresh,
 | Signed-in marker for static pages (`sf_signed_in`) | `lib/auth/use-signed-in.ts` |
 | Landing page after sign-in | `lib/auth/home.ts` |
 
+## Opening a store owner's dashboard (sign-in handoff)
+
+The main domain (`lvh.me:3000`, `store-forge.com`) is the StoreForge platform. A store owner's dashboard lives on THEIR store host (`<store>-<id>.<root>/dashboard`). Cookies are host-only, so a store host starts with no session; the owner is carried over with a one-time code, and no cookie is ever widened or shared.
+
+```
+landing "Dashboard" / login / root /dashboard  ->  GET /auth/open-store   (main site; app/auth/open-store/route.ts)
+create store (createStoreAction)                ->  same helper, store known from the API answer
+   requireWorkspace()                      the active/default store, from the API membership list
+   POST /auth/handoff {audience}           API: only for a store the person is an active member of; signed, single use, 60 s
+   303 -> http://<store>-<id>.<root>/auth/handoff?code=...
+store host: GET /auth/handoff           (app/auth/handoff/route.ts)
+   POST /auth/handoff/exchange             API (trusted server only): new session for THIS host; the root session is untouched
+   303 -> /dashboard                        (a refused code -> this host's /login)
+```
+
+- **One helper.** `lib/tenant/open-store.ts` (`storeDashboardUrl`) builds the address from the existing `storefrontUrl`; the dashboard layout, the landing button and the create-store action all use it. The layout sends an owner who lands on the root `/dashboard` to `/auth/open-store`.
+- **Signing out.** Cookies are host-only, so a store host's sign-out button sends the browser through `GET /auth/sign-out?to=<store label>` on the main site, which clears the main site's own session (and the marker the landing page reads), then returns to that store's sign-in page. `to` must be a real store host under the root domain.
+- **No store, no problem.** No workspace -> `requireWorkspace` sends the person to onboarding (or the admin area for staff). If the code cannot be made, the owner still lands on their store host's sign-in page. With no `NEXT_PUBLIC_ROOT_DOMAIN` there are no store hosts, so the dashboard stays on the current host.
+- **Multiple stores.** The store is the one `requireWorkspace` picks (preferred-store cookie if the person is a member, else their first membership).
+
 ## Behaviour notes
 
 - **Signed-in marker.** Static store pages cannot read the HttpOnly cookies. They read the token-free `sf_signed_in` marker through `useSignedIn`.

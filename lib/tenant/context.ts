@@ -76,7 +76,8 @@ export const requireWorkspace = cache(async () => {
   const active = await getActiveTenant();
   // No (active) workspace: Platform Admins belong in the admin area. On a store's own address nobody can onboard (the notice explains it);
   // on the main site a signed-in customer without a store continues the self-service onboarding (choose a plan, pay, create the store).
-  if (!active) redirect((await isPlatformAdmin()) ? ROUTES.admin : (await getRequestStoreSlug()) ? ROUTES.noWorkspace : ROUTES.onboarding);
+  // On a store host nobody is sent to /admin or onboarding (both exist only on the main site): a non-member sees the "not a member" notice.
+  if (!active) redirect((await getRequestStoreSlug()) ? ROUTES.noWorkspace : (await isPlatformAdmin()) ? ROUTES.admin : ROUTES.onboarding);
   const { store, memberships: tenants } = await loadWorkspaceData();
   return { user, active, store, tenants };
 });

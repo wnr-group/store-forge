@@ -1,4 +1,4 @@
-import { RESERVED_SLUGS } from "@/config/app";
+import { RESERVED_SLUGS, ROUTES } from "@/config/app";
 
 /**
  * Subdomain routing: <store-slug>.<root domain>. Pure so the proxy and the tests share it.
@@ -25,12 +25,12 @@ export const isPublicId = (v: string | null | undefined): v is string => !!v && 
 export const isStoreLabel = (v: string | null | undefined): v is string => !!v && LABEL.test(v) && !v.includes("--");
 
 /**
- * On a store subdomain only these paths are the app (sign-in and that store's dashboard); everything
+ * On a store subdomain only these paths are the app (sign-in, that store's dashboard, the sign-in handoff and the open-store redirect); everything
  * else is the public storefront. /admin is deliberately NOT here: the Platform Admin area exists only on
  * the main domain.
  */
 export function isSubdomainAppPath(pathname: string): boolean {
-  return ["/login", "/dashboard", "/no-workspace"].some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  return ["/login", "/dashboard", "/no-workspace", ROUTES.handoff, ROUTES.openStore].some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 export function storeSlugFromHost(host: string | null | undefined, rootDomain: string | null | undefined): string | null {

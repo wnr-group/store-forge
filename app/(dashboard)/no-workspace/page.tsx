@@ -16,14 +16,13 @@ export const metadata: Metadata = { title: "No workspace" };
 /** Signed in, but not a member of any active company. Accounts are provisioned; nobody can self-onboard. */
 export default async function NoWorkspacePage() {
   const user = await requireUser();
-  if (await isPlatformAdmin()) redirect(ROUTES.admin);
-  if (await getActiveTenant()) redirect(ROUTES.dashboard);
-
-  // On <store>.<root>/ a signed-in session for another account lands here too (cookies are per host).
+  // On <store>.<root>/ a signed-in session for another account lands here too (cookies are per host). The admin area exists only on the main site.
   const storeSlug = await getRequestStoreSlug();
+  if (!storeSlug && (await isPlatformAdmin())) redirect(ROUTES.admin);
+  if (await getActiveTenant()) redirect(ROUTES.dashboard);
   const brand = await getPublicBranding();
   const description = storeSlug
-    ? `You are signed in as ${user.email ?? "this account"}, which is not a member of ${storeSlug}. Sign out, then sign in with an account that belongs to this store.`
+    ? `You are signed in as ${user.email ?? "this account"}, which does not belong to this store's workspace. Sign out, then sign in with an account that is a member of this store.`
     : `Your account is not linked to an active company. It may have been deactivated or the company suspended. Please contact your ${APP_NAME} administrator or company owner${brand.supportEmail ? ` (${brand.supportEmail})` : ""}.`;
 
   return (

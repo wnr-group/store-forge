@@ -12,6 +12,10 @@ export const ROUTES = {
   signup: "/signup",
   onboarding: "/onboarding",
   noWorkspace: "/no-workspace",
+  /** Main site: sends a signed-in store owner to their own store host (see lib/tenant/open-store.ts). */
+  openStore: "/auth/open-store",
+  /** Store host: trades the one-time code from the main site for this host's own session. */
+  handoff: "/auth/handoff",
   admin: "/admin",
   adminCompanies: "/admin/organizations",
   adminNewCompany: "/admin/organizations/new",
