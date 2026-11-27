@@ -5,8 +5,8 @@ import { apiRequest } from "@/lib/api/client";
 export type UploadTarget = { path: string; token: string; signedUrl: string };
 
 export type UploadRequestApi = {
-  scope: "product" | "collection" | "store";
-  /** Product or collection id; required unless `scope` is `store`. */
+  scope: "product" | "collection" | "store" | "catalog";
+  /** Product, collection or catalog item id; required unless `scope` is `store`. */
   ownerId?: string;
   files: { type: string; size: number }[];
 };

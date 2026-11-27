@@ -8,8 +8,8 @@ import { IMAGE_TYPES, MAX_IMAGES_PER_PRODUCT, VIDEO_TYPES } from "@/lib/validati
 import { parseInput } from "@/lib/validations/parse";
 
 const requestSchema = z.object({
-  scope: z.enum(["product", "collection", "store"]),
-  /** Product / collection id the files will belong to (ignored for the store logo). */
+  scope: z.enum(["product", "collection", "store", "catalog"]),
+  /** Product / collection / catalog item id the files will belong to (ignored for the store logo). */
   ownerId: z.uuid().optional(),
   files: z.array(z.object({ type: z.enum([...IMAGE_TYPES, ...VIDEO_TYPES]), size: z.number().int().positive() })).min(1).max(MAX_IMAGES_PER_PRODUCT),
 }).refine((v) => v.scope === "store" || v.files.every((f) => !(VIDEO_TYPES as readonly string[]).includes(f.type)), { message: "Videos can only be uploaded for the store" });

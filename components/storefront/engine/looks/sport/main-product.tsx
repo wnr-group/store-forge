@@ -43,6 +43,7 @@ export function SportMainProduct({ node, context, sectionId }: SectionProps) {
     { label: "Category", value: product?.category },
     { label: "Product type", value: product?.type },
     { label: "Reference", value: product?.sku },
+    { label: "Part number", value: typeof product?.part_number === "string" ? product.part_number : null },
     { label: "Availability", value: product ? (soldOut ? "Sold out" : "In stock") : null },
   ].filter((h): h is { label: string; value: string } => Boolean(h.value));
 

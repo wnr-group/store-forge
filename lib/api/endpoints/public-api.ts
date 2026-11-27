@@ -55,6 +55,8 @@ export type PublicProductApi = {
     short_description: string | null;
     product_type: string | null;
     sku: string | null;
+    /** The part number; absent on an API that predates it. */
+    part_number?: string | null;
     price_minor: number;
     compare_at_price_minor: number | null;
     has_variants: boolean;

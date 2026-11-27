@@ -66,6 +66,8 @@ export type Product = {
   productType: string | null;
   /** Used when the product has no variants. With variants, SKU/price/stock live on the variants. */
   sku: string | null;
+  /** Optional and NOT unique (a manufacturer or catalogue number). It never identifies a product: the SKU does. */
+  partNumber?: string | null;
   priceMinor: number;
   compareAtPriceMinor: number | null;
   costMinor: number | null;

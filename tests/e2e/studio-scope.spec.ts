@@ -44,7 +44,7 @@ test.describe("merchant dashboard (scoped styling applies)", () => {
       await expect(page.locator('div[data-area="merchant"]')).toHaveCount(1);
       await expect.poll(() => areaMarker(page)).toBe("merchant");
       expect(await height(page.getByRole("button", { name: "Search", exact: true }))).toBeCloseTo(32, 0);
-      expect(await height(page.getByRole("textbox", { name: "Search by name or SKU" }))).toBeCloseTo(32, 0);
+      expect(await height(page.getByRole("textbox", { name: "Search by name, SKU or part number" }))).toBeCloseTo(32, 0);
       expect(await height(page.getByRole("combobox", { name: "Status" }))).toBeCloseTo(32, 0);
     });
   });

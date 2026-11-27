@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /** Addresses that already mean something on a store's own address. Keep in sync with the API and the database. */
-export const RESERVED_PAGE_SLUGS = ["products", "collections", "search", "cart", "checkout", "login", "dashboard", "admin", "api", "pages", "s", "no-workspace", "account"] as const;
+export const RESERVED_PAGE_SLUGS = ["products", "collections", "catalog", "search", "cart", "checkout", "login", "dashboard", "admin", "api", "pages", "s", "no-workspace", "account"] as const;
 
 export const pageSlugSchema = z
   .string()

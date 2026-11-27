@@ -79,7 +79,7 @@ export async function renderedContrast(l: Locator) {
 export async function measureProductsToolbar(page: Page) {
   await page.goto("/dashboard/products");
   const trigger = page.getByRole("button", { name: "Search", exact: true });
-  const search = page.getByRole("textbox", { name: "Search by name or SKU" });
+  const search = page.getByRole("textbox", { name: "Search by name, SKU or part number" });
   const status = page.getByRole("combobox", { name: "Status" });
   await expect(status).toBeVisible();
   const addProduct = page.getByRole("link", { name: /add product/i });

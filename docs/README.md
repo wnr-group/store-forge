@@ -14,6 +14,7 @@ Documentation for the StoreForge Next.js app. For setup and a product overview, 
 | [Testing](./testing.md) | Automated checks and the live verification checklist |
 | [Roles and Permissions](./roles-and-permissions.md) | What each role can do |
 | [Data Model](./data-model.md) | Database tables, relationships and columns |
+| [Catalog hierarchy](./catalog-hierarchy.md) | The configurable level > item tree: dashboard, import and export, part number, and the storefront route every template shares |
 | [Security Review](./security.md) | Platform Admin security review: findings, fixes and recommendations |
 
 ## Related

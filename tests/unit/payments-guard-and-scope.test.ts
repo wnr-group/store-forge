@@ -135,7 +135,8 @@ describe("static scans [layer:STATIC]", () => {
   const changed = () => [...new Set([...git("diff", "--name-only", "origin/main").split("\n"), ...git("ls-files", "--others", "--exclude-standard").split("\n")])].filter(Boolean);
   const ours = () => changed().filter((f) => !f.startsWith("artifacts/") && !f.startsWith("tests/unit/payments-guard-and-scope.test.ts"));
 
-  it("AC-REG-15 [layer:STATIC]: no Firebase dependency or integration was introduced (frontend)", async () => {
+  // One git call per changed file: a branch with hundreds of changed files needs far more than the default 30 s on a slow disk.
+  it("AC-REG-15 [layer:STATIC]: no Firebase dependency or integration was introduced (frontend)", { timeout: 180_000 }, async () => {
     const word = new RegExp(["fire", "base"].join(""), "i");
     const files = ours();
     const hits = files.filter((f) => word.test(f) || (!/package-lock/.test(f) && word.test(git("diff", "origin/main", "--unified=0", "--", f))));
@@ -192,6 +193,10 @@ describe("static scans [layer:STATIC]", () => {
           // and the Owner's own Kanova Store invoice PDF. Paying an invoice reuses the storefront's Razorpay loader, so no new Razorpay host appears.
           "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
           "app/(dashboard)/dashboard/billing/invoices/[id]/download/route.ts",
+          // The catalog hierarchy and product exports: the API token is HttpOnly, so the browser cannot fetch the export pages itself; the
+          // routes only read (catalog:view) and write a CSV or Excel file. They move no money.
+          "app/(dashboard)/dashboard/catalog/export/route.ts",
+          "app/(dashboard)/dashboard/products/export/route.ts",
           "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
         ]);
       },

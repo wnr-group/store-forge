@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, Megaphone, ShoppingBasket, TicketPercent, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, Plug, ScrollText, Settings, ShieldCheck, UserCog, Users, Activity, Gauge, Receipt, SlidersHorizontal, Tags, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, Megaphone, ShoppingBasket, TicketPercent, Building2, CreditCard, Landmark, ShoppingCart, Truck, FolderTree, KeyRound, LayoutDashboard, Layers, Menu, Package, Palette, PenTool, FileText, Plug, ScrollText, Settings, ShieldCheck, UserCog, Users, Activity, Gauge, Receipt, SlidersHorizontal, Tags, Network, type LucideIcon } from "lucide-react";
 import { ROUTES } from "@/config/app";
 import { can, type Actor, type Permission } from "@/lib/auth/permissions";
 export { hiddenFeatureHrefs } from "@/lib/billing/features";
@@ -9,6 +9,7 @@ export type NavItem = { href: string; label: string; icon: LucideIcon; exact?: b
 const NAV_PERMISSION: Record<string, Permission> = {
   [ROUTES.products]: "catalog:view",
   [ROUTES.categories]: "catalog:view",
+  [ROUTES.catalog]: "catalog:view",
   [ROUTES.collections]: "catalog:view",
   [ROUTES.inventory]: "catalog:view",
   [ROUTES.customers]: "customers:view",
@@ -34,6 +35,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.taxes, label: "Taxes", icon: Landmark, group: "Sales" },
   { href: ROUTES.products, label: "Products", icon: Package, group: "Catalog" },
   { href: ROUTES.categories, label: "Categories", icon: FolderTree, group: "Catalog" },
+  { href: ROUTES.catalog, label: "Catalog hierarchy", icon: Network, group: "Catalog" },
   { href: ROUTES.collections, label: "Collections", icon: Layers, group: "Catalog" },
   { href: ROUTES.inventory, label: "Inventory", icon: Boxes, group: "Catalog" },
   { href: ROUTES.discounts, label: "Discounts", icon: TicketPercent, group: "Marketing" },

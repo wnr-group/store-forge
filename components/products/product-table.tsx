@@ -144,6 +144,7 @@ export function ProductTable({ rows, currency, timezone, canManage, canDelete }:
                     <span className="min-w-0">
                       <span className="block truncate font-medium group-hover:text-primary">{r.name}</span>
                       <span className="block truncate font-mono text-xs text-muted-foreground">{r.sku ? r.sku : r.hasVariants ? "Multiple SKUs" : "No SKU"}</span>
+                      {r.partNumber ? <span className="block truncate text-xs text-muted-foreground">Part no. {r.partNumber}</span> : null}
                     </span>
                   </Link>
                 </TableCell>

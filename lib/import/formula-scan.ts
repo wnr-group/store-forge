@@ -85,7 +85,40 @@ export type SheetScan = { formulas: FormulaFinding[]; maxRow: number; maxCol: nu
  */
 export function scanFirstSheet(buf: Buffer): SheetScan {
   const files = entries(buf);
-  const xml = read(files, firstSheetPath(files));
+  return scanSheetXml(read(files, firstSheetPath(files)));
+}
+
+/** The sheets of the workbook in order: their names and the part (path inside the zip) each one is stored in. */
+function listSheets(files: Map<string, Entry>): { name: string; path: string }[] {
+  const wb = read(files, "xl/workbook.xml");
+  const rels = read(files, "xl/_rels/workbook.xml.rels");
+  const relationships = [...rels.matchAll(/<Relationship\b[^>]*>/g)].map((m) => m[0]);
+  return [...wb.matchAll(new RegExp(`<${NS}sheet\\b[^>]*>`, "g"))].map((m) => {
+    const tag = m[0];
+    const name = tag.match(/\bname="([^"]*)"/)?.[1];
+    const rid = tag.match(/\s[\w.-]+:id="([^"]+)"/)?.[1];
+    if (name === undefined || !rid) throw new SheetScanError("sheet entry without a name or relationship");
+    // The uploaded r:id is compared as a plain string to the parsed Id: it is never put into a pattern.
+    const target = relationships.find((t) => t.match(/\bId="([^"]*)"/)?.[1] === rid)?.match(/\bTarget="([^"]+)"/)?.[1];
+    if (!target) throw new SheetScanError("sheet relationship not found");
+    return { name: name.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'"), path: target.startsWith("/") ? target.slice(1) : `xl/${target}` };
+  });
+}
+
+/** The names of the sheets, in workbook order. Throws SheetScanError for a malformed workbook. */
+export function sheetNames(buf: Buffer): string[] {
+  return listSheets(entries(buf)).map((s) => s.name);
+}
+
+/** `scanFirstSheet` for the sheet at `index` (0 = first): the same checks, for a workbook that carries more than one sheet of data. */
+export function scanSheetAt(buf: Buffer, index: number): SheetScan {
+  const files = entries(buf);
+  const sheet = listSheets(files)[index];
+  if (!sheet) throw new SheetScanError("sheet not found");
+  return scanSheetXml(read(files, sheet.path));
+}
+
+function scanSheetXml(xml: string): SheetScan {
   if (!new RegExp(`</${NS}sheetData>\\s*`).test(xml) || !new RegExp(`</${NS}worksheet>\\s*$`).test(xml)) throw new SheetScanError("sheet XML is incomplete");
 
   const found: FormulaFinding[] = [];

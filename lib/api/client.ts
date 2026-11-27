@@ -76,7 +76,7 @@ function fieldErrors(details: unknown): Record<string, string> | undefined {
 }
 
 /** Error codes whose `details` are passed through as typed, structured data (everything else keeps only flat field errors). */
-const STRUCTURED_DETAIL_CODES = new Set(["PRODUCT_IMPORT_INVALID", "CHECKOUT_ISSUES", "DISCOUNT_INVALID"]);
+const STRUCTURED_DETAIL_CODES = new Set(["PRODUCT_IMPORT_INVALID", "CHECKOUT_ISSUES", "DISCOUNT_INVALID", "CATALOG_IMPORT_INVALID", "CATALOG_LEVEL_ORDER_BLOCKED"]);
 
 /** Turns a failed response into the `AppError` the pages and server actions already know how to show. */
 export function toAppError(status: number, body: ApiEnvelope<unknown> | null): AppError {
