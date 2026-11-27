@@ -74,6 +74,8 @@ export async function listCatalogNodesApi(organizationId: string, query: Catalog
 }
 
 export type CatalogNodeApiInput = {
+  /** Create only: an id chosen by the browser, so the picture can be uploaded before the item exists (required with `imagePath`). */
+  id?: string;
   name?: string;
   slug?: string;
   parentId?: string | null;
@@ -82,6 +84,9 @@ export type CatalogNodeApiInput = {
   position?: number;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  /** A new picture's storage path, or null to remove it (and its description). Left out: unchanged. */
+  imagePath?: string | null;
+  imageAlt?: string | null;
 };
 
 export const createCatalogNodeApi = async (organizationId: string, input: CatalogNodeApiInput & { name: string }) =>

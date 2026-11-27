@@ -27,7 +27,7 @@ export type ImageItem = {
 type Props = {
   value: ImageItem[];
   onChange: (next: ImageItem[] | ((prev: ImageItem[]) => ImageItem[])) => void;
-  scope: "product" | "collection" | "store";
+  scope: "product" | "collection" | "store" | "catalog";
   ownerId?: string;
   max: number;
   disabled?: boolean;

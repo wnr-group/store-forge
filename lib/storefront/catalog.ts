@@ -1,4 +1,5 @@
 import { PUBLIC_CATALOG_SORTS, type PublicCatalogBreadcrumb, type PublicCatalogLevel, type PublicCatalogNode, type PublicCatalogNodePage, type PublicCatalogProduct, type PublicCatalogProductPage, type PublicCatalogSort, type PublicCatalogTree } from "@/lib/catalog/public-types";
+import { publicImageUrl } from "@/lib/storage/paths";
 
 /**
  * Everything the storefront needs to show the catalog hierarchy, independent of the template: the URL scheme, how the address and query
@@ -33,6 +34,15 @@ export function catalogSegments(path: string[] | undefined): string[] | null {
   const segments = (path ?? []).map((s) => s.toLowerCase());
   if (segments.length > MAX_SEGMENTS || segments.some((s) => s.length === 0 || s.length > 80 || !SEGMENT.test(s))) return null;
   return segments;
+}
+
+/**
+ * An item's picture for the storefront: its public URL and the text for screen readers (the description the merchant wrote, otherwise the
+ * item's name). Null when the item has no picture. The URL is built from the stored path by the shared helper, never typed here.
+ */
+export function catalogImage(node: Pick<PublicCatalogNode, "name" | "imagePath" | "imageAlt">): { src: string; alt: string } | null {
+  const src = publicImageUrl(node.imagePath);
+  return src ? { src, alt: node.imageAlt?.trim() || node.name } : null;
 }
 
 export const catalogHref = (path?: string | null): string => (path ? `${CATALOG_PATH}/${path}` : CATALOG_PATH);

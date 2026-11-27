@@ -18,6 +18,9 @@ export type PublicCatalogNode = {
   depth: number;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  /** The item's picture (a storage path for `publicImageUrl`) and its description; absent or null when it has none. */
+  imagePath?: string | null;
+  imageAlt?: string | null;
   hasChildren: boolean;
   /** Active products placed directly on this item. */
   productCount: number;

@@ -18,7 +18,7 @@ import { SECTION_COMPONENTS } from "@/components/storefront/engine/sections";
 import { LOOK_IDS } from "@/lib/templates/looks";
 import type { PublicCatalogLevel, PublicCatalogNode, PublicCatalogNodePage, PublicCatalogTree } from "@/lib/catalog/public-types";
 import { catalogDocument } from "@/lib/storefront/documents";
-import { catalogHref, catalogQueryHref, catalogSegments, nodeRenderData, pageWindow, parseCatalogQuery, rootRenderData, toCardProduct, totalPagesOf, type CatalogRenderData } from "@/lib/storefront/catalog";
+import { catalogHref, catalogImage, catalogQueryHref, catalogSegments, nodeRenderData, pageWindow, parseCatalogQuery, rootRenderData, toCardProduct, totalPagesOf, type CatalogRenderData } from "@/lib/storefront/catalog";
 
 vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
 
@@ -199,6 +199,69 @@ describe("the catalog page in every template", () => {
       it("offers the products of the groups below when none sit directly on the item", () => {
         const page = nodePage({ node: { ...nodePage().node, hasChildren: true, level: levels[1] }, children: [pnode("Front", "mahindra/centuro/brakes/front", { depth: 4 })], products: { items: [], page: 1, limit: 24, total: 0, includeDescendants: false } });
         expect(html(nodeRenderData(page, levels, q), look)).toContain("all=1");
+      });
+    });
+  }
+});
+
+describe("pictures of catalog items", () => {
+  const url = (path: string) => `https://example.supabase.co/storage/v1/object/public/products/${path}`;
+  const withPicture = (name: string, path: string, over: Partial<PublicCatalogNode> = {}) => pnode(name, path, { imagePath: `t/catalog/${path.replace(/\//g, "-")}/a.png`, ...over });
+  const count = (out: string, needle: string) => out.split(needle).length - 1;
+
+  it("builds the picture from the stored path, with the description or else the item's name as its text", () => {
+    expect(catalogImage(pnode("Gusto", "gusto"))).toBeNull();
+    expect(catalogImage(pnode("Gusto", "gusto", { imagePath: "" }))).toBeNull();
+    expect(catalogImage(pnode("Gusto", "gusto", { imagePath: "t/catalog/n/a.png" }))).toEqual({ src: url("t/catalog/n/a.png"), alt: "Gusto" });
+    expect(catalogImage(pnode("Gusto", "gusto", { imagePath: "t/catalog/n/a.png", imageAlt: "  Side view " }))).toEqual({ src: url("t/catalog/n/a.png"), alt: "Side view" });
+    expect(catalogImage(pnode("Gusto", "gusto", { imagePath: "t/catalog/n/a.png", imageAlt: "   " }))?.alt).toBe("Gusto");
+  });
+
+  for (const look of [undefined, "standard", "boutique", "sport", "market"]) {
+    describe(`look: ${look ?? "(none)"}`, () => {
+      it("shows an item's picture on its tile, with its own description as the text", () => {
+        const data = rootRenderData(tree({ nodes: [withPicture("Mahindra", "mahindra", { imageAlt: "A red bike" }), pnode("Suzuki", "suzuki")] }), q);
+        const out = html(data, look);
+        expect(out).toContain(`src="${url("t/catalog/mahindra/a.png")}"`);
+        expect(out).toContain('alt="A red bike"');
+        expect(out).toContain('href="/catalog/mahindra"');
+      });
+
+      it("uses the item's name as the text when no description was written", () => {
+        const out = html(rootRenderData(tree({ nodes: [withPicture("Mahindra", "mahindra")] }), q), look);
+        expect(out).toContain('alt="Mahindra"');
+      });
+
+      it("gives a tile without a picture a placeholder of the same size, so the tiles stay level", () => {
+        const out = html(rootRenderData(tree({ nodes: [withPicture("Mahindra", "mahindra"), pnode("Suzuki", "suzuki")] }), q), look);
+        expect(count(out, "<img")).toBe(1);
+        expect(count(out, "data-catalog-media")).toBe(2); // one picture area on each of the two tiles
+        expect(out).toContain("overflow-hidden");
+      });
+
+      it("draws exactly what it drew before when no item has a picture", () => {
+        const out = html(rootRenderData(tree(), q), look);
+        expect(out).not.toContain("<img");
+        expect(out).not.toContain("data-catalog-media");
+      });
+
+      it("shows the picture of the item the page is about beside its title, and those of its children on their tiles", () => {
+        const page = nodePage({
+          node: { ...withPicture("Centuro", "mahindra/centuro", { depth: 2, imageAlt: "Centuro profile" }), level: levels[1] },
+          children: [withPicture("Front", "mahindra/centuro/front", { depth: 3 }), pnode("Rear", "mahindra/centuro/rear", { depth: 3 })],
+          products: { items: [], page: 1, limit: 24, total: 0, includeDescendants: false },
+        });
+        const out = html(nodeRenderData(page, levels, q), look);
+        expect(out).toContain('alt="Centuro profile"');
+        expect(out).toContain(`src="${url("t/catalog/mahindra-centuro/a.png")}"`);
+        expect(out).toContain('alt="Front"');
+        expect(count(out, "<img")).toBe(2);
+      });
+
+      it("shows no header picture for an item without one, and keeps the parts as they were", () => {
+        const out = html(nodeRenderData(nodePage(), levels, q), look);
+        expect(out).not.toContain("<img");
+        expect(out).toContain("Brake pad 1");
       });
     });
   }

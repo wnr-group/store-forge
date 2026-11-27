@@ -39,7 +39,26 @@ const slug = z
   .optional()
   .transform((v) => (v ? v : undefined));
 
+/** A stored picture's path (checked by the API: it must sit in this item's own folder). An empty text means "none". */
+const imagePath = z
+  .string()
+  .trim()
+  .max(300, "The image path is too long.")
+  .nullable()
+  .optional()
+  .transform((v) => (v === undefined ? undefined : v === "" || v === null ? null : v));
+
+const imageAlt = z
+  .string()
+  .trim()
+  .max(200, "The image description can have at most 200 characters.")
+  .nullable()
+  .optional()
+  .transform((v) => (v === undefined ? undefined : v === "" || v === null ? null : v));
+
 export const nodeCreateSchema = z.object({
+  /** Chosen by the browser so the picture can be uploaded first; required when a picture is sent. */
+  id: z.uuid().optional(),
   name: text("Name", 120),
   slug,
   parentId: z.uuid().nullable().optional(),
@@ -47,7 +66,9 @@ export const nodeCreateSchema = z.object({
   status: catalogStatusSchema.optional(),
   seoTitle: optionalText("SEO title", 70),
   seoDescription: optionalText("SEO description", 160),
-});
+  imagePath,
+  imageAlt,
+}).refine((v) => !v.imagePath || Boolean(v.id), { message: "A new item needs an id before it can have an image.", path: ["id"] });
 
 export const nodeUpdateSchema = z.object({
   name: text("Name", 120).optional(),
@@ -56,6 +77,8 @@ export const nodeUpdateSchema = z.object({
   status: catalogStatusSchema.optional(),
   seoTitle: optionalText("SEO title", 70),
   seoDescription: optionalText("SEO description", 160),
+  imagePath,
+  imageAlt,
 });
 
 export const nodeMoveSchema = z.object({ parentId: z.uuid().nullable(), position: z.number().int().min(0).max(1_000_000).optional() });

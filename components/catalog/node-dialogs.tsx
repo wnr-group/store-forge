@@ -4,13 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";
 import { createNodeAction, listNodesAction, moveNodeAction, updateNodeAction } from "@/app/(dashboard)/dashboard/catalog/actions";
 import { ActionDialog } from "@/components/shared/action-dialog";
+import { ImageUploader, type ImageItem } from "@/components/products/image-uploader";
 import { FormField } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { parentLevel } from "@/lib/catalog/tree";
+import { createImageFields, IMAGE_ALT_MAX, imageProblem, updateImageFields } from "@/lib/catalog/node-image";
 import type { CatalogLevel, CatalogNode, CatalogPage, CatalogStatus } from "@/lib/catalog/types";
+import { uuid } from "@/lib/utils/uuid";
 
 type NodeDraft = { name: string; slug: string; description: string; status: CatalogStatus; seoTitle: string; seoDescription: string };
 const blank: NodeDraft = { name: "", slug: "", description: "", status: "draft", seoTitle: "", seoDescription: "" };
@@ -25,10 +28,22 @@ export function NodeFormDialog({ target, level, onClose }: { target: { mode: "cr
   const [v, setV] = useState<NodeDraft>(target.mode === "edit" ? fromNode(target.node) : blank);
   const set = <K extends keyof NodeDraft>(key: K, value: NodeDraft[K]) => setV((prev) => ({ ...prev, [key]: value }));
   const levelName = level?.name ?? "item";
+  // The picture goes to storage before the item is saved, into a folder named after the item. A new item has no id yet, so the dialog
+  // makes one (kept while the dialog is open, so a failed save can be tried again with the same upload) and sends it with the item.
+  const [nodeId] = useState(() => (target.mode === "edit" ? target.node.id : uuid()));
+  const [image, setImage] = useState<ImageItem[]>(
+    target.mode === "edit" && target.node.imagePath ? [{ key: "existing", path: target.node.imagePath, altText: target.node.imageAlt, progress: 100, status: "done", saved: true }] : [],
+  );
+  const [alt, setAlt] = useState(target.mode === "edit" ? (target.node.imageAlt ?? "") : "");
+  const hasImage = image.some((i) => i.status === "done");
 
   const submit = () => {
+    const problem = imageProblem(image);
+    if (problem) return { ok: false as const, error: problem };
     const body = { name: v.name, slug: v.slug, description: v.description, status: v.status, seoTitle: v.seoTitle, seoDescription: v.seoDescription };
-    return target.mode === "edit" ? updateNodeAction(target.node.id, body) : createNodeAction({ ...body, parentId: target.parent?.id ?? null });
+    return target.mode === "edit"
+      ? updateNodeAction(target.node.id, { ...body, ...updateImageFields({ imagePath: target.node.imagePath, imageAlt: target.node.imageAlt }, image, alt) })
+      : createNodeAction({ ...body, id: nodeId, parentId: target.parent?.id ?? null, ...createImageFields(image, alt) });
   };
 
   return (
@@ -59,6 +74,14 @@ export function NodeFormDialog({ target, level, onClose }: { target: { mode: "cr
           <option value="active">Active</option>
         </NativeSelect>
       </FormField>
+      <FormField id="node-image" label="Image" optional hint="Shown with the item's name in your store. JPEG, PNG or WebP, up to 5 MB.">
+        <ImageUploader value={image} onChange={setImage} scope="catalog" ownerId={nodeId} max={1} single label="Item image" />
+      </FormField>
+      {hasImage ? (
+        <FormField id="node-image-alt" label="Image description" optional hint="Read aloud by screen readers. Leave empty to use the item's name.">
+          <Input id="node-image-alt" value={alt} onChange={(e) => setAlt(e.target.value)} maxLength={IMAGE_ALT_MAX} />
+        </FormField>
+      ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <FormField id="node-seo-title" label="SEO title" optional>
           <Input id="node-seo-title" value={v.seoTitle} onChange={(e) => set("seoTitle", e.target.value)} maxLength={70} />

@@ -182,6 +182,8 @@ const CATALOG_HIERARCHY_PAGES = [
   "app/(dashboard)/dashboard/products/[id]/page.tsx",
   "app/(dashboard)/dashboard/products/export/route.ts",
   "app/(dashboard)/dashboard/navigation/page.tsx",
+  // Catalog item pictures: the shared upload action learns one more upload scope ("catalog"), so an item picture is stored in its own folder.
+  "app/(dashboard)/dashboard/uploads/actions.ts",
 ];
 
 // No layer tag on the block: the tool takes the FIRST [layer:X] in a test's full name, and these tests carry their own (STATIC or FE).

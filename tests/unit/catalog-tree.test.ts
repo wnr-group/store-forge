@@ -19,6 +19,8 @@ const node = (id: string, parentId: string | null, pos: number, children: Catalo
   status: "active",
   seoTitle: null,
   seoDescription: null,
+  imagePath: null,
+  imageAlt: null,
   depth: pos,
   pathIds,
   childCount: children.length,

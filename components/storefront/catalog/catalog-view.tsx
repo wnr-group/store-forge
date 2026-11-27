@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { CATALOG_SKINS, type CatalogSkin } from "@/components/storefront/catalog/skins";
 import { LOOKS } from "@/components/storefront/engine/looks";
-import { GRID_GAP, ProductCard } from "@/components/storefront/engine/ui";
+import { GRID_GAP, ImagePlaceholder, ProductCard } from "@/components/storefront/engine/ui";
 import type { PublicCatalogNode } from "@/lib/catalog/public-types";
 import { PUBLIC_CATALOG_SORTS, type PublicCatalogSort } from "@/lib/catalog/public-types";
-import { catalogHref, catalogQueryHref, pageWindow, SORT_LABELS, toCardProduct, totalPagesOf, type CatalogRenderData } from "@/lib/storefront/catalog";
+import { catalogHref, catalogImage, catalogQueryHref, pageWindow, SORT_LABELS, toCardProduct, totalPagesOf, type CatalogRenderData } from "@/lib/storefront/catalog";
 import { lookOf } from "@/lib/templates/engine/theme-style";
 import { cn } from "@/lib/utils";
 
@@ -32,16 +33,27 @@ export function CatalogView({ data, theme, currency, storeName, sfProps }: { dat
 
   const titleText = node ? node.name : (data.hierarchyName ?? "Catalog");
   const eyebrow = node ? node.level.name : (data.levels[0]?.name ?? "");
+  const headerImage = node ? catalogImage(node) : null;
+  // When any tile of a list has a picture, every tile gets a picture area (a soft placeholder where there is none), so the tiles stay level.
+  const withPictures = data.children.some((c) => catalogImage(c) !== null);
 
   return (
     <section className={skin.shell} aria-labelledby="catalog-title" {...sfProps}>
       <Crumbs skin={skin} items={crumbs} />
-      <header className="mt-4 space-y-3">
-        {eyebrow ? <skin.Eyebrow>{eyebrow}</skin.Eyebrow> : null}
-        <div id="catalog-title">
-          <skin.Title>{titleText}</skin.Title>
+      <header className={cn("mt-4", headerImage && "flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6")}>
+        {headerImage ? (
+          // A fixed square box, so the text does not move when the picture arrives. The picture is above the fold: load it first.
+          <div className={cn("relative size-28 shrink-0 overflow-hidden sm:size-36", skin.headerMedia)}>
+            <Image src={headerImage.src} alt={headerImage.alt} fill priority sizes="(min-width: 640px) 144px, 112px" className="object-cover" />
+          </div>
+        ) : null}
+        <div className="min-w-0 space-y-3">
+          {eyebrow ? <skin.Eyebrow>{eyebrow}</skin.Eyebrow> : null}
+          <div id="catalog-title">
+            <skin.Title>{titleText}</skin.Title>
+          </div>
+          {node?.description ? <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">{node.description}</p> : null}
         </div>
-        {node?.description ? <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">{node.description}</p> : null}
       </header>
 
       {data.children.length > 0 ? (
@@ -50,7 +62,7 @@ export function CatalogView({ data, theme, currency, storeName, sfProps }: { dat
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4" aria-label={data.childLevelName ?? "Items"}>
             {data.children.map((child) => (
               <li key={child.id} className="min-w-0">
-                <NodeTile child={child} skin={skin} />
+                <NodeTile child={child} skin={skin} withPicture={withPictures} />
               </li>
             ))}
           </ul>
@@ -100,10 +112,20 @@ function Crumbs({ skin, items }: { skin: CatalogSkin; items: { label: string; hr
   );
 }
 
-function NodeTile({ child, skin }: { child: PublicCatalogNode; skin: CatalogSkin }) {
+function NodeTile({ child, skin, withPicture }: { child: PublicCatalogNode; skin: CatalogSkin; withPicture: boolean }) {
+  const image = catalogImage(child);
   const meta = child.productCount > 0 ? `${child.productCount} ${child.productCount === 1 ? "part" : "parts"}` : child.hasChildren ? "Browse" : "";
   return (
-    <Link href={catalogHref(child.path)} className={skin.tile} data-sf-card="">
+    <Link href={catalogHref(child.path)} className={cn(skin.tile, withPicture && "overflow-hidden")} data-sf-card="">
+      {withPicture ? (
+        <span className={cn("relative block", skin.media)} data-catalog-media="">
+          {image ? (
+            <Image src={image.src} alt={image.alt} fill sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none" />
+          ) : (
+            <ImagePlaceholder className="absolute inset-0" icon={false} />
+          )}
+        </span>
+      ) : null}
       <span className="min-w-0 space-y-1">
         <span className="block text-base leading-snug font-medium break-words text-foreground">{child.name}</span>
         {child.description ? <span className="line-clamp-2 block text-sm text-muted-foreground">{child.description}</span> : null}

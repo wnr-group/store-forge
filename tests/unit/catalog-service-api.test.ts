@@ -24,6 +24,23 @@ beforeEach(() => {
 
 const call = () => apiRequest.mock.calls.at(-1) as [string, Record<string, unknown>];
 
+describe("catalog item pictures (manager)", () => {
+  it("sends the id, the picture's path and its description when an item is created", async () => {
+    const api = await import("@/lib/api/endpoints/catalog-api");
+    const body = { id: ID, name: "Toyota", imagePath: `${tenant.id}/catalog/${ID}/a.png`, imageAlt: "Logo" };
+    await api.createCatalogNodeApi(tenant.id, body);
+    expect(call()[0]).toBe("/catalog/nodes");
+    expect(call()[1]).toMatchObject({ method: "POST", json: body });
+  });
+  it("sends null to remove a picture and nothing about it when it is unchanged", async () => {
+    const api = await import("@/lib/api/endpoints/catalog-api");
+    await api.updateCatalogNodeApi(tenant.id, ID, { imagePath: null, imageAlt: null });
+    expect(call()[1]).toMatchObject({ method: "PATCH", json: { imagePath: null, imageAlt: null } });
+    await api.updateCatalogNodeApi(tenant.id, ID, { name: "Renamed" });
+    expect((call()[1] as { json: Record<string, unknown> }).json).toEqual({ name: "Renamed" });
+  });
+});
+
 describe("catalog endpoints (manager)", () => {
   it("sends each request to the route the API declares, for the verified organization", async () => {
     const api = await import("@/lib/api/endpoints/catalog-api");

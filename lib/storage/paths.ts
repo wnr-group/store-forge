@@ -3,6 +3,7 @@
  * Layout inside the `products` bucket:
  *   {tenantId}/{productId}/{file}        product media
  *   {tenantId}/collections/{id}/{file}   collection images
+ *   {tenantId}/catalog/{nodeId}/{file}   catalog hierarchy item images
  *   {tenantId}/store/{file}              store logo
  * The database CHECK constraints and the Storage policies enforce the same layout.
  */
@@ -12,6 +13,7 @@ export const EXTENSIONS: Record<string, string> = { "image/jpeg": "jpg", "image/
 
 export const productFolder = (tenantId: string, productId: string) => `${tenantId}/${productId}`;
 export const collectionFolder = (tenantId: string, collectionId: string) => `${tenantId}/collections/${collectionId}`;
+export const catalogFolder = (tenantId: string, nodeId: string) => `${tenantId}/catalog/${nodeId}`;
 export const storeFolder = (tenantId: string) => `${tenantId}/store`;
 
 /** True when `path` is a direct child file of `folder` with no traversal tricks. */

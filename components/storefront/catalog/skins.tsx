@@ -21,6 +21,10 @@ export type CatalogSkin = {
   Crumbs: ComponentType<{ items: { label: string; href?: string }[] }> | null;
   /** Classes of one item tile (a link to a child item). */
   tile: string;
+  /** Classes of the picture area of a tile. It sits at the top edge of the tile, so it cancels the tile's padding. The tile clips it to its own corners. */
+  media: string;
+  /** Classes of the box that holds the picture of the item the page is about, beside its title. */
+  headerMedia: string;
   /** Classes of the small heading above a group (the children, the products). */
   groupTitle: string;
   /** Classes of the primary text on the page, for the toolbar and pagination buttons. */
@@ -39,6 +43,8 @@ const standard: CatalogSkin = {
   Title: PlainTitle,
   Crumbs: null,
   tile: "group flex h-full flex-col justify-between gap-3 rounded-[var(--radius,0.5rem)] border border-border bg-card p-5 text-card-foreground transition-colors hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+  media: "-mx-5 -mt-5 aspect-[4/3]",
+  headerMedia: "rounded-[var(--radius,0.5rem)] border border-border",
   groupTitle: "text-lg font-semibold tracking-tight text-foreground",
   control: PLAIN_CONTROL,
 };
@@ -50,6 +56,8 @@ const boutique: CatalogSkin = {
   Title: ({ children }) => <DisplayHeading as="h1">{children}</DisplayHeading>,
   Crumbs: null,
   tile: "group flex h-full flex-col justify-between gap-3 rounded-[1.375rem] border border-border bg-muted/40 p-5 transition-colors hover:border-foreground/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary",
+  media: "-mx-5 -mt-5 aspect-square",
+  headerMedia: "rounded-[1.375rem] border border-border",
   groupTitle: "text-xl leading-tight tracking-[-0.01em] text-foreground [font-family:var(--sf-font-heading)]",
   control: "rounded-full border border-border bg-background px-4 py-1.5 text-sm text-foreground transition-colors hover:border-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
 };
@@ -61,6 +69,8 @@ const sport: CatalogSkin = {
   Title: ({ children }) => <SportTitle as="h1">{children}</SportTitle>,
   Crumbs: null,
   tile: "group flex h-full flex-col justify-between gap-3 rounded-2xl border border-border bg-muted/40 p-5 transition-colors hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+  media: "-mx-5 -mt-5 aspect-[16/10] border-b-[3px] border-primary",
+  headerMedia: "rounded-2xl border-b-[3px] border-primary",
   groupTitle: "text-xl font-extrabold tracking-tight text-primary uppercase",
   control: "rounded-full border border-border bg-background px-4 py-1.5 text-sm font-semibold text-primary transition-colors hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
 };
@@ -72,6 +82,8 @@ const market: CatalogSkin = {
   Title: ({ children }) => <h1 className="mt-1 text-xl leading-tight font-bold text-primary sm:text-[22px]">{children}</h1>,
   Crumbs: MarketCrumbs,
   tile: cn(MARKET_PANEL, "group flex h-full flex-col justify-between gap-3 p-4 transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"),
+  media: "-mx-4 -mt-4 aspect-[3/2]",
+  headerMedia: "rounded-lg border border-border/80 bg-white",
   groupTitle: "text-base font-bold text-primary",
   control: "rounded-lg border border-border bg-white px-3 py-1.5 text-[13px] text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary",
 };

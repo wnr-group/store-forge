@@ -42,6 +42,10 @@ export type CatalogNode = {
   status: CatalogStatus;
   seoTitle: string | null;
   seoDescription: string | null;
+  /** Where the item's picture is stored (turn it into a URL with `publicImageUrl`); null when it has none. */
+  imagePath: string | null;
+  /** The picture's description for screen readers; null when none was written. */
+  imageAlt: string | null;
   depth: number;
   pathIds: string[];
   childCount: number;
