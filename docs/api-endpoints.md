@@ -16,6 +16,14 @@ Which service function calls which StoreForge API endpoint. The base path is `/a
 | | `getProduct` | `GET /products/:id` | Yes | Options, variants, images, `collectionIds` |
 | | `createProduct`, `updateProduct`, `deleteProducts` | `POST /products`, `PATCH /products/:id`, `DELETE /products/:id`, `POST /products/bulk-delete` | Yes | Client-generated `id` is kept. Prices are decimal text |
 | | `setProductsStatus`, `duplicateProduct` | `POST /products/bulk-status`, `/products/:id/duplicate` | Yes | |
+| | `exportProductsPage` | `GET /products/export?page&limit&status` | Yes | Up to 1000 rows a page; the export route writes the file (see [Catalog hierarchy](./catalog-hierarchy.md)). Product bodies carry `partNumber` |
+| Catalog hierarchy | `getCatalogHierarchy`, `createCatalogHierarchy`, `updateCatalogHierarchy` | `GET`, `POST`, `PATCH /catalog/hierarchy` | Yes | 404 `CATALOG_HIERARCHY_NOT_FOUND` becomes `null` / an empty tree |
+| | `createCatalogLevel`, `updateCatalogLevel`, `reorderCatalogLevels`, `deleteCatalogLevel` | `POST /catalog/levels`, `PATCH`, `DELETE /catalog/levels/:id`, `POST /catalog/levels/reorder` | Yes | A refused order is 409 `CATALOG_LEVEL_ORDER_BLOCKED` with `details.problems` |
+| | `getCatalogTree`, `listCatalogNodes`, `getCatalogNode` | `GET /catalog/tree`, `/catalog/nodes?page&limit&search&parentId&levelId&status`, `/catalog/nodes/:id` | Yes | The tree is cut at 5000 items |
+| | `createCatalogNode`, `updateCatalogNode`, `moveCatalogNode`, `reorderCatalogNodes`, `deleteCatalogNode` | `POST /catalog/nodes`, `PATCH /catalog/nodes/:id`, `POST .../move`, `POST /catalog/nodes/reorder`, `DELETE /catalog/nodes/:id[?cascade=true]` | Yes | |
+| | `listCatalogNodeProducts`, `assignCatalogProducts`, `unassignCatalogProducts`, `reorderCatalogNodeProducts` | `GET`, `POST /catalog/nodes/:id/products`, `POST .../unassign`, `POST .../reorder` | Yes | Up to 500 products a request |
+| | `bulkCatalogAssignment`, `getProductPlacements`, `setProductPlacements` | `POST /catalog/assignments/bulk`, `GET`, `PUT /catalog/products/:productId/nodes` | Yes | Bulk is all or nothing: at most 100 items, 500 products, 20000 pairs |
+| | `importCatalogRows`, `exportCatalogPage` | `POST /catalog/import` (`dryRun`), `GET /catalog/export?page&limit` | Yes | At most 2000 rows a request; a real import with any problem is 400 `CATALOG_IMPORT_INVALID` and changes nothing |
 | Uploads | `requestUploadsAction` | `POST /uploads/signed-urls` | Yes | The browser uploads the file straight to Storage |
 | Inventory | `listInventory`, `listAdjustments`, `adjustStock` | `GET /inventory`, `GET`/`POST /inventory/adjustments` | Yes | A ledger row is written in the same transaction |
 | Customers | list, get, create, update, delete | `/customers[/:id]` | Yes | Order history (last 50) is inside `GET /customers/:id` |
@@ -56,6 +64,7 @@ The API applies the admin rate limit and writes audit entries inside its own mut
 |---|---|---|
 | Public branding | `GET /public/branding` | Anonymous. Cached 5 minutes, with default text on failure |
 | Public storefront | `GET /public/storefronts/:slug` | Anonymous. 404 means no store. Memoized per request |
+| Public catalog hierarchy | `GET /public/storefronts/:slug/catalog/tree?maxDepth`, `GET /public/storefronts/:slug/catalog/nodes/<slug>/<slug>...?page&limit&sort&includeDescendants` | Anonymous, cached under the store's tag. An unknown item, a draft item or a store with no published catalog is 404. One shape for every template |
 | Public product | `GET /public/storefronts/:slug/products/:productSlug` | Anonymous. Includes `presentation` (the published per-product settings, or null); read through `parsePresentation`, never trusted as is |
 
 ## Authentication

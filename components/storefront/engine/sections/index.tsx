@@ -26,6 +26,7 @@ import { overrideValue } from "@/lib/editor/style";
 import { readTextOverrides } from "@/lib/editor/text";
 import { TextOverrides } from "../text-overrides";
 import { CartPageSection } from "@/components/storefront/cart/cart-page";
+import { CatalogSection } from "./catalog";
 import { WishlistPageSection } from "@/components/storefront/wishlist/wishlist-page";
 import { CheckoutPageSection } from "@/components/storefront/checkout/checkout-page";
 import { OrderPageSection, OrdersListSection } from "@/components/storefront/checkout/order-page";
@@ -54,6 +55,8 @@ export const SECTION_COMPONENTS: Record<
   "logo-list": LogoListSection,
   /** The bag page. Only the generated cart document uses it; it is not an editor section. */
   cart: CartPageSection,
+  /** The catalog hierarchy page (the top of the catalog or one item). Only the generated catalog document uses it; it is not an editor section. */
+  catalog: CatalogSection,
   /** The wishlist page. Only the generated wishlist document uses it; it is not an editor section. */
   wishlist: WishlistPageSection,
   /** Checkout, one order and the shopper's order list. Only the generated documents use them; they are not editor sections. */

@@ -69,6 +69,11 @@ export function searchProducts<T extends { name: string; short_description?: str
   });
 }
 
+/** A catalog hierarchy page: one catalog section. The data (the top of the catalog or one item) comes with the render context, not the document. */
+export function catalogDocument(): TemplateDocument {
+  return doc([["catalog", node("catalog", {})]]);
+}
+
 /** The bag page: one cart section. The lines live in the shopper's browser, so the page itself holds no store data. */
 export function cartDocument(): TemplateDocument {
   return doc([["cart", node("cart", {})]]);

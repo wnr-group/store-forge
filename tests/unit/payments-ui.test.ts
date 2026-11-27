@@ -173,6 +173,17 @@ const PAYMENT_FILES = [
 /** The Settings form gained the home page SEO title and description (store SEO feature); it is the only Settings file allowed to differ from the baseline. */
 const SEO_SETTINGS_FORM = "components/settings/store-settings-form.tsx";
 
+/**
+ * The catalog hierarchy feature adds its own dashboard area (app/.../dashboard/catalog) and touches three existing catalog pages: the product list
+ * (an Export button), the product editor (a placements card and the part number) and the navigation editor (catalog link choices).
+ */
+const CATALOG_HIERARCHY_PAGES = [
+  "app/(dashboard)/dashboard/products/page.tsx",
+  "app/(dashboard)/dashboard/products/[id]/page.tsx",
+  "app/(dashboard)/dashboard/products/export/route.ts",
+  "app/(dashboard)/dashboard/navigation/page.tsx",
+];
+
 // No layer tag on the block: the tool takes the FIRST [layer:X] in a test's full name, and these tests carry their own (STATIC or FE).
 describe("static checks", () => {
   it("AC-REG-10 [layer:STATIC]: the Settings page and its components are byte-identical to the baseline", () => {
@@ -209,6 +220,10 @@ describe("static checks", () => {
           // and the Owner's own Kanova Store invoice PDF. Paying an invoice reuses the storefront's Razorpay loader, so no new Razorpay host appears.
           "app/(admin)/admin/billing/invoices/[id]/download/route.ts",
           "app/(dashboard)/dashboard/billing/invoices/[id]/download/route.ts",
+          // The catalog hierarchy and product exports: the API token is HttpOnly, so the browser cannot fetch the export pages itself; the
+          // routes only read (catalog:view) and write a CSV or Excel file. They move no money.
+          "app/(dashboard)/dashboard/catalog/export/route.ts",
+          "app/(dashboard)/dashboard/products/export/route.ts",
           "app/(dashboard)/dashboard/shipping/shipments/[id]/label/route.ts",
         ]);
       },
@@ -222,7 +237,7 @@ describe("static checks", () => {
     const paymentStyles = git("diff", "origin/main", "--", "app/globals.css").split("\n").filter((l) => l.startsWith("+") && /payment|razorpay|refund|ledger|transaction/i.test(l));
     const imports = PAYMENT_FILES.filter((f) => f.endsWith(".tsx")).flatMap((f) => [...read(f).matchAll(/from "([^"]+)"/g)].map((m) => m[1]));
     const external = [...new Set(imports.filter((i) => !i.startsWith("@/") && !i.startsWith(".")))].sort();
-    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|billing\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/|team\/)[^/]+\/)/.test(f) && f !== SEO_SETTINGS_FORM);
+    const unexpected = changed.filter((f) => /^(package(-lock)?\.json|components\/ui\/|components\/settings\/|app\/\(dashboard\)\/dashboard\/(?!payments\/|billing\/|orders\/|shipping\/|taxes\/|integrations\/|marketing\/|analytics\/|team\/)[^/]+\/)/.test(f) && f !== SEO_SETTINGS_FORM && !CATALOG_HIERARCHY_PAGES.includes(f) && !f.startsWith("app/(dashboard)/dashboard/catalog/"));
     await capture({
       acId: "AC-FE-16", folder: "logs", fileName: "AC-FE-16.txt", layer: "STATIC", environment: "unit", testName: "AC-FE-16", testFile: here,
       actualResult: `payments components import only existing shared and ui components (external packages: ${external.join(", ")}); no dependency, global style or other page changed`,

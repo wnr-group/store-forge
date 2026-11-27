@@ -1,3 +1,4 @@
+import type { CatalogRenderData } from "@/lib/storefront/catalog";
 import type { TemplateDocument } from "@/lib/templates/document";
 import type { ProductPresentation } from "@/lib/templates/product-presentation";
 import type { StorefrontData } from "@/lib/templates/types";
@@ -35,6 +36,8 @@ export interface ProductDetailData {
   /** False when the product cannot be bought now. */
   available?: boolean;
   sku?: string | null;
+  /** The store's own part number (optional, not unique). Shown beside the SKU, never instead of it. */
+  part_number?: string | null;
   type?: string | null;
   category?: string | null;
   category_id?: string | null;
@@ -88,6 +91,8 @@ export interface RenderContext {
   collections?: CollectionSummary[];
   /** Active products of the collections that featured sections point at, by collection slug. Real tenant data only. */
   collectionProducts?: Record<string, CollectionProductSummary[]>;
+  /** The catalog hierarchy page being drawn (the top of the catalog or one item). Set only by the catalog route; the same for every template. */
+  catalog?: CatalogRenderData;
   theme?: Record<string, unknown>;
   mode?: RenderMode;
   selectedOptions?: Record<string, string>;

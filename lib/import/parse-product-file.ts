@@ -2,7 +2,7 @@ import "server-only";
 import Papa from "papaparse";
 import { readSheet } from "read-excel-file/node";
 import { scanFirstSheet, type FormulaFinding } from "./formula-scan";
-import { ALL_COLUMNS, LIMITS, REQUIRED_COLUMNS, type ImportColumn } from "./product-columns";
+import { ALL_COLUMNS, IGNORED_COLUMNS, LIMITS, REQUIRED_COLUMNS, type ImportColumn } from "./product-columns";
 import { inspectXlsxZip } from "./zip-guard";
 
 export type FileError = { code: "type" | "size" | "empty" | "headers" | "rows" | "payload" | "unreadable" | "xlsx-guard"; message: string };
@@ -62,7 +62,7 @@ export async function parseProductFile(file: File): Promise<ParseOutcome> {
   const header = (grid[0] ?? []).map((h) => cellText(h).replace(/^\uFEFF/, "").trim().toLowerCase());
   while (header.length && header[header.length - 1] === "") header.pop();
   if (header.length === 0) return fail("empty", "The file is empty. Add a header row and at least one product.");
-  const known = new Set<string>(ALL_COLUMNS);
+  const known = new Set<string>([...ALL_COLUMNS, ...IGNORED_COLUMNS]);
   const problems: string[] = [];
   const dups = header.filter((h, i) => h && header.indexOf(h) !== i);
   if (dups.length) problems.push(`Duplicate columns: ${[...new Set(dups)].join(", ")}.`);
@@ -78,7 +78,13 @@ export async function parseProductFile(file: File): Promise<ParseOutcome> {
     header.forEach((col, c) => {
       if (!col) return;
       const text = cellText(cells[c]).trim();
-      if (text !== "") out[col as ImportColumn] = text;
+      if (text === "") return;
+      // `id` and `has_variants` come from the product export; they are read but never imported.
+      if ((IGNORED_COLUMNS as readonly string[]).includes(col)) {
+        if (col === "has_variants" && /^(true|yes|1)$/i.test(text)) out.source_errors = [...(out.source_errors ?? []), { column: "has_variants", message: "This product has variants. The import only creates simple products: remove this row and add variants in the product editor." }];
+        return;
+      }
+      out[col as ImportColumn] = text;
     });
     if (Object.keys(out).length > 1) rows.push(out);
   });

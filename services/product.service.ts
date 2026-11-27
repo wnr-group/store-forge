@@ -28,6 +28,8 @@ export type ProductRow = {
   name: string;
   slug: string;
   sku: string | null;
+  /** Optional and not unique; null when the API predates it or the product has none. */
+  partNumber: string | null;
   status: Product["status"];
   priceMinor: number;
   hasVariants: boolean;
@@ -55,6 +57,7 @@ const SORT_BY = { created: "createdAt", name: "name", price: "price" } as const;
 
 const toListRow = (p: ProductListItemApi): ProductRow => ({
   ...p,
+  partNumber: p.partNumber ?? null,
   status: p.status as Product["status"],
   updatedAt: new Date(p.updatedAt),
   createdAt: new Date(p.createdAt),

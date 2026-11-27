@@ -10,6 +10,7 @@ import { canManageStore } from "@/lib/auth/permissions";
 import { requireWorkspaceCan } from "@/lib/tenant/context";
 import type { TemplateDocument } from "@/lib/templates/document";
 import { readMenu } from "@/lib/themes/navigation";
+import { getCatalogLinkChoices } from "@/services/catalog.service";
 import { listPages } from "@/services/pages.service";
 import { getPreviewStoreData, getTemplate, listTemplates } from "@/services/theme.service";
 
@@ -39,7 +40,7 @@ export default async function NavigationPage() {
     );
   }
 
-  const [detail, pages, data] = await Promise.all([getTemplate(header.id), listPages(), getPreviewStoreData()]);
+  const [detail, pages, data, catalogLinks] = await Promise.all([getTemplate(header.id), listPages(), getPreviewStoreData(), getCatalogLinkChoices()]);
   const document = detail.document as unknown as TemplateDocument;
 
   if (readMenu(document) === null) {
@@ -56,6 +57,7 @@ export default async function NavigationPage() {
     { label: "All products", url: "/products" },
     { label: "All collections", url: "/collections" },
     { label: "Search", url: "/search" },
+    ...catalogLinks,
     ...data.collections.map((c) => ({ label: `Collection: ${c.name}`, url: `/collections/${c.slug}` })),
     ...pages.filter((p) => p.status === "published").map((p) => ({ label: `Page: ${p.title}`, url: `/${p.slug}` })),
   ];

@@ -116,6 +116,12 @@ export function MarketBuyBox({ product, selectedOptions, currency, storeName }: 
             <span className="text-right text-primary">{product.sku}</span>
           </div>
         ) : null}
+        {typeof product.part_number === "string" && product.part_number ? (
+          <div className="flex items-start justify-between gap-3">
+            <span className="text-muted-foreground">Part number</span>
+            <span className="text-right text-primary">{product.part_number}</span>
+          </div>
+        ) : null}
       </div>
     </div>
   );

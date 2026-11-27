@@ -42,6 +42,14 @@ const sku = z
   .nullish()
   .transform((v) => (v ? v : null));
 
+/** Optional, not unique, never replaces the SKU. An empty value clears it. */
+const partNumber = z
+  .string()
+  .trim()
+  .max(64, "Part number must be at most 64 characters.")
+  .nullish()
+  .transform((v) => (v ? v : null));
+
 /** Compare-at only makes sense as a "was" price, so it must exceed the selling price. */
 function checkCompareAt(price: unknown, compareAt: unknown, ctx: z.RefinementCtx, path: (string | number)[]) {
   if (typeof price !== "string" || typeof compareAt !== "string") return;
@@ -92,6 +100,7 @@ export const productInputSchema = z
     categoryId: z.uuid("Please select a valid category.").nullable().default(null),
     collectionIds: z.array(z.uuid()).max(50).default([]),
     sku,
+    partNumber,
     price: moneyText("Price", { required: true, positive: true }),
     compareAtPrice: optionalMoneyText("Compare-at price"),
     cost: optionalMoneyText("Cost per item"),

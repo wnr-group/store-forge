@@ -7,6 +7,8 @@ export type ProductListItemApi = {
   name: string;
   slug: string;
   sku: string | null;
+  /** Not unique and never replaces the SKU. Optional so an API that predates it still parses. */
+  partNumber?: string | null;
   status: string;
   priceMinor: number;
   hasVariants: boolean;
@@ -52,6 +54,7 @@ export type ProductDetailApi = {
   productType: string | null;
   categoryId: string | null;
   sku: string | null;
+  partNumber?: string | null;
   priceMinor: number;
   compareAtPriceMinor: number | null;
   costMinor: number | null;

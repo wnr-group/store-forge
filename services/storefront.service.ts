@@ -16,7 +16,10 @@ import {
   type PublicPageApi,
   type PublicPageLinkApi,
 } from "@/lib/api/endpoints/public-api";
+import { getPublicCatalogNodeApi, getPublicCatalogTreeApi } from "@/lib/api/endpoints/public-catalog-api";
+import type { PublicCatalogSort } from "@/lib/catalog/public-types";
 import { AppError } from "@/lib/errors";
+import { CATALOG_PAGE_SIZE, catalogSegments, nodeRenderData, rootRenderData, type CatalogRenderData } from "@/lib/storefront/catalog";
 import type { CollectionProductSummary } from "@/components/storefront/engine/types";
 import { featuredCollectionSlugs } from "@/lib/storefront/featured";
 import { faviconUrlFromTheme } from "@/lib/storefront/seo";
@@ -182,6 +185,7 @@ export function toProductResource(data: PublicProductApi): Record<string, unknow
     compare_at_price_minor: data.product.compare_at_price_minor,
     available: data.product.available ?? true,
     sku: data.product.sku,
+    part_number: data.product.part_number ?? null,
     type: data.product.product_type,
     category: data.product.category_name,
     image_path: data.images[0]?.path ?? null,
@@ -253,3 +257,30 @@ export const getPublicPageLinks = cache(async (slug: string): Promise<PublicPage
 export const getPublicContentPage = cache(async (slug: string, pageSlug: string): Promise<PublicPageApi | null> =>
   notFoundToNull(() => getPublicPageApi(slug, pageSlug)),
 );
+
+// ------------------------------------------------------------------------------------------------------------------ catalog hierarchy
+
+/** What the catalog page needs: the store, the published frame (theme, header, footer) and the plain data every template draws. */
+export type PublishedCatalogPage = { store: PublicStorefront; frame: { layout: Pick<PublicLayoutApi, "theme" | "groups">; collections: PublicCollectionApi[] }; data: CatalogRenderData };
+
+/**
+ * One page of the store's catalog hierarchy: the top of it (`path` empty) or one item. The same data feeds every template; the frame
+ * only supplies the store's own theme, header and footer, and falls back to the engine's defaults for a store with no published design,
+ * so the catalog works before (and without) any design. Null means "no such page": an unknown store, no published catalog, or an item
+ * that does not exist or is not public. Any other failure is thrown, for the page's error state. Memoized per request.
+ */
+export const getPublishedCatalogPage = cache(async (slug: string, path: string, page: number, sort: PublicCatalogSort, all: boolean): Promise<PublishedCatalogPage | null> => {
+  const segments = catalogSegments(path ? path.split("/") : []);
+  if (!segments) return null;
+  const query = { page, sort, all };
+  const [store, published] = await Promise.all([getPublicStorefront(slug), getPublishedFrame(slug)]);
+  if (!store) return null;
+  const frame: PublishedCatalogPage["frame"] = published ?? { layout: { theme: null, groups: {} }, collections: [] };
+  // The top level and the names of the levels: one small, cached read that serves the root and every item.
+  const tree = await notFoundToNull(() => getPublicCatalogTreeApi(slug, 1));
+  if (!tree?.hierarchy) return null;
+  if (segments.length === 0) return { store, frame, data: rootRenderData(tree, query) };
+  const node = await notFoundToNull(() => getPublicCatalogNodeApi(slug, segments, { page, limit: CATALOG_PAGE_SIZE, sort, includeDescendants: all }));
+  if (!node) return null;
+  return { store, frame, data: nodeRenderData(node, tree.levels, query) };
+});

@@ -1,5 +1,6 @@
 import { TemplateRenderer } from "@/components/storefront/engine/renderer";
 import type { CollectionProductSummary, RenderContext } from "@/components/storefront/engine/types";
+import type { CatalogRenderData } from "@/lib/storefront/catalog";
 import { resolvePageDocument, type PageKey } from "@/lib/storefront/pages";
 import type { TemplateDocument } from "@/lib/templates/document";
 import type { PublicCollectionApi, PublicLayoutApi } from "@/lib/api/endpoints/public-api";
@@ -17,6 +18,7 @@ export function PublishedView({
   document,
   frame,
   resource,
+  catalog,
   page,
   adapt,
 }: {
@@ -24,6 +26,8 @@ export function PublishedView({
   document: TemplateDocument;
   frame: Frame;
   resource?: Record<string, unknown>;
+  /** The catalog hierarchy page's data (see the catalog route). */
+  catalog?: CatalogRenderData;
   /** A generated page the merchant can design: their edited version, if saved in the theme, replaces `document`. */
   page?: PageKey;
   /** Final touch on the page chosen above (the search page puts its live title and note in). */
@@ -34,6 +38,7 @@ export function PublishedView({
     collections: frame?.collections ?? [],
     collectionProducts: frame?.collectionProducts,
     resource,
+    catalog,
     theme: frame?.layout.theme ?? undefined,
     groupHeader: frame?.layout.groups.header ?? undefined,
     groupFooter: frame?.layout.groups.footer ?? undefined,

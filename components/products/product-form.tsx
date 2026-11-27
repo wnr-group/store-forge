@@ -37,6 +37,7 @@ type Values = {
   categoryId: string;
   collectionIds: string[];
   sku: string;
+  partNumber: string;
   price: string;
   compareAtPrice: string;
   cost: string;
@@ -68,7 +69,7 @@ type Props = {
 
 function toValues(currency: string, d?: ProductDetail): Values {
   if (!d) {
-    return { name: "", slug: "", shortDescription: "", description: "", productType: "", categoryId: "", collectionIds: [], sku: "", price: "", compareAtPrice: "", cost: "", trackInventory: true, quantity: "0", lowStockThreshold: "5", weightGrams: "0", taxRateBps: "", hsnCode: "", status: "draft", options: [], variants: [], images: [] };
+    return { name: "", slug: "", shortDescription: "", description: "", productType: "", categoryId: "", collectionIds: [], sku: "", partNumber: "", price: "", compareAtPrice: "", cost: "", trackInventory: true, quantity: "0", lowStockThreshold: "5", weightGrams: "0", taxRateBps: "", hsnCode: "", status: "draft", options: [], variants: [], images: [] };
   }
   const p = d.product;
   const pathById = new Map(d.images.map((i) => [i.id, i.storagePath]));
@@ -81,6 +82,7 @@ function toValues(currency: string, d?: ProductDetail): Values {
     categoryId: p.categoryId ?? "",
     collectionIds: d.collectionIds,
     sku: p.sku ?? "",
+    partNumber: p.partNumber ?? "",
     price: minorToInput(p.priceMinor, currency),
     compareAtPrice: minorToInput(p.compareAtPriceMinor, currency),
     cost: minorToInput(p.costMinor, currency),
@@ -135,6 +137,7 @@ export function ProductForm({ mode, currency, categories, collections, initial, 
       categoryId: values.categoryId || null,
       collectionIds: values.collectionIds,
       sku: values.sku,
+      partNumber: values.partNumber,
       price: values.price,
       compareAtPrice: values.compareAtPrice,
       cost: values.cost,
@@ -338,6 +341,9 @@ export function ProductForm({ mode, currency, categories, collections, initial, 
             </FormField>
             <FormField id="productType" label="Product type" optional error={err("productType")}>
               <Input id="productType" {...reg("productType")} aria-invalid={Boolean(err("productType"))} aria-describedby="productType-msg" placeholder="e.g. T-shirt" disabled={disabled} />
+            </FormField>
+            <FormField id="partNumber" label="Part number" optional error={err("partNumber")} hint="A manufacturer or catalogue number. It can be shared by several products; the SKU stays the product code.">
+              <Input id="partNumber" {...reg("partNumber")} aria-invalid={Boolean(err("partNumber"))} aria-describedby="partNumber-msg" disabled={disabled} />
             </FormField>
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">Collections <span className="ml-1 text-xs font-normal text-muted-foreground">(Optional)</span></legend>

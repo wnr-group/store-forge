@@ -32,6 +32,8 @@ export const ROUTES = {
   products: "/dashboard/products",
   categories: "/dashboard/categories",
   collections: "/dashboard/collections",
+  catalog: "/dashboard/catalog",
+  catalogImport: "/dashboard/catalog/import",
   inventory: "/dashboard/inventory",
   customers: "/dashboard/customers",
   analytics: "/dashboard/analytics",

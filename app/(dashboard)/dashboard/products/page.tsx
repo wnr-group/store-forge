@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PackageOpen, Plus, SearchX, Upload } from "lucide-react";
+import { Download, PackageOpen, Plus, SearchX, Upload } from "lucide-react";
 import { ProductTable } from "@/components/products/product-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ListFilters } from "@/components/shared/list-filters";
@@ -32,6 +32,13 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
     </Link>
   ) : null;
 
+  const exportButton =
+    result.total > 0 ? (
+      <a href={`${ROUTES.products}/export?format=xlsx`} download className={buttonVariants({ variant: "outline" })}>
+        <Download aria-hidden /> Export
+      </a>
+    ) : null;
+
   const addButton = canManage ? (
     <Link href={`${ROUTES.products}/new`} className={buttonVariants()}>
       <Plus aria-hidden /> Add product
@@ -40,7 +47,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader title="Products" description="Manage your catalog, pricing and stock." actions={<div className="flex gap-2">{importButton}{addButton}</div>} />
+      <PageHeader title="Products" description="Manage your catalog, pricing and stock." actions={<div className="flex gap-2">{exportButton}{importButton}{addButton}</div>} />
 
       {result.total === 0 && !filtered ? (
         <EmptyState
@@ -52,7 +59,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       ) : (
         <>
           <ListFilters
-            searchPlaceholder="Search by name or SKU"
+            searchPlaceholder="Search by name, SKU or part number"
             filters={[
               { key: "status", label: "Status", options: [{ value: "all", label: "All statuses" }, { value: "active", label: "Active" }, { value: "draft", label: "Draft" }] },
               {
